@@ -1,0 +1,153 @@
+* {
+  font-family: Open Sans, Sans, Verdana;
+  font-size: 15pt;
+}
+.row_head {
+  height: 123px;
+}
+.wrapper_logo {
+  float: left;
+  width: 322px;
+}
+.wrapper_headoptions {
+  float: left;
+  width: calc(100% - 322px);
+  padding-top: 5px;
+}
+.button_head {
+  background: transparent none scroll no-repeat left top;
+  border: 1px solid #808080;
+  margin: 15px 4px 4px 4px;
+  border-radius: 3px;
+  box-shadow: 2px 2px 3px 0px #a0a0a0;
+  width: 12em;
+}
+.button_head:focus {
+  border: 2px solid #e00000;
+  margin: 14px 3px 3px 3px;
+/* why is there still an outline??? */
+  outline: none;
+}
+.button_head:active {
+  transform: scale(0.94,0.94) translate(2px, 2px);
+}
+.row_body {
+}
+.row_foot {
+  width: 100%;
+  text-align: center;
+}
+#legend_list {
+  list-style-type: none;
+  margin: 0px auto 0px auto;
+}
+#legend_list li {
+  display: inline-block;
+  margin: 0px 10px 4px 4px;
+  padding: 1px 4px 3px 2px;
+  border: 1px solid #808080;
+  border-radius: 3px;
+  box-shadow: 2px 2px 3px 0px #a0a0a0;
+}
+#popup_veil {
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  background-color: #000000;
+  opacity: 0.5;
+  z-index: 1;
+}
+.popup_div {
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+}
+.metric_popup_div {
+  width: 370px;
+  height: 120px;
+}
+.config_popup_div {
+  width: 500px;
+  height: 80px;
+}
+.popup_input {
+  
+}
+.popup_select {
+  font-size: 12pt;
+}
+.popup_select option {
+  font-size: 12pt;
+}
+.popup_trashcan {
+  margin: 2px;
+}
+.popup_close_button {
+  float: right;
+  padding: 2px 2px 1px 1px;
+  border-left: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+}
+.button_resolution, .button_zoom_speed {
+  border: none;
+  margin: 0px;
+  padding: 0px 2px 0px 2px;
+  transform: translate(0, -8px);
+  background-color: transparent;
+}
+.config_popup_labels {
+  float: left;
+  width: 230px;
+}
+.config_popup_slider {
+  width: 200px;
+}
+.xaxis_popup_div {
+/*  width: 340px; */
+}
+.xaxis_popup_labels {
+  float: left;
+}
+.xaxis_popup_time {
+  float: left;
+}
+.yaxis_popup_div {
+  text-align: left;
+}
+.yaxis_popup_radio {
+  float: left;
+}
+.yaxis_popup_minmax {
+  float: left;
+  margin: 0px 0px 0px 50px;
+}
+.yaxis_popup_minmax input {
+  width: 200px;
+}
+.gear_axis:hover {
+  animation: gear_rotate 5s linear infinite;
+}
+@keyframes gear_rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.list_preset_show {
+  list-style-type: none;
+  margin: 0px auto 0px auto;
+  text-align: center;
+}
+.list_preset_show li:before {
+  content: '↳';
+}
+.export_resolution {
+  width: 80px;
+}
+.preset_popup_div {
+  border: none;
+}
