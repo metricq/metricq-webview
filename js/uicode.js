@@ -52,6 +52,7 @@ var globalYRangeOverride = undefined;
 var globalYRangeType = 'local';
 var globalMainPlot = undefined;
 var globalCountTraces = 0;
+var globalLastWheelEvent = undefined;
 var globalPopup = {
   "export": false, //not yet implemented
   "yaxis": false,
@@ -136,16 +137,24 @@ function queryAllMinMax() {
   allMinMax[1] += delta * 0.05;
   return allMinMax;
 }
-function setPlotRanges()
+function setPlotRanges(updateXAxis, updateYAxis)
 {
+  if(!updateXAxis && !updateYAxis)
+  {
+    return;
+  }
+  var relayoutObj = new Object();
+  if(updateXAxis) {
+    relayoutObj["xaxis.range[0]"] = globalStart;
+    relayoutObj["xaxis.range[1]"] = globalEnd;
+  }
+  if(updateYAxis) {
+    let allMinMax = queryAllMinMax();
+    relayoutObj["yaxis.range[0]"] = allMinMax[0];
+    relayoutObj["yaxis.range[1]"] = allMinMax[1];
+  }
   var rowBodyEle = document.querySelector(".row_body");
-  let allMinMax = queryAllMinMax();
-  Plotly.relayout(rowBodyEle, {
-    "xaxis.range[0]": globalStart,
-    "xaxis.range[1]": globalEnd,
-    "yaxis.range[0]": allMinMax[0],
-    "yaxis.range[1]": allMinMax[1]
-  } );
+  Plotly.relayout(rowBodyEle, relayoutObj );
 }
 function renderMetrics()
 {
@@ -161,7 +170,7 @@ function renderMetrics()
 
   updateMetricUrl();
   var rowBodyEle = document.querySelector(".row_body");
-  console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
+  //console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
   if(undefined === globalMainPlot)
   {
     let allMinMax = queryAllMinMax();
@@ -191,11 +200,32 @@ function renderMetrics()
           if(globalStart != startTime
           || globalEnd != endTime)
           {
-            globalStart = startTime;
-            globalEnd = endTime;
-            console.log("Zoom " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
-            reload();
-            updateMetricUrl();
+            let oldDelta = globalEnd - globalStart;
+            let newDelta = endTime - startTime;
+            let wheelEventString = "";
+            let zoomingIsAcceptable = true;
+            if(globalLastWheelEvent)
+            {
+              let deltaWheelEvent = (new Date()).getTime() - globalLastWheelEvent.time;
+              if(1500 > deltaWheelEvent)
+              {
+                wheelEventString = " (deltaY: " + globalLastWheelEvent.deltaY + ")";
+                if((globalLastWheelEvent.deltaY < 0 && newDelta > oldDelta)
+                || (globalLastWheelEvent.deltaY > 0 && newDelta < oldDelta))
+                {
+                  zoomingIsAcceptable = false;
+                  console.log("Invalid Zoom: " + Math.round(newDelta * 100/ oldDelta) + "%" + wheelEventString);
+                }
+              }
+            }
+            if(zoomingIsAcceptable)
+            {
+              globalStart = startTime;
+              globalEnd = endTime;
+              //console.log("Zoom " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
+              reload();
+              updateMetricUrl();
+            }
           }
         }
       }
@@ -217,7 +247,10 @@ function renderMetrics()
       oldTraces.push(i);
     }
     Plotly.deleteTraces(rowBodyEle, oldTraces);
-    
+    if("local" == globalYRangeType)
+    {
+      setPlotRanges(false, true);
+    }
     Plotly.addTraces(rowBodyEle, allTraces);
     globalCountTraces = allTraces.length;
   }
@@ -389,11 +422,14 @@ function initTest()
   // accelerate zooming with scroll wheel
   document.querySelector(".row_body").addEventListener("wheel", function (evt) {
     evt.stopPropagation();
-    var newEvent = new WheelEvent("wheel", {
+    var dataObj = {
+      time: (new Date()).getTime(),
       clientX: evt.clientX,
       clientY: evt.clientY,
       deltaY: evt.deltaY * globalZoomSpeed
-    });
+    }
+    var newEvent = new WheelEvent("wheel", dataObj );
+    globalLastWheelEvent = dataObj;
     evt.target.dispatchEvent(newEvent);
   });
   document.getElementById("button_export").addEventListener("click", function(evt) {
@@ -809,7 +845,7 @@ Vue.component("xaxis-popup", {
       set: function(newValue)
       {
         globalStart = (new Date(newValue)).getTime() + (globalStart % 86400000);
-        setPlotRanges();
+        setPlotRanges(true, true);
       }
     },
     "endDate": {
@@ -821,7 +857,7 @@ Vue.component("xaxis-popup", {
       set: function(newValue)
       {
         globalEnd = (new Date(newValue)).getTime() + (globalEnd % 86400000);
-        setPlotRanges();
+        setPlotRanges(true, true);
       }
     },
     "startTime": {
@@ -834,7 +870,7 @@ Vue.component("xaxis-popup", {
       {
         var dateObj = new Date(this.startDate + " " + newValue);
         globalStart = dateObj.getTime();
-        setPlotRanges();
+        setPlotRanges(true, true);
       }
     },
     "endTime": {
@@ -847,7 +883,7 @@ Vue.component("xaxis-popup", {
       {
         var dateObj = new Date(this.endDate + " " + newValue);
         globalEnd = dateObj.getTime();
-        setPlotRanges();
+        setPlotRanges(true, true);
       }
     }
   }
@@ -896,7 +932,7 @@ Vue.component("yaxis-popup", {
         {
           loadGlobalMinMaxPreemptively();
         }
-        setPlotRanges();
+        setPlotRanges(false, true);
       }
     },
     "allMin": {
@@ -913,7 +949,7 @@ Vue.component("yaxis-popup", {
         let arr = queryAllMinMax();
         arr = [newValue, arr[1]];
         globalYRangeOverride = arr;
-        setPlotRanges();
+        setPlotRanges(false, true);
       }
     },
     "allMax": {
@@ -930,7 +966,7 @@ Vue.component("yaxis-popup", {
         let arr = queryAllMinMax();
         arr = [arr[0], newValue];
         globalYRangeOverride = arr;
-        setPlotRanges();
+        setPlotRanges(false, true);
       }
     }
   }
