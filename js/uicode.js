@@ -22,7 +22,7 @@ var plotlyLayout = {
     },
     exponentformat: 'e',
     showexponent: 'all',
-    fixedrange: true // disable y-scrolling
+    fixedrange: true // disable y-zooming
   },
   showlegend: false,
   dragmode: "pan"
@@ -50,6 +50,8 @@ var globalZoomSpeed = 4; // TODO: make this setting configurable
 var globalConfiguration = new Configuration(2);
 var globalYRangeOverride = undefined;
 var globalYRangeType = 'local';
+var globalMainPlot = undefined;
+var globalCountTraces = 0;
 var globalPopup = {
   "export": false, //not yet implemented
   "yaxis": false,
@@ -134,10 +136,21 @@ function queryAllMinMax() {
   allMinMax[1] += delta * 0.05;
   return allMinMax;
 }
+function setPlotRanges()
+{
+  var rowBodyEle = document.querySelector(".row_body");
+  let allMinMax = queryAllMinMax();
+  Plotly.relayout(rowBodyEle, {
+    "xaxis.range[0]": globalStart,
+    "xaxis.range[1]": globalEnd,
+    "yaxis.range[0]": allMinMax[0],
+    "yaxis.range[1]": allMinMax[1]
+  } );
+}
 function renderMetrics()
 {
   let allTraces = new Array();
-  let allMinMax = queryAllMinMax();
+
   for(var i = 0; i < legendApp.metricsList.length; ++i)
   {
     let curMetric = legendApp.metricsList[i];
@@ -148,10 +161,66 @@ function renderMetrics()
 
   updateMetricUrl();
   var rowBodyEle = document.querySelector(".row_body");
-  plotlyLayout.xaxis.range = [globalStart, globalEnd];
-  plotlyLayout.yaxis.range = allMinMax;
-  Plotly.newPlot(rowBodyEle, 
-    allTraces, plotlyLayout, plotlyOptions);
+  console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
+  if(undefined === globalMainPlot)
+  {
+    let allMinMax = queryAllMinMax();
+    plotlyLayout.xaxis.range = [globalStart, globalEnd];
+    plotlyLayout.yaxis.range = allMinMax;
+    globalMainPlot = Plotly.newPlot(rowBodyEle, 
+      allTraces, plotlyLayout, plotlyOptions);
+    globalCountTraces = allTraces.length;
+    rowBodyEle.on("plotly_relayout", function(eventdata) {
+      if(!eventdata['yaxis.range[0]'])
+      {
+        var startTime = eventdata['xaxis.range[0]'];
+        var endTime = eventdata['xaxis.range[1]'];
+//        console.log("Time Diff:" + (endTime - startTime));
+        if(startTime === undefined || endTime === undefined)
+        {
+          //we got a reset/zoom out
+        } else {
+          if("string" == (typeof startTime))
+          {
+            startTime = new Date(startTime).getTime();
+          }
+          if("string" == (typeof endTime))
+          {
+            endTime = new Date(endTime).getTime();
+          }
+          if(globalStart != startTime
+          || globalEnd != endTime)
+          {
+            globalStart = startTime;
+            globalEnd = endTime;
+            console.log("Zoom " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
+            reload();
+            updateMetricUrl();
+          }
+        }
+      }
+    });
+    //some plotly events: plotly_redraw, plotly_update, plotly_react,
+    // plotly_relayouting, plotly_selecting, plotly_deselect, plotly_selected,
+    // plotly_beforeexport, plotly_afterexport, plotly_autosize
+    rowBodyEle.on("plotly_autosize", function(evt) {
+      var gearEle = document.getElementById("gear_xaxis");
+      var rowBody = document.querySelector(".row_body");
+      positionXAxisGear(rowBody, gearEle);
+    });
+  } else
+  {
+    // don't rerender everything
+    var oldTraces = new Array();
+    for(var i = 0; i < globalCountTraces; ++i)
+    {
+      oldTraces.push(i);
+    }
+    Plotly.deleteTraces(rowBodyEle, oldTraces);
+    
+    Plotly.addTraces(rowBodyEle, allTraces);
+    globalCountTraces = allTraces.length;
+  }
   var gearEle = document.getElementById("gear_xaxis");
   if(gearEle)
   {
@@ -159,38 +228,6 @@ function renderMetrics()
     gearEle = document.getElementById("gear_yaxis");
     gearEle.parentNode.removeChild(gearEle);
   }
-  rowBodyEle.on("plotly_relayout", function(eventdata) {
-     var startTime = eventdata['xaxis.range[0]'];
-     var endTime = eventdata['xaxis.range[1]'];
-//     console.log("Time Diff:" + (endTime - startTime));
-    if(startTime === undefined || endTime === undefined)
-    {
-      //we got a reset/zoom out
-    } else {
-      if("string" == (typeof startTime))
-      {
-        globalStart = new Date(startTime).getTime();
-      } else {
-        globalStart = startTime;
-      }
-      if("string" == (typeof endTime))
-      {
-        globalEnd = new Date(endTime).getTime();
-      } else {
-        globalEnd = endTime;  
-      }      
-      reload();
-      updateMetricUrl();
-    }
-  });
-  //some plotly events: plotly_redraw, plotly_update, plotly_react,
-  // plotly_relayouting, plotly_selecting, plotly_deselect, plotly_selected,
-  // plotly_beforeexport, plotly_afterexport, plotly_autosize
-  rowBodyEle.on("plotly_autosize", function(evt) {
-    var gearEle = document.getElementById("gear_xaxis");
-    var rowBody = document.querySelector(".row_body");
-    positionXAxisGear(rowBody, gearEle);
-  });
   const BODY = document.getElementsByTagName("body")[0];
   /* TODO: abstract gear creation into separate class */
   var gears = [undefined, undefined];
@@ -772,6 +809,7 @@ Vue.component("xaxis-popup", {
       set: function(newValue)
       {
         globalStart = (new Date(newValue)).getTime() + (globalStart % 86400000);
+        setPlotRanges();
       }
     },
     "endDate": {
@@ -783,6 +821,7 @@ Vue.component("xaxis-popup", {
       set: function(newValue)
       {
         globalEnd = (new Date(newValue)).getTime() + (globalEnd % 86400000);
+        setPlotRanges();
       }
     },
     "startTime": {
@@ -795,6 +834,7 @@ Vue.component("xaxis-popup", {
       {
         var dateObj = new Date(this.startDate + " " + newValue);
         globalStart = dateObj.getTime();
+        setPlotRanges();
       }
     },
     "endTime": {
@@ -807,6 +847,7 @@ Vue.component("xaxis-popup", {
       {
         var dateObj = new Date(this.endDate + " " + newValue);
         globalEnd = dateObj.getTime();
+        setPlotRanges();
       }
     }
   }
@@ -855,6 +896,7 @@ Vue.component("yaxis-popup", {
         {
           loadGlobalMinMaxPreemptively();
         }
+        setPlotRanges();
       }
     },
     "allMin": {
@@ -871,6 +913,7 @@ Vue.component("yaxis-popup", {
         let arr = queryAllMinMax();
         arr = [newValue, arr[1]];
         globalYRangeOverride = arr;
+        setPlotRanges();
       }
     },
     "allMax": {
@@ -887,6 +930,7 @@ Vue.component("yaxis-popup", {
         let arr = queryAllMinMax();
         arr = [arr[0], newValue];
         globalYRangeOverride = arr;
+        setPlotRanges();
       }
     }
   }
