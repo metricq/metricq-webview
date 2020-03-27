@@ -97,6 +97,9 @@
   float: left;
   width: 230px;
 }
+.config_popup_labels label {
+  line-height: 26pt;
+}
 .config_popup_slider {
   width: 200px;
 }
@@ -164,6 +167,11 @@
 }
 .export_resolution {
   width: 80px;
+}
+.export_popup_labels {
+  float: left;
+  line-height: 26pt;
+  text-align: left;
 }
 .preset_popup_div {
   border: none;

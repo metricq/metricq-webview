@@ -761,8 +761,9 @@ Vue.component("metric-popup", {
 Vue.component("configuration-popup", {
   "props": ["config"],
   "template": "<div class=\"popup_div config_popup_div\">"
-            + "<div class=\"config_popup_labels\"><label>Auflösung</label><br/>"
-            + "<label>Zoom Geschwindigkeit</label></div>"
+            + "<div class=\"config_popup_labels\">"
+            + "<label for=\"resolution_input\">Auflösung</label><br/>"
+            + "<label for=\"zoom_speed_input\">Zoom Geschwindigkeit</label></div>"
             + "<div style=\"float: left;\">"
             + "<button class=\"button_resolution\" v-on:click=\"manipulateResolution(-1)\">-</button>"
             + "<input type=\"range\" class=\"config_popup_slider\" id=\"resolution_input\" v-model=\"uiResolution\" min=\"0\" max=\"29\" step=\"0.25\"/>"
@@ -832,8 +833,8 @@ Vue.component("xaxis-popup", {
             + "<label>Endzeit</label>"
             + "</div>"
             + "<div class=\"xaxis_popup_time\">"
-            + "<input type=\"date\" v-model=\"startDate\" required /><input type=\"time\" v-model=\"startTime\" required /><br/>"
-            + "<input type=\"date\" v-model=\"endDate\" required /><input type=\"time\" v-model=\"endTime\" required />"
+            + "<input type=\"date\" v-model=\"startDate\" v-bind:max=\"endDate\" required /><input type=\"time\" v-model=\"startTime\" required /><br/>"
+            + "<input type=\"date\" v-model=\"endDate\" v-bind:min=\"startDate\" required /><input type=\"time\" v-model=\"endTime\" required />"
             + "</div>"
             + "<div class=\"popup_close_button\">X</div>"
             + "</div>",
@@ -1037,7 +1038,7 @@ Vue.component("preset-popup", {
 });
 Vue.component("export-popup", {
   "template": "<div class=\"popup_div export_popup_div\">"
-            + "<div style=\"float: left; line-height: 25pt;\">"
+            + "<div class=\"export_popup_labels\">"
             + "<label for=\"export_width\">Breite</label><br/>"
             + "<label for=\"export_height\">Höhe</label><br/>"
             + "<label for=\"export_format\">Dateiformat</label><br/>"
