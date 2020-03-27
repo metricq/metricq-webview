@@ -15,11 +15,6 @@
   padding-top: 5px;
 }
 .button_head {
-  background: transparent none scroll no-repeat left top;
-  border: 1px solid #808080;
-  margin: 15px 4px 4px 4px;
-  border-radius: 3px;
-  box-shadow: 2px 2px 3px 0px #a0a0a0;
   width: 12em;
 }
 .button_head:focus {
@@ -75,10 +70,11 @@
 .popup_input {
   
 }
-.popup_select {
+.popup_legend_select {
   font-size: 12pt;
+  width: 260px;
 }
-.popup_select option {
+.popup_legend_select option {
   font-size: 12pt;
 }
 .popup_trashcan {
@@ -137,10 +133,31 @@
     transform: rotate(360deg);
   }
 }
+#preset_select {
+  width: 280px;
+}
+.button_preset_show {
+  width: 7em;
+}
+.generic_button {
+  background: transparent none scroll no-repeat left top;
+  border: 1px solid #808080;
+  margin: 15px 4px 4px 4px;
+  border-radius: 3px;
+  box-shadow: 2px 2px 3px 0px #a0a0a0;
+}
+.generic_select {
+  background: transparent none scroll no-repeat left top;
+  border: 1px solid #808080;
+  margin: 15px 4px 4px 4px;
+  border-radius: 3px;
+  box-shadow: 2px 2px 3px 0px #a0a0a0;
+}
 .list_preset_show {
   list-style-type: none;
   margin: 0px auto 0px auto;
-  text-align: center;
+  text-align: left;
+  width: 450px;
 }
 .list_preset_show li:before {
   content: '↳';
@@ -151,3 +168,8 @@
 .preset_popup_div {
   border: none;
 }
+.yaxis_popup_label_minmax {
+  display: inline-block;
+  width: 2.5em;
+}
+

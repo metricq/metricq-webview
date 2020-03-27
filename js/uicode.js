@@ -742,9 +742,11 @@ Vue.component("metric-popup", {
             + "</div>"
             + "<div class=\"popup_close_button\">X</div>"
             + "<div class=\"popup_cleaner\"></div>"
-            + "<select class=\"popup_select\" size=\"1\" v-bind:value=\"metric.marker\" v-on:change=\"changeMarker\">"
+            + "<div style=\"float: left;\">"
+            + "<select class=\"popup_legend_select generic_select\" size=\"1\" v-bind:value=\"metric.marker\" v-on:change=\"changeMarker\">"
             + "<option v-for=\"symbol in markerSymbols\" v-bind:value=\"symbol\">{{ symbol }}</option>"
             + "</select>"
+            + "</div>"
             + "</div>",
   "data": function () {
     return { "markerSymbols": markerSymbols };
@@ -752,7 +754,7 @@ Vue.component("metric-popup", {
   "methods": {
     "changeMarker": function()
     {
-      this.metric.updateMarker(document.querySelector(".popup_select").value);
+      this.metric.updateMarker(document.querySelector(".popup_legend_select").value);
     }
   }
 });
@@ -896,8 +898,8 @@ Vue.component("yaxis-popup", {
             + "<input type=\"radio\" value=\"local\" name=\"yaxis\" id=\"yaxis_local\" v-model=\"yaxisRange\" /><label for=\"yaxis_local\">Lokales Min/Max</label><br/>"
             + "<input type=\"radio\" value=\"manual\" name=\"yaxis\" id=\"yaxis_manual\" v-model=\"yaxisRange\" /><label for=\"yaxis_manual\">Manuelles Min/Max</label><br/>"
             + "<div class=\"yaxis_popup_minmax\">"
-            + "<label for=\"yaxis_min\">Min:</label><input type=\"number\" v-model=\"allMin\" id=\"yaxis_min\" :disabled.sync=\"manualDisabled\"/><br/>"
-            + "<label for=\"yaxis_max\">Max:</label><input type=\"number\" v-model=\"allMax\" id=\"yaxis_max\" :disabled.sync=\"manualDisabled\"/><br/>"
+            + "<label for=\"yaxis_min\" class=\"yaxis_popup_label_minmax\">Min:</label><input type=\"number\" v-model=\"allMin\" id=\"yaxis_min\" :disabled.sync=\"manualDisabled\"/><br/>"
+            + "<label for=\"yaxis_max\" class=\"yaxis_popup_label_minmax\">Max:</label><input type=\"number\" v-model=\"allMax\" id=\"yaxis_max\" :disabled.sync=\"manualDisabled\"/><br/>"
             + "</div>"
             + "</div>"
             + "<div class=\"popup_close_button\">X</div>"
@@ -941,7 +943,7 @@ Vue.component("yaxis-popup", {
         let arr = queryAllMinMax();
         if(arr)
         {
-          return arr[0];
+          return (new Number(arr[0])).toFixed(3);
         }
       },
       set: function(newValue)
@@ -958,7 +960,7 @@ Vue.component("yaxis-popup", {
         let arr = queryAllMinMax();
         if(arr)
         {
-          return arr[1];
+          return (new Number(arr[1])).toFixed(3);
         }
       },
       set: function(newValue)
@@ -974,10 +976,10 @@ Vue.component("yaxis-popup", {
 Vue.component("preset-popup", {
   "template": "<div class=\"popup_div preset_popup_div\">"
             + "<img src=\"img/metricq-webview-logo.png\" width=\"322\" height=\"123\" /><br/>"
-            + "<select id=\"preset_select\" size=\"1\" v-on:change=\"updateList\">"
+            + "<select class=\"generic_select\" id=\"preset_select\" size=\"1\" v-on:change=\"updateList\" v-on:keydown.enter=\"showMetrics\">"
             + "<option v-for=\"(presetValue, presetIndex) in metricPresets\" v-bind:value=\"presetIndex\">{{ presetIndex }}</option>"
             + "</select>"
-            + "<button v-on:click=\"showMetrics\">Anzeigen</button>"
+            + "<button class=\"button_preset_show generic_button\" v-on:click=\"showMetrics\">Anzeigen</button>"
             + "<ul class=\"list_preset_show\">"
             + "<li v-for=\"metricName in metricMetriclist\">{{ metricName }}</li>"
             + "</ul>"
@@ -1035,17 +1037,17 @@ Vue.component("preset-popup", {
 });
 Vue.component("export-popup", {
   "template": "<div class=\"popup_div export_popup_div\">"
-            + "<div style=\"float: left\">"
+            + "<div style=\"float: left; line-height: 25pt;\">"
             + "<label for=\"export_width\">Breite</label><br/>"
             + "<label for=\"export_height\">Höhe</label><br/>"
             + "<label for=\"export_format\">Dateiformat</label><br/>"
             + "</div><div style=\"float:left\">"
             + "<input type=\"number\" id=\"export_width\" class=\"export_resolution\" v-model=\"exportWidth\" />px<br/>"
             + "<input type=\"number\" id=\"export_height\" class=\"export_resolution\" v-model=\"exportHeight\" />px<br/>"
-            + "<select size=\"1\" id =\"export_format\" v-model=\"selectedFileformat\">"
+            + "<select size=\"1\" id =\"export_format\" v-model=\"selectedFileformat\" class=\"generic_select\">"
             + "<option v-for=\"fileformatName in fileformats\" v-bind:value=\"fileformatName\">{{ fileformatName }}</option>"
             + "</select><br/>"
-            + "<button v-on:click=\"doExport\">Export</button>"
+            + "<button class=\"generic_button\" v-on:click=\"doExport\">Export</button>"
             + "</div>"
             + "<div class=\"popup_close_button\">X</div>"
             + "</div>",
@@ -1203,7 +1205,7 @@ var popupApp = new Vue({
             Plotly.restyle(document.querySelector(".row_body"), {"line.color": myMetric.color}, myTraces);
           }
         }}(affectedTraces, legendApp.metricsList[selectedIndex]);
-        popupEle.querySelector(".popup_select").addEventListener("change", function(myTraces, myMetric) { return function(evt) {
+        popupEle.querySelector(".popup_legend_select").addEventListener("change", function(myTraces, myMetric) { return function(evt) {
           Plotly.restyle(document.querySelector(".row_body"), {"marker.symbol": myMetric.marker}, myTraces);
         }}(affectedTraces, legendApp.metricsList[selectedIndex]));
 
@@ -1311,6 +1313,10 @@ var presetApp = new Vue({
       popupEle.style.height = "100%";
       popupEle.style.left = "0px";
       popupEle.style.top = "0px";
+      setTimeout(function() {
+        var selectEle = document.getElementById("preset_select");
+        selectEle.focus();
+      }, 100);
     }
   }
 });
