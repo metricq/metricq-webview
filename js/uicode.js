@@ -589,50 +589,54 @@ function parseResponse(parsedJson)
   var minmaxValue = [ undefined, undefined];
   for(var i = 0; i < parsedJson.length; ++i)
   {
-    if(-1 < parsedJson[i].target.indexOf("/"))
+    //TODO: check for if datapoints exist
+    if(-1 < parsedJson[i].target.indexOf("/")
+    && parsedJson[i]["datapoints"]
+    && parsedJson[i].datapoints[0])
     {
       metricBase = parsedJson[i].target.substring(0, parsedJson[i].target.indexOf("/"));
       metricAggregate = parsedJson[i].target.substring(parsedJson[i].target.indexOf("/") + 1);
-    }
-    if(undefined === traceRgbCss)
-    {
-      let existingIndex = legendApp.metricsList.findIndex(function(paramValue, paramIndex, paramArray) { return paramValue.name == metricBase; });
-      if(-1 == existingIndex)
+    
+      if(undefined === traceRgbCss)
       {
-        traceRgbCss = metricBaseToRgb(metricBase);
-      } else
-      {
-        traceRgbCss = legendApp.metricsList[existingIndex].color;
-        traceMarker = legendApp.metricsList[existingIndex].marker;
+        let existingIndex = legendApp.metricsList.findIndex(function(paramValue, paramIndex, paramArray) { return paramValue.name == metricBase; });
+        if(-1 == existingIndex)
+        {
+          traceRgbCss = metricBaseToRgb(metricBase);
+        } else
+        {
+          traceRgbCss = legendApp.metricsList[existingIndex].color;
+          traceMarker = legendApp.metricsList[existingIndex].marker;
+        }
       }
-    }
 
-    var curTrace = {
-      "x": new Array(),
-      "y": new Array(),
-      "name": metricAggregate,
-      "type": "scatter"
-    }
-    switch(metricAggregate)
-    {
-      case "min": 
-      case "max": /* fall-through */
-      case "avg": /* fall-through */
-      case "raw": /* fall-through */
-        if(undefined === minmaxValue[0])
-        {
-          minmaxValue[0] =  minmaxValue[1] = parsedJson[i].datapoints[0][0];
-        }
-        for(var j = 0, curY; j < parsedJson[i].datapoints.length; ++j)
-        {
-          curTrace.x.push(parsedJson[i].datapoints[j][1]);
-          curY = parsedJson[i].datapoints[j][0];
-          curTrace.y.push(curY);
-          if(curY > minmaxValue[1]) minmaxValue[1] = curY;
-          if(curY < minmaxValue[0]) minmaxValue[0] = curY;
-        }
-        tracesAll[metricAggregate] = curTrace;
-        break;
+      var curTrace = {
+        "x": new Array(),
+        "y": new Array(),
+        "name": metricAggregate,
+        "type": "scatter"
+      }
+      switch(metricAggregate)
+      {
+        case "min": 
+        case "max": /* fall-through */
+        case "avg": /* fall-through */
+        case "raw": /* fall-through */
+          if(undefined === minmaxValue[0])
+          {
+            minmaxValue[0] =  minmaxValue[1] = parsedJson[i].datapoints[0][0];
+          }
+          for(var j = 0, curY; j < parsedJson[i].datapoints.length; ++j)
+          {
+            curTrace.x.push(parsedJson[i].datapoints[j][1]);
+            curY = parsedJson[i].datapoints[j][0];
+            curTrace.y.push(curY);
+            if(curY > minmaxValue[1]) minmaxValue[1] = curY;
+            if(curY < minmaxValue[0]) minmaxValue[0] = curY;
+          }
+          tracesAll[metricAggregate] = curTrace;
+          break;
+      }
     }
   }
   if(tracesAll["min"] && tracesAll["max"])
@@ -807,9 +811,8 @@ Vue.component("configuration-popup", {
       let newValue = parseFloat(this.uiZoomSpeed) + increment;
       newValue =  this.withinRange(document.getElementById("zoom_speed_input"), newValue);
       this.uiZoomSpeed = newValue;
-      //manually update the DOM, because
-      // vue js is too dumb to do that
-      document.getElementById("zoom_speed_input").value = newValue;
+      // make vue js update using force
+      this.$forceUpdate();
     },
     "withinRange": function(ele, newValue)
     {
