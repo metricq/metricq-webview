@@ -197,7 +197,7 @@ class MetricHandler {
   reload()
   {
   	let rowBodyEle = document.querySelector(".row_body");
-    let maxDataPoints = Math.round(rowBodyEle.offsetWidth / globalConfiguration.resolution);
+    let maxDataPoints = Math.round(rowBodyEle.offsetWidth / this.renderer.configuration.resolution);
     this.doRequest(maxDataPoints);
   }
 }

@@ -1,8 +1,10 @@
 class Configuration {
-  constructor(resolutionParam)
+  constructor(resolutionParam, zoomSpeedParam)
   {
     this.resolution = resolutionParam;
+    this.zoomSpeed = zoomSpeedParam;
     this.popup = false;
-    this.key = "configuration"
+    this.key = "configuration";
+    this.lastWheelEvent = undefined;
   }
 }

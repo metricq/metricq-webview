@@ -14,6 +14,22 @@ class MetricQWebView {
     this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime);
     this.postRender = undefined;
     this.countTraces = 0;
+    this.hasPlot = false;
+    this.configuration = new Configuration(2, 4)
+
+      // accelerate zooming with scroll wheel
+    this.ele.addEventListener("wheel", function (configParam) { return function (evt) {
+      evt.stopPropagation();
+      var dataObj = {
+        time: (new Date()).getTime(),
+        clientX: evt.clientX,
+        clientY: evt.clientY,
+        deltaY: evt.deltaY * configParam.zoomSpeed
+      }
+      var newEvent = new WheelEvent("wheel", dataObj );
+      configParam.lastWheelEvent = dataObj;
+      evt.target.dispatchEvent(newEvent);
+    };}(this.configuration));
     this.plotlyLayout = {
 	  xaxis: {
 	    type: 'date',
@@ -75,13 +91,15 @@ class MetricQWebView {
 
     this.updateMetricUrl();
     //console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
-    if(undefined === globalMainPlot)
+
+    if(!this.hasPlot)
     {
       let allMinMax = this.queryAllMinMax();
       this.plotlyLayout.xaxis.range = [this.handler.startTime, this.handler.stopTime];
       this.plotlyLayout.yaxis.range = allMinMax;
-      globalMainPlot = Plotly.newPlot(this.ele, 
+      Plotly.newPlot(this.ele, 
         allTraces, this.plotlyLayout, this.plotlyOptions);
+      this.hasPlot = true;
       this.countTraces = allTraces.length;
       this.ele.on("plotly_relayout", function(selfReference) { return function(eventdata) {
         if(!eventdata['yaxis.range[0]'])
@@ -108,14 +126,14 @@ class MetricQWebView {
               let newDelta = endTime - startTime;
               let wheelEventString = "";
               let zoomingIsAcceptable = true;
-              if(globalLastWheelEvent)
+              if(selfReference.configuration.lastWheelEvent)
               {
-                let deltaWheelEvent = (new Date()).getTime() - globalLastWheelEvent.time;
+                let deltaWheelEvent = (new Date()).getTime() - selfReference.configuration.lastWheelEvent.time;
                 if(1500 > deltaWheelEvent)
                 {
-                  wheelEventString = " (deltaY: " + globalLastWheelEvent.deltaY + ")";
-                  if((globalLastWheelEvent.deltaY < 0 && newDelta > oldDelta)
-                  || (globalLastWheelEvent.deltaY > 0 && newDelta < oldDelta))
+                  wheelEventString = " (deltaY: " + selfReference.configuration.lastWheelEvent.deltaY + ")";
+                  if((selfReference.configuration.lastWheelEvent.deltaY < 0 && newDelta > oldDelta)
+                  || (selfReference.configuration.lastWheelEvent.deltaY > 0 && newDelta < oldDelta))
                   {
                     zoomingIsAcceptable = false;
                     console.log("Invalid Zoom: " + Math.round(newDelta * 100/ oldDelta) + "%" + wheelEventString);
@@ -404,8 +422,8 @@ function importMetricUrl()
 
 function initializeMetrics(metricNamesArr, timeStart, timeStop)
 {
-  globalMetricHandle = new MetricQWebView(document.querySelector(".row_body"), metricNamesArr, timeStart, timeStop);
-  globalMetricHandle.postRender = function() {
+  let newManager = new MetricQWebView(document.querySelector(".row_body"), metricNamesArr, timeStart, timeStop);
+  newManager.postRender = function() {
     legendApp.$forceUpdate();
   };
   /*

@@ -1,23 +1,22 @@
 
 /* TODO: bind these locally, somehow */
 var METRICQ_BACKEND = "https://grafana.metricq.zih.tu-dresden.de/metricq/query";
-var globalEnd = new Date().getTime();
-var globalStart = globalEnd - 3600 * 2 * 1000;
-var globalZoomSpeed = 4; // TODO: make this setting configurable
-var globalConfiguration = new Configuration(2);
-var globalYRangeOverride = undefined;
-var globalYRangeType = 'local';
-var globalMainPlot = undefined;
-var globalLastWheelEvent = undefined;
 var globalPopup = {
   "export": false, //not yet implemented
   "yaxis": false,
   "xaxis": false,
-  "presetSelection": false
+  "presetSelection": false,
+  "configuration": false
 };
 var globalSelectedPreset = undefined;
 for(var attrib in metricPresets) { globalSelectedPreset = metricPresets[attrib]; break; }
 var globalMetricHandle = new MetricHandler(undefined, new Array(), 0, 0);
+
+
+/* TODO: remove these */
+var globalYRangeOverride = undefined;
+var globalYRangeType = 'local';
+
 
 var veil = {
   "myPopup": undefined,
@@ -56,42 +55,32 @@ var veil = {
   }
 }
 
+//At Startup:
+if(-1 < window.location.href.indexOf("#"))
+{
+  try {
+    importMetricUrl();
+  } catch(exc)
+  {
+    console.log("Could not import metrics.");
+    console.log(exc);
+  }
+} else
+{
+  Vue.nextTick(function() { globalPopup.presetSelection = true; });
+}  
+
 
 
 function initTest()
 {
-  // accelerate zooming with scroll wheel
-  document.querySelector(".row_body").addEventListener("wheel", function (evt) {
-    evt.stopPropagation();
-    var dataObj = {
-      time: (new Date()).getTime(),
-      clientX: evt.clientX,
-      clientY: evt.clientY,
-      deltaY: evt.deltaY * globalZoomSpeed
-    }
-    var newEvent = new WheelEvent("wheel", dataObj );
-    globalLastWheelEvent = dataObj;
-    evt.target.dispatchEvent(newEvent);
-  });
+
   document.getElementById("button_export").addEventListener("click", function(evt) {
     globalPopup.export = ! globalPopup.export;
   });
   document.getElementById("button_configuration").addEventListener("click", function(evt) {
     configApp.togglePopup();
   });
-  if(-1 < window.location.href.indexOf("#"))
-  {
-    importMetricUrl();
-  } else
-  {
-    globalPopup.presetSelection = true;
-    /*
-    let maxDataPoints = Math.round(window.innerWidth / globalConfiguration.resolution);
-    sampleRequest(globalStart, globalEnd, maxDataPoints, "elab.ariel.power");
-    sampleRequest(globalStart, globalEnd, maxDataPoints, "elab.ariel.s0.package.power");
-    legendApp.metricsList.push(new Metric("", metricBaseToRgb(""), markerSymbols[0], new Array(), [undefined, undefined]));
-    */
-  }  
 }
 /* TODO: move this to MetricQWebView */
 function loadGlobalMinMaxPreemptively() {
@@ -195,34 +184,7 @@ Vue.component("metric-legend", {
   }
 });
 
-//adapted from https://plot.ly/python/marker-style/
-// not working:
-//   "cross-thin", "x-thin", "asterisk", "hash", "hash-dot", "y-up", "y-down", "y-left", "y-right",
-//   "line-ew", "line-ns", "line-ne", "line-nw"
-var markerSymbols = ["circle", "circle-dot", "circle-open", "circle-open-dot", "square", "square-dot",
- "square-open", "square-open-dot", "diamond", "diamond-dot", "diamond-open", "diamond-open-dot", "cross",
- "cross-dot", "cross-open", "cross-open-dot", "x", "x-dot", "x-open", "x-open-dot", "triangle-up",
- "triangle-up-dot", "triangle-up-open", "triangle-up-open-dot", "triangle-down", "triangle-down-dot",
- "triangle-down-open", "triangle-down-open-dot", "triangle-left", "triangle-left-dot",
- "triangle-left-open", "triangle-left-open-dot", "triangle-right", "triangle-right-dot",
- "triangle-right-open", "triangle-right-open-dot", "triangle-ne", "triangle-ne-dot", "triangle-ne-open",
- "triangle-ne-open-dot", "triangle-se", "triangle-se-dot", "triangle-se-open", "triangle-se-open-dot",
- "triangle-sw", "triangle-sw-dot", "triangle-sw-open", "triangle-sw-open-dot", "triangle-nw",
- "triangle-nw-dot", "triangle-nw-open", "triangle-nw-open-dot", "pentagon", "pentagon-dot",
- "pentagon-open", "pentagon-open-dot", "hexagon", "hexagon-dot", "hexagon-open", "hexagon-open-dot",
- "hexagon2", "hexagon2-dot", "hexagon2-open", "hexagon2-open-dot", "octagon", "octagon-dot",
- "octagon-open", "octagon-open-dot", "star", "star-dot", "star-open", "star-open-dot", "hexagram",
- "hexagram-dot", "hexagram-open", "hexagram-open-dot", "star-triangle-up", "star-triangle-up-dot",
- "star-triangle-up-open", "star-triangle-up-open-dot", "star-triangle-down", "star-triangle-down-dot",
- "star-triangle-down-open", "star-triangle-down-open-dot", "star-square", "star-square-dot",
- "star-square-open", "star-square-open-dot", "star-diamond", "star-diamond-dot", "star-diamond-open",
- "star-diamond-open-dot", "diamond-tall", "diamond-tall-dot", "diamond-tall-open",
- "diamond-tall-open-dot", "diamond-wide", "diamond-wide-dot", "diamond-wide-open",
- "diamond-wide-open-dot", "hourglass", "hourglass-open", "bowtie", "bowtie-open", "circle-cross",
- "circle-cross-open", "circle-x", "circle-x-open", "square-cross", "square-cross-open", "square-x",
- "square-x-open", "diamond-cross", "diamond-cross-open", "diamond-x", "diamond-x-open",  "cross-thin-open",
- "x-thin-open", "asterisk-open", "hash-open", "hash-open-dot", "y-up-open", "y-down-open", "y-left-open",
- "y-right-open", "line-ew-open", "line-ns-open", "line-ne-open", "line-nw-open"];
+
 
 Vue.component("metric-popup", {
   "props": ["metric"],
@@ -269,20 +231,20 @@ Vue.component("configuration-popup", {
   "computed": {
     "uiResolution": {
       get: function() {
-        return 30 - globalConfiguration.resolution;
+        return 30 - window.MetricQWebView.instances[0].configuration.resolution;
       },
       set: function(newValue) {
-        globalConfiguration.resolution = 30 - newValue;
+        window.MetricQWebView.instances[0].configuration.resolution = 30 - newValue;
         this.$emit("update:uiResolution", newValue);
       }
     },
     "uiZoomSpeed": {
       cache: false,
       get: function() {
-        return globalZoomSpeed;
+        return window.MetricQWebView.instances[0].configuration.zoomSpped;
       },
       set: function(newValue) {
-        globalZoomSpeed = newValue;
+        window.MetricQWebView.instances[0].configuration.zoomSpped = newValue;
         this.$emit("update:uiZoomSpeed", newValue);
       }
     }
@@ -765,17 +727,32 @@ var configApp = new Vue({
   "methods": {
     "togglePopup": function()
     {
-      globalConfiguration.popup = ! globalConfiguration.popup;
+      globalPopup.configuration = ! globalPopup.configuration;
     }
   },
-  "data": {
-    "config": globalConfiguration
+  "computed": {
+    "config": {
+      "get": function()
+      {
+        if(window["MetricQWebView"])
+        {
+          return window.MetricQWebView.instances[0].configuration;
+        } else
+        {
+          return {"resolution": 2, "zoomSpeed": 4};
+        }
+      },
+      "set": function(newValue)
+      {
+        window.MetricQWebView.instances[0].configuration = newValue;
+      }
+    }
   },
   updated() {
     var popupEle = document.querySelector(".config_popup_div");
     if(popupEle)
     {
-      var disablePopupFunc = function() { globalConfiguration.popup = false; window.MetricQWebView.instances[0].reload(); };
+      var disablePopupFunc = function() { globalPopup.configuration = false; window.MetricQWebView.instances[0].reload(); };
       veil.create(function(evt) { disablePopupFunc(); });
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
