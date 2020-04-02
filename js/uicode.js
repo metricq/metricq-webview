@@ -1,47 +1,4 @@
-var plotlyLayout = {
-  xaxis: {
-    type: 'date',
-    showticklabels: true,
-    tickangle: 'auto',
-    tickfont: {
-      family: 'Open Sans, Sans, Verdana',
-      size: 14,
-      color: 'black'
-    },
-    exponentformat: 'e',
-    showexponent: 'all'
-  },
-  yaxis: {
-    showticklabels: true,
-    tickangle: 'auto',
-    tickmode: "last",
-    tickfont: {
-      family: 'Open Sans, Sans, Verdana',
-      size: 14,
-      color: 'black'
-    },
-    exponentformat: 'e',
-    showexponent: 'all',
-    fixedrange: true // disable y-zooming
-  },
-  showlegend: false,
-  dragmode: "pan"
-};
-var plotlyOptions = {
-  scrollZoom: true,
-  // "zoom2d", "zoomIn2d", "zoomOut2d"
-  modeBarButtonsToRemove: [ "lasso2d", "autoScale2d", "resetScale2d", "toggleHover", "toggleSpikelines", "hoverClosestCartesian", "hoverCompareCartesian", "toImage"],
-  displaylogo: false, // don't show the plotly logo
-  toImageButtonOptions: {
-    format: "svg", // also available: jpeg, png, webp
-    filename: "metricq-webview",
-    height: 500,
-    width: 800,
-    scale: 1
-  },
-  responsive: true, // automatically adjust to window resize
-  displayModeBar: true // icons always visible
-}
+
 /* TODO: bind these locally, somehow */
 var METRICQ_BACKEND = "https://grafana.metricq.zih.tu-dresden.de/metricq/query";
 var globalEnd = new Date().getTime();
@@ -51,7 +8,6 @@ var globalConfiguration = new Configuration(2);
 var globalYRangeOverride = undefined;
 var globalYRangeType = 'local';
 var globalMainPlot = undefined;
-var globalCountTraces = 0;
 var globalLastWheelEvent = undefined;
 var globalPopup = {
   "export": false, //not yet implemented
@@ -61,6 +17,7 @@ var globalPopup = {
 };
 var globalSelectedPreset = undefined;
 for(var attrib in metricPresets) { globalSelectedPreset = metricPresets[attrib]; break; }
+var globalMetricHandle = new MetricHandler(undefined, new Array(), 0, 0);
 
 var veil = {
   "myPopup": undefined,
@@ -98,324 +55,8 @@ var veil = {
     veil.myPopup = popupEle;
   }
 }
-function queryAllMinMax() {
-  let referenceAttribute = "minmax";
-  if("manual" == globalYRangeType && globalYRangeOverride)
-  {
-    return globalYRangeOverride;
-  } else if("global" == globalYRangeType)
-  {
-    referenceAttribute = "globalMinmax";
-  }
-  let allMinMax = [undefined, undefined];
-  //TODO: restrict local min/max to actual visual area
-  //      as in the prototype
-  for(var i = 0; i < legendApp.metricsList.length; ++i)
-  {
-    let curMetric = legendApp.metricsList[i];
-    if(curMetric[referenceAttribute])
-    {
-      if(undefined === allMinMax[0])
-      {
-       allMinMax = [curMetric[referenceAttribute][0], curMetric[referenceAttribute][1]];
-      } else
-      {
-        if(curMetric[referenceAttribute][0] < allMinMax[0])
-        {
-          allMinMax[0] = curMetric[referenceAttribute][0];
-        }
-        if(curMetric[referenceAttribute][1] > allMinMax[1])
-        {
-          allMinMax[1] = curMetric[referenceAttribute][1];
-        }
-      }
-    }
-  }
-  //add a little wiggle room, so that markers won't be cut off
-  const delta = allMinMax[1] - allMinMax[0];
-  allMinMax[0] -= delta * 0.05;
-  allMinMax[1] += delta * 0.05;
-  return allMinMax;
-}
-function setPlotRanges(updateXAxis, updateYAxis)
-{
-  if(!updateXAxis && !updateYAxis)
-  {
-    return;
-  }
-  var relayoutObj = new Object();
-  if(updateXAxis) {
-    relayoutObj["xaxis.range[0]"] = globalStart;
-    relayoutObj["xaxis.range[1]"] = globalEnd;
-  }
-  if(updateYAxis) {
-    let allMinMax = queryAllMinMax();
-    relayoutObj["yaxis.range[0]"] = allMinMax[0];
-    relayoutObj["yaxis.range[1]"] = allMinMax[1];
-  }
-  var rowBodyEle = document.querySelector(".row_body");
-  Plotly.relayout(rowBodyEle, relayoutObj );
-}
-function renderMetrics()
-{
-  let allTraces = new Array();
 
-  for(var i = 0; i < legendApp.metricsList.length; ++i)
-  {
-    let curMetric = legendApp.metricsList[i];
-    if(curMetric.traces) {
-      allTraces = allTraces.concat(curMetric.traces);
-    }
-  }
 
-  updateMetricUrl();
-  var rowBodyEle = document.querySelector(".row_body");
-  //console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
-  if(undefined === globalMainPlot)
-  {
-    let allMinMax = queryAllMinMax();
-    plotlyLayout.xaxis.range = [globalStart, globalEnd];
-    plotlyLayout.yaxis.range = allMinMax;
-    globalMainPlot = Plotly.newPlot(rowBodyEle, 
-      allTraces, plotlyLayout, plotlyOptions);
-    globalCountTraces = allTraces.length;
-    rowBodyEle.on("plotly_relayout", function(eventdata) {
-      if(!eventdata['yaxis.range[0]'])
-      {
-        var startTime = eventdata['xaxis.range[0]'];
-        var endTime = eventdata['xaxis.range[1]'];
-//        console.log("Time Diff:" + (endTime - startTime));
-        if(startTime === undefined || endTime === undefined)
-        {
-          //we got a reset/zoom out
-        } else {
-          if("string" == (typeof startTime))
-          {
-            startTime = new Date(startTime).getTime();
-          }
-          if("string" == (typeof endTime))
-          {
-            endTime = new Date(endTime).getTime();
-          }
-          if(globalStart != startTime
-          || globalEnd != endTime)
-          {
-            let oldDelta = globalEnd - globalStart;
-            let newDelta = endTime - startTime;
-            let wheelEventString = "";
-            let zoomingIsAcceptable = true;
-            if(globalLastWheelEvent)
-            {
-              let deltaWheelEvent = (new Date()).getTime() - globalLastWheelEvent.time;
-              if(1500 > deltaWheelEvent)
-              {
-                wheelEventString = " (deltaY: " + globalLastWheelEvent.deltaY + ")";
-                if((globalLastWheelEvent.deltaY < 0 && newDelta > oldDelta)
-                || (globalLastWheelEvent.deltaY > 0 && newDelta < oldDelta))
-                {
-                  zoomingIsAcceptable = false;
-                  console.log("Invalid Zoom: " + Math.round(newDelta * 100/ oldDelta) + "%" + wheelEventString);
-                }
-              }
-            }
-            if(zoomingIsAcceptable)
-            {
-              globalStart = startTime;
-              globalEnd = endTime;
-              //console.log("Zoom " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
-              reload();
-              updateMetricUrl();
-            }
-          }
-        }
-      }
-    });
-    //some plotly events: plotly_redraw, plotly_update, plotly_react,
-    // plotly_relayouting, plotly_selecting, plotly_deselect, plotly_selected,
-    // plotly_beforeexport, plotly_afterexport, plotly_autosize
-    rowBodyEle.on("plotly_autosize", function(evt) {
-      var gearEle = document.getElementById("gear_xaxis");
-      var rowBody = document.querySelector(".row_body");
-      positionXAxisGear(rowBody, gearEle);
-    });
-  } else
-  {
-    // don't rerender everything
-    var oldTraces = new Array();
-    for(var i = 0; i < globalCountTraces; ++i)
-    {
-      oldTraces.push(i);
-    }
-    Plotly.deleteTraces(rowBodyEle, oldTraces);
-    if("local" == globalYRangeType)
-    {
-      setPlotRanges(false, true);
-    }
-    Plotly.addTraces(rowBodyEle, allTraces);
-    globalCountTraces = allTraces.length;
-  }
-  var gearEle = document.getElementById("gear_xaxis");
-  if(gearEle)
-  {
-    gearEle.parentNode.removeChild(gearEle);
-    gearEle = document.getElementById("gear_yaxis");
-    gearEle.parentNode.removeChild(gearEle);
-  }
-  const BODY = document.getElementsByTagName("body")[0];
-  /* TODO: abstract gear creation into separate class */
-  var gears = [undefined, undefined];
-  for(var i = 0; i < 2; ++i)
-  {
-    gears[i] = document.createElement("img");
-    var img = new Image();
-    img.src = "img/gear.png";
-    gears[i].src = img.src;
-    gears[i].setAttribute("class", "gear_axis");
-    gears[i] = BODY.appendChild(gears[i]);
-  }
-  gears[0].setAttribute("id", "gear_xaxis");
-  positionXAxisGear(rowBodyEle, gears[0]);
-  gears[0].addEventListener("click", function() {
-    globalPopup.xaxis = ! globalPopup.xaxis;
-  });
-  gears[1].setAttribute("id", "gear_yaxis");
-  positionYAxisGear(rowBodyEle, gears[1]);
-  gears[1].addEventListener("click", function() {
-    globalPopup.yaxis = ! globalPopup.yaxis;
-  })
-}
-function positionXAxisGear(rowBodyEle, gearEle) {
-  gearEle.style.position = "absolute";
-  var posGear = getTopLeft(rowBodyEle);
-  posGear[0] += parseInt(rowBodyEle.offsetWidth) - parseInt(gearEle.offsetWidth);
-  posGear[1] += parseInt(rowBodyEle.offsetHeight) - parseInt(gearEle.offsetHeight);
-  posGear[0] += -35;
-  posGear[1] += -30;
-  gearEle.style.left = posGear[0] + "px";
-  gearEle.style.top = posGear[1] + "px";  
-}
-function positionYAxisGear(rowBodyEle, gearEle) {
-  gearEle.style.position = "absolute";
-  var posGear = getTopLeft(rowBodyEle);
-  posGear[0] += 20;
-  posGear[1] += 70;
-  gearEle.style.left = posGear[0] + "px";
-  gearEle.style.top = posGear[1] + "px";    
-}
-function getTopLeft(ele) {
-  var topLeft = [0, 0];
-  var curEle = ele;
-  while(!curEle.tagName || (curEle.tagName && curEle.tagName.toLowerCase() != "html")) {
-    topLeft[0] += parseInt(curEle.offsetLeft);
-    topLeft[1] += parseInt(curEle.offsetTop);
-    curEle = curEle.parentNode;
-  }
-  return topLeft;
-}
-function updateMetricUrl()
-{
-  let encodedStr = "";
-  //old style: 
-  if(false)
-  {
-    let jsurlObj = {
-      "cntr": new Array(),
-      "start": globalStart,
-      "stop": globalEnd,
-    };
-    for(var i = 0; i < legendApp.metricsList.length; ++i)
-    {
-      jsurlObj.cntr.push(legendApp.metricsList[i].name);
-    }
-    encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj));
-  } else
-  {
-    encodedStr = "." + globalStart + "_" + globalEnd;
-    for(var i = 0; i < legendApp.metricsList.length; ++i)
-    {
-      encodedStr += "_" + legendApp.metricsList[i].name;
-    }
-    encodedStr = encodeURIComponent(encodedStr);
-  }
-  window.location.href =
-     parseLocationHref()[0]
-   + "#"
-   + encodedStr;
-}
-function parseLocationHref()
-{
-  let hashPos = window.location.href.indexOf("#");
-  let baseUrl = "";
-  let jsurlStr = "";
-  if(-1 == hashPos)
-  {
-    baseUrl = window.location.href;
-  } else
-  {
-    baseUrl = window.location.href.substring(0, hashPos);
-    jsurlStr = decodeURIComponent(window.location.href.substring(hashPos + 1));
-  }
-  return [baseUrl, jsurlStr];
-}
-function importMetricUrl()
-{
-  var jsurlStr = parseLocationHref()[1];
-  if(1 < jsurlStr.length)
-  {
-    if("~" == jsurlStr.charAt(0))
-    {
-      let metricsObj = undefined;
-      try {
-        metricsObj = window.JSURL.parse(jsurlStr);
-      } catch(exc)
-      {
-        console.log("Could not interpret URL");
-        console.log(exc);
-        return false;
-      }
-      for(var i = 0; i < metricsObj.cntr.length; ++i)
-      {
-        legendApp.metricsList.push(new Metric(metricsObj.cntr[i], metricBaseToRgb(metricsObj.cntr[i]), markerSymbols[i * 4], new Array(), [undefined, undefined]));
-      }
-      globalStart = parseInt(metricsObj.start);
-      globalEnd = parseInt(metricsObj.stop);
-      reload();
-      return true;
-    } else if("." == jsurlStr.charAt(0))
-    {
-      const splitted = jsurlStr.split("_");
-      if(1 < splitted.length)
-      {
-        globalStart = parseInt(splitted[0].substring(1));
-        globalEnd = parseInt(splitted[1]);
-        for(var i = 2; i < splitted.length; ++i)
-        {
-          let metricName = splitted[i];
-          legendApp.metricsList.push(new Metric(metricName, metricBaseToRgb(metricName), markerSymbols[(i - 2) * 4], new Array(), [undefined, undefined]));
-        }
-        reload();
-        return true;
-      }
-    }
-  }
-  return false;
-}
-function reload()
-{
-  var requestMetrics = new Array();
-  legendApp.metricsList.forEach(function(paramValue, paramIndex, paramArray) {
-    if(0 < paramValue.name.length)
-    {
-      requestMetrics.push(paramValue.name);
-    }
-  });
-  let rowBodyEle = document.querySelector(".row_body");
-  let maxDataPoints = Math.round(rowBodyEle.offsetWidth / globalConfiguration.resolution);
-  requestMetrics.forEach(function(paramValue, paramIndex, paramArray) {
-    sampleRequest(globalStart, globalEnd, maxDataPoints, paramValue);
-  });
-
-}
 
 function initTest()
 {
@@ -452,6 +93,7 @@ function initTest()
     */
   }  
 }
+/* TODO: move this to MetricQWebView */
 function loadGlobalMinMaxPreemptively() {
   const now = (new Date()).getTime();
   const tenYears = 10 * 365 * 86400 * 1000;
@@ -526,48 +168,6 @@ function loadGlobalMinMaxPreemptively() {
   }
   req.send(JSON.stringify(queryObj));
 }
-function sampleRequest(startDate, endDate, maxDataPoints, metricName)
-{
-  var timeMargin = (endDate - startDate) / 3;
-  var queryObj = {"range":
-        {
-                "from": new Date(startDate - timeMargin).toISOString(),
-                "to": new Date(endDate + timeMargin).toISOString()
-        },
-        "maxDataPoints": maxDataPoints,
-        "targets":[{
-                "metric": metricName,
-                "functions":[
-                        "min",
-                        "max",
-                        "avg",
-                        "count"
-                ]}
-        ]
-  };
-  // TODO: put a validity checker for the queryObj here
-  // it should validate, that dates are well-formed
-  // it should validate, that maxDataPoints is an integer greater null
-  // TODO: use modern WebWorkers, or even better:
-  //       use fetch-API with promises, it's modern!
-  var req = new XMLHttpRequest();
-  req.open("POST", METRICQ_BACKEND, true);
-  req.onreadystatechange = function(evtObj) {
-    if(4 == evtObj.target.readyState)
-    {
-      var parsedObj = undefined;
-      try {
-        parsedObj = JSON.parse(evtObj.target.responseText);
-        parseResponse(parsedObj);
-      } catch(exc)
-      {
-        console.log("Couldn't parse");
-        console.log(exc);
-      }
-    }
-  }
-  req.send(JSON.stringify(queryObj));
-}
 
 function metricBaseToRgb(metricBase)
 {
@@ -575,134 +175,22 @@ function metricBaseToRgb(metricBase)
   return "rgb(" + rgbArr[0] + "," + rgbArr[1] + "," + rgbArr[2] + ")";
 }
 
-/* TODO: move this into metric class */
-function parseResponse(parsedJson)
-{
-  var tracesAll = {
-    "min": undefined,
-    "max": undefined
-  }
-  var traceRgbCss = undefined;
-  var traceMarker = markerSymbols[0];
-  var metricBase = undefined;
-  var metricAggregate = undefined;
-  var minmaxValue = [ undefined, undefined];
-  for(var i = 0; i < parsedJson.length; ++i)
-  {
-    //TODO: check for if datapoints exist
-    if(-1 < parsedJson[i].target.indexOf("/")
-    && parsedJson[i]["datapoints"]
-    && parsedJson[i].datapoints[0])
-    {
-      metricBase = parsedJson[i].target.substring(0, parsedJson[i].target.indexOf("/"));
-      metricAggregate = parsedJson[i].target.substring(parsedJson[i].target.indexOf("/") + 1);
-    
-      if(undefined === traceRgbCss)
-      {
-        let existingIndex = legendApp.metricsList.findIndex(function(paramValue, paramIndex, paramArray) { return paramValue.name == metricBase; });
-        if(-1 == existingIndex)
-        {
-          traceRgbCss = metricBaseToRgb(metricBase);
-        } else
-        {
-          traceRgbCss = legendApp.metricsList[existingIndex].color;
-          traceMarker = legendApp.metricsList[existingIndex].marker;
-        }
-      }
 
-      var curTrace = {
-        "x": new Array(),
-        "y": new Array(),
-        "name": metricAggregate,
-        "type": "scatter"
-      }
-      switch(metricAggregate)
-      {
-        case "min": 
-        case "max": /* fall-through */
-        case "avg": /* fall-through */
-        case "raw": /* fall-through */
-          if(undefined === minmaxValue[0])
-          {
-            minmaxValue[0] =  minmaxValue[1] = parsedJson[i].datapoints[0][0];
-          }
-          for(var j = 0, curY; j < parsedJson[i].datapoints.length; ++j)
-          {
-            curTrace.x.push(parsedJson[i].datapoints[j][1]);
-            curY = parsedJson[i].datapoints[j][0];
-            curTrace.y.push(curY);
-            if(curY > minmaxValue[1]) minmaxValue[1] = curY;
-            if(curY < minmaxValue[0]) minmaxValue[0] = curY;
-          }
-          tracesAll[metricAggregate] = curTrace;
-          break;
-      }
-    }
-  }
-  if(tracesAll["min"] && tracesAll["max"])
-  {
-    var traces = [ tracesAll["min"], tracesAll["max"]];
-    traces[1].fill = "tonexty";
-    if(tracesAll["avg"])
-    {
-      traces.push(tracesAll["avg"]);
-    }
-    traces.forEach( function (paramValue, paramIndex, paramArray) {
-      paramValue.mode = "lines";
-      paramValue.line = {
-      "width": 0,
-      "color": traceRgbCss,
-      "shape": "vh" }; // connect "next"
-      //"shape": "hv" // connect "last"
-      //"shape": "linear" // connect "direct"
-    });
-    if(tracesAll["avg"])
-    {
-      traces[2].line.dash = "dash";
-      traces[2].line.width = 2;
-    }
-    //add traces to metricList, create an object of metric class in before
-    loadedMetric(metricBase, traceRgbCss, traceMarker, traces, minmaxValue);
-    renderMetrics();
-  } else if(tracesAll["raw"])
-  {
-    var rawTrace = [tracesAll["raw"]]
-    rawTrace[0].mode = "markers";
-    rawTrace[0].marker = {
-      "size": 10,
-      "color": traceRgbCss,
-      "symbol": traceMarker
-    }
-    loadedMetric(metricBase, traceRgbCss, traceMarker, rawTrace, minmaxValue);
-    renderMetrics();
-  }
-}
-function loadedMetric(metricBase, metricColor, metricMarker, metricTraces, minmaxValue)
-{
-  //check for previously existing metrics with the same name
-  let existingIndex = legendApp.metricsList.findIndex(function(paramValue, paramIndex, paramArray) { return paramValue.name == metricBase; });
-  if(-1 == existingIndex)
-  {
-    let newMetric = new Metric(metricBase, metricColor, metricMarker, metricTraces, minmaxValue);
-    legendApp.metricsList.push(newMetric);
-  } else {
-    legendApp.metricsList[existingIndex].traces = metricTraces;
-    legendApp.metricsList[existingIndex].minmax = minmaxValue;
-  }
-}
 
 
 Vue.component("metric-legend", {
   "props": ["metric"],
-  "template": "<li v-on:click=\"metricPopup(metric.name)\"><span v-bind:style=\"{color: metric.color}\">█</span> {{ metric.name }} </li>",
+  "template": "<li v-on:click=\"metricPopup(metric.name)\"><span v-bind:class=\"metric.popupKey\" v-bind:style=\"{color: metric.color}\">█</span> {{ metric.name }} </li>",
   "methods": {
     "metricPopup": function(metricName) {
       //console.log(metricName);
-      let existingIndex = legendApp.metricsList.findIndex(function(paramValue, paramIndex, paramArray) { return paramValue.name == metricName; });
-      if(-1 != existingIndex)
+      var myMetric = window.MetricQWebView.instances[0].getMetric(metricName);
+      if(myMetric)
       {
-        legendApp.metricsList[existingIndex].popup = ! legendApp.metricsList[existingIndex].popup;
+        myMetric.popup = ! myMetric.popup;
       }
+      popupApp.$forceUpdate();
+      Vue.nextTick(initializeMetricPopup);
     }
   }
 });
@@ -845,51 +333,51 @@ Vue.component("xaxis-popup", {
     "startDate": {
       get: function()
       {
-        var dateObj = new Date(globalStart);
+        var dateObj = new Date(window.MetricQWebView.instances[0].handler.startTime);
         return dateObj.getFullYear() + "-" + ((dateObj.getMonth() + 1) < 10 ? "0" : "") + (dateObj.getMonth() + 1) + "-" + (dateObj.getDate() < 10 ? "0" : "") + dateObj.getDate()
       },
       set: function(newValue)
       {
-        globalStart = (new Date(newValue)).getTime() + (globalStart % 86400000);
-        setPlotRanges(true, true);
+        window.MetricQWebView.instances[0].handler.startTime = (new Date(newValue)).getTime() + (window.MetricQWebView.instances[0].handler.startTime % 86400000);
+        window.MetricQWebView.instances[0].setPlotRanges(true, true);
       }
     },
     "endDate": {
       get: function()
       {
-        var dateObj = new Date(globalEnd);
+        var dateObj = new Date(window.MetricQWebView.instances[0].handler.stopTime);
         return dateObj.getFullYear() + "-" + ((dateObj.getMonth() + 1) < 10 ? "0" : "") + (dateObj.getMonth() + 1) + "-" + (dateObj.getDate() < 10 ? "0" : "") + dateObj.getDate()
       },
       set: function(newValue)
       {
-        globalEnd = (new Date(newValue)).getTime() + (globalEnd % 86400000);
-        setPlotRanges(true, true);
+        window.MetricQWebView.instances[0].handler.stopTime = (new Date(newValue)).getTime() + (window.MetricQWebView.instances[0].handler.stopTime % 86400000);
+        window.MetricQWebView.instances[0].setPlotRanges(true, true);
       }
     },
     "startTime": {
       get: function()
       {
-        var dateObj = new Date(globalStart);
+        var dateObj = new Date(window.MetricQWebView.instances[0].handler.startTime);
         return (dateObj.getHours() < 10 ? "0" : "") + dateObj.getHours() + ":" + (dateObj.getMinutes() < 10 ? "0" : "") + dateObj.getMinutes() + ":" + (dateObj.getSeconds() < 10 ? "0" : "") + dateObj.getSeconds()
       },
       set: function(newValue)
       {
         var dateObj = new Date(this.startDate + " " + newValue);
-        globalStart = dateObj.getTime();
-        setPlotRanges(true, true);
+        window.MetricQWebView.instances[0].handler.startTime = dateObj.getTime();
+        window.MetricQWebView.instances[0].setPlotRanges(true, true);
       }
     },
     "endTime": {
       get: function()
       {
-        var dateObj = new Date(globalEnd);
+        var dateObj = new Date(window.MetricQWebView.instances[0].handler.stopTime);
         return (dateObj.getHours() < 10 ? "0" : "") + dateObj.getHours() + ":" + (dateObj.getMinutes() < 10 ? "0" : "") + dateObj.getMinutes() + ":" + (dateObj.getSeconds() < 10 ? "0" : "") + dateObj.getSeconds()
       },
       set: function(newValue)
       {
         var dateObj = new Date(this.endDate + " " + newValue);
-        globalEnd = dateObj.getTime();
-        setPlotRanges(true, true);
+        window.MetricQWebView.instances[0].handler.stopTime = dateObj.getTime();
+        window.MetricQWebView.instances[0].setPlotRanges(true, true);
       }
     }
   }
@@ -938,13 +426,13 @@ Vue.component("yaxis-popup", {
         {
           loadGlobalMinMaxPreemptively();
         }
-        setPlotRanges(false, true);
+        window.MetricQWebView.instances[0].setPlotRanges(false, true);
       }
     },
     "allMin": {
       get: function()
       {
-        let arr = queryAllMinMax();
+        let arr = window.MetricQWebView.instances[0].queryAllMinMax();
         if(arr)
         {
           return (new Number(arr[0])).toFixed(3);
@@ -952,16 +440,16 @@ Vue.component("yaxis-popup", {
       },
       set: function(newValue)
       {
-        let arr = queryAllMinMax();
+        let arr = window.MetricQWebView.instances[0].queryAllMinMax();
         arr = [newValue, arr[1]];
         globalYRangeOverride = arr;
-        setPlotRanges(false, true);
+        window.MetricQWebView.instances[0].setPlotRanges(false, true);
       }
     },
     "allMax": {
       get: function()
       {
-        let arr = queryAllMinMax();
+        let arr = window.MetricQWebView.instances[0].queryAllMinMax();
         if(arr)
         {
           return (new Number(arr[1])).toFixed(3);
@@ -969,10 +457,10 @@ Vue.component("yaxis-popup", {
       },
       set: function(newValue)
       {
-        let arr = queryAllMinMax();
+        let arr = window.MetricQWebView.instances[0].queryAllMinMax();
         arr = [arr[0], newValue];
         globalYRangeOverride = arr;
-        setPlotRanges(false, true);
+        window.MetricQWebView.instances[0].setPlotRanges(false, true);
       }
     }
   }
@@ -1025,17 +513,18 @@ Vue.component("preset-popup", {
       globalPopup.presetSelection = false;
       let hasEmptyMetric = false;
       var i = 0;
+      var metricNamesArr = new Array();
       for(; i < globalSelectedPreset.length; ++i)
       {
         let metricName = globalSelectedPreset[i];
         if(0 == metricName.length) hasEmptyMetric = true;
-        legendApp.metricsList.push(new Metric(metricName, metricBaseToRgb(metricName), markerSymbols[i*4], new Array(), [undefined, undefined]));
+        metricNamesArr.push(metricName);
       }
       if( ! hasEmptyMetric)
       {
-        legendApp.metricsList.push(new Metric("", metricBaseToRgb(""), markerSymbols[i * 4], new Array(), [undefined, undefined]));
+        metricNamesArr.push("");
       }
-      reload();
+      initializeMetrics(metricNamesArr, (new Date()).getTime() - 3600 * 1000 * 2, (new Date()).getTime());
     }
   }
 });
@@ -1062,39 +551,40 @@ Vue.component("export-popup", {
     "selectedFileformat": {
       get: function()
       {
-        return plotlyOptions.toImageButtonOptions.format;
+        return window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.format;
       },
       set: function(newValue)
       {
-        plotlyOptions.toImageButtonOptions.format = newValue;
+        window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.format = newValue;
       }
     },
     "exportWidth": {
       get: function()
       {
-        return plotlyOptions.toImageButtonOptions.width;
+        return window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.width;
       },
       set: function(newValue)
       {
-        plotlyOptions.toImageButtonOptions.width = parseInt(newValue);
+        window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.width = parseInt(newValue);
       }
     },
     "exportHeight":
     {
       get: function()
       {
-        return plotlyOptions.toImageButtonOptions.height;
+        return window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.height;
       },
       set: function(newValue)
       {
-        plotlyOptions.toImageButtonOptions.height = parseInt(newValue);
+        window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.height = parseInt(newValue);
       }
     }
   },
   "methods": {
     "doExport": function()
     {
-      Plotly.downloadImage(document.querySelector(".row_body"), plotlyOptions.toImageButtonOptions);
+      var instance = window.MetricQWebView.instances[0];
+      Plotly.downloadImage(instance.ele, instance.plotlyOptions.toImageButtonOptions);
       veil.destroy();
       globalPopup.export = false;
     }
@@ -1103,8 +593,25 @@ Vue.component("export-popup", {
 
 var legendApp = new Vue({
   "el": "#legend_list",
-  "data": {
-    "metricsList": new Array()
+  "computed": {
+    "metricsList": {
+      cache: false,
+      "get": function () {
+        if(window["MetricQWebView"])
+        {
+          return window.MetricQWebView.instances[0].handler.allMetrics;
+        } else
+        {
+          return new Object();
+        }
+      },
+      "set": function (newValue){
+        if(window["MetricQWebView"])
+        {
+          return window.MetricQWebView.instances[0].handler.allMetrics = newValue;
+        }
+      }
+    }
   }
 });
 var popupApp = new Vue({
@@ -1112,30 +619,53 @@ var popupApp = new Vue({
   "methods": {
   },
   "computed": {
-    "metricsList": function() { return legendApp.metricsList; }
+    "metricsList": {
+      cache: false,
+      "get": function() {
+        if(window["MetricQWebView"])
+        {
+          return window.MetricQWebView.instances[0].handler.allMetrics;
+        } else
+        {
+          return new Object();
+        }
+      },
+      "set": function (newValue){
+        if(window["MetricQWebView"])
+        {
+          return window.MetricQWebView.instances[0].handler.allMetrics = newValue;
+        }
+      }
+    }
   },
+  //not called by $forceUpdate :(
   updated() {
-    var selectedIndex = -1;
-    for(var i = 0; i < legendApp.metricsList.length; ++i)
+  }
+});
+function initializeMetricPopup() {
+    var instance = window.MetricQWebView.instances[0];
+    var myMetric = undefined;
+    for(var metricBase in instance.handler.allMetrics)
     {
-      if(legendApp.metricsList[i].popup)
+      if(instance.handler.allMetrics[metricBase].popup)
       {
-        selectedIndex = i;
+        myMetric = instance.handler.allMetrics[metricBase];
         break;
       }
     }
-    if(-1 != selectedIndex) {
-      var popupEle = document.querySelector("#" + legendApp.metricsList[i].popupKey);
+    if(undefined !== myMetric) {
+      var popupEle = document.getElementById(myMetric.popupKey);
       if(popupEle)
       {
         let affectedTraces = new Array();
-        for(var i = 0, j = 0; i < legendApp.metricsList.length; ++i)
+        var j = 0;
+        for(var metricBase in instance.handler.allMetrics)
         {
-          if(legendApp.metricsList[i].traces)
+          if(instance.handler.allMetrics[metricBase].traces)
           {
-            for(var k = 0; k < legendApp.metricsList[i].traces.length; ++k)
+            for(var k = 0; k < instance.handler.allMetrics[metricBase].traces.length; ++k)
             {
-              if(selectedIndex == i)
+              if(metricBase == myMetric.name)
               {
                 affectedTraces.push(j);
               }
@@ -1143,47 +673,48 @@ var popupApp = new Vue({
             }
           }
         }
-        var disablePopupFunc = function(paramIndex) {
+        var disablePopupFunc = function(paramMyMetric, paramMyInstance, paramMyTraces) {
           return function(evt) {
-            var myMetric = legendApp.metricsList[parseInt(evt.target.getAttribute("metric-array-index"))];
-            var myTraces = JSON.parse(evt.target.getAttribute("metric-affected-traces"));
-            myMetric.popup = false
+            myMetric.popup = false;
+            popupApp.$forceUpdate();
             veil.destroy();
 
-            if("popup_trashcan" != evt.target.getAttribute("class"))
+            if("popup_trashcan" == evt.target.getAttribute("class"))
             {
-              if(myMetric.name != evt.target.getAttribute("metric-old-name"))
+              paramMyInstance.deleteMetric(paramMyMetric.name);
+              paramMyInstance.deleteTraces(paramMyTraces);
+              Vue.nextTick(function() { legendApp.$forceUpdate(); });
+            } else
+            {
+              if(paramMyMetric.name != evt.target.getAttribute("metric-old-name"))
               {
-                myMetric.updateName(myMetric.name);
-                if("" == evt.target.getAttribute("metric-old-name"))
-                {
-                  legendApp.metricsList.push(new Metric("", metricBaseToRgb(""), markerSymbols[0], new Array(), [undefined, undefined]));
-                } else {
-                  /* TODO: reject metric names that already exist */
-                }
-                reload();
+                paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute("metric-old-name"));
               } else {
-                if(evt.target.getAttribute("metric-old-color") != myMetric.color)
+                if(evt.target.getAttribute("metric-old-color") != paramMyMetric.color)
                 {
-                  if("raw" == myMetric.traces[0].name)
+                  if("raw" == paramMyMetric.traces[0].name)
                   {
-                    Plotly.restyle(document.querySelector(".row_body"), {"marker.color": myMetric.color}, myTraces);
+                    Plotly.restyle(document.querySelector(".row_body"), {"marker.color": paramMyMetric.color}, paramMyTraces);
                   } else {
-                    Plotly.restyle(document.querySelector(".row_body"), {"line.color": myMetric.color}, myTraces);
+                    Plotly.restyle(document.querySelector(".row_body"), {"line.color": paramMyMetric.color}, paramMyTraces);
+                  }
+                  let colorEle = document.getElementsByClassName(paramMyMetric.popupKey);
+                  if(colorEle && colorEle[0])
+                  {
+                    colorEle[0].style.color = paramMyMetric.color;
                   }
                 }
-                if(evt.target.getAttribute("metric-old-marker") != myMetric.marker)
+                if(evt.target.getAttribute("metric-old-marker") != paramMyMetric.marker)
                 {
-                  Plotly.restyle(document.querySelector(".row_body"), {"marker.symbol": myMetric.marker}, myTraces);
+                  Plotly.restyle(document.querySelector(".row_body"), {"marker.symbol": paramMyMetric.marker}, paramMyTraces);
                 }
                 //don't do a complete repaint
                 //renderMetrics();
               }
             }
-        } }(selectedIndex);
+        } }(myMetric, instance, affectedTraces);
         var veilEle = veil.create(disablePopupFunc);
         veil.attachPopup(popupEle);
-        popupEle.style.zIndex = 500 + selectedIndex;
         var inputEle = popupEle.querySelector(".popup_input");
         inputEle.addEventListener("keyup", function(evt) {
           if(evt.key.toLowerCase() == "enter")
@@ -1196,51 +727,39 @@ var popupApp = new Vue({
         var trashcanEle = popupEle.querySelector(".popup_trashcan");
 
         var colorchooserEle = popupEle.querySelector(".popup_colorchooser");
-        var colorchooserObj = new Colorchooser(colorchooserEle, legendApp.metricsList[selectedIndex]);
-        colorchooserObj.onchange = function(myTraces, myMetric) { return function() {
-          if(0 == myMetric.traces.length)
+        var colorchooserObj = new Colorchooser(colorchooserEle, myMetric);
+        colorchooserObj.onchange = function(myTraces, paramMyMetric) { return function() {
+          if(0 == paramMyMetric.traces.length)
           {
             return;
           }
-          if("raw" == myMetric.traces[0].name)
+          if("markers" == paramMyMetric.traces[0].mode)
           {
-            Plotly.restyle(document.querySelector(".row_body"), {"marker.color": myMetric.color}, myTraces);
+            Plotly.restyle(document.querySelector(".row_body"), {"marker.color": paramMyMetric.color}, myTraces);
           } else {
-            Plotly.restyle(document.querySelector(".row_body"), {"line.color": myMetric.color}, myTraces);
+            Plotly.restyle(document.querySelector(".row_body"), {"line.color": paramMyMetric.color}, myTraces);
           }
-        }}(affectedTraces, legendApp.metricsList[selectedIndex]);
-        popupEle.querySelector(".popup_legend_select").addEventListener("change", function(myTraces, myMetric) { return function(evt) {
-          Plotly.restyle(document.querySelector(".row_body"), {"marker.symbol": myMetric.marker}, myTraces);
-        }}(affectedTraces, legendApp.metricsList[selectedIndex]));
+        }}(affectedTraces, myMetric);
+        popupEle.querySelector(".popup_legend_select").addEventListener("change", function(myTraces, paramMyMetric) { return function(evt) {
+          Plotly.restyle(document.querySelector(".row_body"), {"marker.symbol": paramMyMetric.marker}, myTraces);
+        }}(affectedTraces, myMetric));
 
         [veilEle, inputEle, closeEle, trashcanEle].forEach(function(paramValue, paramIndex, paramArray) {
-          paramValue.setAttribute("metric-array-index", "" + selectedIndex);
-          paramValue.setAttribute("metric-old-name", legendApp.metricsList[selectedIndex].name);
-          paramValue.setAttribute("metric-old-color", legendApp.metricsList[selectedIndex].color);
-          paramValue.setAttribute("metric-old-marker", legendApp.metricsList[selectedIndex].marker);
+          paramValue.setAttribute("metric-old-name", myMetric.name);
+          paramValue.setAttribute("metric-old-color", myMetric.color);
+          paramValue.setAttribute("metric-old-marker", myMetric.marker);
           paramValue.setAttribute("metric-affected-traces", JSON.stringify(affectedTraces))
         });
 
-        trashcanEle.addEventListener("click", function(paramIndex, disableFunc){
+        trashcanEle.addEventListener("click", function(paramMetricName, disableFunc){
           return function(evt) {
             disableFunc(evt);
-            //legendApp.metricsList = legendApp.metricsList.slice(paramIndex, 1);
-            var newArray = new Array();
-            for(var i = 0; i < legendApp.metricsList.length; ++i)
-            {
-              if(i != paramIndex)
-              {
-                newArray.push(legendApp.metricsList[i]);
-              }
-            }
-            legendApp.metricsList = newArray;
-            renderMetrics();
           };
-        }(selectedIndex, disablePopupFunc));
+        }(myMetric.name, disablePopupFunc));
       }
     }
   }
-});
+
 var configApp = new Vue({
   "el": "#wrapper_popup_configuration",
   "methods": {
@@ -1256,7 +775,7 @@ var configApp = new Vue({
     var popupEle = document.querySelector(".config_popup_div");
     if(popupEle)
     {
-      var disablePopupFunc = function() { globalConfiguration.popup = false; reload(); };
+      var disablePopupFunc = function() { globalConfiguration.popup = false; window.MetricQWebView.instances[0].reload(); };
       veil.create(function(evt) { disablePopupFunc(); });
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
@@ -1273,7 +792,7 @@ var xaxisApp = new Vue({
     var popupEle = document.querySelector(".xaxis_popup_div");
     if(popupEle)
     {
-      var disablePopupFunc = function() { globalPopup.xaxis = false; reload(); };
+      var disablePopupFunc = function() { globalPopup.xaxis = false; window.MetricQWebView.instances[0].reload(); };
       veil.create(disablePopupFunc);
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
@@ -1291,7 +810,7 @@ var yaxisApp = new Vue({
     var popupEle = document.querySelector(".yaxis_popup_div");
     if(popupEle)
     {
-      var disablePopupFunc = function() { globalPopup.yaxis = false; reload(); };
+      var disablePopupFunc = function() { globalPopup.yaxis = false; window.MetricQWebView.instances[0].reload(); };
       veil.create(disablePopupFunc);
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
@@ -1310,7 +829,7 @@ var presetApp = new Vue({
     var popupEle = document.querySelector(".preset_popup_div");
     if(popupEle)
     {
-      var disablePopupFunc = function() { globalPopup.presetSelection = false; reload(); };
+      var disablePopupFunc = function() { globalPopup.presetSelection = false; window.MetricQWebView.instances[0].reload(); };
       veil.create(disablePopupFunc);
       veil.attachPopup(popupEle);
       popupEle.style.width = "100%";
@@ -1334,7 +853,7 @@ var exportApp = new Vue({
     var popupEle = document.querySelector(".export_popup_div");
     if(popupEle)
     {
-      var disablePopupFunc = function() { globalPopup.export = false; reload(); };
+      var disablePopupFunc = function() { globalPopup.export = false; window.MetricQWebView.instances[0].reload(); };
       veil.create(disablePopupFunc);
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
