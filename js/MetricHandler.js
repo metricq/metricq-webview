@@ -12,75 +12,132 @@ class MetricHandler {
     this.WIGGLEROOM_PERCENTAGE = 0.05;
 
   	this.allMetrics = new Object();
+    for(var i = 0; i < this.initialMetricNames.length; ++i)
+    {
+      var curMetricName = this.initialMetricNames[i];
+      if(0 < curMetricName.length)
+      {
+        this.allMetrics[curMetricName] = new Metric(curMetricName, metricBaseToRgb(curMetricName), markerSymbols[i * 4], new Array(), [undefined, undefined]);
+      } else
+      {
+        this.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[i * 4], new Array(), [undefined, undefined]);
+      }
+    }
   }
   doRequest(maxDataPoints) {
   	var timeMargin = (this.stopTime - this.startTime) / 3;
-  	let metricNamesArr = new Array();
-    for(var metricBase in this.allMetrics)
-    {
-      metricNamesArr.push(this.allMetrics[metricBase].name);
-    }
-  	if(0 == metricNamesArr.length)
+    var nonErrorProneMetrics = new Array();
+    var remainingMetrics = new Array();
+  	for (var metricBase in this.allMetrics)
   	{
-  	  metricNamesArr = this.initialMetricNames;
-  	}
-  	for (var i = 0; i < metricNamesArr.length; ++i)
-  	{
-  	  var metricName = metricNamesArr[i];
-	    if(0 == metricName.length)
-      {
-        if(!this.allMetrics["empty"])
-        {
-          this.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[0], new Array(), [undefined, undefined]);
-        }
-      } else
+      var curMetric = this.allMetrics[metricBase];
+	    if(0 < curMetric.name.length)
 	    {
-        var queryObj = {"range":
-          {
-                "from": new Date(this.startTime - timeMargin).toISOString(),
-                "to": new Date(this.stopTime + timeMargin).toISOString()
-          },
-          "maxDataPoints": maxDataPoints,
-          "targets":[{
-                "metric": metricName,
-                "functions":[
-                        "min",
-                        "max",
-                        "avg",
-                        "count"
-                ]}
-          ]
-        };
-        // TODO: put a validity checker for the queryObj here
-        // it should validate, that dates are well-formed
-        // it should validate, that maxDataPoints is an integer greater null
-        // TODO: use modern WebWorkers, or even better:
-        //       use fetch-API with promises, it's modern!
-        var req = new XMLHttpRequest();
-        req.open("POST", METRICQ_BACKEND, true);
-        req.onreadystatechange = function(selfReference, paramMetricName) { return function(evtObj) {
-          if(4 == evtObj.target.readyState)
-            if(200 <= evtObj.target.status
-            && 300 > evtObj.target.status)
-            {
-              var parsedObj = undefined;
-              try {
-                parsedObj = JSON.parse(evtObj.target.responseText);
-                selfReference.parseResponse(parsedObj);
-              } catch(exc)
-              {
-                console.log("Couldn't parse");
-                console.log(exc);
-              }
-            } else
-            {
-              selfReference.receivedError(evtObj.target.status, paramMetricName);
-            }
-          }
-        }(this, metricName);
-        req.send(JSON.stringify(queryObj));
+        if(curMetric.errorprone)
+        {
+          remainingMetrics.push(curMetric.name);
+        } else
+        {
+          nonErrorProneMetrics.push(curMetric.name);
+        }
       }
     }
+    var queryJSON = this.createMetricQQuery(this.startTime - timeMargin,
+                                            this.stopTime + timeMargin,
+                                            maxDataPoints,
+                                            nonErrorProneMetrics,
+                                            ["min", "max", "avg", "count"]);
+    if(queryJSON)
+    {
+      // TODO: use modern WebWorkers, or even better:
+      //       use fetch-API with promises, it's modern!
+      var req = new XMLHttpRequest();
+      req.open("POST", METRICQ_BACKEND, true);
+      req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+      req.onreadystatechange = function(selfReference, paramMetricArr) { return function(evtObj) {
+        selfReference.handleMetricResponse(selfReference, paramMetricArr, evtObj);
+      }; }(this, nonErrorProneMetrics);
+      req.send(queryJSON);
+    }
+    for(var i = 0; i < remainingMetrics.length; ++i)
+    {
+      var queryJSON = this.createMetricQQuery(this.startTime - timeMargin,
+                                              this.stopTime + timeMargin,
+                                              maxDataPoints,
+                                              [remainingMetrics[i]],
+                                              ["min", "max", "avg", "count"]);
+      if(queryJSON)
+      {
+        var req = new XMLHttpRequest();
+        req.open("POST", METRICQ_BACKEND, true);
+        req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        req.onreadystatechange = function(selfReference, paramMetricArr) { return function(evtObj) {
+          selfReference.handleMetricResponse(selfReference, paramMetricArr, evtObj);
+        }; }(this, [remainingMetrics[i]]);
+        req.send(queryJSON);
+      }
+    }
+  }
+  handleMetricResponse(selfReference, metricArr, evt)
+  {
+    if(4 == evt.target.readyState)
+    {
+      if(200 <= evt.target.status
+      && 300 > evt.target.status)
+      {
+        var parsedObj = undefined;
+        try {
+          parsedObj = JSON.parse(evt.target.responseText);
+          selfReference.parseResponse(parsedObj, metricArr);
+        } catch(exc)
+        {
+          console.log("Couldn't parse");
+          console.log(exc);
+        }
+      } else
+      {
+        selfReference.receivedError(evt.target.status, metricArr);
+      }
+    }
+  }
+  createMetricQQuery(startTime, stopTime, maxDataPoints, metricArr, metricFunctions)
+  {
+    if(startTime instanceof Date)
+    {
+      startTime = startTime.getTime();
+    }
+    if(stopTime instanceof Date)
+    {
+      stopTime = stopTime.getTime();
+    }
+    startTime = parseInt(startTime);
+    stopTime = parseInt(stopTime);
+    maxDataPoints = parseInt(maxDataPoints);
+    if(!(startTime < stopTime))
+    {
+      return undefined;
+    }
+    if(!maxDataPoints)
+    {
+      maxDataPoints = 400;
+    }
+    var queryObj = {"range":
+      {
+        "from": new Date(startTime).toISOString(),
+        "to": new Date(stopTime).toISOString()
+      },
+      "maxDataPoints": maxDataPoints,
+      "targets": new Array()
+    };
+    for(var i = 0; i < metricArr.length; ++i)
+    {
+      var targetObj = {
+        "metric": metricArr[i],
+        "functions": metricFunctions
+      };
+      queryObj.targets.push(targetObj);
+    }
+    return JSON.stringify(queryObj);
   }
   queryAllMinMax() {
     let referenceAttribute = "minmax";
@@ -121,13 +178,13 @@ class MetricHandler {
     allMinMax[1] += delta * this.WIGGLEROOM_PERCENTAGE;
     return allMinMax;
   }
-  /* TODO: move this into metric class */
-  parseResponse(parsedJson)
+  parseResponse(parsedJson, paramMetricsArr)
   {
+    //TODO: write this to handle multiple metrics
     var tracesAll = {
       "min": undefined,
       "max": undefined
-    }
+    };
     var traceRgbCss = undefined;
     var traceMarker = markerSymbols[0];
     var metricBase = undefined;
@@ -234,9 +291,8 @@ class MetricHandler {
   }
   receivedError(errorCode, metricBase)
   {
-    //TODO: Implement me,
-    // some fancy code, marking a metric as faulty,
-    //   which entails it being excluded in bulk-requests
+    // mark a metric so it is being excluded in bulk-requests
+    this.allMetrics[metricBase].errorprone = true;
   }
   reload()
   {

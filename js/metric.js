@@ -46,6 +46,7 @@ class Metric
   	this.traces = paramTraces;
     this.minmax = paramMinMax;
     this.globalMinmax = undefined;
+    this.errorprone = false;
   	this.popup = false;
   }
   filterKey(paramKey)
