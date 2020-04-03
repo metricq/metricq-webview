@@ -1,21 +1,16 @@
 
 /* TODO: bind these locally, somehow */
-var METRICQ_BACKEND = "https://grafana.metricq.zih.tu-dresden.de/metricq/query";
 var globalPopup = {
   "export": false, //not yet implemented
   "yaxis": false,
   "xaxis": false,
-  "presetSelection": false,
-  "configuration": false
+  "presetSelection": false
 };
 var globalSelectedPreset = undefined;
 for(var attrib in metricPresets) { globalSelectedPreset = metricPresets[attrib]; break; }
 var globalMetricHandle = new MetricHandler(undefined, new Array(), 0, 0);
 
 
-/* TODO: remove these */
-var globalYRangeOverride = undefined;
-var globalYRangeType = 'local';
 
 
 var veil = {
@@ -74,7 +69,6 @@ if(-1 < window.location.href.indexOf("#"))
 
 function initTest()
 {
-
   document.getElementById("button_export").addEventListener("click", function(evt) {
     globalPopup.export = ! globalPopup.export;
   });
@@ -82,87 +76,7 @@ function initTest()
     configApp.togglePopup();
   });
 }
-/* TODO: move this to MetricQWebView */
-function loadGlobalMinMaxPreemptively() {
-  const now = (new Date()).getTime();
-  const tenYears = 10 * 365 * 86400 * 1000;
-  var queryObj = {
-    "range": {
-      "from": (new Date(now - tenYears)).toISOString(),
-      "to": (new Date(now)).toISOString()
-    },
-    "maxDataPoints": 3,
-    "targets": new Array()
-  };
-  for(var i = 0; i < legendApp.metricsList.length; ++i)
-  {
-    if(0 < legendApp.metricsList[i].name.length)
-    {
-      let curTarget = {
-        "metric": legendApp.metricsList[i].name,
-        "functions": ["min", "max"]
-      };
-      queryObj.targets.push(curTarget);
-    }
-  }
-  //TODO: use fetch-API with promises
-  var req = new XMLHttpRequest();
-  req.open("POST", METRICQ_BACKEND, true);
-  req.onreadystatechange = function(evt)
-  {
-    //TODO: take into account server
-    //      response code (i.e. code 500)
-    if(4 == evt.target.readyState) {
-      var responseObj = undefined;
-      try {
-        responseObj = JSON.parse(evt.target.responseText);
-      } catch(exc)
-      {
-        console.log("Couldn't parse");
-        console.log(exc);
-      }
-      if(responseObj) {
-        for(var i = 0; i < responseObj.length; ++i)
-        {
-          var slashPos = responseObj[i].target.indexOf("/");
-          if(-1 < slashPos) {
-            var metricBase = responseObj[i].target.substring(0, slashPos);
-            var correspondingIndex = legendApp.metricsList.findIndex(function(paramValue, paramIndex, paramArr) { return paramValue.name == metricBase; });
-            if(-1 < correspondingIndex)
-            {
-              var metricObj = legendApp.metricsList[correspondingIndex];
-              var curDatapoints = responseObj[i].datapoints;
-              var curMinMax = [ curDatapoints[0][0], curDatapoints[0][0]];
-              if(metricObj.globalMinmax)
-              {
-                curMinMax = [metricObj.globalMinmax[0], metricObj.globalMinmax[1]];
-              }
-              for(var j = 1; j < curDatapoints.length; ++j)
-              {
-                if(curDatapoints[j][0] < curMinMax[0])
-                {
-                  curMinMax[0] = curDatapoints[j][0];
-                }
-                if(curDatapoints[j][0] > curMinMax[1])
-                {
-                  curMinMax[1] = curDatapoints[j][0];
-                }
-              }
-              metricObj.globalMinmax = curMinMax;
-            }
-          }
-        }
-      }
-    }
-  }
-  req.send(JSON.stringify(queryObj));
-}
 
-function metricBaseToRgb(metricBase)
-{
-  var rgbArr = hslToRgb((crc32(metricBase) >> 24 & 255) / 255.00, 1, 0.46);
-  return "rgb(" + rgbArr[0] + "," + rgbArr[1] + "," + rgbArr[2] + ")";
-}
 
 
 
@@ -363,21 +277,21 @@ Vue.component("yaxis-popup", {
       cache: false,
       get: function()
       {
-        return "manual" != globalYRangeType;
+        return "manual" != window.MetricQWebView.instances[0].yRangeType;
       },
       set: function(newValue)
       {
-        globalYRangeType = "local";
+        window.MetricQWebView.instances[0].yRangeType = "local";
       }
     },
     "yaxisRange": {
       get: function()
       {
-        return globalYRangeType;
+        return window.MetricQWebView.instances[0].yRangeType;
       },
       set: function(newValue)
       {
-        globalYRangeType = newValue;
+        window.MetricQWebView.instances[0].yRangeType = newValue;
         var ele = document.getElementById("yaxis_min");
         if(ele) {
           ele.disabled = "manual" != newValue;
@@ -386,7 +300,7 @@ Vue.component("yaxis-popup", {
         }
         if("global" == newValue)
         {
-          loadGlobalMinMaxPreemptively();
+          window.MetricQWebView.instances[0].handler.loadGlobalMinMax();
         }
         window.MetricQWebView.instances[0].setPlotRanges(false, true);
       }
@@ -394,7 +308,7 @@ Vue.component("yaxis-popup", {
     "allMin": {
       get: function()
       {
-        let arr = window.MetricQWebView.instances[0].queryAllMinMax();
+        let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
         if(arr)
         {
           return (new Number(arr[0])).toFixed(3);
@@ -402,16 +316,16 @@ Vue.component("yaxis-popup", {
       },
       set: function(newValue)
       {
-        let arr = window.MetricQWebView.instances[0].queryAllMinMax();
+        let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
         arr = [newValue, arr[1]];
-        globalYRangeOverride = arr;
+        window.MetricQWebView.instances[0].yRangeOverride = arr;
         window.MetricQWebView.instances[0].setPlotRanges(false, true);
       }
     },
     "allMax": {
       get: function()
       {
-        let arr = window.MetricQWebView.instances[0].queryAllMinMax();
+        let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
         if(arr)
         {
           return (new Number(arr[1])).toFixed(3);
@@ -419,9 +333,9 @@ Vue.component("yaxis-popup", {
       },
       set: function(newValue)
       {
-        let arr = window.MetricQWebView.instances[0].queryAllMinMax();
+        let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
         arr = [arr[0], newValue];
-        globalYRangeOverride = arr;
+        window.MetricQWebView.instances[0].yRangeOverride = arr;
         window.MetricQWebView.instances[0].setPlotRanges(false, true);
       }
     }
@@ -727,11 +641,13 @@ var configApp = new Vue({
   "methods": {
     "togglePopup": function()
     {
-      globalPopup.configuration = ! globalPopup.configuration;
+      window.MetricQWebView.instances[0].configuration.popup = !window.MetricQWebView.instances[0].configuration.popup;
+      this.$forceUpdate();
     }
   },
   "computed": {
     "config": {
+      "cache": false,
       "get": function()
       {
         if(window["MetricQWebView"])
@@ -752,7 +668,7 @@ var configApp = new Vue({
     var popupEle = document.querySelector(".config_popup_div");
     if(popupEle)
     {
-      var disablePopupFunc = function() { globalPopup.configuration = false; window.MetricQWebView.instances[0].reload(); };
+      var disablePopupFunc = function() { window.MetricQWebView.instances[0].configuration.popup = false; configApp.$forceUpdate(); window.MetricQWebView.instances[0].reload(); };
       veil.create(function(evt) { disablePopupFunc(); });
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");

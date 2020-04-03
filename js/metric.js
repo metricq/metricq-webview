@@ -28,6 +28,14 @@ var markerSymbols = ["circle", "circle-dot", "circle-open", "circle-open-dot", "
  "y-right-open", "line-ew-open", "line-ns-open", "line-ne-open", "line-nw-open"];
 
 
+function metricBaseToRgb(metricBase)
+{
+  var rgbArr = hslToRgb((crc32(metricBase) >> 24 & 255) / 255.00, 1, 0.46);
+  return "rgb(" + rgbArr[0] + "," + rgbArr[1] + "," + rgbArr[2] + ")";
+}
+
+
+
 class Metric
 {
   constructor(paramName, paramColor, paramMarker, paramTraces, paramMinMax)

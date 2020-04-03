@@ -1,3 +1,6 @@
+var METRICQ_BACKEND = "https://grafana.metricq.zih.tu-dresden.de/metricq/query";
+
+
 class MetricHandler {
   constructor(paramRenderer, paramMetricsArr, paramStartTime, paramStopTime)
   {
@@ -5,6 +8,8 @@ class MetricHandler {
   	this.initialMetricNames = paramMetricsArr;
   	this.startTime = paramStartTime;
   	this.stopTime = paramStopTime;
+
+    this.WIGGLEROOM_PERCENTAGE = 0.05;
 
   	this.allMetrics = new Object();
   }
@@ -76,6 +81,45 @@ class MetricHandler {
         req.send(JSON.stringify(queryObj));
       }
     }
+  }
+  queryAllMinMax() {
+    let referenceAttribute = "minmax";
+    if("manual" == this.renderer.yRangeType && this.renderer.yRangeOverride)
+    {
+      return this.renderer.yRangeOverride;
+    } else if("global" == this.renderer.yRangeType)
+    {
+      referenceAttribute = "globalMinmax";
+    }
+    let allMinMax = [undefined, undefined];
+    //TODO: restrict local min/max to actual visual area
+    //      as in the prototype
+    for(var metricBase in this.allMetrics)
+    {
+      let curMetric = this.allMetrics[metricBase];
+      if(curMetric[referenceAttribute])
+      {
+        if(undefined === allMinMax[0])
+        {
+         allMinMax = [curMetric[referenceAttribute][0], curMetric[referenceAttribute][1]];
+        } else
+        {
+          if(curMetric[referenceAttribute][0] < allMinMax[0])
+          {
+            allMinMax[0] = curMetric[referenceAttribute][0];
+          }
+          if(curMetric[referenceAttribute][1] > allMinMax[1])
+          {
+            allMinMax[1] = curMetric[referenceAttribute][1];
+          }
+        }
+      }
+    }
+    //add a little wiggle room, so that markers won't be cut off
+    const delta = allMinMax[1] - allMinMax[0];
+    allMinMax[0] -= delta * this.WIGGLEROOM_PERCENTAGE;
+    allMinMax[1] += delta * this.WIGGLEROOM_PERCENTAGE;
+    return allMinMax;
   }
   /* TODO: move this into metric class */
   parseResponse(parsedJson)
@@ -199,5 +243,87 @@ class MetricHandler {
   	let rowBodyEle = document.querySelector(".row_body");
     let maxDataPoints = Math.round(rowBodyEle.offsetWidth / this.renderer.configuration.resolution);
     this.doRequest(maxDataPoints);
+  }
+
+  loadGlobalMinMax()
+  {
+    const now = (new Date()).getTime();
+    const tenYears = 10 * 365 * 86400 * 1000;
+    var queryObj = {
+      "range": {
+        "from": (new Date(now - tenYears)).toISOString(),
+        "to": (new Date(now)).toISOString()
+      },
+      "maxDataPoints": 3,
+      "targets": new Array()
+    };
+    for(var metricBase in this.allMetrics)
+    {
+      if(0 < this.allMetrics[metricBase].name.length)
+      {
+        if(undefined === this.allMetrics[metricBase].globalMinmax)
+        {
+          let curTarget = {
+            "metric": this.allMetrics[metricBase].name,
+            "functions": ["min", "max"]
+          };
+          queryObj.targets.push(curTarget);
+        }
+      }
+    }
+    if(0 == queryObj.targets.length)
+    {
+      return;
+    }
+    //TODO: maybe use fetch-API with promises
+    var req = new XMLHttpRequest();
+    req.open("POST", METRICQ_BACKEND, true);
+    req.onreadystatechange = function(selfReference) { return function(evt)
+    {
+      //TODO: take into account server
+      //      response code (i.e. code 500)
+      if(4 == evt.target.readyState) {
+        var responseObj = undefined;
+        try {
+          responseObj = JSON.parse(evt.target.responseText);
+        } catch(exc)
+        {
+          console.log("Couldn't parse");
+          console.log(exc);
+        }
+        if(responseObj) {
+          for(var i = 0; i < responseObj.length; ++i)
+          {
+            var slashPos = responseObj[i].target.indexOf("/");
+            if(-1 < slashPos) {
+              var metricBase = responseObj[i].target.substring(0, slashPos);
+              var metricObj = selfReference.allMetrics[metricBase];
+              if(metricObj)
+              {
+                var curDatapoints = responseObj[i].datapoints;
+                var curMinMax = [ curDatapoints[0][0], curDatapoints[0][0]];
+                if(metricObj.globalMinmax)
+                {
+                  curMinMax = [metricObj.globalMinmax[0], metricObj.globalMinmax[1]];
+                }
+                for(var j = 1; j < curDatapoints.length; ++j)
+                {
+                  if(curDatapoints[j][0] < curMinMax[0])
+                  {
+                    curMinMax[0] = curDatapoints[j][0];
+                  }
+                  if(curDatapoints[j][0] > curMinMax[1])
+                  {
+                    curMinMax[1] = curDatapoints[j][0];
+                  }
+                }
+                metricObj.globalMinmax = curMinMax;
+              }
+            }
+          }
+        }
+      }
+    };}(this);
+    req.send(JSON.stringify(queryObj));
   }
 }

@@ -16,6 +16,12 @@ class MetricQWebView {
     this.countTraces = 0;
     this.hasPlot = false;
     this.configuration = new Configuration(2, 4)
+    /* TODO: old globals
+    var globalYRangeOverride = undefined;
+    var globalYRangeType = 'local';
+    */
+    this.yRangeOverride = undefined;
+    this.yRangeType = 'local';
 
       // accelerate zooming with scroll wheel
     this.ele.addEventListener("wheel", function (configParam) { return function (evt) {
@@ -94,7 +100,7 @@ class MetricQWebView {
 
     if(!this.hasPlot)
     {
-      let allMinMax = this.queryAllMinMax();
+      let allMinMax = this.handler.queryAllMinMax();
       this.plotlyLayout.xaxis.range = [this.handler.startTime, this.handler.stopTime];
       this.plotlyLayout.yaxis.range = allMinMax;
       Plotly.newPlot(this.ele, 
@@ -168,7 +174,7 @@ class MetricQWebView {
         oldTraces.push(i);
       }
       Plotly.deleteTraces(this.ele, oldTraces);
-      if("local" == globalYRangeType)
+      if("local" == this.yRangeType)
       {
         this.setPlotRanges(false, true);
       }
@@ -268,45 +274,6 @@ class MetricQWebView {
 	   + "#"
 	   + encodedStr;
 	}
-	queryAllMinMax() {
-	  let referenceAttribute = "minmax";
-	  if("manual" == globalYRangeType && globalYRangeOverride)
-	  {
-	    return globalYRangeOverride;
-	  } else if("global" == globalYRangeType)
-	  {
-	    referenceAttribute = "globalMinmax";
-	  }
-	  let allMinMax = [undefined, undefined];
-	  //TODO: restrict local min/max to actual visual area
-	  //      as in the prototype
-	  for(var metricBase in this.handler.allMetrics)
-	  {
-	    let curMetric = this.handler.allMetrics[metricBase];
-	    if(curMetric[referenceAttribute])
-	    {
-	      if(undefined === allMinMax[0])
-	      {
-	       allMinMax = [curMetric[referenceAttribute][0], curMetric[referenceAttribute][1]];
-	      } else
-	      {
-	        if(curMetric[referenceAttribute][0] < allMinMax[0])
-	        {
-	          allMinMax[0] = curMetric[referenceAttribute][0];
-	        }
-	        if(curMetric[referenceAttribute][1] > allMinMax[1])
-	        {
-	          allMinMax[1] = curMetric[referenceAttribute][1];
-	        }
-	      }
-	    }
-	  }
-	  //add a little wiggle room, so that markers won't be cut off
-	  const delta = allMinMax[1] - allMinMax[0];
-	  allMinMax[0] -= delta * 0.05;
-	  allMinMax[1] += delta * 0.05;
-	  return allMinMax;
-	}
 	setPlotRanges(updateXAxis, updateYAxis)
 	{
 	  if(!updateXAxis && !updateYAxis)
@@ -319,7 +286,7 @@ class MetricQWebView {
 	    relayoutObj["xaxis.range[1]"] = this.handler.stopTime;
 	  }
 	  if(updateYAxis) {
-	    let allMinMax = this.queryAllMinMax();
+	    let allMinMax = this.handler.queryAllMinMax();
 	    relayoutObj["yaxis.range[0]"] = allMinMax[0];
 	    relayoutObj["yaxis.range[1]"] = allMinMax[1];
 	  }
@@ -371,6 +338,7 @@ class MetricQWebView {
         /* TODO: reject metric names that already exist */
         this.reload();
 	}
+
 }
 
 function parseLocationHref()
