@@ -3,15 +3,15 @@
   font-size: 15pt;
 }
 .row_head {
-  height: 123px;
+  height: 150px;
 }
 .wrapper_logo {
   float: left;
-  width: 322px;
+  width: 150px;
+  margin-left: calc(50% - 75px - 6em - 2px);
 }
 .wrapper_headoptions {
   float: left;
-  width: calc(100% - 322px);
   padding-top: 5px;
 }
 .button_head {
@@ -57,15 +57,30 @@
   left: 0px;
   top: 0px;
   background-color: #ffffff;
-  border: 1px solid #000000;
+  border: 1px solid #707070;
+  box-shadow: 1px 1px 5px 5px #505050, inset -1px -1px 6px 0px #a0a0a0;
+  border-radius: 8px;
+}
+.popup_header {
+  border-bottom: 1px solid #d0d0d0;
+  background-color: #e8e8e8;
+  height: 29px;
+  text-align: left;
+  padding: 0px 0px 0px 0.5em;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  box-shadow: inset -4px -1px 4px 0px #a0a0a0;
+  user-select: none;
+}
+.popup_body {
+  padding: 4px;
 }
 .metric_popup_div {
   width: 370px;
-  height: 120px;
 }
 .config_popup_div {
   width: 500px;
-  height: 80px;
+  height: 120px;
 }
 .popup_input {
   
@@ -82,9 +97,13 @@
 }
 .popup_close_button {
   float: right;
-  padding: 2px 2px 1px 1px;
-  border-left: 1px solid #000000;
-  border-bottom: 1px solid #000000;
+  transform: translate(18px, -18px) scale(0.8);
+}
+.popup_close_button:hover {
+  transform: translate(18px, -18px) scale(1);
+}
+.popup_close_image {
+  pointer-events: none;
 }
 .button_resolution, .button_zoom_speed {
   border: none;
@@ -96,9 +115,11 @@
 .config_popup_labels {
   float: left;
   width: 230px;
+  padding: 4px 0px 0px 0px;
 }
 .config_popup_labels label {
-  line-height: 26pt;
+  line-height: 30pt;
+  user-select: none;
 }
 .config_popup_slider {
   width: 200px;
@@ -117,6 +138,9 @@
 }
 .yaxis_popup_radio {
   float: left;
+}
+.yaxis_popup_radio label {
+  user-select: none;
 }
 .yaxis_popup_minmax {
   float: left;

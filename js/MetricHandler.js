@@ -329,6 +329,7 @@ class MetricHandler {
     }
     if(0 == queryObj.targets.length)
     {
+      this.renderer.setPlotRanges(false, true);
       return;
     }
     //TODO: maybe use fetch-API with promises
@@ -377,6 +378,7 @@ class MetricHandler {
               }
             }
           }
+          selfReference.renderer.setPlotRanges(false, true);
         }
       }
     };}(this);

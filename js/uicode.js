@@ -98,26 +98,40 @@ Vue.component("metric-legend", {
   }
 });
 
+Vue.component("popup-header", {
+  "props": ["popupTitle"],
+  "template": "<div class=\"popup_header\">{{ popupTitle }}"
+            + "<div class=\"popup_close_button\">"
+            + "<img class=\"popup_close_image\" src=\"img/popup-close.png\" title=\"Schliessen\" width=\"46\" height=\"46\" />"
+            + "</div>"
+            + "</div>"
+});
 
 
 Vue.component("metric-popup", {
   "props": ["metric"],
-  "template": "<div v-bind:id=\"metric.popupKey\" class=\"popup_div metric_popup_div\"><div style=\"float: left; width: 258px;\">"
+  "template": "<div v-bind:id=\"metric.popupKey\" class=\"popup_div metric_popup_div\">"
+            + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
+            + "<div class=\"popup_body\">"
+            + "<div style=\"float: left; width: 258px;\">"
             + "<input type=\"text\" class=\"popup_input\" v-model=\"metric.name\" /><br/>"
-            + "<canvas class=\"popup_colorchooser\" width=\"260\" height=\"45\"></canvas></div>"
+            + "<canvas class=\"popup_colorchooser\" width=\"270\" height=\"45\"></canvas></div>"
             + "<div style=\"width: 90px; float: left;\">"
             + "<img src=\"img/trashcan.png\" class=\"popup_trashcan\" width=\"17\" height=\"17\">"
             + "</div>"
-            + "<div class=\"popup_close_button\">X</div>"
             + "<div class=\"popup_cleaner\"></div>"
             + "<div style=\"float: left;\">"
             + "<select class=\"popup_legend_select generic_select\" size=\"1\" v-bind:value=\"metric.marker\" v-on:change=\"changeMarker\">"
             + "<option v-for=\"symbol in markerSymbols\" v-bind:value=\"symbol\">{{ symbol }}</option>"
             + "</select>"
             + "</div>"
+            + "</div>"
             + "</div>",
   "data": function () {
-    return { "markerSymbols": markerSymbols };
+    return { 
+      "markerSymbols": markerSymbols,
+      "popupTitle": "Metrik-Eigenschaften"
+     };
   },
   "methods": {
     "changeMarker": function()
@@ -129,6 +143,8 @@ Vue.component("metric-popup", {
 Vue.component("configuration-popup", {
   "props": ["config"],
   "template": "<div class=\"popup_div config_popup_div\">"
+            + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
+            + "<div class=\"popup_body\">"
             + "<div class=\"config_popup_labels\">"
             + "<label for=\"resolution_input\">Auflösung</label><br/>"
             + "<label for=\"zoom_speed_input\">Zoom Geschwindigkeit</label></div>"
@@ -140,10 +156,16 @@ Vue.component("configuration-popup", {
             + "<input type=\"range\" class=\"config_popup_slider\" id=\"zoom_speed_input\" v-model.sync=\"uiZoomSpeed\" min=\"1\" max=\"100\" step=\"0.5\"/>"
             + "<button class=\"button_zoom_speed\" v-on:click=\"manipulateZoomSpeed(+3)\">+</button><br/>"
             + "</div>"
-            + "<div class=\"popup_close_button\">X</div>"
+            + "</div>"
             + "</div>",
+  "data": function() {
+    return {
+      "popupTitle": "Globale-Einstellungen"
+    }
+  },
   "computed": {
     "uiResolution": {
+      cache: false,
       get: function() {
         return 30 - window.MetricQWebView.instances[0].configuration.resolution;
       },
@@ -155,10 +177,10 @@ Vue.component("configuration-popup", {
     "uiZoomSpeed": {
       cache: false,
       get: function() {
-        return window.MetricQWebView.instances[0].configuration.zoomSpped;
+        return window.MetricQWebView.instances[0].configuration.zoomSpeed;
       },
       set: function(newValue) {
-        window.MetricQWebView.instances[0].configuration.zoomSpped = newValue;
+        window.MetricQWebView.instances[0].configuration.zoomSpeed = newValue;
         this.$emit("update:uiZoomSpeed", newValue);
       }
     }
@@ -169,6 +191,7 @@ Vue.component("configuration-popup", {
       let newValue = parseFloat(this.uiResolution) + increment;
       newValue = this.withinRange(document.getElementById("resolution_input"), newValue);
       this.uiResolution = newValue;
+      this.$forceUpdate();
     },
     "manipulateZoomSpeed": function(increment)
     {
@@ -195,6 +218,8 @@ Vue.component("configuration-popup", {
 
 Vue.component("xaxis-popup", {
   "template": "<div class=\"popup_div xaxis_popup_div\">"
+            + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
+            + "<div class=\"popup_body\">"
             + "<div class=\"xaxis_popup_labels\">"
             + "<label>Anfangszeit</label><br/>"
             + "<label>Endzeit</label>"
@@ -203,8 +228,13 @@ Vue.component("xaxis-popup", {
             + "<input type=\"date\" v-model=\"startDate\" v-bind:max=\"endDate\" required /><input type=\"time\" v-model=\"startTime\" required /><br/>"
             + "<input type=\"date\" v-model=\"endDate\" v-bind:min=\"startDate\" required /><input type=\"time\" v-model=\"endTime\" required />"
             + "</div>"
-            + "<div class=\"popup_close_button\">X</div>"
+            + "</div>"
             + "</div>",
+  "data": function() {
+    return {
+      "popupTitle": "Zeitachsen-Einstellungen"
+    }
+  },
   "computed": {
     "startDate": {
       get: function()
@@ -261,6 +291,8 @@ Vue.component("xaxis-popup", {
 Vue.component("yaxis-popup", {
   /* use vue-js for radio buttons */
   "template": "<div class=\"popup_div yaxis_popup_div\">"
+            + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
+            + "<div class=\"popup_body\">"
             + "<div class=\"yaxis_popup_radio\">"
             + "<input type=\"radio\" value=\"global\" name=\"yaxis\" id=\"yaxis_global\" v-model=\"yaxisRange\" /><label for=\"yaxis_global\">Globales Min/Max</label><br/>"
             + "<input type=\"radio\" value=\"local\" name=\"yaxis\" id=\"yaxis_local\" v-model=\"yaxisRange\" /><label for=\"yaxis_local\">Lokales Min/Max</label><br/>"
@@ -270,8 +302,13 @@ Vue.component("yaxis-popup", {
             + "<label for=\"yaxis_max\" class=\"yaxis_popup_label_minmax\">Max:</label><input type=\"number\" v-model=\"allMax\" id=\"yaxis_max\" :disabled.sync=\"manualDisabled\"/><br/>"
             + "</div>"
             + "</div>"
-            + "<div class=\"popup_close_button\">X</div>"
+            + "</div>"
             + "</div>",
+  "data": function() {
+    return {
+      "popupTitle": "Y-Achsen-Einstellungen"
+    }
+  },
   "computed": {
     "manualDisabled": {
       cache: false,
@@ -301,8 +338,10 @@ Vue.component("yaxis-popup", {
         if("global" == newValue)
         {
           window.MetricQWebView.instances[0].handler.loadGlobalMinMax();
+        } else
+        {
+          window.MetricQWebView.instances[0].setPlotRanges(false, true);
         }
-        window.MetricQWebView.instances[0].setPlotRanges(false, true);
       }
     },
     "allMin": {
@@ -343,7 +382,8 @@ Vue.component("yaxis-popup", {
 });
 Vue.component("preset-popup", {
   "template": "<div class=\"popup_div preset_popup_div\">"
-            + "<img src=\"img/metricq-webview-logo.png\" width=\"322\" height=\"123\" /><br/>"
+            + "<div class=\"popup_body\">"
+            + "<img src=\"img/metricq-logo.png\" width=\"150\" height=\"150\" /><br/>"
             + "<select class=\"generic_select\" id=\"preset_select\" size=\"1\" v-on:change=\"updateList\" v-on:keydown.enter=\"showMetrics\">"
             + "<option v-for=\"(presetValue, presetIndex) in metricPresets\" v-bind:value=\"presetIndex\">{{ presetIndex }}</option>"
             + "</select>"
@@ -351,6 +391,7 @@ Vue.component("preset-popup", {
             + "<ul class=\"list_preset_show\">"
             + "<li v-for=\"metricName in metricMetriclist\">{{ metricName }}</li>"
             + "</ul>"
+            + "</div>"
             + "</div>",
   "computed": {
     metricPresets()
@@ -406,6 +447,8 @@ Vue.component("preset-popup", {
 });
 Vue.component("export-popup", {
   "template": "<div class=\"popup_div export_popup_div\">"
+            + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
+            + "<div class=\"popup_body\">"
             + "<div class=\"export_popup_labels\">"
             + "<label for=\"export_width\">Breite</label><br/>"
             + "<label for=\"export_height\">Höhe</label><br/>"
@@ -418,8 +461,13 @@ Vue.component("export-popup", {
             + "</select><br/>"
             + "<button class=\"generic_button\" v-on:click=\"doExport\">Export</button>"
             + "</div>"
-            + "<div class=\"popup_close_button\">X</div>"
+            + "</div>"
             + "</div>",
+  "data": function() {
+    return {
+      "popupTitle": "Export"
+    }
+  },
   "computed": {
     fileformats() {
       return ["svg", "png", "jpeg", "webp"];

@@ -28,7 +28,7 @@ class Colorchooser {
   		//this.ctx.moveTo(i, 30);
   		//this.ctx.lineTo(i, 60);
   		//this.ctx.stroke();
-  		this.ctx.fillRect(1 + 0.5 + i, 21, 10, 18);
+  		this.ctx.fillRect(1 + 0.5 + i, 21, 2, 18);
   	}
   	var colorX = this.colorVal * 256 + 1.5;
   	var rgbArr = hslToRgb(this.colorVal, 1, 0.46);
@@ -73,8 +73,12 @@ class Colorchooser {
   }
   onclick(evt)
   {
-    var x = evt.layerX - 1 - 0.5;
+    var x = evt.layerX - 1 - 0.5 - parseInt(this.canvas.offsetLeft);
     this.colorVal = x / 256;
+    if(this.colorVal > 1)
+    {
+      this.colorVal = 1;
+    }
     this.render();
     var rgbArr = hslToRgb(this.colorVal, 1, 0.46);
     this.metric.updateColor("rgb(" + rgbArr[0] + "," + rgbArr[1] + "," + rgbArr[2] + ")");
