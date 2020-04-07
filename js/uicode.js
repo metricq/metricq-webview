@@ -83,7 +83,10 @@ function initTest()
 
 Vue.component("metric-legend", {
   "props": ["metric"],
-  "template": "<li v-on:click=\"metricPopup(metric.name)\"><span v-bind:class=\"metric.popupKey\" v-bind:style=\"{color: metric.color}\">█</span> {{ metric.name }} </li>",
+  "template": "<li v-on:click=\"metricPopup(metric.name)\">"
+            + "<span v-bind:class=\"metric.popupKey\" v-bind:style=\"{color: metric.color}\">█</span>"
+            + " {{ metric.displayName }}"
+            + "</li>",
   "methods": {
     "metricPopup": function(metricName) {
       //console.log(metricName);

@@ -311,7 +311,7 @@ class MetricQWebView {
 	{
 		if(!this.handler.allMetrics["empty"])
 		{
-			this.handler.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[0], new Array(), [undefined, undefined]);
+			this.handler.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[0], new Array());
 		}
 	}
 	deleteMetric(metricBase)
@@ -328,7 +328,7 @@ class MetricQWebView {
 		metricReference.updateName(newName);
         if("" == oldName)
         {
-            this.handler.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[0], new Array(), [undefined, undefined]);
+            this.handler.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[0], new Array());
             this.handler.allMetrics[newName] = metricReference;
         } else
         {
@@ -394,11 +394,4 @@ function initializeMetrics(metricNamesArr, timeStart, timeStop)
   newManager.postRender = function() {
     legendApp.$forceUpdate();
   };
-  /*
-  for(var i = 0; i < metricNamesArr.length; ++i)
-  {
-    //TODO: move color initialization into class Metric
-    //legendApp.metricsList.push(new Metric(metricNamesArr[i], metricBaseToRgb(metricNamesArr[i]), markerSymbols[i * 4], new Array(), [undefined, undefined]));
-  }
-  */
 }

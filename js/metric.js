@@ -38,13 +38,13 @@ function metricBaseToRgb(metricBase)
 
 class Metric
 {
-  constructor(paramName, paramColor, paramMarker, paramTraces, paramMinMax)
+  constructor(paramName, paramColor, paramMarker, paramTraces)
   {
   	this.updateName(paramName);
-  	this.color = paramColor;
   	this.marker = paramMarker;
-  	this.traces = paramTraces;
-    this.minmax = paramMinMax;
+    this.color = paramColor;
+  	this.traces = new Array();
+    this.setTraces(paramTraces);
     this.globalMinmax = undefined;
     this.errorprone = false;
   	this.popup = false;
@@ -58,6 +58,13 @@ class Metric
   	this.name = newName;
   	let computedKey = this.filterKey(newName);
   	this.popupKey = "popup_" + computedKey;
+    if("" === newName)
+    {
+      this.displayName = "Metrik hinzufügen";
+    } else
+    {
+      this.displayName = newName;
+    }
   }
   updateColor(newCssColor)
   {
@@ -85,5 +92,36 @@ class Metric
     	  paramValue.marker.symbol = newMarker;
     	}
     });
+  }
+  setTraces(newTraces)
+  {
+    this.traces = newTraces;
+    this.updateColor(this.color);
+    this.updateMarker(this.marker);
+  }
+  getMinMax(startTime, stopTime)
+  {
+    var myMinMax = undefined;
+    for(let i = 0; i < this.traces.length; ++i)
+    {
+      for(let j = 0; (j < this.traces[i].x.length && j < this.traces[i].y.length); ++j)
+      {
+        if(this.traces[i].x[j] >= startTime
+        && this.traces[i].x[j] <= stopTime)
+        {
+          if(undefined == myMinMax)
+          {
+            myMinMax = [this.traces[i].y[j], this.traces[i].y[j]];
+          } else if(myMinMax[0] > this.traces[i].y[j])
+          {
+            myMinMax[0] = this.traces[i].y[j];
+          } else if(myMinMax[1] < this.traces[i].y[j])
+          {
+            myMinMax[1] = this.traces[i].y[j];
+          }
+        }
+      }
+    }
+    return myMinMax;
   }
 }

@@ -17,10 +17,10 @@ class MetricHandler {
       var curMetricName = this.initialMetricNames[i];
       if(0 < curMetricName.length)
       {
-        this.allMetrics[curMetricName] = new Metric(curMetricName, metricBaseToRgb(curMetricName), markerSymbols[i * 4], new Array(), [undefined, undefined]);
+        this.allMetrics[curMetricName] = new Metric(curMetricName, metricBaseToRgb(curMetricName), markerSymbols[i * 4], new Array());
       } else
       {
-        this.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[i * 4], new Array(), [undefined, undefined]);
+        this.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[i * 4], new Array());
       }
     }
   }
@@ -139,35 +139,40 @@ class MetricHandler {
     }
     return JSON.stringify(queryObj);
   }
+  //TODO: rename to getAllMinMax() as this function does not do an active query!
   queryAllMinMax() {
     let referenceAttribute = "minmax";
     if("manual" == this.renderer.yRangeType && this.renderer.yRangeOverride)
     {
       return this.renderer.yRangeOverride;
-    } else if("global" == this.renderer.yRangeType)
-    {
-      referenceAttribute = "globalMinmax";
     }
     let allMinMax = [undefined, undefined];
-    //TODO: restrict local min/max to actual visual area
-    //      as in the prototype
     for(var metricBase in this.allMetrics)
     {
       let curMetric = this.allMetrics[metricBase];
-      if(curMetric[referenceAttribute])
+      let curMinMax = undefined;
+      if("global" == this.renderer.yRangeType)
+      {
+        curMinMax = curMetric.globalMinmax;
+      }
+      if("local" == this.renderer.yRangeType)
+      {
+        curMinMax = curMetric.getMinMax(this.startTime, this.stopTime);
+      }
+      if(curMinMax)
       {
         if(undefined === allMinMax[0])
         {
-         allMinMax = [curMetric[referenceAttribute][0], curMetric[referenceAttribute][1]];
+         allMinMax = curMinMax;
         } else
         {
-          if(curMetric[referenceAttribute][0] < allMinMax[0])
+          if(curMinMax[0] < allMinMax[0])
           {
-            allMinMax[0] = curMetric[referenceAttribute][0];
+            allMinMax[0] = curMinMax[0];
           }
-          if(curMetric[referenceAttribute][1] > allMinMax[1])
+          if(curMinMax[1] > allMinMax[1])
           {
-            allMinMax[1] = curMetric[referenceAttribute][1];
+            allMinMax[1] = curMinMax[1];
           }
         }
       }
@@ -178,18 +183,84 @@ class MetricHandler {
     allMinMax[1] += delta * this.WIGGLEROOM_PERCENTAGE;
     return allMinMax;
   }
+  parseTrace(metricBase, metricAggregate, datapointsArr) {
+    var curTrace = {
+      "x": new Array(),
+      "y": new Array(),
+      "name": metricAggregate,
+      "type": "scatter"
+    }
+    switch(metricAggregate)
+    {
+      case "min": 
+      case "max": /* fall-through */
+      case "avg": /* fall-through */
+      case "raw": /* fall-through */
+        for(var j = 0; j < datapointsArr.length; ++j)
+        {
+          curTrace.x.push(datapointsArr[j][1]);
+          curTrace.y.push(datapointsArr[j][0]);
+        }
+        return curTrace;
+    }
+    return undefined;
+  }
+  processTracesArr(tracesAll)
+  {
+    // parse multiple metrics/traces
+    let i = 0;
+    for(var curMetric in tracesAll)
+    {
+      var curTraces = tracesAll[curMetric];
+      if(curTraces["min"] && curTraces["max"])
+      {
+        var storeTraces = [ curTraces["min"], curTraces["max"]];
+        storeTraces[1].fill = "tonexty";
+        if(curTraces["avg"])
+        {
+          storeTraces.push(curTraces["avg"]);
+        }
+        storeTraces.forEach( function (paramValue, paramIndex, paramArray) {
+          paramValue.mode = "lines";
+          paramValue.line = {
+          "width": 0,
+          "color": undefined,
+          "shape": "vh" }; // connect "next"
+          //"shape": "hv" // connect "last"
+          //"shape": "linear" // connect "direct"
+        });
+        if(curTraces["avg"])
+        {
+          storeTraces[2].line.dash = "dash";
+          storeTraces[2].line.width = 2;
+        }
+        //add traces to metricList, create an object of metric class in before
+        this.loadedMetric(curMetric, storeTraces, i);
+      } else if(curTraces["raw"])
+      {
+        var rawTrace = [curTraces["raw"]];
+        rawTrace[0].mode = "markers";
+        rawTrace[0].marker = {
+          "size": 10,
+          "color": undefined,
+          "symbol": undefined
+        }
+        this.loadedMetric(curMetric, rawTrace, i);
+      }
+      ++i;
+    }
+    if(0 < i)
+    {
+      this.renderer.renderMetrics();
+    }
+  }
   parseResponse(parsedJson, paramMetricsArr)
   {
-    //TODO: write this to handle multiple metrics
-    var tracesAll = {
-      "min": undefined,
-      "max": undefined
-    };
-    var traceRgbCss = undefined;
-    var traceMarker = markerSymbols[0];
+    //TODO: track metrics thate were requested but got no response,
+    //        mark these as errorpone=true
+    var tracesAll = new Object();
     var metricBase = undefined;
     var metricAggregate = undefined;
-    var minmaxValue = [ undefined, undefined];
     for(var i = 0; i < parsedJson.length; ++i)
     {
       if(-1 < parsedJson[i].target.indexOf("/")
@@ -199,94 +270,28 @@ class MetricHandler {
         metricBase = parsedJson[i].target.substring(0, parsedJson[i].target.indexOf("/"));
         metricAggregate = parsedJson[i].target.substring(parsedJson[i].target.indexOf("/") + 1);
 
-        if(undefined === traceRgbCss)
+        let parsedTrace = this.parseTrace(metricBase, metricAggregate, parsedJson[i].datapoints);
+        if(parsedTrace)
         {
-          if(this.allMetrics[metricBase])
+          if(!tracesAll[metricBase])
           {
-          	traceRgbCss = this.allMetrics[metricBase].color;
-            traceMarker = this.allMetrics[metricBase].marker;
-          } else
-          {
-            traceRgbCss = metricBaseToRgb(metricBase);
+            tracesAll[metricBase] = new Object();
           }
-        }
-
-        var curTrace = {
-          "x": new Array(),
-          "y": new Array(),
-          "name": metricAggregate,
-          "type": "scatter"
-        }
-        switch(metricAggregate)
-        {
-          case "min": 
-          case "max": /* fall-through */
-          case "avg": /* fall-through */
-          case "raw": /* fall-through */
-            if(undefined === minmaxValue[0])
-            {
-              minmaxValue[0] =  minmaxValue[1] = parsedJson[i].datapoints[0][0];
-            }
-            for(var j = 0, curY; j < parsedJson[i].datapoints.length; ++j)
-            {
-              curTrace.x.push(parsedJson[i].datapoints[j][1]);
-              curY = parsedJson[i].datapoints[j][0];
-              curTrace.y.push(curY);
-              if(curY > minmaxValue[1]) minmaxValue[1] = curY;
-              if(curY < minmaxValue[0]) minmaxValue[0] = curY;
-            }
-            tracesAll[metricAggregate] = curTrace;
-            break;
+          tracesAll[metricBase][metricAggregate] = parsedTrace;
         }
       }
     }
-    if(tracesAll["min"] && tracesAll["max"])
-    {
-      var traces = [ tracesAll["min"], tracesAll["max"]];
-      traces[1].fill = "tonexty";
-      if(tracesAll["avg"])
-      {
-        traces.push(tracesAll["avg"]);
-      }
-      traces.forEach( function (paramValue, paramIndex, paramArray) {
-        paramValue.mode = "lines";
-        paramValue.line = {
-        "width": 0,
-        "color": traceRgbCss,
-        "shape": "vh" }; // connect "next"
-        //"shape": "hv" // connect "last"
-        //"shape": "linear" // connect "direct"
-      });
-      if(tracesAll["avg"])
-      {
-        traces[2].line.dash = "dash";
-        traces[2].line.width = 2;
-      }
-      //add traces to metricList, create an object of metric class in before
-      this.loadedMetric(metricBase, traceRgbCss, traceMarker, traces, minmaxValue);
-      this.renderer.renderMetrics();
-    } else if(tracesAll["raw"])
-    {
-      var rawTrace = [tracesAll["raw"]]
-      rawTrace[0].mode = "markers";
-      rawTrace[0].marker = {
-        "size": 10,
-        "color": traceRgbCss,
-        "symbol": traceMarker
-      }
-      this.loadedMetric(metricBase, traceRgbCss, traceMarker, rawTrace, minmaxValue);
-      this.renderer.renderMetrics();
-    }
+    this.processTracesArr(tracesAll);
   }
-  loadedMetric(metricBase, metricColor, metricMarker, metricTraces, minmaxValue)
+  loadedMetric(metricBase, metricTraces, metricIndex)
   {
-    if(this.allMetrics[metricBase])
+    let myMetric = this.allMetrics[metricBase];
+    if(!myMetric)
     {
-      this.allMetrics[metricBase].traces = metricTraces;
-      this.allMetrics[metricBase].minmax = minmaxValue;
-    } else
+      this.allMetrics[metricBase] = new Metric(metricBase, metricBaseToRgb(metricBase), markerSymbols[metricIndex * 4], metricTraces);
+    } else 
     {
-      this.allMetrics[metricBase] = new Metric(metricBase, metricColor, metricMarker, metricTraces, minmaxValue);
+      myMetric.setTraces(metricTraces);
     }
   }
   receivedError(errorCode, metricBase)
