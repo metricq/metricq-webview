@@ -137,7 +137,10 @@ Vue.component("metric-popup", {
             + "</div>"
             + "<div class=\"modal-footer\">"
             + "<button class=\"btn btn-danger\">"
-            + "<img src=\"img/icons/trash.svg\" class=\"popup_trashcan\" width=\"32\" height=\"32\">"
+            + "<img src=\"img/icons/trash.svg\" class=\"popup_trashcan\" width=\"26\" height=\"26\" />"
+            + "</button>"
+            + "<button class=\"btn btn-primary popup_ok\">"
+            + "OK"
             + "</button>"
             + "</div>"
             + "</div>"
@@ -171,6 +174,11 @@ Vue.component("configuration-popup", {
             + "<div class=\"input-group\">"
             + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"zoom_speed_input\">Zoom Geschwindigkeit</label></div></div>"
             + "<input type=\"range\" class=\"config_popup_slider form-control\" id=\"zoom_speed_input\" v-model.sync=\"uiZoomSpeed\" min=\"1\" max=\"100\" step=\"0.5\"/>"
+            + "</div>"
+            + "<div class=\"modal-footer\">"
+            + "<button class=\"btn btn-primary popup_ok\">"
+            + "OK"
+            + "</button>"
             + "</div>"
             + "</div>"
             + "</div>"
@@ -247,6 +255,11 @@ Vue.component("xaxis-popup", {
             + "<div class=\"input-group\">"
             + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"end_date_time\">Endzeit</label></div></div>"
             + "<input type=\"date\" v-model=\"endDate\" v-bind:min=\"startDate\" required /><input type=\"time\" id=\"end_date_time\" v-model=\"endTime\" required />"
+            + "</div>"
+            + "<div class=\"modal-footer\">"
+            + "<button class=\"btn btn-primary popup_ok\">"
+            + "OK"
+            + "</button>"
             + "</div>"
             + "</div>"
             + "</div>"
@@ -337,6 +350,11 @@ Vue.component("yaxis-popup", {
             + "<div class=\"input-group\">"
             + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"yaxis_ax\" class=\"yaxis_popup_label_minmax\">Max:</label></div></div>"
             + "<input type=\"number\" v-model=\"allMax\" id=\"yaxis_max\" :disabled.sync=\"manualDisabled\"/>"
+            + "</div>"
+            + "<div class=\"modal-footer\">"
+            + "<button class=\"btn btn-primary popup_ok\">"
+            + "OK"
+            + "</button>"
             + "</div>"
             + "</div>"
             + "</div>"
@@ -445,7 +463,7 @@ Vue.component("preset-popup", {
             + "</select>"
             + "</div>"
             + "<ul class=\"list-group list_preset_show\">"
-            + "<li v-for=\"metricName in metricMetriclist\" class=\"list-group-item\">"
+            + "<li v-for=\"metricName in metricMetriclist\" v-if=\"0 < metricName.length\" class=\"list-group-item\">"
             + "<img class=\"list_arrow_icon\" src=\"img/icons/arrow-return-right.svg\" width=\"32\" height=\"32\" />"
             + "{{ metricName }}</li>"
             + "</ul>"
@@ -506,6 +524,7 @@ Vue.component("preset-popup", {
         metricNamesArr.push("");
       }
       initializeMetrics(metricNamesArr, (new Date()).getTime() - 3600 * 1000 * 2, (new Date()).getTime());
+      legendApp.$forceUpdate();
     }
   }
 });
@@ -529,9 +548,11 @@ Vue.component("export-popup", {
             + "<option v-for=\"fileformatName in fileformats\" v-bind:value=\"fileformatName\">{{ fileformatName }}</option>"
             + "</select>"
             + "</div>"
+            + "<div class=\"modal-footer\">"
             + "<button class=\"btn btn-primary\" v-on:click=\"doExport\">"
             + "<img src=\"img/icons/image.svg\" width=\"28\" height=\"28\" />"
             + " Export</button>"
+            + "</div>"
             + "</div>"
             + "</div>"
             + "</div>"
@@ -719,7 +740,6 @@ function initializeMetricPopup() {
         var veilEle = veil.create(disablePopupFunc);
         veil.attachPopup(popupEle);
         var closeEle = popupEle.querySelector(".popup_close_button");
-        closeEle.addEventListener("click", disablePopupFunc);
         var modalEle = document.querySelector(".modal");
         modalEle.addEventListener("click", function (evt) { if("dialog" == evt.target.getAttribute("role")) { veil.destroy(); disablePopupFunc(evt); } });
         var inputEle = popupEle.querySelector(".popup_input");
@@ -749,19 +769,22 @@ function initializeMetricPopup() {
         popupEle.querySelector(".popup_legend_select").addEventListener("change", function(myTraces, paramMyMetric) { return function(evt) {
           Plotly.restyle(document.querySelector(".row_body"), {"marker.symbol": paramMyMetric.marker}, myTraces);
         }}(affectedTraces, myMetric));
+        var okEle = document.querySelector(".popup_ok");
 
-        [veilEle, inputEle, closeEle, trashcanEle].forEach(function(paramValue, paramIndex, paramArray) {
+        [veilEle, inputEle, closeEle, trashcanEle, okEle].forEach(function(paramValue, paramIndex, paramArray) {
           paramValue.setAttribute("metric-old-name", myMetric.name);
           paramValue.setAttribute("metric-old-color", myMetric.color);
           paramValue.setAttribute("metric-old-marker", myMetric.marker);
           paramValue.setAttribute("metric-affected-traces", JSON.stringify(affectedTraces))
         });
 
-        trashcanEle.addEventListener("click", function(paramMetricName, disableFunc){
-          return function(evt) {
-            disableFunc(evt);
-          };
-        }(myMetric.name, disablePopupFunc));
+        [okEle, closeEle, trashcanEle].forEach(function(paramValue, paramIndex, paramArray) {
+          paramValue.addEventListener("click", function(paramMetricName, disableFunc){
+            return function(evt) {
+              disableFunc(evt);
+            }
+          }(myMetric.name, disablePopupFunc));
+        });
       }
     }
   }
@@ -802,7 +825,8 @@ var configApp = new Vue({
       veil.create(function(evt) { disablePopupFunc(); });
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
-      closeButtonEle.addEventListener("click", function () { veil.destroy(); disablePopupFunc(); });
+      var okEle = popupEle.querySelector(".popup_ok");
+      [closeButtonEle, okEle].forEach(function (paramValue, paramIndex, paramArr) { paramValue.addEventListener("click", function () { veil.destroy(); disablePopupFunc(); })});
       var modalEle = document.querySelector(".modal");
       modalEle.addEventListener("click", function (evt) { if("dialog" == evt.target.getAttribute("role")) { veil.destroy(); disablePopupFunc(); } });
     }
@@ -821,7 +845,8 @@ var xaxisApp = new Vue({
       veil.create(disablePopupFunc);
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
-      closeButtonEle.addEventListener("click", function() { veil.destroy(); disablePopupFunc(); });
+      var okEle = popupEle.querySelector(".popup_ok");
+      [closeButtonEle, okEle].forEach(function (paramValue, paramIndex, paramArr) { paramValue.addEventListener("click", function () { veil.destroy(); disablePopupFunc(); })});
       var modalEle = document.querySelector(".modal");
       modalEle.addEventListener("click", function (evt) { if("dialog" == evt.target.getAttribute("role")) { veil.destroy(); disablePopupFunc(); } });
     }
@@ -841,7 +866,8 @@ var yaxisApp = new Vue({
       veil.create(disablePopupFunc);
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
-      closeButtonEle.addEventListener("click", function() { veil.destroy(); disablePopupFunc(); });
+      var okEle = popupEle.querySelector(".popup_ok");
+      [closeButtonEle, okEle].forEach(function (paramValue, paramIndex, paramArr) { paramValue.addEventListener("click", function () { veil.destroy(); disablePopupFunc(); })});
       var modalEle = document.querySelector(".modal");
       modalEle.addEventListener("click", function (evt) { if("dialog" == evt.target.getAttribute("role")) { veil.destroy(); disablePopupFunc(); } });
     }
