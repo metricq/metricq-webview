@@ -99,18 +99,6 @@
   transform: translate(0, -8px);
   background-color: transparent;
 }
-.config_popup_labels {
-  float: left;
-  width: 230px;
-  padding: 4px 0px 0px 0px;
-}
-.config_popup_labels label {
-  line-height: 30pt;
-  user-select: none;
-}
-.config_popup_slider {
-  width: 200px;
-}
 .xaxis_popup_div {
 /*  width: 340px; */
 }
@@ -195,4 +183,21 @@
 .list_arrow_icon {
   margin: 0px 5px 0px 0px;
   transform: translate(-3px, -3px);
+}
+.export_popup_label {
+  width: 6em;
+  user-select: none;
+}
+.config_popup_label {
+  width: 11em;
+  user-select: none;
+}
+.metric_popup_label {
+  width: 4em;
+}
+.xaxis_popup_label {
+  width: 5.5em;
+}
+.xaxis_date_field {
+  width: 10em;
 }
