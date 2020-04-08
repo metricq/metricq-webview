@@ -85,6 +85,7 @@ Vue.component("metric-legend", {
   "template": "<li class=\"btn btn-info legend_item\" v-on:click=\"metricPopup(metric.name)\">"
             + "<div v-bind:class=\"metric.popupKey\" v-bind:style=\"{ backgroundColor: metric.color}\">&nbsp;</div>"
             + " {{ metric.displayName }}"
+            + "<img src=\"img/icons/pencil.svg\" width=\"28\" height=\"28\" />"
             + "</li>",
   "methods": {
     "metricPopup": function(metricName) {
@@ -105,7 +106,7 @@ Vue.component("popup-header", {
   "template": "<div class=\"modal-header\">" 
             + "<h5 class=\"modal-title\">{{ popupTitle }}</h5>"
             + "<button type=\"button\" class=\"close popup_close_button\" data-dismiss=\"modal\" aria-label=\"Close\">"
-            + "<span aria-hidden=\"true\">&times;</span>"
+            + "<span aria-hidden=\"true\" class=\"close_button_symbol\">&times;</span>"
             + "</button>"
             + "</div>"
 });
@@ -132,7 +133,11 @@ Vue.component("metric-popup", {
             + "<option v-for=\"symbol in markerSymbols\" v-bind:value=\"symbol\">{{ symbol }}</option>"
             + "</select>"
             + "</div>"
-
+            + "<div class=\"modal-footer\">"
+            + "<button class=\"btn btn-danger\">"
+            + "<img src=\"img/icons/trash.svg\" class=\"popup_trashcan\" width=\"32\" height=\"32\">"
+            + "</button>"
+            + "</div>"
             + "</div>"
             + "</div>"
             + "</div>"

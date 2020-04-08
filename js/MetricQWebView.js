@@ -206,7 +206,7 @@ class MetricQWebView {
     {
       gears[i] = document.createElement("img");
       var img = new Image();
-      img.src = "img/gear.png";
+      img.src = "img/icons/gear.svg";
       gears[i].src = img.src;
       gears[i].setAttribute("class", "gear_axis");
       gears[i] = BODY.appendChild(gears[i]);
