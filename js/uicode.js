@@ -366,7 +366,6 @@ Vue.component("yaxis-popup", {
       },
       set: function(newValue)
       {
-        window.MetricQWebView.instances[0].yRangeType = newValue;
         var ele = document.getElementById("yaxis_min");
         if(ele) {
           ele.disabled = "manual" != newValue;
@@ -375,14 +374,23 @@ Vue.component("yaxis-popup", {
         }
         if("global" == newValue)
         {
+          window.MetricQWebView.instances[0].yRangeType = newValue;
           window.MetricQWebView.instances[0].handler.loadGlobalMinMax();
         } else
         {
+          if("manual" == newValue)
+          {
+            let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
+            window.MetricQWebView.instances[0].yRangeOverride = arr;
+            this.$forceUpdate();
+          }
+          window.MetricQWebView.instances[0].yRangeType = newValue;
           window.MetricQWebView.instances[0].setPlotRanges(false, true);
         }
       }
     },
     "allMin": {
+      cache: false,
       get: function()
       {
         let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
@@ -400,6 +408,7 @@ Vue.component("yaxis-popup", {
       }
     },
     "allMax": {
+      cache: false,
       get: function()
       {
         let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
@@ -434,7 +443,9 @@ Vue.component("preset-popup", {
             + "</select>"
             + "</div>"
             + "<ul class=\"list-group list_preset_show\">"
-            + "<li v-for=\"metricName in metricMetriclist\" class=\"list-group-item\">{{ metricName }}</li>"
+            + "<li v-for=\"metricName in metricMetriclist\" class=\"list-group-item\">"
+            + "<img class=\"list_arrow_icon\" src=\"img/icons/arrow-return-right.svg\" width=\"32\" height=\"32\" />"
+            + "{{ metricName }}</li>"
             + "</ul>"
             + "</div>"
             + "</div>"
@@ -670,7 +681,13 @@ function initializeMetricPopup() {
             {
               if(paramMyMetric.name != evt.target.getAttribute("metric-old-name"))
               {
-                paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute("metric-old-name"));
+                if("" == paramMyMetric.name && !evt.target.getAttribute("metric-old-name"))
+                {
+                  //do nothing
+                } else
+                {
+                  paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute("metric-old-name"));
+                }
               } else {
                 if(evt.target.getAttribute("metric-old-color") != paramMyMetric.color)
                 {

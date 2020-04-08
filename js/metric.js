@@ -60,7 +60,7 @@ class Metric
   	this.popupKey = "popup_" + computedKey;
     if("" === newName)
     {
-      this.displayName = "Metrik hinzufügen";
+      this.displayName = "+";
     } else
     {
       this.displayName = newName;

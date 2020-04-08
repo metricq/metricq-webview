@@ -301,7 +301,10 @@ class MetricHandler {
   receivedError(errorCode, metricBase)
   {
     // mark a metric so it is being excluded in bulk-requests
-    this.allMetrics[metricBase].errorprone = true;
+    if(this.allMetrics[metricBase])
+    {
+      this.allMetrics[metricBase].errorprone = true;
+    }
   }
   reload()
   {

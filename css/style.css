@@ -167,13 +167,7 @@
   box-shadow: 2px 2px 3px 0px #a0a0a0;
 }
 .list_preset_show {
-  list-style-type: none;
-  margin: 0px auto 0px auto;
   text-align: left;
-  width: 450px;
-}
-.list_preset_show li:before {
-  content: '↳';
 }
 .export_resolution {
   width: 80px;
@@ -196,4 +190,8 @@
 
 .close_button_symbol {
   font-size: 36pt;
+}
+.list_arrow_icon {
+  margin: 0px 5px 0px 0px;
+  transform: translate(-3px, -3px);
 }
