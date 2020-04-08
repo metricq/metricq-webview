@@ -11,10 +11,14 @@ class MetricHandler {
 
     this.WIGGLEROOM_PERCENTAGE = 0.05;
 
-  	this.allMetrics = new Object();
-    for(var i = 0; i < this.initialMetricNames.length; ++i)
+    this.initializeMetrics(paramMetricsArr)
+  }
+  initializeMetrics(initialMetricNames)
+  {
+    this.allMetrics = new Object();
+    for(var i = 0; i < initialMetricNames.length; ++i)
     {
-      var curMetricName = this.initialMetricNames[i];
+      var curMetricName = initialMetricNames[i];
       if(0 < curMetricName.length)
       {
         this.allMetrics[curMetricName] = new Metric(curMetricName, metricBaseToRgb(curMetricName), markerSymbols[i * 4], new Array());

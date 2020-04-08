@@ -1,14 +1,13 @@
 
-/* TODO: bind these locally, somehow */
 var globalPopup = {
-  "export": false, //not yet implemented
+  "export": false,
   "yaxis": false,
   "xaxis": false,
   "presetSelection": false
 };
 var globalSelectedPreset = undefined;
 for(var attrib in metricPresets) { globalSelectedPreset = metricPresets[attrib]; break; }
-var globalMetricHandle = new MetricHandler(undefined, new Array(), 0, 0);
+new MetricQWebView(document.querySelector(".row_body"), new Array(), (new Date()).getTime() - 7200 * 1000, (new Date()).getTime());
 
 
 
@@ -83,8 +82,8 @@ function initTest()
 
 Vue.component("metric-legend", {
   "props": ["metric"],
-  "template": "<li v-on:click=\"metricPopup(metric.name)\">"
-            + "<span v-bind:class=\"metric.popupKey\" v-bind:style=\"{color: metric.color}\">█</span>"
+  "template": "<li class=\"btn btn-info legend_item\" v-on:click=\"metricPopup(metric.name)\">"
+            + "<div v-bind:class=\"metric.popupKey\" v-bind:style=\"{ backgroundColor: metric.color}\">&nbsp;</div>"
             + " {{ metric.displayName }}"
             + "</li>",
   "methods": {
@@ -103,30 +102,38 @@ Vue.component("metric-legend", {
 
 Vue.component("popup-header", {
   "props": ["popupTitle"],
-  "template": "<div class=\"popup_header\">{{ popupTitle }}"
-            + "<div class=\"popup_close_button\">"
-            + "<img class=\"popup_close_image\" src=\"img/popup-close.png\" title=\"Schliessen\" width=\"46\" height=\"46\" />"
-            + "</div>"
+  "template": "<div class=\"modal-header\">" 
+            + "<h5 class=\"modal-title\">{{ popupTitle }}</h5>"
+            + "<button type=\"button\" class=\"close popup_close_button\" data-dismiss=\"modal\" aria-label=\"Close\">"
+            + "<span aria-hidden=\"true\">&times;</span>"
+            + "</button>"
             + "</div>"
 });
 
 
 Vue.component("metric-popup", {
   "props": ["metric"],
-  "template": "<div v-bind:id=\"metric.popupKey\" class=\"popup_div metric_popup_div\">"
+  "template": "<div v-bind:id=\"metric.popupKey\" class=\"modal popup_div metric_popup_div\" tabindex=\"-1\" role=\"dialog\">"
+            + "<div class=\"modal-dialog\" role=\"document\">"
+            + "<div class=\"modal-content\">"
             + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
-            + "<div class=\"popup_body\">"
-            + "<div style=\"float: left; width: 258px;\">"
-            + "<input type=\"text\" class=\"popup_input\" v-model=\"metric.name\" /><br/>"
-            + "<canvas class=\"popup_colorchooser\" width=\"270\" height=\"45\"></canvas></div>"
-            + "<div style=\"width: 90px; float: left;\">"
-            + "<img src=\"img/trashcan.png\" class=\"popup_trashcan\" width=\"17\" height=\"17\">"
+            + "<div class=\"modal-body\">"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"input_metric_name\">Name</label></div></div>"
+            + "<input type=\"text\" id=\"input_metric_name\" class=\"popup_input\" v-model=\"metric.name\" />"
             + "</div>"
-            + "<div class=\"popup_cleaner\"></div>"
-            + "<div style=\"float: left;\">"
-            + "<select class=\"popup_legend_select generic_select\" size=\"1\" v-bind:value=\"metric.marker\" v-on:change=\"changeMarker\">"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label>Farbe:</label></div></div>"
+            + "<canvas class=\"popup_colorchooser\" width=\"270\" height=\"45\"></canvas>"
+            + "</div>"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"select_marker\">Symbol:</label></div></div>"
+            + "<select id=\"select_marker\" class=\"popup_legend_select form-control\" size=\"1\" v-bind:value=\"metric.marker\" v-on:change=\"changeMarker\">"
             + "<option v-for=\"symbol in markerSymbols\" v-bind:value=\"symbol\">{{ symbol }}</option>"
             + "</select>"
+            + "</div>"
+
+            + "</div>"
             + "</div>"
             + "</div>"
             + "</div>",
@@ -145,19 +152,20 @@ Vue.component("metric-popup", {
 });
 Vue.component("configuration-popup", {
   "props": ["config"],
-  "template": "<div class=\"popup_div config_popup_div\">"
+  "template": "<div class=\"modal popup_div config_popup_div\" tabindex=\"-1\" role=\"dialog\">"
+            + "<div class=\"modal-dialog\" role=\"document\">"
+            + "<div class=\"modal-content\">"
             + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
-            + "<div class=\"popup_body\">"
-            + "<div class=\"config_popup_labels\">"
-            + "<label for=\"resolution_input\">Auflösung</label><br/>"
-            + "<label for=\"zoom_speed_input\">Zoom Geschwindigkeit</label></div>"
-            + "<div style=\"float: left;\">"
-            + "<button class=\"button_resolution\" v-on:click=\"manipulateResolution(-1)\">-</button>"
-            + "<input type=\"range\" class=\"config_popup_slider\" id=\"resolution_input\" v-model=\"uiResolution\" min=\"0\" max=\"29\" step=\"0.25\"/>"
-            + "<button class=\"button_resolution\" v-on:click=\"manipulateResolution(+1)\">+</button><br/>"
-            + "<button class=\"button_zoom_speed\" v-on:click=\"manipulateZoomSpeed(-3)\">-</button>"
-            + "<input type=\"range\" class=\"config_popup_slider\" id=\"zoom_speed_input\" v-model.sync=\"uiZoomSpeed\" min=\"1\" max=\"100\" step=\"0.5\"/>"
-            + "<button class=\"button_zoom_speed\" v-on:click=\"manipulateZoomSpeed(+3)\">+</button><br/>"
+            + "<div class=\"modal-body\">"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"resolution_input\">Auflösung</label></div></div>"
+            + "<input type=\"range\" class=\"config_popup_slider form-control\" id=\"resolution_input\" v-model=\"uiResolution\" min=\"0\" max=\"29\" step=\"0.25\"/>"
+            + "</div>"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"zoom_speed_input\">Zoom Geschwindigkeit</label></div></div>"
+            + "<input type=\"range\" class=\"config_popup_slider form-control\" id=\"zoom_speed_input\" v-model.sync=\"uiZoomSpeed\" min=\"1\" max=\"100\" step=\"0.5\"/>"
+            + "</div>"
+            + "</div>"
             + "</div>"
             + "</div>"
             + "</div>",
@@ -220,16 +228,20 @@ Vue.component("configuration-popup", {
 });
 
 Vue.component("xaxis-popup", {
-  "template": "<div class=\"popup_div xaxis_popup_div\">"
+  "template": "<div class=\"modal popup_div xaxis_popup_div\" tabindex=\"-1\" role=\"dialog\">"
+            + "<div class=\"modal-dialog\" role=\"document\">"
+            + "<div class=\"modal-content\">"
             + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
-            + "<div class=\"popup_body\">"
-            + "<div class=\"xaxis_popup_labels\">"
-            + "<label>Anfangszeit</label><br/>"
-            + "<label>Endzeit</label>"
+            + "<div class=\"modal-body\">"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"start_date_time\">Anfangszeit</label></div></div>"
+            + "<input type=\"date\" v-model=\"startDate\" v-bind:max=\"endDate\" required /><input type=\"time\" v-model=\"startTime\" id=\"start_date_time\" required /><br/>"
             + "</div>"
-            + "<div class=\"xaxis_popup_time\">"
-            + "<input type=\"date\" v-model=\"startDate\" v-bind:max=\"endDate\" required /><input type=\"time\" v-model=\"startTime\" required /><br/>"
-            + "<input type=\"date\" v-model=\"endDate\" v-bind:min=\"startDate\" required /><input type=\"time\" v-model=\"endTime\" required />"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"end_date_time\">Endzeit</label></div></div>"
+            + "<input type=\"date\" v-model=\"endDate\" v-bind:min=\"startDate\" required /><input type=\"time\" id=\"end_date_time\" v-model=\"endTime\" required />"
+            + "</div>"
+            + "</div>"
             + "</div>"
             + "</div>"
             + "</div>",
@@ -293,16 +305,34 @@ Vue.component("xaxis-popup", {
 });
 Vue.component("yaxis-popup", {
   /* use vue-js for radio buttons */
-  "template": "<div class=\"popup_div yaxis_popup_div\">"
+  "template": "<div class=\"modal popup_div yaxis_popup_div\" tabindex=\"-1\" role=\"dialog\">"
+            + "<div class=\"modal-dialog\" role=\"document\">"
+            + "<div class=\"modal-content\">"
             + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
-            + "<div class=\"popup_body\">"
-            + "<div class=\"yaxis_popup_radio\">"
-            + "<input type=\"radio\" value=\"global\" name=\"yaxis\" id=\"yaxis_global\" v-model=\"yaxisRange\" /><label for=\"yaxis_global\">Globales Min/Max</label><br/>"
-            + "<input type=\"radio\" value=\"local\" name=\"yaxis\" id=\"yaxis_local\" v-model=\"yaxisRange\" /><label for=\"yaxis_local\">Lokales Min/Max</label><br/>"
-            + "<input type=\"radio\" value=\"manual\" name=\"yaxis\" id=\"yaxis_manual\" v-model=\"yaxisRange\" /><label for=\"yaxis_manual\">Manuelles Min/Max</label><br/>"
+            + "<div class=\"modal-body\">"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><input type=\"radio\" value=\"global\" name=\"yaxis\" id=\"yaxis_global\" v-model=\"yaxisRange\" /></div></div>"
+            + "<label for=\"yaxis_global\" class=\"form-control\">Globales Min/Max</label>"
+            + "</div>"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><input type=\"radio\" value=\"local\" name=\"yaxis\" id=\"yaxis_local\" v-model=\"yaxisRange\" /></div></div>"
+            + "<label for=\"yaxis_local\" class=\"form-control\">Lokales Min/Max</label>"
+            + "</div>"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><input type=\"radio\" value=\"manual\" name=\"yaxis\" id=\"yaxis_manual\" v-model=\"yaxisRange\" /></div></div>"
+            + "<label for=\"yaxis_manual\" class=\"form-control\">Manuelles Min/Max</label>"
+            + "</div>"
             + "<div class=\"yaxis_popup_minmax\">"
-            + "<label for=\"yaxis_min\" class=\"yaxis_popup_label_minmax\">Min:</label><input type=\"number\" v-model=\"allMin\" id=\"yaxis_min\" :disabled.sync=\"manualDisabled\"/><br/>"
-            + "<label for=\"yaxis_max\" class=\"yaxis_popup_label_minmax\">Max:</label><input type=\"number\" v-model=\"allMax\" id=\"yaxis_max\" :disabled.sync=\"manualDisabled\"/><br/>"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"yaxis_min\" class=\"yaxis_popup_label_minmax\">Min:</label></div></div>"
+            + "<input type=\"number\" v-model=\"allMin\" id=\"yaxis_min\" :disabled.sync=\"manualDisabled\"/>"
+            + "</div>"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"yaxis_ax\" class=\"yaxis_popup_label_minmax\">Max:</label></div></div>"
+            + "<input type=\"number\" v-model=\"allMax\" id=\"yaxis_max\" :disabled.sync=\"manualDisabled\"/>"
+            + "</div>"
+            + "</div>"
+            + "</div>"
             + "</div>"
             + "</div>"
             + "</div>"
@@ -384,16 +414,29 @@ Vue.component("yaxis-popup", {
   }
 });
 Vue.component("preset-popup", {
-  "template": "<div class=\"popup_div preset_popup_div\">"
-            + "<div class=\"popup_body\">"
-            + "<img src=\"img/metricq-logo.png\" width=\"150\" height=\"150\" /><br/>"
-            + "<select class=\"generic_select\" id=\"preset_select\" size=\"1\" v-on:change=\"updateList\" v-on:keydown.enter=\"showMetrics\">"
+  "template": "<div class=\"modal popup_div preset_popup_div\" tabindex=\"-1\" role=\"dialog\">"
+            + "<div class=\"modal-dialog modal-lg\" role=\"document\">"
+            + "<div class=\"modal-content\">"
+            + "<div class=\"modal-header\">"
+            + "<img src=\"img/metricq-logo.png\" width=\"150\" height=\"150\" style=\"margin: 0px auto;\"/>"
+            + "</div>"
+            + "<div class=\"modal-body\">"
+            + "<div style=\"float: left;\">"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"preset_select\">Preset</label></div></div>"
+            + "<select class=\"form-control\" id=\"preset_select\" size=\"1\" v-on:change=\"updateList\" v-on:keydown.enter=\"showMetrics\">"
             + "<option v-for=\"(presetValue, presetIndex) in metricPresets\" v-bind:value=\"presetIndex\">{{ presetIndex }}</option>"
             + "</select>"
-            + "<button class=\"button_preset_show generic_button\" v-on:click=\"showMetrics\">Anzeigen</button>"
-            + "<ul class=\"list_preset_show\">"
-            + "<li v-for=\"metricName in metricMetriclist\">{{ metricName }}</li>"
+            + "</div>"
+            + "<ul class=\"list-group list_preset_show\">"
+            + "<li v-for=\"metricName in metricMetriclist\" class=\"list-group-item\">{{ metricName }}</li>"
             + "</ul>"
+            + "</div>"
+            + "</div>"
+            + "<div class=\"modal-footer\">"
+            + "<button class=\"btn btn-primary\" v-on:click=\"showMetrics\">Anzeigen</button>"
+            + "</div>"
+            + "</div>"
             + "</div>"
             + "</div>",
   "computed": {
@@ -449,20 +492,27 @@ Vue.component("preset-popup", {
   }
 });
 Vue.component("export-popup", {
-  "template": "<div class=\"popup_div export_popup_div\">"
+  "template": "<div class=\"modal popup_div export_popup_div\" tabindex=\"-1\" role=\"dialog\">"
+            + "<div class=\"modal-dialog\" role=\"document\">"
+            + "<div class=\"modal-content\">"
             + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
-            + "<div class=\"popup_body\">"
-            + "<div class=\"export_popup_labels\">"
-            + "<label for=\"export_width\">Breite</label><br/>"
-            + "<label for=\"export_height\">Höhe</label><br/>"
-            + "<label for=\"export_format\">Dateiformat</label><br/>"
-            + "</div><div style=\"float:left\">"
-            + "<input type=\"number\" id=\"export_width\" class=\"export_resolution\" v-model=\"exportWidth\" />px<br/>"
-            + "<input type=\"number\" id=\"export_height\" class=\"export_resolution\" v-model=\"exportHeight\" />px<br/>"
-            + "<select size=\"1\" id =\"export_format\" v-model=\"selectedFileformat\" class=\"generic_select\">"
+            + "<div class=\"modal-body\">"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"export_width\">Breite</label></div></div>"
+            + "<input type=\"number\" id=\"export_width\" class=\"export_resolution\" v-model=\"exportWidth\" />"
+            + "</div>"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"export_height\">Höhe</label></div></div>"
+            + "<input type=\"number\" id=\"export_height\" class=\"export_resolution\" v-model=\"exportHeight\" />"
+            + "</div>"
+            + "<div class=\"input-group\">"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"export_format\">Dateiformat</label></div></div>"
+            + "<select size=\"1\" id =\"export_format\" v-model=\"selectedFileformat\" class=\"form-control\">"
             + "<option v-for=\"fileformatName in fileformats\" v-bind:value=\"fileformatName\">{{ fileformatName }}</option>"
-            + "</select><br/>"
-            + "<button class=\"generic_button\" v-on:click=\"doExport\">Export</button>"
+            + "</select>"
+            + "</div>"
+            + "<button class=\"btn btn-primary\" v-on:click=\"doExport\">Export</button>"
+            + "</div>"
             + "</div>"
             + "</div>"
             + "</div>",
@@ -642,6 +692,10 @@ function initializeMetricPopup() {
         } }(myMetric, instance, affectedTraces);
         var veilEle = veil.create(disablePopupFunc);
         veil.attachPopup(popupEle);
+        var closeEle = popupEle.querySelector(".popup_close_button");
+        closeEle.addEventListener("click", disablePopupFunc);
+        var modalEle = document.querySelector(".modal");
+        modalEle.addEventListener("click", function (evt) { if("dialog" == evt.target.getAttribute("role")) { veil.destroy(); disablePopupFunc(evt); } });
         var inputEle = popupEle.querySelector(".popup_input");
         inputEle.addEventListener("keyup", function(evt) {
           if(evt.key.toLowerCase() == "enter")
@@ -649,8 +703,6 @@ function initializeMetricPopup() {
             disablePopupFunc(evt);
           }
         });
-        var closeEle = popupEle.querySelector(".popup_close_button");
-        closeEle.addEventListener("click", disablePopupFunc);
         var trashcanEle = popupEle.querySelector(".popup_trashcan");
 
         var colorchooserEle = popupEle.querySelector(".popup_colorchooser");
@@ -666,6 +718,7 @@ function initializeMetricPopup() {
           } else {
             Plotly.restyle(document.querySelector(".row_body"), {"line.color": paramMyMetric.color}, myTraces);
           }
+          document.querySelector("div." + paramMyMetric.popupKey).style.backgroundColor = paramMyMetric.color;
         }}(affectedTraces, myMetric);
         popupEle.querySelector(".popup_legend_select").addEventListener("change", function(myTraces, paramMyMetric) { return function(evt) {
           Plotly.restyle(document.querySelector(".row_body"), {"marker.symbol": paramMyMetric.marker}, myTraces);
@@ -724,6 +777,8 @@ var configApp = new Vue({
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
       closeButtonEle.addEventListener("click", function () { veil.destroy(); disablePopupFunc(); });
+      var modalEle = document.querySelector(".modal");
+      modalEle.addEventListener("click", function (evt) { if("dialog" == evt.target.getAttribute("role")) { veil.destroy(); disablePopupFunc(); } });
     }
   }
 });
@@ -741,6 +796,8 @@ var xaxisApp = new Vue({
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
       closeButtonEle.addEventListener("click", function() { veil.destroy(); disablePopupFunc(); });
+      var modalEle = document.querySelector(".modal");
+      modalEle.addEventListener("click", function (evt) { if("dialog" == evt.target.getAttribute("role")) { veil.destroy(); disablePopupFunc(); } });
     }
 
   }
@@ -759,6 +816,8 @@ var yaxisApp = new Vue({
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
       closeButtonEle.addEventListener("click", function() { veil.destroy(); disablePopupFunc(); });
+      var modalEle = document.querySelector(".modal");
+      modalEle.addEventListener("click", function (evt) { if("dialog" == evt.target.getAttribute("role")) { veil.destroy(); disablePopupFunc(); } });
     }
 
   }
@@ -802,6 +861,8 @@ var exportApp = new Vue({
       veil.attachPopup(popupEle);
       var closeButtonEle = popupEle.querySelector(".popup_close_button");
       closeButtonEle.addEventListener("click", function() { veil.destroy(); disablePopupFunc(); });
+      var modalEle = document.querySelector(".modal");
+      modalEle.addEventListener("click", function (evt) { if("dialog" == evt.target.getAttribute("role")) { veil.destroy(); disablePopupFunc(); } });
     }
   }
 });

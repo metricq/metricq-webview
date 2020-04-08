@@ -40,6 +40,7 @@ class MetricQWebView {
 	  xaxis: {
 	    type: 'date',
 	    showticklabels: true,
+	    ticks: "outside", //TODO: figure out how to show ticklabels but no ticks within the graph
 	    tickangle: 'auto',
 	    tickfont: {
 	      family: 'Open Sans, Sans, Verdana',
@@ -80,7 +81,16 @@ class MetricQWebView {
 	  responsive: true, // automatically adjust to window resize
 	  displayModeBar: true // icons always visible
 	}
-
+    if(0 < paramMetricNamesArr.length)
+    {
+      this.handler.doRequest(400);
+    }
+  }
+  reinitialize(metricsArr, startTime, stopTime)
+  {
+    this.handler.initializeMetrics(metricsArr);
+    this.handler.startTime = startTime;
+    this.handler.stopTime = stopTime;
     this.handler.doRequest(400);
   }
   renderMetrics()
@@ -387,11 +397,22 @@ function importMetricUrl()
   }
   return false;
 }
-
+/* TODO: generalize this for cases where is no "legendApp" */
 function initializeMetrics(metricNamesArr, timeStart, timeStop)
 {
-  let newManager = new MetricQWebView(document.querySelector(".row_body"), metricNamesArr, timeStart, timeStop);
-  newManager.postRender = function() {
-    legendApp.$forceUpdate();
-  };
+  let newManager = undefined;
+  if(window.MetricQWebView)
+  {
+    newManager = window.MetricQWebView.instances[0];
+    newManager.reinitialize(metricNamesArr, timeStart, timeStop);
+    newManager.postRender = function() {
+      legendApp.$forceUpdate();
+    };
+  } else 
+  {
+    newManager = new MetricQWebView(document.querySelector(".row_body"), metricNamesArr, timeStart, timeStop);
+    newManager.postRender = function() {
+      legendApp.$forceUpdate();
+    };
+  }
 }
