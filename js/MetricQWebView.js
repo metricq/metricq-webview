@@ -175,6 +175,55 @@ class MetricQWebView {
         var gearEle = document.getElementById("gear_xaxis");
         selfReference.positionXAxisGear(selfReference.ele, gearEle);
       };}(this));
+
+	    /* TODO: externalize gear stuff */
+	  var gearEle = document.getElementById("gear_xaxis");
+	  if(gearEle)
+	  {
+	    gearEle.parentNode.removeChild(gearEle);
+	    gearEle = document.getElementById("gear_yaxis");
+	    gearEle.parentNode.removeChild(gearEle);
+	  }
+	  const BODY = document.getElementsByTagName("body")[0];
+	  /* TODO: abstract gear creation into separate class */
+	  var gearImages = [undefined, undefined, undefined, undefined];
+	  var gearSrc = ["img/icons/gear.svg",
+	  			     "img/icons/arrow-left-right.svg",
+	  			     "img/icons/gear.svg",
+	  			     "img/icons/arrow-up-down.svg"];
+	  for(var i = 0; i < 4; ++i)
+	  {
+	    gearImages[i] = document.createElement("img");
+	    var img = new Image();
+	    img.src = gearSrc[i];
+	    gearImages[i].src = img.src;
+	    if(-1 < gearSrc[i].indexOf("gear"))
+	    {
+	      gearImages[i].setAttribute("class", "gear_axis");
+	    }
+	    gearImages[i].setAttribute("width", "28");
+	    gearImages[i].setAttribute("height", "28");
+	  }
+	  var gearWrapper = [undefined, undefined];
+	  var gearIds = ["gear_xaxis", "gear_yaxis"];
+	  for(var i = 0; i < 2; ++i)
+	  {
+	    gearWrapper[i] = document.createElement("div");
+	    gearWrapper[i].setAttribute("id", gearIds[i]);
+	    gearWrapper[i].appendChild(gearImages[i * 2]);
+	    gearWrapper[i].appendChild(document.createElement("br"));
+	    gearWrapper[i].appendChild(gearImages[i * 2 + 1]);
+	    gearWrapper[i] = BODY.appendChild(gearWrapper[i]);
+	  }
+	  this.positionXAxisGear(this.ele, gearWrapper[0]);
+	  gearWrapper[0].addEventListener("click", function() {
+	    globalPopup.xaxis = ! globalPopup.xaxis;
+	  });
+	  this.positionYAxisGear(this.ele, gearWrapper[1]);
+	  gearWrapper[1].addEventListener("click", function() {
+	    globalPopup.yaxis = ! globalPopup.yaxis;
+	  });
+
     } else
     {
       // don't rerender everything
@@ -190,37 +239,15 @@ class MetricQWebView {
       }
       Plotly.addTraces(this.ele, allTraces);
       this.countTraces = allTraces.length;
+      gearEle = document.getElementById("gear_xaxis");
+      if(gearEle)
+      {
+        this.positionXAxisGear(this.ele, gearEle);
+        gearEle = document.getElementById("gear_yaxis");
+        this.positionYAxisGear(this.ele, gearEle);
+      }
     }
-    /* TODO: externalize gear stuff */
-    var gearEle = document.getElementById("gear_xaxis");
-    if(gearEle)
-    {
-      gearEle.parentNode.removeChild(gearEle);
-      gearEle = document.getElementById("gear_yaxis");
-      gearEle.parentNode.removeChild(gearEle);
-    }
-    const BODY = document.getElementsByTagName("body")[0];
-    /* TODO: abstract gear creation into separate class */
-    var gears = [undefined, undefined];
-    for(var i = 0; i < 2; ++i)
-    {
-      gears[i] = document.createElement("img");
-      var img = new Image();
-      img.src = "img/icons/gear.svg";
-      gears[i].src = img.src;
-      gears[i].setAttribute("class", "gear_axis");
-      gears[i] = BODY.appendChild(gears[i]);
-    }
-    gears[0].setAttribute("id", "gear_xaxis");
-    this.positionXAxisGear(this.ele, gears[0]);
-    gears[0].addEventListener("click", function() {
-      globalPopup.xaxis = ! globalPopup.xaxis;
-    });
-    gears[1].setAttribute("id", "gear_yaxis");
-    this.positionYAxisGear(this.ele, gears[1]);
-    gears[1].addEventListener("click", function() {
-      globalPopup.yaxis = ! globalPopup.yaxis;
-    });
+
     if(this.postRender)
     {
     	this.postRender();

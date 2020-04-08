@@ -60,10 +60,10 @@ class Metric
   	this.popupKey = "popup_" + computedKey;
     if("" === newName)
     {
-      this.displayName = "+";
+      this.htmlName = "<img src=\"img/icons/plus-circle.svg\" width=\"28\" height=\"28\" />";
     } else
     {
-      this.displayName = newName;
+      this.htmlName = newName;
     }
   }
   updateColor(newCssColor)

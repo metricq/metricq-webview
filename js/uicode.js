@@ -83,8 +83,10 @@ function initTest()
 Vue.component("metric-legend", {
   "props": ["metric"],
   "template": "<li class=\"btn btn-info legend_item\" v-on:click=\"metricPopup(metric.name)\">"
-            + "<div v-bind:class=\"metric.popupKey\" v-bind:style=\"{ backgroundColor: metric.color}\">&nbsp;</div>"
-            + " {{ metric.displayName }}"
+            + "<div v-bind:class=\"metric.popupKey\" v-bind:style=\"{ backgroundColor: metric.color}\">"
+            + "&nbsp;" //"<img src=\"img/icons/droplet.svg\" width=\"24\" height=\"24\">"
+            + "</div>"
+            + "<span v-html=\"metric.htmlName\"></span>"
             + "<img src=\"img/icons/pencil.svg\" width=\"28\" height=\"28\" />"
             + "</li>",
   "methods": {
@@ -124,11 +126,11 @@ Vue.component("metric-popup", {
             + "<input type=\"text\" id=\"input_metric_name\" class=\"popup_input\" v-model=\"metric.name\" />"
             + "</div>"
             + "<div class=\"input-group\">"
-            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label>Farbe:</label></div></div>"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label>Farbe</label></div></div>"
             + "<canvas class=\"popup_colorchooser\" width=\"270\" height=\"45\"></canvas>"
             + "</div>"
             + "<div class=\"input-group\">"
-            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"select_marker\">Symbol:</label></div></div>"
+            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"select_marker\">Symbol</label></div></div>"
             + "<select id=\"select_marker\" class=\"popup_legend_select form-control\" size=\"1\" v-bind:value=\"metric.marker\" v-on:change=\"changeMarker\">"
             + "<option v-for=\"symbol in markerSymbols\" v-bind:value=\"symbol\">{{ symbol }}</option>"
             + "</select>"
@@ -527,7 +529,9 @@ Vue.component("export-popup", {
             + "<option v-for=\"fileformatName in fileformats\" v-bind:value=\"fileformatName\">{{ fileformatName }}</option>"
             + "</select>"
             + "</div>"
-            + "<button class=\"btn btn-primary\" v-on:click=\"doExport\">Export</button>"
+            + "<button class=\"btn btn-primary\" v-on:click=\"doExport\">"
+            + "<img src=\"img/icons/image.svg\" width=\"28\" height=\"28\" />"
+            + " Export</button>"
             + "</div>"
             + "</div>"
             + "</div>"
