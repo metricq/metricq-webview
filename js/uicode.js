@@ -14,12 +14,17 @@ new MetricQWebView(document.querySelector(".row_body"), new Array(), (new Date()
 
 var veil = {
   "myPopup": undefined,
-  "create": function(destroyCallback)
+  "create": function(destroyCallback, solidVeil)
    {
      var veilEle = document.createElement("div");
      veilEle.setAttribute("id", "popup_veil");
      veilEle.style.width = window.innerWidth;
      veilEle.style.height = window.innerHeight;
+     if(solidVeil)
+     {
+       veilEle.style.backgroundColor = "#808080";
+       veilEle.style.opacity = 1;
+     }
      veilEle = document.getElementsByTagName("body")[0].appendChild(veilEle);
      veilEle.addEventListener("click", function(evt) { veil.destroy(evt); } );
      veil.ondestroy = destroyCallback;
@@ -82,11 +87,11 @@ function initTest()
 
 Vue.component("metric-legend", {
   "props": ["metric"],
-  "template": "<li class=\"btn btn-info legend_item\" v-on:click=\"metricPopup(metric.name)\">"
+  "template": "<li class=\"btn btn-light legend_item\" style=\"background-color: #FFFFFF; margin-top: 10px;\" v-on:click=\"metricPopup(metric.name)\">"
             + "<div v-bind:class=\"metric.popupKey\" v-bind:style=\"{ backgroundColor: metric.color}\">"
             + "&nbsp;" //"<img src=\"img/icons/droplet.svg\" width=\"24\" height=\"24\">"
-            + "</div>"
-            + "<span v-html=\"metric.htmlName\"></span>"
+            + "</div> &nbsp;"
+            + "<span v-html=\"metric.htmlName\"></span>&nbsp;"
             + "<img src=\"img/icons/pencil.svg\" width=\"28\" height=\"28\" />"
             + "</li>",
   "methods": {
@@ -129,12 +134,12 @@ Vue.component("metric-popup", {
             + "<div class=\"form-group row\">"
             + "<label class=\"col-sm-2 col-form-label\">Farbe</label>"
             + "<div class=\"col-sm-10\">"
-            + "<canvas class=\"popup_colorchooser\" width=\"270\" height=\"45\"></canvas>"
+            + "<canvas class=\"popup_colorchooser form-control\" width=\"345\" height=\"32\"></canvas>" //270,45
             + "</div></div>"
             + "<div class=\"form-group row\">"
             + "<label class=\"col-sm-2 col-form-label\" for=\"select_marker\">Symbol</label>"
             + "<div class=\"col-sm-10\">"
-            + "<select id=\"select_marker\" class=\"popup_legend_select form-control\" size=\"1\" v-bind:value=\"metric.marker\" v-on:change=\"changeMarker\">"
+            + "<select id=\"select_marker\" class=\"form-control custom-select popup_legend_select\" size=\"1\" v-bind:value=\"metric.marker\" v-on:change=\"changeMarker\">"
             + "<option v-for=\"symbol in markerSymbols\" v-bind:value=\"symbol\">{{ symbol }}</option>"
             + "</select>"
             + "</div></div>"
@@ -171,13 +176,13 @@ Vue.component("configuration-popup", {
             + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
             + "<div class=\"modal-body\">"
             + "<div class=\"form-group row\">"
-            + "<label class=\"col-sm-2 col-form-label\" for=\"resolution_input\">Auflösung</label>"
-            + "<div class=\"col-sm-10\">"
+            + "<label class=\"col-sm-6 col-form-label\" for=\"resolution_input\">Auflösung</label>"
+            + "<div class=\"col-sm-6\">"
             + "<input type=\"range\" class=\"form-control\" id=\"resolution_input\" v-model=\"uiResolution\" min=\"0\" max=\"29\" step=\"0.25\"/>"
             + "</div></div>"
             + "<div class=\"form-group row\">"
-            + "<label class=\"col-sm-2 col-form-label\" for=\"zoom_speed_input\">Zoom Geschwindigkeit</label>"
-            + "<div class=\"col-sm-10\">"
+            + "<label class=\"col-sm-6 col-form-label\" for=\"zoom_speed_input\">Zoom Geschwindigkeit</label>"
+            + "<div class=\"col-sm-6\">"
             + "<input type=\"range\" class=\"form-control\" id=\"zoom_speed_input\" v-model.sync=\"uiZoomSpeed\" min=\"1\" max=\"100\" step=\"0.5\"/>"
             + "</div></div>"
             + "<div class=\"modal-footer\">"
@@ -255,15 +260,15 @@ Vue.component("xaxis-popup", {
             + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
             + "<div class=\"modal-body\">"
             + "<div class=\"form-group row\">"
-            + "<label class=\"col-sm-2 col-form-label\" for=\"start_date_time\">Anfangszeit</label>"
-            + "<div class=\"col-sm-10\">"
-            + "<input type=\"date\" class=\"form-control\" v-model=\"startDate\" v-bind:max=\"endDate\" required /><input type=\"time\" class=\"form-control\" v-model=\"startTime\" id=\"start_date_time\" required /><br/>"
+            + "<label class=\"col-sm-3 col-form-label\" for=\"start_date_time\">Anfangszeit</label>"
+            + "<div class=\"col-sm-9\">"
+            + "<input type=\"date\" class=\"form-control col-sm-6\" v-model=\"startDate\" v-bind:max=\"endDate\" required /><input type=\"time\" class=\"form-control col-sm-6\" v-model=\"startTime\" id=\"start_date_time\" step=\"1\" required /><br/>"
             + "</div>"
             + "</div>"
             + "<div class=\"form-group row\">"
-            + "<label class=\"col-sm-2 col-form-label\" for=\"end_date_time\">Endzeit</label>"
-            + "<div class=\"col-sm-10\">"
-            + "<input type=\"date\" class=\"form-control\" v-model=\"endDate\" v-bind:min=\"startDate\" required /><input type=\"time\" class=\"form-control\" id=\"end_date_time\" v-model=\"endTime\" required />"
+            + "<label class=\"col-sm-3 col-form-label\" for=\"end_date_time\">Endzeit</label>"
+            + "<div class=\"col-sm-9\">"
+            + "<input type=\"date\" class=\"form-control col-sm-6\" v-model=\"endDate\" v-bind:min=\"startDate\" required /><input type=\"time\" class=\"form-control col-sm-6\" id=\"end_date_time\" v-model=\"endTime\" step=\"1\" required />"
             + "</div>"
             + "</div>"
             + "<div class=\"modal-footer\">"
@@ -342,24 +347,24 @@ Vue.component("yaxis-popup", {
             + "<div class=\"modal-body\">"
             + "<div class=\"form-check\">"
             + "<input class=\"form-check-input\" type=\"radio\" value=\"global\" name=\"yaxis\" id=\"yaxis_global\" v-model=\"yaxisRange\" />"
-            + "<label for=\"yaxis_global\" class=\"form-check-label\">Globales Min/Max</label>"
+            + "<label for=\"yaxis_global\" class=\"form-check-label form-control-plaintext\">Globales Min/Max</label>"
             + "</div>"
             + "<div class=\"form-check\">"
             + "<input class=\"form-check-input\" type=\"radio\" value=\"local\" name=\"yaxis\" id=\"yaxis_local\" v-model=\"yaxisRange\" />"
-            + "<label for=\"yaxis_local\" class=\"form-check-label\">Lokales Min/Max</label>"
+            + "<label for=\"yaxis_local\" class=\"form-check-label form-control-plaintext\">Lokales Min/Max</label>"
             + "</div>"
             + "<div class=\"form-check\">"
             + "<input class=\"form-check-input\" type=\"radio\" value=\"manual\" name=\"yaxis\" id=\"yaxis_manual\" v-model=\"yaxisRange\" />"
-            + "<label for=\"yaxis_manual\" class=\"form-check-label\">Manuelles Min/Max</label>"
+            + "<label for=\"yaxis_manual\" class=\"form-check-label form-control-plaintext\">Manuelles Min/Max</label>"
             + "</div>"
             + "<div class=\"form-group yaxis_popup_minmax\">"
             + "<div class=\"form-group row\">"
             + "<label for=\"yaxis_min\" class=\"yaxis_popup_label_minmax col-sm-2 col-form-label\">Min:</label>"
-            + "<div class=\"col-sm-10\"><input class=\"form-control\" type=\"number\" v-model=\"allMin\" id=\"yaxis_min\" :disabled.sync=\"manualDisabled\"/></div>"
+            + "<div class=\"col-sm-10\"><input class=\"form-control\" type=\"number\" v-model=\"allMin\" id=\"yaxis_min\" :disabled.sync=\"manualDisabled\" step=\"0.001\"/></div>"
             + "</div>"
             + "<div class=\"form-group row\">"
             + "<label for=\"yaxis_ax\" class=\"yaxis_popup_label_minmax col-sm-2 col-form-label\">Max:</label>"
-            + "<div class=\"col-sm-10\"><input class=\"form-control\" type=\"number\" v-model=\"allMax\" id=\"yaxis_max\" :disabled.sync=\"manualDisabled\"/></div>"
+            + "<div class=\"col-sm-10\"><input class=\"form-control\" type=\"number\" v-model=\"allMax\" id=\"yaxis_max\" :disabled.sync=\"manualDisabled\" step=\"0.001\"/></div>"
             + "</div>"
             + "<div class=\"modal-footer\">"
             + "<button class=\"btn btn-primary popup_ok\">"
@@ -466,19 +471,23 @@ Vue.component("preset-popup", {
             + "</div>"
             + "<div class=\"modal-body\">"
             + "<div style=\"float: left;\">"
-            + "<div class=\"input-group\">"
-            + "<div class=\"input-group-prepend\"><div class=\"input-group-text\"><label for=\"preset_select\">Preset</label></div></div>"
-            + "<select class=\"form-control custom-select\" id=\"preset_select\" size=\"1\" v-on:change=\"updateList\" v-on:keydown.enter=\"showMetrics\">"
-            + "<option v-for=\"(presetValue, presetIndex) in metricPresets\" v-bind:value=\"presetIndex\">{{ presetIndex }}</option>"
+            + "<div class=\"form-group row\">"
+            + "<label for=\"preset_select\" class=\"col-sm-3 form-control-plaintext leftalign\">Preset</label>"
+            + "<div class=\"col-sm-9\">"
+            + "<select class=\"form-control custom-select fullwidth\" id=\"preset_select\" size=\"1\" v-on:change=\"updateList\" v-on:keydown.enter=\"showMetrics\">"
+            + "<option class=\"fullwidth\" v-for=\"(presetValue, presetIndex) in metricPresets\" v-bind:value=\"presetIndex\">{{ presetIndex }}</option>"
             + "</select>"
-            + "</div>"
-            + "<ul class=\"list-group list_preset_show\">"
-            + "<li v-for=\"metricName in metricMetriclist\" v-if=\"0 < metricName.length\" class=\"list-group-item\">"
-            + "<img class=\"list_arrow_icon\" src=\"img/icons/arrow-return-right.svg\" width=\"32\" height=\"32\" />"
+            + "</div></div>"
+            + "<div v-if=\"anyMetrics\" class=\"row\">"
+            + "<div class=\"col-sm-3\" style=\"padding-left: 0px;\"><label class=\"leftalign form-control-plaintext\">Metriken:</label></div>"
+            + "<div class=\"col-sm-9\">"
+            + "<ul class=\"list-group list_preset_show fullwidth\">"
+            + "<li v-for=\"metricName in metricMetriclist\" v-if=\"0 < metricName.length\" class=\"list-group-item fullwidth\">"
+//            + "<img class=\"list_arrow_icon\" src=\"img/icons/arrow-return-right.svg\" width=\"32\" height=\"32\" />"
+//            + "<img class=\"list_arrow_icon\" src=\"img/icons/graph-up.svg\" width=\"32\" height=\"32\">"
             + "{{ metricName }}</li>"
             + "</ul>"
-            + "</div>"
-            + "</div>"
+            + "</div></div></div></div>"
             + "<div class=\"modal-footer\">"
             + "<button class=\"btn btn-primary\" v-on:click=\"showMetrics\">Anzeigen</button>"
             + "</div>"
@@ -489,6 +498,30 @@ Vue.component("preset-popup", {
     metricPresets()
     {
       return metricPresets;
+    },
+    "anyMetrics": {
+      cache: false,
+      get: function()
+      {
+        var metricStr = "";
+        var ele = document.getElementById("preset_select");
+        var referenceArr = undefined;
+        if(ele) {
+          referenceArr = metricPresets[ele.value];
+        } else if(metricPresets["no preset"])
+        {
+          referenceArr = metricPresets["no preset"];
+        } else
+        {
+          return true;
+        }
+        for(var curMetric in referenceArr)
+        {
+          metricStr += referenceArr[curMetric];
+        }
+        return 0 < metricStr.length;
+      },
+      set: function(newValue) { }
     },
     "metricMetriclist": {
       cache: false,
@@ -545,19 +578,19 @@ Vue.component("export-popup", {
             + "<popup-header v-bind:popupTitle=\"popupTitle\"></popup-header>"
             + "<div class=\"modal-body\">"
             + "<div class=\"form-group row\">"
-            + "<label class=\"col-sm-2 col-form-label\" for=\"export_width\">Breite</label>"
-            + "<div class=\"col-sm-10\">"
-            + "<input type=\"number\" id=\"export_width\" v-model=\"exportWidth\" />"
+            + "<label class=\"col-sm-3 col-form-label\" for=\"export_width\">Breite</label>"
+            + "<div class=\"col-sm-7\">"
+            + "<input type=\"number\" id=\"export_width\" v-model=\"exportWidth\" class=\"form-control\"/>"
             + "</div></div>"
             + "<div class=\"form-group row\">"
-            + "<label class=\"col-sm-2 col-form-label\" for=\"export_height\">Höhe</label>"
-            + "<div class=\"col-sm-10\">"
-            + "<input type=\"number\" id=\"export_height\" v-model=\"exportHeight\" />"
+            + "<label class=\"col-sm-3 col-form-label\" for=\"export_height\">Höhe</label>"
+            + "<div class=\"col-sm-7\">"
+            + "<input type=\"number\" id=\"export_height\" v-model=\"exportHeight\" class=\"form-control\" />"
             + "</div></div>"
             + "<div class=\"form-group row\">"
-            + "<label class=\"col-sm-2 col-form-label\" for=\"export_format\">Dateiformat</label>"
-            + "<div class=\"col-sm-10\">"
-            + "<select size=\"1\" id =\"export_format\" v-model=\"selectedFileformat\" class=\"form-control\">"
+            + "<label class=\"col-sm-3 col-form-label\" for=\"export_format\">Dateiformat</label>"
+            + "<div class=\"col-sm-7\">"
+            + "<select size=\"1\" id =\"export_format\" v-model=\"selectedFileformat\" class=\"form-control custom-select\" style=\"width: 100%;\">"
             + "<option v-for=\"fileformatName in fileformats\" v-bind:value=\"fileformatName\">{{ fileformatName }}</option>"
             + "</select>"
             + "</div></div>"
@@ -898,7 +931,7 @@ var presetApp = new Vue({
     if(popupEle)
     {
       var disablePopupFunc = function() { globalPopup.presetSelection = false; window.MetricQWebView.instances[0].reload(); };
-      veil.create(disablePopupFunc);
+      veil.create(disablePopupFunc, true);
       veil.attachPopup(popupEle);
       popupEle.style.width = "100%";
       popupEle.style.height = "100%";

@@ -60,7 +60,7 @@ class Metric
   	this.popupKey = "popup_" + computedKey;
     if("" === newName)
     {
-      this.htmlName = "<img src=\"img/icons/plus-circle.svg\" width=\"28\" height=\"28\" />";
+      this.htmlName = "<img src=\"img/icons/plus-circle.svg\" width=\"28\" height=\"28\" /> Neu ";
     } else
     {
       this.htmlName = newName;

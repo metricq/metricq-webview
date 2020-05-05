@@ -68,8 +68,11 @@ class MetricQWebView {
 	};
     this.plotlyOptions = {
 	  scrollZoom: true,
+	  // see src/components/modebar/buttons.js
+	  // on how to modify hover behaviour:
+	  // 173 modeBarButtons.hoverClosestCartesian
 	  // "zoom2d", "zoomIn2d", "zoomOut2d"
-	  modeBarButtonsToRemove: [ "lasso2d", "autoScale2d", "resetScale2d", "toggleHover", "toggleSpikelines", "hoverClosestCartesian", "hoverCompareCartesian", "toImage"],
+	  modeBarButtonsToRemove: [ "lasso2d", "autoScale2d", "resetScale2d", "select2d", "toggleHover", "toggleSpikelines", "hoverClosestCartesian", "hoverCompareCartesian", "toImage"],
 	  displaylogo: false, // don't show the plotly logo
 	  toImageButtonOptions: {
 	    format: "svg", // also available: jpeg, png, webp
@@ -273,12 +276,9 @@ class MetricQWebView {
 	}
 	getTopLeft(ele) {
 	  var topLeft = [0, 0];
-	  var curEle = ele;
-	  while(!curEle.tagName || (curEle.tagName && curEle.tagName.toLowerCase() != "html")) {
-	    topLeft[0] += parseInt(curEle.offsetLeft);
-	    topLeft[1] += parseInt(curEle.offsetTop);
-	    curEle = curEle.parentNode;
-	  }
+	  let eleRect = ele.getBoundingClientRect();
+	  topLeft[0] = eleRect.left + window.scrollX;
+	  topLeft[1] = eleRect.top + window.scrollY;
 	  return topLeft;
 	}
 	updateMetricUrl()
