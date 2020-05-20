@@ -648,7 +648,7 @@ Vue.component("export-popup", {
     "doExport": function()
     {
       var instance = window.MetricQWebView.instances[0];
-      Plotly.downloadImage(instance.ele, instance.plotlyOptions.toImageButtonOptions);
+      instance.doExport();
       veil.destroy();
       globalPopup.export = false;
     }

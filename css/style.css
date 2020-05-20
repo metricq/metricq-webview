@@ -99,10 +99,10 @@ body {
 }
 .popup_close_button {
   float: right;
-  transform: translate(18px, -18px) scale(0.8);
+  transform: translate(11px, -24px) scale(0.8);
 }
 .popup_close_button:hover {
-  transform: translate(18px, -18px) scale(1);
+  transform: translate(11px, -24px) scale(1);
 }
 .popup_close_image {
   pointer-events: none;

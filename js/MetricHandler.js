@@ -5,7 +5,6 @@ class MetricHandler {
   constructor(paramRenderer, paramMetricsArr, paramStartTime, paramStopTime)
   {
   	this.renderer = paramRenderer;
-  	this.initialMetricNames = paramMetricsArr;
   	this.startTime = paramStartTime;
   	this.stopTime = paramStopTime;
 
@@ -191,8 +190,9 @@ class MetricHandler {
     var curTrace = {
       "x": new Array(),
       "y": new Array(),
-      "name": metricAggregate,
-      "type": "scatter"
+      "name": metricBase + "/" + metricAggregate,
+      "type": "scatter",
+      "hoverinfo": "skip"
     }
     switch(metricAggregate)
     {

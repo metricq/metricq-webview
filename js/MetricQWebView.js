@@ -36,17 +36,21 @@ class MetricQWebView {
       configParam.lastWheelEvent = dataObj;
       evt.target.dispatchEvent(newEvent);
     };}(this.configuration));
+    // see the source file
+    //   src/plots/cartesian/layout_attributes.js
+    // for a complete set of available options
     this.plotlyLayout = {
 	  xaxis: {
 	    type: 'date',
 	    showticklabels: true,
-	    ticks: "outside", //TODO: figure out how to show ticklabels but no ticks within the graph
+	    ticks: "outside",
 	    tickangle: 'auto',
 	    tickfont: {
 	      family: 'Open Sans, Sans, Verdana',
 	      size: 14,
 	      color: 'black'
 	    },
+        showgrid: false,
 	    exponentformat: 'e',
 	    showexponent: 'all'
 	  },
@@ -84,6 +88,7 @@ class MetricQWebView {
 	  responsive: true, // automatically adjust to window resize
 	  displayModeBar: true // icons always visible
 	}
+	//Plotly.d3.behavior.zoom.scaleBy = function(selection, k) { return k*100; };
     if(0 < paramMetricNamesArr.length)
     {
       this.handler.doRequest(400);
@@ -375,7 +380,13 @@ class MetricQWebView {
         /* TODO: reject metric names that already exist */
         this.reload();
 	}
-
+	doExport()
+	{
+		//this.plotlyLayout.showlegend=true;
+		Plotly.relayout(this.ele,{"showlegend": true});
+		Plotly.downloadImage(this.ele, this.plotlyOptions.toImageButtonOptions);
+		Plotly.relayout(this.ele,{"showlegend": false});
+	}
 }
 
 function parseLocationHref()
