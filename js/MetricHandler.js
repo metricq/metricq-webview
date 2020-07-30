@@ -262,17 +262,18 @@ class MetricHandler {
   {
     //TODO: track metrics thate were requested but got no response,
     //        mark these as errorpone=true
-    var tracesAll = new Object();
-    var metricBase = undefined;
-    var metricAggregate = undefined;
+    let tracesAll = new Object();
+    let metricBase = undefined;
+    let metricAggregate = undefined;
     for(var i = 0; i < parsedJson.length; ++i)
     {
-      if(-1 < parsedJson[i].target.indexOf("/")
+      let fullMetric = parsedJson[i].target;
+      if(-1 < fullMetric.indexOf("/")
       && parsedJson[i]["datapoints"]
       && parsedJson[i].datapoints[0])
       {
-        metricBase = parsedJson[i].target.substring(0, parsedJson[i].target.indexOf("/"));
-        metricAggregate = parsedJson[i].target.substring(parsedJson[i].target.indexOf("/") + 1);
+        metricBase = fullMetric.substring(0, fullMetric.indexOf("/"));
+        metricAggregate = fullMetric.substring(fullMetric.indexOf("/") + 1);
 
         let parsedTrace = this.parseTrace(metricBase, metricAggregate, parsedJson[i].datapoints);
         if(parsedTrace)
