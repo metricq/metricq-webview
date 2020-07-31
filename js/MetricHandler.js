@@ -91,7 +91,8 @@ class MetricHandler {
         var parsedObj = undefined;
         try {
           parsedObj = JSON.parse(evt.target.responseText);
-          selfReference.parseResponse(parsedObj, metricArr);
+          //selfReference.parseResponse(parsedObj, metricArr);
+          selfReference.renderer.renderMetrics(parsedObj);
         } catch(exc)
         {
           console.log("Couldn't parse");

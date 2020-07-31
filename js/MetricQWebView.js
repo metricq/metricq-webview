@@ -15,6 +15,7 @@ class MetricQWebView {
     this.postRender = undefined;
     this.countTraces = 0;
     this.hasPlot = false;
+    this.graticule = undefined;
     this.configuration = new Configuration(2, 4)
     /* TODO: old globals
     var globalYRangeOverride = undefined;
@@ -101,7 +102,7 @@ class MetricQWebView {
     this.handler.stopTime = stopTime;
     this.handler.doRequest(400);
   }
-  renderMetrics()
+  renderMetrics(datapointsJSON)
   {
     let allTraces = new Array();
 
@@ -118,71 +119,25 @@ class MetricQWebView {
 
     if(!this.hasPlot)
     {
-      let allMinMax = this.handler.queryAllMinMax();
-      this.plotlyLayout.xaxis.range = [this.handler.startTime, this.handler.stopTime];
-      this.plotlyLayout.yaxis.range = allMinMax;
-      Plotly.newPlot(this.ele, 
-        allTraces, this.plotlyLayout, this.plotlyOptions);
-      this.hasPlot = true;
-      this.countTraces = allTraces.length;
-      this.ele.on("plotly_relayout", function(selfReference) { return function(eventdata) {
-        if(!eventdata['yaxis.range[0]'])
-        {
-          var startTime = eventdata['xaxis.range[0]'];
-          var endTime = eventdata['xaxis.range[1]'];
-//        console.log("Time Diff:" + (endTime - startTime));
-          if(startTime === undefined || endTime === undefined)
-          {
-            //we got a reset/zoom out
-          } else {
-            if("string" == (typeof startTime))
-            {
-              startTime = new Date(startTime).getTime();
-            }
-            if("string" == (typeof endTime))
-            {
-              endTime = new Date(endTime).getTime();
-            }
-            if(selfReference.handler.startTime != startTime
-            || selfReference.handler.stopTime != endTime)
-            {
-              let oldDelta = selfReference.handler.stopTime - selfReference.handler.startTime;
-              let newDelta = endTime - startTime;
-              let wheelEventString = "";
-              let zoomingIsAcceptable = true;
-              if(selfReference.configuration.lastWheelEvent)
-              {
-                let deltaWheelEvent = (new Date()).getTime() - selfReference.configuration.lastWheelEvent.time;
-                if(1500 > deltaWheelEvent)
-                {
-                  wheelEventString = " (deltaY: " + selfReference.configuration.lastWheelEvent.deltaY + ")";
-                  if((selfReference.configuration.lastWheelEvent.deltaY < 0 && newDelta > oldDelta)
-                  || (selfReference.configuration.lastWheelEvent.deltaY > 0 && newDelta < oldDelta))
-                  {
-                    zoomingIsAcceptable = false;
-                    console.log("Invalid Zoom: " + Math.round(newDelta * 100/ oldDelta) + "%" + wheelEventString);
-                  }
-                }
-              }
-              if(zoomingIsAcceptable)
-              {
-                selfReference.handler.startTime = startTime;
-                selfReference.handler.stopTime = endTime;
-                //console.log("Zoom " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
-                selfReference.handler.reload();
-                selfReference.updateMetricUrl();
-              }
-            }
-          }
-        }
-      }}(this));
-      //some plotly events: plotly_redraw, plotly_update, plotly_react,
-      // plotly_relayouting, plotly_selecting, plotly_deselect, plotly_selected,
-      // plotly_beforeexport, plotly_afterexport, plotly_autosize
-      this.ele.on("plotly_autosize", function(selfReference) { return function(evt) {
-        var gearEle = document.getElementById("gear_xaxis");
-        selfReference.positionXAxisGear(selfReference.ele, gearEle);
-      };}(this));
+    	//TODO: initialize Graticule class here
+    	var canvasSize = [ parseInt(this.ele.offsetWidth), 400];
+    	var canvasBorders = [10, 20, 40, 40]; //TOP, RIGHT, BOTTOM, LEFT;
+    	var labelingDistance = [5, 10]; // first left, then bottom
+    	var myCanvas = document.createElement("canvas");
+    	myCanvas.setAttribute("width", canvasSize[0]);
+    	myCanvas.setAttribute("height", canvasSize[1]);
+    	this.ele.appendChild(myCanvas);
+    	var myContext = myCanvas.getContext("2d");
+    	// Params: (ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
+    	this.graticule = new Graticule(myContext, [canvasBorders[3],
+    											  canvasBorders[0],
+    											  canvasSize[0] - (canvasBorders[1] + canvasBorders[3]),
+    											  canvasSize[1] - (canvasBorders[0] + canvasBorders[2])],
+    									labelingDistance[0], labelingDistance[1],
+    									[canvasSize[0], canvasSize[1]]);
+    	this.hasPlot = true;
+    	this.graticule.data.processMetricQDatapoints(datapointsJSON, true, true);
+    	this.graticule.draw(true);
 
 	    /* TODO: externalize gear stuff */
 	  var gearEle = document.getElementById("gear_xaxis");
@@ -235,25 +190,7 @@ class MetricQWebView {
     } else
     {
       // don't rerender everything
-      var oldTraces = new Array();
-      for(var i = 0; i < this.countTraces; ++i)
-      {
-        oldTraces.push(i);
-      }
-      Plotly.deleteTraces(this.ele, oldTraces);
-      if("local" == this.yRangeType)
-      {
-        this.setPlotRanges(false, true);
-      }
-      Plotly.addTraces(this.ele, allTraces);
-      this.countTraces = allTraces.length;
-      gearEle = document.getElementById("gear_xaxis");
-      if(gearEle)
-      {
-        this.positionXAxisGear(this.ele, gearEle);
-        gearEle = document.getElementById("gear_yaxis");
-        this.positionYAxisGear(this.ele, gearEle);
-      }
+      //TODO: update Graticule here
     }
 
     if(this.postRender)
@@ -322,17 +259,7 @@ class MetricQWebView {
 	  {
 	    return;
 	  }
-	  var relayoutObj = new Object();
-	  if(updateXAxis) {
-	    relayoutObj["xaxis.range[0]"] = this.handler.startTime;
-	    relayoutObj["xaxis.range[1]"] = this.handler.stopTime;
-	  }
-	  if(updateYAxis) {
-	    let allMinMax = this.handler.queryAllMinMax();
-	    relayoutObj["yaxis.range[0]"] = allMinMax[0];
-	    relayoutObj["yaxis.range[1]"] = allMinMax[1];
-	  }
-	  Plotly.relayout(this.ele, relayoutObj );
+	  //TODO: code me
 	}
 	reload()
 	{
