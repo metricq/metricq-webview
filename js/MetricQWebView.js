@@ -5,7 +5,17 @@ class MetricQWebView {
     if(!window["MetricQWebView"])
     {
       window.MetricQWebView = {
-      	instances: new Array()
+      	instances: new Array(),
+      	getInstance: function(htmlEle) {
+      	  for(var i = 0; i < window.MetricQWebView.instances.length; ++i)
+      	  {
+      	  	if(window.MetricQWebView.instances[i].ele.isSameNode(htmlEle))
+      	  	{
+      	  	  return window.MetricQWebView.instances[i];
+      	  	}
+      	  }
+      	  return undefined;
+      	}
       };
     }
     window.MetricQWebView.instances.push(this);
@@ -16,7 +26,7 @@ class MetricQWebView {
     this.countTraces = 0;
     this.hasPlot = false;
     this.graticule = undefined;
-    this.configuration = new Configuration(2, 4)
+    this.configuration = new Configuration(2, 4);
     /* TODO: old globals
     var globalYRangeOverride = undefined;
     var globalYRangeType = 'local';
@@ -126,7 +136,7 @@ class MetricQWebView {
     	var myCanvas = document.createElement("canvas");
     	myCanvas.setAttribute("width", canvasSize[0]);
     	myCanvas.setAttribute("height", canvasSize[1]);
-    	this.ele.appendChild(myCanvas);
+    	this.ele = this.ele.appendChild(myCanvas);
     	var myContext = myCanvas.getContext("2d");
     	// Params: (ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
     	this.graticule = new Graticule(myContext, [canvasBorders[3],
@@ -138,6 +148,7 @@ class MetricQWebView {
     	this.hasPlot = true;
     	this.graticule.data.processMetricQDatapoints(datapointsJSON, true, true);
     	this.graticule.draw(true);
+    	registerCallbacks(myCanvas);
 
 	    /* TODO: externalize gear stuff */
 	  var gearEle = document.getElementById("gear_xaxis");
@@ -289,7 +300,8 @@ class MetricQWebView {
 	}
 	deleteTraces(tracesArr)
 	{
-		Plotly.deleteTraces(this.ele, tracesArr);
+		//TODO: REFACTOR
+		//Plotly.deleteTraces(this.ele, tracesArr);
 		this.countTraces -= tracesArr.length;
 	}
 	changeMetricName(metricReference, newName, oldName)

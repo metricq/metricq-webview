@@ -1,4 +1,13 @@
 
+
+var uiOptions = {
+  horizontalScrolling: false,
+  smoothScrollingExtraData: true,
+  minimumXPixels: 0.5,
+  sortTooltip: false,
+  errorArrowInterval: 2000
+};
+
 var uiInteractArr = [
   ["drag", ["17"], "uiInteractPan"],
   ["drag", ["!16", "!17"], "uiInteractZoomArea"],
@@ -8,23 +17,24 @@ var uiInteractArr = [
 ];
 
 
-function uiInteractPan()
+function uiInteractPan(metricQInstance, evtObj)
 {
   if(mouseDown.previousPos[0] !== mouseDown.currentPos[0]
   || mouseDown.previousPos[1] !== mouseDown.currentPos[1])
   {
-    mainGraticule.moveTimeAndValueRanges( (mouseDown.currentPos[0] - mouseDown.previousPos[0]) * -1 * mainGraticule.curTimePerPixel, 0);
-    setTimeout(function (lastUpdateTime) { return function() { updateAllSeriesesBands(lastUpdateTime); }; }(mainGraticule.lastRangeChangeTime), 150);
-    mainGraticule.draw(false);
+    metricQInstance.graticule.moveTimeAndValueRanges( (mouseDown.currentPos[0] - mouseDown.previousPos[0]) * -1 * metricQInstance.graticule.curTimePerPixel, 0);
+    setTimeout(function (lastUpdateTime) { return function() { updateAllSeriesesBands(lastUpdateTime); }; }(metricQInstance.graticule.lastRangeChangeTime), 150);
+    metricQInstance.graticule.draw(false);
   }
 }
-function uiInteractZoomArea()
+function uiInteractZoomArea(metricQInstance, evtObj)
 {
   if(mouseDown.previousPos[0] !== mouseDown.currentPos[0]
   || mouseDown.previousPos[1] !== mouseDown.currentPos[1])
   {
-    mainGraticule.draw(false);
-    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    metricQInstance.graticule.draw(false);
+    var myCtx = metricQInstance.graticule.ctx;
+    myCtx.fillStyle = "rgba(0,0,0,0.2)";
     var minXPos = mouseDown.currentPos[0];
     if(mouseDown.startPos[0] < minXPos)
     {
@@ -35,16 +45,16 @@ function uiInteractZoomArea()
     {
       maxXPos = mouseDown.startPos[0];
     }
-    ctx.fillRect(minXPos, mainGraticule.graticuleDimensions[1], maxXPos - minXPos, mainGraticule.graticuleDimensions[3]);
-    var timeValueStart = mainGraticule.getTimeValueAtPoint( [minXPos, mouseDown.relativeStartPos[1]]);
-    var timeValueEnd = mainGraticule.getTimeValueAtPoint([maxXPos, mouseDown.relativeStartPos[1]]);
+    myCtx.fillRect(minXPos, metricQInstance.graticule.graticuleDimensions[1], maxXPos - minXPos, metricQInstance.graticule.graticuleDimensions[3]);
+    var timeValueStart = metricQInstance.graticule.getTimeValueAtPoint( [minXPos, mouseDown.relativeStartPos[1]]);
+    var timeValueEnd = metricQInstance.graticule.getTimeValueAtPoint([maxXPos, mouseDown.relativeStartPos[1]]);
   
     if(timeValueStart && timeValueEnd)
     {
       var timeDelta = timeValueEnd[0] - timeValueStart[0];
       var centerPos = [
         Math.floor(minXPos + (maxXPos - minXPos) / 2),
-        Math.floor(mainGraticule.graticuleDimensions[1] + (mainGraticule.graticuleDimensions[3] - mainGraticule.graticuleDimensions[1]) / 2)
+        Math.floor(metricQInstance.graticule.graticuleDimensions[1] + (metricQInstance.graticule.graticuleDimensions[3] - metricQInstance.graticule.graticuleDimensions[1]) / 2)
       ];
       var deltaString = "";
       if(86400000 < timeDelta)
@@ -63,21 +73,21 @@ function uiInteractZoomArea()
       {
         deltaString = Math.floor(timeDelta) + " milliseconds";
       }
-      centerPos[0] -= Math.round(ctx.measureText(deltaString).width / 2);
-      ctx.fillStyle = "#000000";
-      ctx.fillText(deltaString , centerPos[0], centerPos[1]);
+      centerPos[0] -= Math.round(myCtx.measureText(deltaString).width / 2);
+      myCtx.fillStyle = "#000000";
+      myCtx.fillText(deltaString , centerPos[0], centerPos[1]);
     }
   }
 }
-function uiInteractZoomIn(evtObj)
+function uiInteractZoomIn(metricQInstance, evtObj)
 {
   evtObj.preventDefault();
   var relativeStart = mouseDown.relativeStartPos;
   var relativeEnd = calculateActualMousePos(evtObj);
   if(1 < Math.abs(relativeStart[0] - relativeEnd[0]))
   {
-    var posEnd   = mainGraticule.getTimeValueAtPoint( relativeStart );
-    var posStart = mainGraticule.getTimeValueAtPoint( relativeEnd );
+    var posEnd   = metricQInstance.graticule.getTimeValueAtPoint( relativeStart );
+    var posStart = metricQInstance.graticule.getTimeValueAtPoint( relativeEnd );
     if(!posEnd || !posStart)
     {
       return;
@@ -88,40 +98,40 @@ function uiInteractZoomIn(evtObj)
       posEnd = posStart;
       posStart = swap;
     }
-    if(!mainGraticule.setTimeRange([posStart[0], posEnd[0]]))
+    if(!metricQInstance.graticule.setTimeRange([posStart[0], posEnd[0]]))
     {
       showUserHint("Zoom-Limit erreicht.");
     }
-    mainGraticule.automaticallyDetermineRanges(false, true, metricParams.allTimeReference);
-    setTimeout(function (lastUpdateTime) { return function() { updateAllSeriesesBands(lastUpdateTime); }; }(mainGraticule.lastRangeChangeTime), 200);
-    mainGraticule.draw(false);
+    metricQInstance.graticule.automaticallyDetermineRanges(false, true, "global" == metricQInstance.yRangeType);
+    setTimeout(function (myMetricQInstance, lastUpdateTime) { return function() { updateAllSeriesesBands(myMetricQInstance, lastUpdateTime); }; }(metricQInstance, metricQInstance.graticule.lastRangeChangeTime), 200);
+    metricQInstance.graticule.draw(false);
   }
 }
-function uiInteractZoomWheel(evtObj)
+function uiInteractZoomWheel(metricQInstance, evtObj)
 {
-  if(! evtObj.target || !mainGraticule)
+  if(! evtObj.target || !metricQInstance)
   {
     return;
   }
   evtObj.preventDefault();
   if(evtObj.deltaX && uiOptions.horizontalScrolling) // horizontal scrolling
   {
-    var deltaRange = mainGraticule.curTimeRange[1] - mainGraticule.curTimeRange[0];
+    var deltaRange = metricQInstance.graticule.curTimeRange[1] - metricQInstance.graticule.curTimeRange[0];
     if(0 > evtObj.deltaX)
     {
-      if(!mainGraticule.setTimeRange([mainGraticule.curTimeRange[0] - deltaRange * 0.2, mainGraticule.curTimeRange[1] - deltaRange * 0.2]))
+      if(!metricQInstance.graticule.setTimeRange([metricQInstance.graticule.curTimeRange[0] - deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] - deltaRange * 0.2]))
       {
         showUserHint("Zoom-Limit erreicht.");
       }
     } else if(0 < evtObj.deltaX)
     {
-      if(!mainGraticule.setTimeRange([mainGraticule.curTimeRange[0] + deltaRange * 0.2, mainGraticule.curTimeRange[1] + deltaRange * 0.2]))
+      if(!metricQInstance.graticule.setTimeRange([metricQInstance.graticule.curTimeRange[0] + deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] + deltaRange * 0.2]))
       {
         showUserHint("Zoom-Limit erreicht.");
       }
     }
-    setTimeout(function (lastUpdateTime) { return function() { updateAllSeriesesBands(lastUpdateTime); }; }(mainGraticule.lastRangeChangeTime), 200);
-    mainGraticule.draw(false);
+    setTimeout(function (myMetricQInstance, lastUpdateTime) { return function() { updateAllSeriesesBands(myMetricQInstance, lastUpdateTime); }; }(metricQInstance, metricQInstance.graticule.lastRangeChangeTime), 200);
+    metricQInstance.graticule.draw(false);
   } else // vertical scrolling
   {
     var scrollDirection = evtObj.deltaY;
@@ -134,34 +144,35 @@ function uiInteractZoomWheel(evtObj)
       scrollDirection = 0.2;
     }
     var curPos = calculateActualMousePos(evtObj);
-    var curTimeValue = mainGraticule.getTimeValueAtPoint(curPos);
+    var curTimeValue = metricQInstance.graticule.getTimeValueAtPoint(curPos);
     if(curTimeValue)
     {
-      if(!mainGraticule.zoomTimeAndValueAtPoint(curTimeValue, scrollDirection, true, false))
+      if(!metricQInstance.graticule.zoomTimeAndValueAtPoint(curTimeValue, scrollDirection, true, false))
       {
         showUserHint("Konnte nicht weiter zoomen, Limit erreicht");
       }
-      mainGraticule.automaticallyDetermineRanges(false, true, metricParams.allTimeReference);
-      setTimeout(function (lastUpdateTime) { return function() { updateAllSeriesesBands(lastUpdateTime); }; }(mainGraticule.lastRangeChangeTime), 150);
-      mainGraticule.draw(false);
+      metricQInstance.graticule.automaticallyDetermineRanges(false, true, "global" == metricQInstance.yRangeType);
+      setTimeout(function (myMetricQInstance, lastUpdateTime) { return function() { updateAllSeriesesBands(myMetricQInstance, lastUpdateTime); }; }(metricQInstance, metricQInstance.graticule.lastRangeChangeTime), 150);
+      metricQInstance.graticule.draw(false);
     }
   }
 }
-function uiInteractLegend(evtObj)
+function uiInteractLegend(metricQInstance, evtObj)
 {
   var curPosOnCanvas = calculateActualMousePos(evtObj);
-  var curPoint = mainGraticule.getTimeValueAtPoint(curPosOnCanvas);
+  var curPoint = metricQInstance.graticule.getTimeValueAtPoint(curPosOnCanvas);
   if(!curPoint)
   {
     return;
   }
-  mainGraticule.draw(false);
-  ctx.fillStyle = "rgba(0,0,0,0.8)";
-  ctx.fillRect(curPosOnCanvas[0] - 1, mainGraticule.graticuleDimensions[1], 2, mainGraticule.graticuleDimensions[3]);
-  ctx.font = "14px Sans";
+  metricQInstance.graticule.draw(false);
+  var myCtx = metricQInstance.graticule.ctx;
+  myCtx.fillStyle = "rgba(0,0,0,0.8)";
+  myCtx.fillRect(curPosOnCanvas[0] - 1, metricQInstance.graticule.graticuleDimensions[1], 2, metricQInstance.graticule.graticuleDimensions[3]);
+  myCtx.font = "14px Sans";
   var metricsArray = new Array();
   var maxTextWidth = 0;
-  var allValuesAtTime = mainGraticule.data.getAllValuesAtTime(curPoint[0]);
+  var allValuesAtTime = metricQInstance.graticule.data.getAllValuesAtTime(curPoint[0]);
   for(var i = 0; i < allValuesAtTime.length; ++i)
   {
     var newEntry = [
@@ -170,7 +181,7 @@ function uiInteractLegend(evtObj)
       ];
     var curTextLine = (new Number(newEntry[0])).toFixed(3) + " " + allValuesAtTime[i][1] + "/" + allValuesAtTime[i][2];
     newEntry.push(curTextLine);
-    newEntry.push(ctx.measureText(curTextLine).width);
+    newEntry.push(myCtx.measureText(curTextLine).width);
     if(newEntry[3] > maxTextWidth)
     {
       maxTextWidth = newEntry[3];
@@ -183,18 +194,18 @@ function uiInteractLegend(evtObj)
   }
   var posDate = new Date(curPoint[0]);
   var timeString = posDate.toLocaleString();
-  ctx.fillText(timeString, curPosOnCanvas[0] + 10, 40 - 20);
+  myCtx.fillText(timeString, curPosOnCanvas[0] + 10, 40 - 20);
   for(var i = 0; i < metricsArray.length; ++i)
   {
-    ctx.fillStyle = determineColorForMetric(metricsArray[i][1]);
-    ctx.globalAlpha = 0.4;
-    ctx.fillRect(curPosOnCanvas[0] + 10, 40 + i * 20 - 15, maxTextWidth, 20);
-    ctx.fillStyle = "#000000";
-    ctx.globalAlpha = 1;
-    ctx.fillText(metricsArray[i][2], curPosOnCanvas[0] + 10, 40 + i * 20);
+    myCtx.fillStyle = determineColorForMetric(metricsArray[i][1]);
+    myCtx.globalAlpha = 0.4;
+    myCtx.fillRect(curPosOnCanvas[0] + 10, 40 + i * 20 - 15, maxTextWidth, 20);
+    myCtx.fillStyle = "#000000";
+    myCtx.globalAlpha = 1;
+    myCtx.fillText(metricsArray[i][2], curPosOnCanvas[0] + 10, 40 + i * 20);
   }
 }
-function uiInteractCheck(eventType, evtObj)
+function uiInteractCheck(eventType, pertainingElement, evtObj)
 {
   for(var i = 0; i < uiInteractArr.length; ++i)
   {
@@ -215,41 +226,41 @@ function uiInteractCheck(eventType, evtObj)
       }
       if(matchingSoFar)
       {
-        window[uiInteractArr[i][2]](evtObj);
+        window[uiInteractArr[i][2]](window.MetricQWebView.getInstance(pertainingElement), evtObj);
       }
     }
   }
 }
-function registerCallbacks()
+function registerCallbacks(anchoringObject)
 {
-  mouseDown.registerDragCallback(function(evtObj) {
-    if(mainGraticule && mouseDown.startTarget && "CANVAS" === mouseDown.startTarget.tagName)
+  mouseDown.registerDragCallback(function (myElement) { return function(evtObj) {
+    if(myElement && mouseDown.startTarget && mouseDown.startTarget.isSameNode(myElement))
     {
       evtObj.preventDefault();
-      uiInteractCheck("drag", evtObj);
+      uiInteractCheck("drag", myElement, evtObj);
     }
-  });
-  mouseDown.registerDropCallback(function(evtObj) {
-    if(mainGraticule && mouseDown.startTarget && "CANVAS" === mouseDown.startTarget.tagName)
+  }; }(anchoringObject));
+  mouseDown.registerDropCallback(function (myElement) { return function(evtObj) {
+    if(myElement && mouseDown.startTarget && mouseDown.startTarget.isSameNode(myElement))
     {
-      uiInteractCheck("drop", evtObj);
+      uiInteractCheck("drop", myElement, evtObj);
     }
-  });
-  mouseDown.registerMoveCallback(function(evtObj) {
-    if(mainGraticule && "CANVAS" === evtObj.target.tagName)
+  }; }(anchoringObject));
+  mouseDown.registerMoveCallback(function (myElement) { return function(evtObj) {
+    if(myElement && myElement.isSameNode(evtObj.target))
     {
-      uiInteractCheck("move", evtObj);
+      uiInteractCheck("move", myElement, evtObj);
     }
-  });
-  document.getElementsByTagName("canvas")[0].addEventListener("mouseout", function(evtObj) {
-    if(mainGraticule)
+  }; }(anchoringObject));
+  anchoringObject.addEventListener("mouseout", function (myElement) { return function(evtObj) {
+    if(myElement)
     {
-      mainGraticule.draw(false);
+      window.MetricQWebView.getInstance(myElement).graticule.draw(false);
     }
-  });
-  document.getElementsByTagName("canvas")[0].addEventListener("wheel", function(evtObj) {
-    uiInteractCheck("wheel", evtObj);
-  });
+  }; }(anchoringObject));
+  anchoringObject.addEventListener("wheel", function (myElement) { return function(evtObj) {
+    uiInteractCheck("wheel", myElement, evtObj);
+  }; }(anchoringObject));
 }
 function calculateActualMousePos(evtObj)
 {
@@ -260,3 +271,189 @@ function calculateActualMousePos(evtObj)
   curPos[1] += scrollOffset[1];
   return curPos;
 }
+
+function updateAllSeriesesBands(metricQInstance, lastUpdateTime) {
+  console.log("Stub-function updateAllSeriesesBands(). Implement me!");
+}
+
+var mouseDown = {
+  startPos: undefined,
+  relativeStartPos: undefined,
+  currentPos: undefined,
+  previousPos: undefined,
+  endPos: undefined,
+  duration: 0,
+  isDown: false,
+  startTime: 0,
+  endTime: 0,
+  startTarget: undefined,
+  endTarget: undefined,
+  dragCallbacks: new Array(),
+  dropCallbacks: new Array(),
+  moveCallbacks: new Array(),
+  calcRelativePos: function(evtObj)
+  {
+    var curPos = [
+      evtObj.x,
+      evtObj.y
+    ];
+    if(mouseDown.startTarget)
+    {
+      curPos[0] -= mouseDown.startTarget.offsetLeft;
+      curPos[1] -= mouseDown.startTarget.offsetTop;
+
+      var scrollOffset = calculateScrollOffset(mouseDown.startTarget);
+      curPos[0] += scrollOffset[0];
+      curPos[1] += scrollOffset[1];
+    }
+    return curPos;
+  },
+  startClick: function(evtObj)
+  {
+    mouseDown.startTarget = evtObj.target;
+    mouseDown.endTarget = undefined;
+    mouseDown.endTime = 0;
+    mouseDown.duration = 0;
+    mouseDown.startTime = evtObj.timestamp;
+    var curPos = mouseDown.calcRelativePos(evtObj);
+    mouseDown.startPos = [ curPos[0], curPos[1]];
+    mouseDown.currentPos = [ curPos[0], curPos[1]];
+    mouseDown.previousPos = [ curPos[0], curPos[1]];
+    mouseDown.relativeStartPos = calculateActualMousePos(evtObj);
+    mouseDown.isDown = true;
+  },
+  moving: function(evtObj)
+  {
+    if(true === mouseDown.isDown)
+    {
+      mouseDown.previousPos = mouseDown.currentPos;
+      mouseDown.currentPos = mouseDown.calcRelativePos(evtObj);
+      for(var i = 0; i < mouseDown.dragCallbacks.length; ++i)
+      {
+        mouseDown.dragCallbacks[i](evtObj);
+      }
+    } else
+    {
+      for(var i = 0; i < mouseDown.moveCallbacks.length; ++i)
+      {
+        mouseDown.moveCallbacks[i](evtObj);
+      }
+    }
+  },
+  endClick: function(evtObj)
+  {
+    mouseDown.endPos = mouseDown.calcRelativePos(evtObj);
+    mouseDown.endTime = evtObj.timestamp;
+    mouseDown.duration = mouseDown.endTime - mouseDown.startTime;
+    mouseDown.endTarget = evtObj.target;
+    mouseDown.isDown = false;
+    for(var i = 0; i < mouseDown.dropCallbacks.length; ++i)
+    {
+      mouseDown.dropCallbacks[i](evtObj);
+    }
+  },
+  registerDragCallback: function(callbackFunc)
+  {
+    mouseDown.dragCallbacks.push(callbackFunc);
+  },
+  registerDropCallback: function(callbackFunc)
+  {
+    mouseDown.dropCallbacks.push(callbackFunc);
+  },
+  registerMoveCallback: function(callbackFunc)
+  {
+    mouseDown.moveCallbacks.push(callbackFunc);
+  }
+}
+var keyDown = {
+  keys: new Array(),
+  keyDown: function(evtObj)
+  {
+    keyDown.keys.push(evtObj.keyCode);
+  },
+  keyUp: function(evtObj)
+  {
+    for(var i = 0; i < keyDown.keys.length; ++i)
+    {
+      if(evtObj.keyCode == keyDown.keys[i])
+      {
+        keyDown.keys.splice(i, 1);
+        --i;
+      }
+    }
+  },
+  is: function (keyCode)
+  {
+    for(var i = 0; i < keyDown.keys.length; ++i)
+    {
+      if(keyDown.keys[i] == keyCode)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+};
+
+function showUserHint(messageText, showDuration)
+{
+  if(undefined === showDuration)
+  {
+    showDuration = 2000 + messageText.length * 50;
+  }
+  if(userHintWindow && userHintWindow.parentNode)
+  {
+    userHintWindow.parentNode.removeChild(userHintWindow);
+    userHintWindow = undefined;
+  }
+  var windowWidth = 10 + Math.min(messageText.length, 80) * 7;
+  if(windowWidth > window.innerWidth)
+  {
+    windowWidth = window.innerWidth;
+  }
+  var windowHeight = Math.ceil(messageText.length / 80) * 27;
+
+  var windowEle = document.createElement("div");
+  windowEle.style.position = "fixed";
+  windowEle.style.left = Math.floor(window.innerWidth / 2 - windowWidth /2);
+  windowEle.style.top  = Math.floor(window.innerHeight / 2 - windowHeight / 2);
+  windowEle.style.fontSize = "10pt";
+  windowEle.style.border = "1px solid #000000";
+  windowEle.style.borderRadius = "18px";
+  windowEle.style.padding = "3px 6px 3px 6px";
+  windowEle.style.width = windowWidth;
+  windowEle.style.height = windowHeight;
+  windowEle.style.backgroundColor = "#fdfddb";
+  windowEle.appendChild(document.createTextNode(messageText));
+  userHintWindow = windowEle = document.getElementsByTagName("body")[0].appendChild(windowEle);
+  setTimeout(function(hintEle) { return function() {
+    if(hintEle)
+    {
+      hintEle.animate([{ opacity: 1 }, { opacity: 0.01 }],
+                      { duration: 1200,
+                        iterations: 1 });
+    }
+  }; }(windowEle), showDuration - 1200);
+  setTimeout(function(hintEle) { return function() { if(hintEle && hintEle.parentNode) { hintEle.parentNode.removeChild(hintEle); } }; }(windowEle), showDuration);
+}
+
+/* figure out scroll offset */
+function calculateScrollOffset(curLevelElement)
+{
+  var scrollOffset = [0, 0];
+  if(curLevelElement.parentNode && "HTML" !== curLevelElement.tagName)
+  {
+    var scrollOffset = calculateScrollOffset(curLevelElement.parentNode);
+  }
+  scrollOffset[0] += curLevelElement.scrollLeft;
+  scrollOffset[1] += curLevelElement.scrollTop;
+  return scrollOffset;
+}
+
+
+//document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("mousedown", mouseDown.startClick);
+document.addEventListener("mousemove", mouseDown.moving);
+document.addEventListener("mouseup", mouseDown.endClick);
+document.addEventListener("keydown", keyDown.keyDown);
+document.addEventListener("keyup", keyDown.keyUp);
