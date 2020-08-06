@@ -27,12 +27,11 @@ class MetricQWebView {
     this.hasPlot = false;
     this.graticule = undefined;
     this.configuration = new Configuration(2, 4);
-    /* TODO: old globals
-    var globalYRangeOverride = undefined;
-    var globalYRangeType = 'local';
-    */
     this.yRangeOverride = undefined;
     this.yRangeType = 'local';
+    this.lastThrottledReloadTime = 0;
+    this.RELOAD_THROTTLING_DELAY = 150;
+    this.reloadThrottleTimeout = undefined;
 
       // accelerate zooming with scroll wheel
     this.ele.addEventListener("wheel", function (configParam) { return function (evt) {
@@ -129,7 +128,6 @@ class MetricQWebView {
 
     if(!this.hasPlot)
     {
-    	//TODO: initialize Graticule class here
     	var canvasSize = [ parseInt(this.ele.offsetWidth), 400];
     	var canvasBorders = [10, 20, 40, 40]; //TOP, RIGHT, BOTTOM, LEFT;
     	var labelingDistance = [5, 10]; // first left, then bottom
@@ -200,8 +198,9 @@ class MetricQWebView {
 
     } else
     {
-      // don't rerender everything
-      //TODO: update Graticule here
+      //Parameters: JSON, doDraw, doResize
+      this.graticule.data.processMetricQDatapoints(datapointsJSON, true, false);
+      this.graticule.draw(false);
     }
 
     if(this.postRender)
@@ -274,7 +273,30 @@ class MetricQWebView {
 	}
 	reload()
 	{
-		this.handler.reload();
+	  this.handler.reload();
+	}
+	throttledReload()
+	{
+      
+      //TODO: implement feature to throttle requests
+      // (i.e. 150 ms without new call to this function)
+      var now = (new Date()).getTime();
+      if(this.reloadThrottleTimeout
+      && (now - this.lastThrottledReloadTime) >= this.RELOAD_THROTTLING_DELAY)
+      {
+      	this.reload();
+      } else
+      {
+      	if(this.reloadThrottleTimeout)
+      	{
+      		clearTimeout(this.reloadThrottleTimeout);
+      	}
+      	this.reloadThrottleTimeout = setTimeout(function(selfReference) { return function () {
+      		selfReference.throttledReload();
+      		selfReference.reloadThrottleTimeout = undefined;
+      	}; }(this), this.RELOAD_THROTTLING_DELAY + 5);
+      }
+      this.lastThrottledReloadTime = now;
 	}
 	getMetric(metricName)
 	{

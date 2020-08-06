@@ -22,8 +22,10 @@ function uiInteractPan(metricQInstance, evtObj)
   if(mouseDown.previousPos[0] !== mouseDown.currentPos[0]
   || mouseDown.previousPos[1] !== mouseDown.currentPos[1])
   {
-    metricQInstance.graticule.moveTimeAndValueRanges( (mouseDown.currentPos[0] - mouseDown.previousPos[0]) * -1 * metricQInstance.graticule.curTimePerPixel, 0);
-    setTimeout(function (lastUpdateTime) { return function() { updateAllSeriesesBands(lastUpdateTime); }; }(metricQInstance.graticule.lastRangeChangeTime), 150);
+  	var timeToMoveBy = (mouseDown.currentPos[0] - mouseDown.previousPos[0]) * -1 * metricQInstance.graticule.curTimePerPixel;
+    metricQInstance.handler.setTimeRange(metricQInstance.handler.startTime + timeToMoveBy,
+    									 metricQInstance.handler.stopTime  + timeToMoveBy);
+    metricQInstance.throttledReload();
     metricQInstance.graticule.draw(false);
   }
 }
@@ -98,12 +100,16 @@ function uiInteractZoomIn(metricQInstance, evtObj)
       posEnd = posStart;
       posStart = swap;
     }
+    metricQInstance.handler.startTime = posStart[0];
+    metricQInstance.handler.stopTime = posEnd[0];
+    //this call isn't needed any more
+    //TODO: remove this function call
     if(!metricQInstance.graticule.setTimeRange([posStart[0], posEnd[0]]))
     {
       showUserHint("Zoom-Limit erreicht.");
     }
     metricQInstance.graticule.automaticallyDetermineRanges(false, true, "global" == metricQInstance.yRangeType);
-    setTimeout(function (myMetricQInstance, lastUpdateTime) { return function() { updateAllSeriesesBands(myMetricQInstance, lastUpdateTime); }; }(metricQInstance, metricQInstance.graticule.lastRangeChangeTime), 200);
+    metricQInstance.reload(); // no need to throttle reload here
     metricQInstance.graticule.draw(false);
   }
 }
@@ -116,21 +122,22 @@ function uiInteractZoomWheel(metricQInstance, evtObj)
   evtObj.preventDefault();
   if(evtObj.deltaX && uiOptions.horizontalScrolling) // horizontal scrolling
   {
-    var deltaRange = metricQInstance.graticule.curTimeRange[1] - metricQInstance.graticule.curTimeRange[0];
+    var deltaRange = metricQInstance.handler.stopTime - metricQInstance.handler.startTime;//metricQInstance.graticule.curTimeRange[1] - metricQInstance.graticule.curTimeRange[0];
+    //TODO: set start and stopTime of the handler
     if(0 > evtObj.deltaX)
     {
-      if(!metricQInstance.graticule.setTimeRange([metricQInstance.graticule.curTimeRange[0] - deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] - deltaRange * 0.2]))
+      if(!metricQInstance.handler.setTimeRange([metricQInstance.graticule.curTimeRange[0] - deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] - deltaRange * 0.2]))
       {
         showUserHint("Zoom-Limit erreicht.");
       }
     } else if(0 < evtObj.deltaX)
     {
-      if(!metricQInstance.graticule.setTimeRange([metricQInstance.graticule.curTimeRange[0] + deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] + deltaRange * 0.2]))
+      if(!metricQInstance.handler.setTimeRange([metricQInstance.graticule.curTimeRange[0] + deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] + deltaRange * 0.2]))
       {
         showUserHint("Zoom-Limit erreicht.");
       }
     }
-    setTimeout(function (myMetricQInstance, lastUpdateTime) { return function() { updateAllSeriesesBands(myMetricQInstance, lastUpdateTime); }; }(metricQInstance, metricQInstance.graticule.lastRangeChangeTime), 200);
+    myMetricQInstance.throttledReload();
     metricQInstance.graticule.draw(false);
   } else // vertical scrolling
   {
@@ -147,12 +154,12 @@ function uiInteractZoomWheel(metricQInstance, evtObj)
     var curTimeValue = metricQInstance.graticule.getTimeValueAtPoint(curPos);
     if(curTimeValue)
     {
-      if(!metricQInstance.graticule.zoomTimeAndValueAtPoint(curTimeValue, scrollDirection, true, false))
+      if(!metricQInstance.handler.zoomTimeAtPoint(curTimeValue, scrollDirection))
       {
         showUserHint("Konnte nicht weiter zoomen, Limit erreicht");
       }
       metricQInstance.graticule.automaticallyDetermineRanges(false, true, "global" == metricQInstance.yRangeType);
-      setTimeout(function (myMetricQInstance, lastUpdateTime) { return function() { updateAllSeriesesBands(myMetricQInstance, lastUpdateTime); }; }(metricQInstance, metricQInstance.graticule.lastRangeChangeTime), 150);
+      metricQInstance.throttledReload();
       metricQInstance.graticule.draw(false);
     }
   }
@@ -272,9 +279,7 @@ function calculateActualMousePos(evtObj)
   return curPos;
 }
 
-function updateAllSeriesesBands(metricQInstance, lastUpdateTime) {
-  console.log("Stub-function updateAllSeriesesBands(). Implement me!");
-}
+
 
 var mouseDown = {
   startPos: undefined,
@@ -395,6 +400,8 @@ var keyDown = {
   }
 };
 
+
+var userHintWindow = undefined;
 function showUserHint(messageText, showDuration)
 {
   if(undefined === showDuration)

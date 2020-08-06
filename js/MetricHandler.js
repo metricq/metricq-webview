@@ -300,6 +300,33 @@ class MetricHandler {
       myMetric.setTraces(metricTraces);
     }
   }
+  setTimeRange(paramStartTime, paramStopTime)
+  {
+    //TODO: check for zoom area if it is too narrow (i.e. less than 1000 ms)
+    //TODO: sync the aforementioned minimum time window
+    this.startTime = paramStartTime;
+    this.stopTime  = paramStopTime;
+    this.renderer.graticule.setTimeRange([this.startTime, this.stopTime]);
+    //this.lastRangeChangeTime = (new Date()).getTime();
+    //TODO: return false when intended zoom area is smaller than e.g. 1000 ms
+    return true;
+  }
+  zoomTimeAtPoint(pointAt, zoomDirection)
+  {
+    var zoomFactor = 1 + zoomDirection;
+    var newTimeDelta  = (this.stopTime - this.startTime  ) * zoomFactor;
+    var couldZoom = false;
+    if(newTimeDelta > 50)
+    {
+      var relationalPositionOfPoint = (pointAt[0] - this.startTime) / (this.stopTime - this.startTime);
+      if(this.setTimeRange(pointAt[0] - (newTimeDelta * relationalPositionOfPoint),
+                             pointAt[0] + (newTimeDelta * (1 - relationalPositionOfPoint))))
+      {
+        couldZoom = true;
+      }
+    }
+    return couldZoom;
+  }
   receivedError(errorCode, metricBase)
   {
     // mark a metric so it is being excluded in bulk-requests
