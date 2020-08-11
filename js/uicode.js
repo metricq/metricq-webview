@@ -762,12 +762,9 @@ function initializeMetricPopup() {
               } else {
                 if(evt.target.getAttribute("metric-old-color") != paramMyMetric.color)
                 {
-                  if("raw" == paramMyMetric.traces[0].name)
-                  {
-                    Plotly.restyle(document.querySelector(".row_body"), {"marker.color": paramMyMetric.color}, paramMyTraces);
-                  } else {
-                    Plotly.restyle(document.querySelector(".row_body"), {"line.color": paramMyMetric.color}, paramMyTraces);
-                  }
+                  //TODO: call some function on MetricQWebView instance about color change
+                  //        (TODO: write that function)
+                  paramMyMetric.updateColor(paramMyMetric.color);
                   let colorEle = document.getElementsByClassName(paramMyMetric.popupKey);
                   if(colorEle && colorEle[0])
                   {
@@ -776,7 +773,7 @@ function initializeMetricPopup() {
                 }
                 if(evt.target.getAttribute("metric-old-marker") != paramMyMetric.marker)
                 {
-                  Plotly.restyle(document.querySelector(".row_body"), {"marker.symbol": paramMyMetric.marker}, paramMyTraces);
+                  paramMyMetric.updateMarker(paramMyMetric.marker);
                 }
                 //don't do a complete repaint
                 //renderMetrics();
@@ -813,7 +810,7 @@ function initializeMetricPopup() {
           document.querySelector("div." + paramMyMetric.popupKey).style.backgroundColor = paramMyMetric.color;
         }}(affectedTraces, myMetric);
         popupEle.querySelector(".popup_legend_select").addEventListener("change", function(myTraces, paramMyMetric) { return function(evt) {
-          Plotly.restyle(document.querySelector(".row_body"), {"marker.symbol": paramMyMetric.marker}, myTraces);
+          paramMyMetric.updateMarker(paramMyMetric.marker);
         }}(affectedTraces, myMetric));
         var okEle = document.querySelector(".popup_ok");
 

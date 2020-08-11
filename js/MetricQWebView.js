@@ -313,7 +313,7 @@ class MetricQWebView {
 	{
 		if(!this.handler.allMetrics["empty"])
 		{
-			this.handler.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[0], new Array());
+			this.handler.allMetrics["empty"] = new Metric(this.graticule, "", metricBaseToRgb(""), markerSymbols[0], new Array());
 		}
 	}
 	deleteMetric(metricBase)
@@ -326,12 +326,16 @@ class MetricQWebView {
 		//Plotly.deleteTraces(this.ele, tracesArr);
 		this.countTraces -= tracesArr.length;
 	}
+	setMetricColor()
+	{
+		//TODO: Code me
+	}
 	changeMetricName(metricReference, newName, oldName)
 	{
 		metricReference.updateName(newName);
         if("" == oldName)
         {
-            this.handler.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[0], new Array());
+            this.handler.allMetrics["empty"] = new Metric(this.graticule, "", metricBaseToRgb(""), markerSymbols[0], new Array());
             this.handler.allMetrics[newName] = metricReference;
         } else
         {

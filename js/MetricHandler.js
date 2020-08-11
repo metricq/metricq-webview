@@ -20,10 +20,10 @@ class MetricHandler {
       var curMetricName = initialMetricNames[i];
       if(0 < curMetricName.length)
       {
-        this.allMetrics[curMetricName] = new Metric(curMetricName, metricBaseToRgb(curMetricName), markerSymbols[i * 4], new Array());
+        this.allMetrics[curMetricName] = new Metric(this.renderer, curMetricName, metricBaseToRgb(curMetricName), markerSymbols[i * 4], new Array());
       } else
       {
-        this.allMetrics["empty"] = new Metric("", metricBaseToRgb(""), markerSymbols[i * 4], new Array());
+        this.allMetrics["empty"] = new Metric(this.renderer, "", metricBaseToRgb(""), markerSymbols[i * 4], new Array());
       }
     }
   }
@@ -294,7 +294,7 @@ class MetricHandler {
     let myMetric = this.allMetrics[metricBase];
     if(!myMetric)
     {
-      this.allMetrics[metricBase] = new Metric(metricBase, metricBaseToRgb(metricBase), markerSymbols[metricIndex * 4], metricTraces);
+      this.allMetrics[metricBase] = new Metric(this.renderer, metricBase, metricBaseToRgb(metricBase), markerSymbols[metricIndex * 4], metricTraces);
     } else 
     {
       myMetric.setTraces(metricTraces);

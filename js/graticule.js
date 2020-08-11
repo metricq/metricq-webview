@@ -653,6 +653,7 @@ function Graticule(ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, par
               }
               break;
             case "_": /* hline marker */
+            case "-":
               parsedObj.drawDots.func = function(ctx, width, height)
               {
                 ctx.moveTo(0, height / 2);
