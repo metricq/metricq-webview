@@ -458,7 +458,6 @@ function calculateScrollOffset(curLevelElement)
 }
 
 
-//document.addEventListener("DOMContentLoaded", init);
 document.addEventListener("mousedown", mouseDown.startClick);
 document.addEventListener("mousemove", mouseDown.moving);
 document.addEventListener("mouseup", mouseDown.endClick);

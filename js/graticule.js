@@ -1,6 +1,8 @@
-function Graticule(ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
+function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
 {
+  this.ele = paramEle;
   this.ctx = ctx;
+  this.canvasSize = [paramEle.offsetWidth, paramEle.offsetHeight];
   this.graticuleDimensions = offsetDimension;
   this.curTimeRange = undefined;
   this.curValueRange = undefined;
@@ -1072,6 +1074,22 @@ function Graticule(ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, par
     }
     return valueRange;
   };
+  this.windowResize = function(evt)
+  {
+    var newSize = [this.ele.parentNode.offsetWidth, this.canvasSize[1]];
+    console.log("windowResize: " + newSize.join(","));
+    this.clearSize = newSize;
+    var canvasBorders = [10, 20, 40, 40]; //TOP, RIGHT, BOTTOM, LEFT;
+    this.graticuleDimensions = [canvasBorders[3],
+                            canvasBorders[0],
+                            newSize[0] - (canvasBorders[1] + canvasBorders[3]),
+                            newSize[1] - (canvasBorders[0] + canvasBorders[2])];
+    this.canvasSize = newSize;
+    this.ele.setAttribute("width", this.ele.parentNode.offsetWidth);
+    this.draw(false);
+    
+  }
+  window.addEventListener("resize", function (selfReference) { return function (evt) { selfReference.windowResize(evt); };}(this));
 }
 function dateToHHMMStr(curDate)
 {
