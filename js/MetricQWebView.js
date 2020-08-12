@@ -313,12 +313,14 @@ class MetricQWebView {
 	{
 		if(!this.handler.allMetrics["empty"])
 		{
-			this.handler.allMetrics["empty"] = new Metric(this.graticule, "", metricBaseToRgb(""), markerSymbols[0], new Array());
+			this.handler.allMetrics["empty"] = new Metric(this, "", metricBaseToRgb(""), markerSymbols[0], new Array());
 		}
 	}
 	deleteMetric(metricBase)
 	{
+		this.graticule.data.deleteMetric(metricBase);
 		delete this.handler.allMetrics[metricBase];
+		this.graticule.draw(false);
 	}
 	deleteTraces(tracesArr)
 	{
@@ -326,16 +328,12 @@ class MetricQWebView {
 		//Plotly.deleteTraces(this.ele, tracesArr);
 		this.countTraces -= tracesArr.length;
 	}
-	setMetricColor()
-	{
-		//TODO: Code me
-	}
 	changeMetricName(metricReference, newName, oldName)
 	{
 		metricReference.updateName(newName);
         if("" == oldName)
         {
-            this.handler.allMetrics["empty"] = new Metric(this.graticule, "", metricBaseToRgb(""), markerSymbols[0], new Array());
+            this.handler.allMetrics["empty"] = new Metric(this, "", metricBaseToRgb(""), markerSymbols[0], new Array());
             this.handler.allMetrics[newName] = metricReference;
         } else
         {

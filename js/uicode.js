@@ -745,13 +745,15 @@ function initializeMetricPopup() {
 
             if("popup_trashcan" == evt.target.getAttribute("class"))
             {
+              console.log("trashcan clicked");
+              //TODO: code me proper
               paramMyInstance.deleteMetric(paramMyMetric.name);
-              paramMyInstance.deleteTraces(paramMyTraces);
               Vue.nextTick(function() { legendApp.$forceUpdate(); });
             } else
             {
               if(paramMyMetric.name != evt.target.getAttribute("metric-old-name"))
               {
+                // TODO: take care of me
                 if("" == paramMyMetric.name && !evt.target.getAttribute("metric-old-name"))
                 {
                   //do nothing
@@ -762,8 +764,6 @@ function initializeMetricPopup() {
               } else {
                 if(evt.target.getAttribute("metric-old-color") != paramMyMetric.color)
                 {
-                  //TODO: call some function on MetricQWebView instance about color change
-                  //        (TODO: write that function)
                   paramMyMetric.updateColor(paramMyMetric.color);
                   let colorEle = document.getElementsByClassName(paramMyMetric.popupKey);
                   if(colorEle && colorEle[0])
@@ -797,17 +797,8 @@ function initializeMetricPopup() {
         var colorchooserEle = popupEle.querySelector(".popup_colorchooser");
         var colorchooserObj = new Colorchooser(colorchooserEle, myMetric);
         colorchooserObj.onchange = function(myTraces, paramMyMetric) { return function() {
-          if(0 == paramMyMetric.traces.length)
-          {
-            return;
-          }
-          if("markers" == paramMyMetric.traces[0].mode)
-          {
-            Plotly.restyle(document.querySelector(".row_body"), {"marker.color": paramMyMetric.color}, myTraces);
-          } else {
-            Plotly.restyle(document.querySelector(".row_body"), {"line.color": paramMyMetric.color}, myTraces);
-          }
           document.querySelector("div." + paramMyMetric.popupKey).style.backgroundColor = paramMyMetric.color;
+          paramMyMetric.renderer.graticule.draw(false);
         }}(affectedTraces, myMetric);
         popupEle.querySelector(".popup_legend_select").addEventListener("change", function(myTraces, paramMyMetric) { return function(evt) {
           paramMyMetric.updateMarker(paramMyMetric.marker);

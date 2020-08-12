@@ -232,6 +232,18 @@ function DataCache()
     }
     return valueArr;
   }
+  this.deleteMetric = function(metricName)
+  {
+    for(var i = 0; i < this.metrics.length; ++i)
+    {
+      if(metricName == this.metrics[i].name)
+      {
+        this.metrics.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 function MetricCache(paramMetricName)

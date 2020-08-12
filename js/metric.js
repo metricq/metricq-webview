@@ -50,12 +50,15 @@ class Metric
     if(this.renderer && this.renderer.graticule && this.renderer.graticule.data)
     {
       var metricCache = this.renderer.graticule.data.getMetricCache(this.name);
-      metricCache.band.styleOptions.color = newCssColor;
-      for(var curSeries in metricCache.series)
+      if(metricCache)
       {
-        if(metricCache.series[curSeries])
+        metricCache.band.styleOptions.color = newCssColor;
+        for(var curSeries in metricCache.series)
         {
-          metricCache.series[curSeries].styleOptions.color = newCssColor;
+          if(metricCache.series[curSeries])
+          {
+            metricCache.series[curSeries].styleOptions.color = newCssColor;
+          }
         }
       }
     }
@@ -73,11 +76,16 @@ class Metric
     if(this.renderer && this.renderer.graticule && this.renderer.graticule.data)
     {
       var metricCache = this.renderer.graticule.data.getMetricCache(this.name);
-      for(var curSeries in metricCache.series)
+      if(metricCache)
       {
-        if(metricCache.series[curSeries])
+        for(var curSeries in metricCache.series)
         {
-          metricCache.series[curSeries].styleOptions.dots = newMarker;
+          //TODO: change this so that marker type ist being stored
+          //        but it only applies marker to /raw aggregate
+          if(metricCache.series[curSeries])
+          {
+            metricCache.series[curSeries].styleOptions.dots = newMarker;
+          }
         }
       }
     }
