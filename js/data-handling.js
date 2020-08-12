@@ -405,6 +405,25 @@ function MetricCache(paramMetricName)
     });
     reqAjax.send(JSON.stringify(reqJson));
   }
+  this.getAllMinMax = function() {
+    var allMin = undefined, allMax = undefined;
+    for(var curAggregate in this.series)
+    {
+      if(this.series[curAggregate])
+      {
+        let curMinMax = this.series[curAggregate].getValueRange();
+        if(undefined === allMin || curMinMax[0] < allMin)
+        {
+          allMin = curMinMax[0];
+        }
+        if(undefined === allMax || curMinMax[1] > allMax)
+        {
+          allMax = curMinMax[1];
+        }
+      }
+    }
+    return [allMin, allMax];
+  }
   this.fetchAllTimeMinMax();
 }
 

@@ -98,27 +98,14 @@ class Metric
   }
   getMinMax(startTime, stopTime)
   {
-    var myMinMax = undefined;
-    for(let i = 0; i < this.traces.length; ++i)
+    if(this.renderer && this.renderer.graticule && this.renderer.graticule.data)
     {
-      for(let j = 0; (j < this.traces[i].x.length && j < this.traces[i].y.length); ++j)
+      var metricCache = this.renderer.graticule.data.getMetricCache(this.name);
+      if(metricCache)
       {
-        if(this.traces[i].x[j] >= startTime
-        && this.traces[i].x[j] <= stopTime)
-        {
-          if(undefined == myMinMax)
-          {
-            myMinMax = [this.traces[i].y[j], this.traces[i].y[j]];
-          } else if(myMinMax[0] > this.traces[i].y[j])
-          {
-            myMinMax[0] = this.traces[i].y[j];
-          } else if(myMinMax[1] < this.traces[i].y[j])
-          {
-            myMinMax[1] = this.traces[i].y[j];
-          }
-        }
+        return metricCache.getAllMinMax();
       }
     }
-    return myMinMax;
+    return undefined;
   }
 }

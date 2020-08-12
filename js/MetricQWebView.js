@@ -270,6 +270,10 @@ class MetricQWebView {
 	    return;
 	  }
 	  //TODO: code me
+	  let allMinMax = this.handler.queryAllMinMax();
+	  this.graticule.curValueRange = [allMinMax[0], allMinMax[1]];
+
+	  this.graticule.draw(false);
 	}
 	reload()
 	{

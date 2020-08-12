@@ -294,7 +294,7 @@ Vue.component("xaxis-popup", {
       },
       set: function(newValue)
       {
-        window.MetricQWebView.instances[0].handler.startTime = (new Date(newValue)).getTime() + (window.MetricQWebView.instances[0].handler.startTime % 86400000);
+        window.MetricQWebView.instances[0].handler.setTimeRange((new Date(newValue)).getTime() + (window.MetricQWebView.instances[0].handler.startTime % 86400000), undefined);
         window.MetricQWebView.instances[0].setPlotRanges(true, true);
       }
     },
@@ -306,7 +306,7 @@ Vue.component("xaxis-popup", {
       },
       set: function(newValue)
       {
-        window.MetricQWebView.instances[0].handler.stopTime = (new Date(newValue)).getTime() + (window.MetricQWebView.instances[0].handler.stopTime % 86400000);
+        window.MetricQWebView.instances[0].handler.setTimeRange(undefined, (new Date(newValue)).getTime() + (window.MetricQWebView.instances[0].handler.stopTime % 86400000));
         window.MetricQWebView.instances[0].setPlotRanges(true, true);
       }
     },
@@ -319,7 +319,7 @@ Vue.component("xaxis-popup", {
       set: function(newValue)
       {
         var dateObj = new Date(this.startDate + " " + newValue);
-        window.MetricQWebView.instances[0].handler.startTime = dateObj.getTime();
+        window.MetricQWebView.instances[0].handler.setTimeRange(dateObj.getTime, undefined);
         window.MetricQWebView.instances[0].setPlotRanges(true, true);
       }
     },
@@ -332,7 +332,7 @@ Vue.component("xaxis-popup", {
       set: function(newValue)
       {
         var dateObj = new Date(this.endDate + " " + newValue);
-        window.MetricQWebView.instances[0].handler.stopTime = dateObj.getTime();
+        window.MetricQWebView.instances[0].handler.setTimeRange(undefined, dateObj.getTime());
         window.MetricQWebView.instances[0].setPlotRanges(true, true);
       }
     }
@@ -745,15 +745,12 @@ function initializeMetricPopup() {
 
             if("popup_trashcan" == evt.target.getAttribute("class"))
             {
-              console.log("trashcan clicked");
-              //TODO: code me proper
               paramMyInstance.deleteMetric(paramMyMetric.name);
               Vue.nextTick(function() { legendApp.$forceUpdate(); });
             } else
             {
               if(paramMyMetric.name != evt.target.getAttribute("metric-old-name"))
               {
-                // TODO: take care of me
                 if("" == paramMyMetric.name && !evt.target.getAttribute("metric-old-name"))
                 {
                   //do nothing
