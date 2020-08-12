@@ -150,6 +150,7 @@ function uiInteractZoomWheel(metricQInstance, evtObj)
     {
       scrollDirection = 0.2;
     }
+    scrollDirection *= metricQInstance.configuration.zoomSpeed / 10;
     var curPos = calculateActualMousePos(evtObj);
     var curTimeValue = metricQInstance.graticule.getTimeValueAtPoint(curPos);
     if(curTimeValue)

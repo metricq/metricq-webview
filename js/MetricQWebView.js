@@ -26,7 +26,7 @@ class MetricQWebView {
     this.countTraces = 0;
     this.hasPlot = false;
     this.graticule = undefined;
-    this.configuration = new Configuration(2, 4);
+    this.configuration = new Configuration(2, 10);
     this.yRangeOverride = undefined;
     this.yRangeType = 'local';
     this.lastThrottledReloadTime = 0;

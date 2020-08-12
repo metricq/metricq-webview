@@ -1077,7 +1077,6 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
   this.windowResize = function(evt)
   {
     var newSize = [this.ele.parentNode.offsetWidth, this.canvasSize[1]];
-
     this.clearSize = newSize;
     var canvasBorders = [10, 20, 40, 40]; //TOP, RIGHT, BOTTOM, LEFT;
     this.graticuleDimensions = [canvasBorders[3],
