@@ -326,7 +326,7 @@ class MetricHandler {
     var zoomFactor = 1 + zoomDirection;
     var newTimeDelta  = (this.stopTime - this.startTime  ) * zoomFactor;
     var couldZoom = false;
-    if(newTimeDelta > 50)
+    if(newTimeDelta > this.renderer.graticule.MIN_ZOOM_TIME)
     {
       var relationalPositionOfPoint = (pointAt[0] - this.startTime) / (this.stopTime - this.startTime);
       if(this.setTimeRange(pointAt[0] - (newTimeDelta * relationalPositionOfPoint),

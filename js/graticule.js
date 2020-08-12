@@ -13,6 +13,7 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
   this.clearSize = paramClearSize;
   this.lastRangeChangeTime = 0;
   this.data = new DataCache();
+  this.MIN_ZOOM_TIME = 1000;
   this.resetData = function()
   {
     delete this.data;
@@ -339,10 +340,10 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
   this.setTimeRange = function (newTimeRange)
   {
     var tooNarrow = false;
-    if((newTimeRange[1] - newTimeRange[0]) < 1000)
+    if((newTimeRange[1] - newTimeRange[0]) < this.MIN_ZOOM_TIME)
     {
       var oldDelta = newTimeRange[1] - newTimeRange[0];
-      var newDelta = 1000;
+      var newDelta = this.MIN_ZOOM_TIME;
       newTimeRange[0] -= Math.round((newDelta - oldDelta) / 2.00);
       newTimeRange[1] += Math.round((newDelta - oldDelta) / 2.00);
       tooNarrow = true;
@@ -358,7 +359,7 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
     var newTimeDelta  = (this.curTimeRange[1] - this.curTimeRange[0]  ) * zoomFactor;
     var newValueDelta = (this.curValueRange[1] - this.curValueRange[0]) * zoomFactor;
     var couldZoom = false;
-    if(zoomTime && newTimeDelta > 50)
+    if(zoomTime && newTimeDelta > this.MIN_ZOOM_TIME)
     {
       var relationalPositionOfPoint = (pointAt[0] - this.curTimeRange[0]) / (this.curTimeRange[1] - this.curTimeRange[0]);
       if(this.setTimeRange([ pointAt[0] - (newTimeDelta * relationalPositionOfPoint),

@@ -610,37 +610,37 @@ Vue.component("export-popup", {
   },
   "computed": {
     fileformats() {
-      return ["svg", "png", "jpeg", "webp"];
+      return ["png", "jpeg"];
     },
     "selectedFileformat": {
       get: function()
       {
-        return window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.format;
+        return window.MetricQWebView.instances[0].configuration.exportFormat;
       },
       set: function(newValue)
       {
-        window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.format = newValue;
+        window.MetricQWebView.instances[0].configuration.exportFormat = newValue;
       }
     },
     "exportWidth": {
       get: function()
       {
-        return window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.width;
+        return window.MetricQWebView.instances[0].configuration.exportWidth;
       },
       set: function(newValue)
       {
-        window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.width = parseInt(newValue);
+        window.MetricQWebView.instances[0].configuration.exportWidth = parseInt(newValue);
       }
     },
     "exportHeight":
     {
       get: function()
       {
-        return window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.height;
+        return window.MetricQWebView.instances[0].configuration.exportHeight;
       },
       set: function(newValue)
       {
-        window.MetricQWebView.instances[0].plotlyOptions.toImageButtonOptions.height = parseInt(newValue);
+        window.MetricQWebView.instances[0].configuration.exportHeight = parseInt(newValue);
       }
     }
   },

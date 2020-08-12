@@ -349,10 +349,23 @@ class MetricQWebView {
 	}
 	doExport()
 	{
-		//this.plotlyLayout.showlegend=true;
-		Plotly.relayout(this.ele,{"showlegend": true});
-		Plotly.downloadImage(this.ele, this.plotlyOptions.toImageButtonOptions);
-		Plotly.relayout(this.ele,{"showlegend": false});
+		//TODO: heed width and height parameters!
+		//this.configuration.exportWidth;
+
+		let filenameStr = "MetricQ-WebView.";
+		let filetypeStr = "image/";
+		filenameStr += this.configuration.exportFormat;
+		filetypeStr += this.configuration.exportFormat;
+		let canvasImageData = this.graticule.ele.toDataURL(filetypeStr);
+		var linkEle = document.createElement("a");
+        linkEle.setAttribute("href", canvasImageData);
+        linkEle.setAttribute("download", filenameStr);
+        //linkEle.setAttribute("onclick", "this.parentNode.removeChild(this);");
+        linkEle.appendChild(document.createTextNode("Export"));
+        linkEle = document.body.appendChild(linkEle);
+
+        linkEle.click();
+        document.body.removeChild(linkEle);
 	}
 }
 
