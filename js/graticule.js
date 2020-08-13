@@ -1087,9 +1087,9 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
     this.canvasSize = newSize;
     this.ele.setAttribute("width", this.ele.parentNode.offsetWidth);
     this.draw(false);
+    //TODO: reposition the gear elements!
     
   }
-  window.addEventListener("resize", function (selfReference) { return function (evt) { selfReference.windowResize(evt); };}(this));
 }
 function dateToHHMMStr(curDate)
 {

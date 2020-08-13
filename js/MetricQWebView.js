@@ -103,6 +103,7 @@ class MetricQWebView {
     {
       this.handler.doRequest(400);
     }
+    window.addEventListener("resize", function (selfReference) { return function (evt) { selfReference.windowResize(evt); };}(this));
   }
   reinitialize(metricsArr, startTime, stopTime)
   {
@@ -144,8 +145,12 @@ class MetricQWebView {
     									labelingDistance[0], labelingDistance[1],
     									[canvasSize[0], canvasSize[1]]);
     	this.hasPlot = true;
+    	//parameters two and three "true" (doDraw, doResize) are ignored here :/
+    	this.graticule.setTimeRange([this.handler.startTime, this.handler.stopTime]);
     	this.graticule.data.processMetricQDatapoints(datapointsJSON, true, true);
-    	this.graticule.draw(true);
+    	//URL import problem here: the response's start and end time are taken here :/
+    	this.graticule.automaticallyDetermineRanges(false, true, "global" == this.yRangeType);
+    	this.graticule.draw(false);
     	registerCallbacks(myCanvas);
 
 	    /* TODO: externalize gear stuff */
@@ -177,6 +182,8 @@ class MetricQWebView {
 	    gearImages[i].setAttribute("height", "28");
 	  }
 	  var gearWrapper = [undefined, undefined];
+	  //TODO: THIS IS NOT MULTI-INSTANCE-SAFE
+	  //TODO: RENAME THESE ids SO THAT THEY GET NEW INDIVIDUAL ids EACH AND EVERY TIME
 	  var gearIds = ["gear_xaxis", "gear_yaxis"];
 	  for(var i = 0; i < 2; ++i)
 	  {
@@ -366,6 +373,11 @@ class MetricQWebView {
 
         linkEle.click();
         document.body.removeChild(linkEle);
+	}
+	windowResize(evt)
+	{
+		this.positionXAxisGear(this.ele, document.getElementById("gear_xaxis"));
+		this.graticule.windowResize(evt);
 	}
 }
 

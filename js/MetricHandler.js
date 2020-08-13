@@ -314,12 +314,18 @@ class MetricHandler {
     }
     this.startTime = paramStartTime;
     this.stopTime  = paramStopTime;
-    //maybe move this line to MetricQWebView.setPlotRanges()?
-    this.renderer.graticule.setTimeRange([this.startTime, this.stopTime]);
+
+
+    this.renderer.updateMetricUrl();
+
+    //maybe move this line to MetricQWebView.setPlotRanges()? NAW
+    return this.renderer.graticule.setTimeRange([this.startTime, this.stopTime]);
     //this.lastRangeChangeTime = (new Date()).getTime();
     //TODO: return false when intended zoom area is smaller than e.g. 1000 ms
     //TODO: define a CONSTANT that is MINIMUM_ZOOM_AREA
-    return true;
+
+    //TODO: call url export here?
+    //return true;
   }
   zoomTimeAtPoint(pointAt, zoomDirection)
   {

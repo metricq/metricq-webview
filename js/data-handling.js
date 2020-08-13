@@ -4,8 +4,6 @@ function DataCache()
   this.metrics = new Array();
   this.processMetricQDatapoints = function(datapointsJSON, doDraw, doResize)
   {
-    //TODO: remove this DEBUG-Output
-    console.log(datapointsJSON);
     var distinctMetrics = new Object();
     var metricCountIndex = undefined;
     for(var i = 0; i < datapointsJSON.length; ++i)
