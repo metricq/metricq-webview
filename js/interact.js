@@ -177,7 +177,7 @@ function uiInteractLegend(metricQInstance, evtObj)
   var myCtx = metricQInstance.graticule.ctx;
   myCtx.fillStyle = "rgba(0,0,0,0.8)";
   myCtx.fillRect(curPosOnCanvas[0] - 1, metricQInstance.graticule.graticuleDimensions[1], 2, metricQInstance.graticule.graticuleDimensions[3]);
-  myCtx.font = "14px Sans";
+  myCtx.font = "14px sans-serif"; //actually it's sans-serif
   var metricsArray = new Array();
   var maxTextWidth = 0;
   var allValuesAtTime = metricQInstance.graticule.data.getAllValuesAtTime(curPoint[0]);
