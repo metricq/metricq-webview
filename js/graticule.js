@@ -14,6 +14,7 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
   this.lastRangeChangeTime = 0;
   this.data = new DataCache();
   this.MIN_ZOOM_TIME = 1000;
+  this.DEFAULT_FONT = "sans-serif";
   this.resetData = function()
   {
     delete this.data;
@@ -296,7 +297,7 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
     }
     /* draw text */
     this.ctx.fillStyle = "rgba(0,0,0,1)";
-    this.ctx.font = "14px Sans";
+    this.ctx.font = "14px " + this.DEFAULT_FONT;
     for(var i = 0; i < xAxisSteps.length; ++i)
     {
       var textWidth = this.ctx.measureText(xAxisSteps[i][1]).width;

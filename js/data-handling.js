@@ -4,18 +4,19 @@ function DataCache()
   this.metrics = new Array();
   this.processMetricQDatapoints = function(datapointsJSON, doDraw, doResize)
   {
+    //console.log(datapointsJSON);
     var distinctMetrics = new Object();
-    var metricCountIndex = undefined;
-    for(var i = 0; i < datapointsJSON.length; ++i)
+    var indexesOfCountData = new Array();
+    for(var targetName in datapointsJSON)
     {
-      var metric = datapointsJSON[i];
-      var metricParts = metric.target.split("/");
+      var metric = datapointsJSON[targetName];
+      var metricParts = targetName.split("/");
       if("count" == metricParts[1])
       {
-        metricCountIndex = i;
+        indexesOfCountData.push(targetName);
       } else
       {
-        this.newSeries(metricParts[0], metricParts[1]).parseDatapoints(metric.datapoints);
+        this.newSeries(metricParts[0], metricParts[1]).parseDatapoints(metric.data);
       }
       if("raw" == metricParts[1])
       {
@@ -33,10 +34,11 @@ function DataCache()
     for(var curMetricBase in distinctMetrics)
     {
       distinctMetrics[curMetricBase].generateBand();
-      if(undefined !== metricCountIndex)
-      {
-        distinctMetrics[curMetricBase].parseCountDatapoints(datapointsJSON[metricCountIndex]);
-      }
+    }
+    for(var i = 0; i < indexesOfCountData.length; ++i)
+    {
+      var metricParts = indexesOfCountData[i].split("/");
+      distinctMetrics[metricParts[0]].parseCountDatapoints(datapointsJSON[indexesOfCountData[i]].data);
     }
   }
   this.newSeries = function(metricName, metricAggregate)
@@ -330,7 +332,7 @@ function MetricCache(paramMetricName)
         {
           for(var j = 0; j < curSeries.points.length && j < countDatapoints.length; ++j)
           {
-            curSeries.points[j].count = countDatapoints[j][0];
+            curSeries.points[j].count = countDatapoints[j].value;
           }
         }
       }
@@ -387,7 +389,7 @@ function MetricCache(paramMetricName)
       ]
     };
     var reqAjax = new XMLHttpRequest();
-    reqAjax.open("POST", METRICQ_BACKEND, true);
+    reqAjax.open("POST", METRICQ_BACKEND + "/query", true);
     reqAjax.processingFunction = function (ref) { return function (json) {ref.processAllTimeQuery(ref, json); }; }(this);
     reqAjax.addEventListener("load", function(evtObj) {
       var parsedJson = undefined;
@@ -610,7 +612,8 @@ function Series(paramAggregate, paramStyleOptions)
   {
     for(var i = 0; i < metricDatapoints.length; ++i)
     {
-      this.addPoint(new Point(metricDatapoints[i][1], metricDatapoints[i][0]), true);
+      var ms = metricDatapoints[i].time.unix() * 1000 + metricDatapoints[i].time.millisecond();
+      this.addPoint(new Point(ms , metricDatapoints[i].value), true);
     }
   }
   this.getTimeRange = function()

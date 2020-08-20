@@ -216,6 +216,10 @@ class MetricQWebView {
     }
   }
 	positionXAxisGear(rowBodyEle, gearEle) {
+	  if(!rowBodyEle || !gearEle)
+	  {
+	  	return;
+	  }
 	  gearEle.style.position = "absolute";
 	  var posGear = this.getTopLeft(rowBodyEle);
 	  posGear[0] += parseInt(rowBodyEle.offsetWidth) - parseInt(gearEle.offsetWidth);
@@ -226,6 +230,10 @@ class MetricQWebView {
 	  gearEle.style.top = posGear[1] + "px";  
 	}
 	positionYAxisGear(rowBodyEle, gearEle) {
+	  if(!rowBodyEle || !gearEle)
+	  {
+	  	return;
+	  }
 	  gearEle.style.position = "absolute";
 	  var posGear = this.getTopLeft(rowBodyEle);
 	  posGear[0] += 20;
@@ -376,8 +384,11 @@ class MetricQWebView {
 	}
 	windowResize(evt)
 	{
-		this.positionXAxisGear(this.ele, document.getElementById("gear_xaxis"));
-		this.graticule.windowResize(evt);
+		if(this.graticule)
+		{
+		  this.positionXAxisGear(this.ele, document.getElementById("gear_xaxis"));
+		  this.graticule.windowResize(evt);
+		}
 	}
 }
 

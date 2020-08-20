@@ -1,4 +1,4 @@
-var METRICQ_BACKEND = "https://grafana.metricq.zih.tu-dresden.de/metricq/query";
+var METRICQ_BACKEND = "https://grafana.metricq.zih.tu-dresden.de/metricq";
 
 
 class MetricHandler {
@@ -7,6 +7,7 @@ class MetricHandler {
   	this.renderer = paramRenderer;
   	this.startTime = paramStartTime;
   	this.stopTime = paramStopTime;
+    this.metricQHistoric = new MetricQHistoric(METRICQ_BACKEND);
 
     this.WIGGLEROOM_PERCENTAGE = 0.05;
 
@@ -45,42 +46,83 @@ class MetricHandler {
         }
       }
     }
-    var queryJSON = this.createMetricQQuery(this.startTime - timeMargin,
-                                            this.stopTime + timeMargin,
-                                            maxDataPoints,
-                                            nonErrorProneMetrics,
-                                            ["min", "max", "avg", "count"]);
-    if(queryJSON)
+    
+                                           
+    var queryObj = this.metricQHistoric.query(this.startTime - timeMargin,
+                                              this.stopTime  + timeMargin,
+                                              maxDataPoints);
+    var defaultAggregates = ['min', 'max', 'avg', 'count'];
+    for(var i = 0; i < nonErrorProneMetrics.length; ++i)
     {
-      // TODO: use modern WebWorkers, or even better:
-      //       use fetch-API with promises, it's modern!
-      var req = new XMLHttpRequest();
-      req.open("POST", METRICQ_BACKEND, true);
-      req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-      req.onreadystatechange = function(selfReference, paramMetricArr) { return function(evtObj) {
-        selfReference.handleMetricResponse(selfReference, paramMetricArr, evtObj);
-      }; }(this, nonErrorProneMetrics);
-      req.send(queryJSON);
+      queryObj.target(nonErrorProneMetrics[i], defaultAggregates);
+    }
+    if(0 < queryObj.targets.length)
+    {
+      //TODO: register some callback
+
+      //execute query
+      //TODO: pass parameter nonErrorProneMetrics
+      queryObj.run().then(function(selfReference, requestedMetrics) { return function(dataset) { selfReference.handleResponse(selfReference, requestedMetrics, dataset); }; }(this, nonErrorProneMetrics));
+      //queryObj.run().then((dataset) => { this.handleResponse(dataset); });
+
+
+
     }
     for(var i = 0; i < remainingMetrics.length; ++i)
     {
-      var queryJSON = this.createMetricQQuery(this.startTime - timeMargin,
-                                              this.stopTime + timeMargin,
-                                              maxDataPoints,
-                                              [remainingMetrics[i]],
-                                              ["min", "max", "avg", "count"]);
-      if(queryJSON)
-      {
-        var req = new XMLHttpRequest();
-        req.open("POST", METRICQ_BACKEND, true);
-        req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        req.onreadystatechange = function(selfReference, paramMetricArr) { return function(evtObj) {
-          selfReference.handleMetricResponse(selfReference, paramMetricArr, evtObj);
-        }; }(this, [remainingMetrics[i]]);
-        req.send(queryJSON);
-      }
+      var queryObj = this.metricQHistoric.query(this.startTime - timeMargin,
+                                                this.stopTime  + timeMargin,
+                                                maxDataPoints);
+      queryObj.target(remainingMetrics[i], defaultAggregates);
+
+      queryObj.run().then(function(selfReference, requestedMetrics) { return function(dataset) { selfReference.handleResponse(selfReference, requestedMetrics, dataset); }; }(this, [ remainingMetrics[i] ]));
     }
   }
+  handleResponse(selfReference, requestedMetrics, myData)
+  {
+    var listOfFaultyMetrics = new Array();
+    for(var i = 0; i < requestedMetrics.length; ++i)
+    {
+      var metricName = requestedMetrics[i];
+      var matchingAggregatesObj = new Object();
+      var matchingAggregatesCount = 0;
+      for(var curMetricName in myData)
+      {
+        var splitted = curMetricName.split("/");
+        if(splitted[0] === requestedMetrics[i])
+        {
+          matchingAggregatesObj[splitted[1]] = true;
+          matchingAggregatesCount += 1;
+        }
+      }
+      if(!selfReference.checkIfMetricIsOk(metricName, matchingAggregatesCount, matchingAggregatesObj))
+      {
+        listOfFaultyMetrics.push(metricName);
+        selfReference.receivedError(0, metricName);
+      }
+    }
+    if(0 < listOfFaultyMetrics)
+    {
+      showUserHint("Error with metrics: " + listOfFaultyMetrics.join(", "));
+    }
+    selfReference.renderer.renderMetrics(myData);
+  }
+  checkIfMetricIsOk(metricName, aggregateCount, aggregateObj)
+  {
+    if(!metricName
+    || 1 > aggregateCount
+    || !aggregateObj["count"])
+    {
+      return false;
+    }
+    if(!((aggregateObj["raw"] && !aggregateObj["min"] && !aggregateObj["max"])
+      ||(!aggregateObj["raw"] && aggregateObj["min"] && aggregateObj["max"])))
+    {
+      return false;
+    }
+    return true;
+  }
+  //TODO: 'drop'/remove this function
   handleMetricResponse(selfReference, metricArr, evt)
   {
     if(4 == evt.target.readyState)
@@ -92,7 +134,10 @@ class MetricHandler {
         try {
           parsedObj = JSON.parse(evt.target.responseText);
           //selfReference.parseResponse(parsedObj, metricArr);
-          selfReference.renderer.renderMetrics(parsedObj);
+          //console.log("old Data format:");
+          //console.log(parsedObj);
+          console.log("Dropping data...");
+          //selfReference.renderer.renderMetrics(parsedObj);
         } catch(exc)
         {
           console.log("Couldn't parse");
@@ -100,6 +145,7 @@ class MetricHandler {
         }
       } else
       {
+        console.log(evt.target);
         selfReference.receivedError(evt.target.status, metricArr);
       }
     }
