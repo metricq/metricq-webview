@@ -464,3 +464,18 @@ document.addEventListener("mousemove", mouseDown.moving);
 document.addEventListener("mouseup", mouseDown.endClick);
 document.addEventListener("keydown", keyDown.keyDown);
 document.addEventListener("keyup", keyDown.keyUp);
+
+// code for Mac Safari
+window.addEventListener("gesturechange", function(evt) {
+// console.log(evt);
+evt.preventDefault();
+var timeRange = window.MetricQWebView.instances[0].graticule.curTimeRange;
+var delta = timeRange[1] - timeRange[0];
+timeMargin = Math.round((delta * evt.scale - delta) / 2);
+timeRange[0] -= timeMargin;
+timeRange[1] += timeMargin;
+window.MetricQWebView.instances[0].handler.setTimeRange(timeRange[0], timeRange[1]);
+window.MetricQWebView.instances[0].throttledReload();
+window.MetricQWebView.instances[0].graticule.draw(false);
+ });
+window.addEventListener("contextmenu", event => event.preventDefault());
