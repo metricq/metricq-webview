@@ -122,6 +122,10 @@ class MetricHandler {
     }
     return true;
   }
+  searchMetricsPromise(inputStr)
+  {
+    return this.metricQHistoric.search(inputStr);
+  }
   //TODO: 'drop'/remove this function
   handleMetricResponse(selfReference, metricArr, evt)
   {

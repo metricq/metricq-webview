@@ -26,6 +26,7 @@ class Metric
     this.globalMinmax = undefined;
     this.errorprone = false;
   	this.popup = false;
+    //this.autocompleteList = new Array();
   }
   filterKey(paramKey)
   {

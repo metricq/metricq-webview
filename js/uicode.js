@@ -129,7 +129,11 @@ Vue.component("metric-popup", {
             + "<div class=\"form-group row\">"
             + "<label class=\"col-sm-2 col-form-label\" for=\"input_metric_name\">Name</label>"
             + "<div class=\"col-sm-10\">"
-            + "<input type=\"text\" id=\"input_metric_name\" class=\"popup_input form-control\" v-model=\"metric.name\" />"
+            + "<input type=\"text\" list=\"autocomplete_metric\" id=\"input_metric_name\" class=\"popup_input form-control\" v-model=\"metric.name\" />"
+            + "<datalist id=\"autocomplete_metric\">"
+            // using v-for here doesn't work :(
+            //+ "<option v-for=\"suggestion in autocompleteList\" v-bind:value=\"suggestion\">{{ suggestion }}</option>"
+            + "</datalist>"
             + "</div></div>"
             + "<div class=\"form-group row\">"
             + "<label class=\"col-sm-2 col-form-label\">Farbe</label>"
@@ -609,6 +613,7 @@ Vue.component("export-popup", {
     }
   },
   "computed": {
+
     fileformats() {
       return ["png", "jpeg"];
     },
@@ -721,6 +726,7 @@ function initializeMetricPopup() {
       var popupEle = document.getElementById(myMetric.popupKey);
       if(popupEle)
       {
+        //TODO: remove this 'affectedTraces' stuff
         let affectedTraces = new Array();
         var j = 0;
         for(var metricBase in instance.handler.allMetrics)
@@ -788,6 +794,21 @@ function initializeMetricPopup() {
           {
             disablePopupFunc(evt);
           }
+          //TODO: implement throttling? 
+          instance.handler.searchMetricsPromise(evt.target.value).then(function(myInstance, wrapperEle, paramMetric) { return function(searchSuggestions) {
+            var datalistEle = document.getElementById("autocomplete_metric");
+            for(var i = datalistEle.childNodes.length - 1; i >= 0; --i)
+            {
+              datalistEle.removeChild(datalistEle.childNodes[i]);
+            }
+            for(var i = 0; i < searchSuggestions.length; ++i)
+            {
+              var optionEle = document.createElement("option");
+              optionEle.setAttribute("value", searchSuggestions[i]);
+              datalistEle.appendChild(optionEle);
+            }
+
+          }; }(instance, popupEle, myMetric));
         });
         var trashcanEle = popupEle.querySelector(".popup_trashcan");
 
