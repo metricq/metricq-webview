@@ -365,11 +365,11 @@ class MetricHandler {
 
     if(isNaN(paramStartTime) || isNaN(paramStopTime))
     {
-      throw new Exception("uh oh time is NaN");
+      throw "uh oh time is NaN";
     }
     if(paramStartTime >= paramStopTime)
     {
-      throw new Exception(`startTime(${paramStartTime}) is not smaller than stopTime(${paramStopTime})`);
+      throw `startTime(${paramStartTime}) is not smaller than stopTime(${paramStopTime})`;
     }
 
     

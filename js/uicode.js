@@ -323,7 +323,7 @@ Vue.component("xaxis-popup", {
       set: function(newValue)
       {
         var dateObj = new Date(this.startDate + " " + newValue);
-        window.MetricQWebView.instances[0].handler.setTimeRange(dateObj.getTime, undefined);
+        window.MetricQWebView.instances[0].handler.setTimeRange(dateObj.getTime(), undefined);
         window.MetricQWebView.instances[0].setPlotRanges(true, true);
       }
     },
