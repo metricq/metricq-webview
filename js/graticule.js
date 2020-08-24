@@ -256,7 +256,7 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
     }
     var firstStep = rangeStart - (rangeStart % stepSize);
     var stepsArr = new Array();
-    for(var i = 0, curVal = 0; firstStep + (i * stepSize) < rangeEnd; i++)
+    for(var i = 0, curVal = 0; firstStep + (i * stepSize) <= rangeEnd; i++)
     {
       curVal = firstStep + (i * stepSize);
       if(0 > powerTen)
