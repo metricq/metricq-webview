@@ -412,13 +412,16 @@ function MetricCache(paramMetricName)
       if(this.series[curAggregate])
       {
         let curMinMax = this.series[curAggregate].getValueRange();
-        if(undefined === allMin || curMinMax[0] < allMin)
+        if(curMinMax)
         {
-          allMin = curMinMax[0];
-        }
-        if(undefined === allMax || curMinMax[1] > allMax)
-        {
-          allMax = curMinMax[1];
+          if(undefined === allMin || curMinMax[0] < allMin)
+          {
+            allMin = curMinMax[0];
+          }
+          if(undefined === allMax || curMinMax[1] > allMax)
+          {
+            allMax = curMinMax[1];
+          }
         }
       }
     }
@@ -537,7 +540,7 @@ function Series(paramAggregate, paramStyleOptions)
         {
           ++betterIndex;
         }
-      } else if("direct" == this.styleOptions.connect)
+      } else if("direct" == this.styleOptions.connect) // linear-interpolation
       {
         var firstPoint, secondPoint;
         if((timeAt < this.points[betterIndex].time && 0 > betterIndex) || (betterIndex + 1) >= this.points.length)

@@ -13,6 +13,9 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
   this.clearSize = paramClearSize;
   this.lastRangeChangeTime = 0;
   this.data = new DataCache();
+  //TODO: take these non-changing parameters
+  //      as parameters to initialisation
+  this.MAX_ZOOM_TIME = 20 * 365 * 24 * 3600 * 1000; //TODO: actually use this
   this.MIN_ZOOM_TIME = 1000;
   this.DEFAULT_FONT = "sans-serif";
   this.resetData = function()
@@ -302,7 +305,10 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
     {
       var textWidth = this.ctx.measureText(xAxisSteps[i][1]).width;
       this.ctx.fillText(xAxisSteps[i][1], xPositions[i] - Math.floor(textWidth / 2), this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom /2);
+
     }
+    //DEBUG
+    //console.log("x-axis labeling offset: " + (this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom /2));
     for(var i = 0; i < yAxisSteps.length; ++i)
     {
       if(yPositions[i] >= this.graticuleDimensions[1])
@@ -338,22 +344,14 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
     this.curValueRange[1] += moveValueBy;
     this.lastRangeChangeTime = (new Date()).getTime();
   };
-  this.setTimeRange = function (newTimeRange)
+  this.setTimeRange = function (paramStartTime, paramStopTime)
   {
-    var tooNarrow = false;
-    if((newTimeRange[1] - newTimeRange[0]) < this.MIN_ZOOM_TIME)
-    {
-      var oldDelta = newTimeRange[1] - newTimeRange[0];
-      var newDelta = this.MIN_ZOOM_TIME;
-      newTimeRange[0] -= Math.round((newDelta - oldDelta) / 2.00);
-      newTimeRange[1] += Math.round((newDelta - oldDelta) / 2.00);
-      tooNarrow = true;
-    }
-    this.curTimeRange = [newTimeRange[0], newTimeRange[1]];
+    this.curTimeRange = [paramStartTime, paramStopTime];
     this.curTimePerPixel = (this.curTimeRange[1] - this.curTimeRange[0]) / this.graticuleDimensions[2];
     this.lastRangeChangeTime = (new Date()).getTime();
-    return !tooNarrow;
+    return true;
   };
+  // is never called, why not remove this??
   this.zoomTimeAndValueAtPoint = function(pointAt, zoomDirection, zoomTime, zoomValue)
   {
     var zoomFactor = 1 + zoomDirection;
@@ -363,8 +361,9 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
     if(zoomTime && newTimeDelta > this.MIN_ZOOM_TIME)
     {
       var relationalPositionOfPoint = (pointAt[0] - this.curTimeRange[0]) / (this.curTimeRange[1] - this.curTimeRange[0]);
-      if(this.setTimeRange([ pointAt[0] - (newTimeDelta * relationalPositionOfPoint),
-                             pointAt[0] + (newTimeDelta * (1 - relationalPositionOfPoint))]))
+      //TODO: fix this, setTimeRange no longer checks validity
+      if(this.setTimeRange(pointAt[0] - (newTimeDelta * relationalPositionOfPoint),
+                           pointAt[0] + (newTimeDelta * (1 - relationalPositionOfPoint))))
       {
         couldZoom = true;
       }
@@ -381,9 +380,12 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
   };
   this.automaticallyDetermineRanges = function(determineTimeRange, determineValueRange, allTimeValueRanges)
   {
+    // uh oh, this case is troublesome, when we wrap
+    //   the time in a handler, like we do
     if(determineTimeRange)
     {
-      this.setTimeRange(this.figureOutTimeRange());
+      var times = this.figureOutTimeRange();
+      this.setTimeRange(times[0], times[1]);
     }
     if(determineValueRange)
     {
@@ -395,6 +397,8 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
       this.lastRangeChangeTime = (new Date()).getTime();
     }
   };
+  //since automaticallyDetermineRanges is not suitable anymore,
+  //  parameter 'adjustRanges' should never be true!
   this.draw = function(adjustRanges)
   {
     timers.drawing = {
@@ -403,6 +407,7 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
     };
     if(true === adjustRanges)
     {
+      throw new Exception("Tried to automatically determine time ranges. That makes handler out of sync, disallowed!");
       this.automaticallyDetermineRanges(true, true);
     } else if(undefined === this.curTimeRange)
     {
@@ -451,7 +456,9 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
        * 2 = last
        * 3 = next
        */
-      switch(styleOptions.connect)
+      switch(styleOptions.connect)  // Thomas: Magische Zahlen sind nicht schön
+                                    //         prinzipiell sind magische Zahlen nicht schön
+                                    // Inkonsistenz: Einmal Strings, einmal Zahlen
       {
         case "next":
           parsedObj.connect = 3;

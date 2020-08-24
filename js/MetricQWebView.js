@@ -30,9 +30,9 @@ class MetricQWebView {
     this.margins = {
     	canvas: {
     		top: 10,
-    		right: 20,
+    		right: 35,
     		bottom: 40,
-    		left: 40
+    		left: 35
     	},
     	labels: {
     		left: 5,
@@ -150,11 +150,11 @@ class MetricQWebView {
     											  this.margins.canvas.top,
     											  canvasSize[0] - (this.margins.canvas.right + this.margins.canvas.left),
     											  canvasSize[1] - (this.margins.canvas.top + this.margins.canvas.bottom)],
-    									this.margins.labels.left, this.margins.labels.top,
+    									this.margins.labels.left, this.margins.labels.bottom,
     									[canvasSize[0], canvasSize[1]]);
     	this.hasPlot = true;
     	//parameters two and three "true" (doDraw, doResize) are ignored here :/
-    	this.graticule.setTimeRange([this.handler.startTime, this.handler.stopTime]);
+    	this.handler.setTimeRange(this.handler.startTime, this.handler.stopTime);
     	this.graticule.data.processMetricQDatapoints(datapointsJSON, true, true);
     	//URL import problem here: the response's start and end time are taken here :/
     	this.graticule.automaticallyDetermineRanges(false, true, "global" == this.yRangeType);

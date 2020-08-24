@@ -362,14 +362,43 @@ class MetricHandler {
     {
       paramStopTime = this.stopTime;
     }
+
+    if(isNaN(paramStartTime) || isNaN(paramStopTime))
+    {
+      throw new Exception("uh oh time is NaN");
+    }
+    if(paramStartTime >= paramStopTime)
+    {
+      throw new Exception(`startTime(${paramStartTime}) is not smaller than stopTime(${paramStopTime})`);
+    }
+
+    
+    var timeSuitable = true;
+    if((paramStopTime - paramStartTime) < this.renderer.graticule.MIN_ZOOM_TIME)
+    {
+      var oldDelta = paramStopTime - paramStartTime;
+      var newDelta = this.renderer.graticule.MIN_ZOOM_TIME;
+      paramStartTime -= Math.round((newDelta - oldDelta) / 2.00);
+      paramStopTime  += Math.round((newDelta - oldDelta) / 2.00);
+      timeSuitable = false;
+    }
+    if((paramStopTime - paramStartTime) > this.renderer.graticule.MAX_ZOOM_TIME)
+    {
+      var oldDelta = paramStopTime - paramStartTime;
+      var newDelta = this.renderer.graticule.MAX_ZOOM_TIME;
+      paramStartTime += Math.round((oldDelta - newDelta) / 2.00);
+      paramStopTime  -= Math.round((oldDelta - newDelta) / 2.00);
+      timeSuitable = false;
+    }
+
     this.startTime = paramStartTime;
     this.stopTime  = paramStopTime;
-
-
+    
     this.renderer.updateMetricUrl();
 
     //maybe move this line to MetricQWebView.setPlotRanges()? NAW
-    return this.renderer.graticule.setTimeRange([this.startTime, this.stopTime]);
+    this.renderer.graticule.setTimeRange(this.startTime, this.stopTime);
+    return timeSuitable;
     //this.lastRangeChangeTime = (new Date()).getTime();
     //TODO: return false when intended zoom area is smaller than e.g. 1000 ms
     //TODO: define a CONSTANT that is MINIMUM_ZOOM_AREA

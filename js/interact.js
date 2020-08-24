@@ -100,11 +100,7 @@ function uiInteractZoomIn(metricQInstance, evtObj)
       posEnd = posStart;
       posStart = swap;
     }
-    metricQInstance.handler.startTime = posStart[0];
-    metricQInstance.handler.stopTime = posEnd[0];
-    //this call isn't needed any more
-    //TODO: remove this function call
-    if(!metricQInstance.graticule.setTimeRange([posStart[0], posEnd[0]]))
+    if(!metricQInstance.handler.setTimeRange(Math.round(posStart[0]), Math.round(posEnd[0])))
     {
       showUserHint("Zoom-Limit erreicht.");
     }
@@ -126,13 +122,13 @@ function uiInteractZoomWheel(metricQInstance, evtObj)
     //TODO: set start and stopTime of the handler
     if(0 > evtObj.deltaX)
     {
-      if(!metricQInstance.handler.setTimeRange([metricQInstance.graticule.curTimeRange[0] - deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] - deltaRange * 0.2]))
+      if(!metricQInstance.handler.setTimeRange(metricQInstance.graticule.curTimeRange[0] - deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] - deltaRange * 0.2))
       {
         showUserHint("Zoom-Limit erreicht.");
       }
     } else if(0 < evtObj.deltaX)
     {
-      if(!metricQInstance.handler.setTimeRange([metricQInstance.graticule.curTimeRange[0] + deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] + deltaRange * 0.2]))
+      if(!metricQInstance.handler.setTimeRange(metricQInstance.graticule.curTimeRange[0] + deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] + deltaRange * 0.2))
       {
         showUserHint("Zoom-Limit erreicht.");
       }
