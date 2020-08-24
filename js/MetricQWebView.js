@@ -27,25 +27,35 @@ class MetricQWebView {
     this.hasPlot = false;
     this.graticule = undefined;
     this.configuration = new Configuration(2, 10);
+    this.margins = {
+    	canvas: {
+    		top: 10,
+    		right: 20,
+    		bottom: 40,
+    		left: 40
+    	},
+    	labels: {
+    		left: 5,
+    		bottom: 10
+    	},
+    	gears: {
+    		x: {
+    			left: -3,
+    			top: -1
+    		},
+    		y: {
+    			left: 2,
+    			top: 6
+    		}
+    	}
+    };
     this.yRangeOverride = undefined;
     this.yRangeType = 'local';
     this.lastThrottledReloadTime = 0;
     this.RELOAD_THROTTLING_DELAY = 150;
     this.reloadThrottleTimeout = undefined;
 
-      // accelerate zooming with scroll wheel
-    this.ele.addEventListener("wheel", function (configParam) { return function (evt) {
-      evt.stopPropagation();
-      var dataObj = {
-        time: (new Date()).getTime(),
-        clientX: evt.clientX,
-        clientY: evt.clientY,
-        deltaY: evt.deltaY * configParam.zoomSpeed
-      }
-      var newEvent = new WheelEvent("wheel", dataObj );
-      configParam.lastWheelEvent = dataObj;
-      evt.target.dispatchEvent(newEvent);
-    };}(this.configuration));
+    //TODO: Drop old Plotly Code
     // see the source file
     //   src/plots/cartesian/layout_attributes.js
     // for a complete set of available options
@@ -130,19 +140,17 @@ class MetricQWebView {
     if(!this.hasPlot)
     {
     	var canvasSize = [ parseInt(this.ele.offsetWidth), 400];
-    	var canvasBorders = [10, 20, 40, 40]; //TOP, RIGHT, BOTTOM, LEFT;
-    	var labelingDistance = [5, 10]; // first left, then bottom
     	var myCanvas = document.createElement("canvas");
     	myCanvas.setAttribute("width", canvasSize[0]);
     	myCanvas.setAttribute("height", canvasSize[1]);
     	this.ele = this.ele.appendChild(myCanvas);
     	var myContext = myCanvas.getContext("2d");
     	// Params: (ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
-    	this.graticule = new Graticule(myCanvas, myContext, [canvasBorders[3],
-    											  canvasBorders[0],
-    											  canvasSize[0] - (canvasBorders[1] + canvasBorders[3]),
-    											  canvasSize[1] - (canvasBorders[0] + canvasBorders[2])],
-    									labelingDistance[0], labelingDistance[1],
+    	this.graticule = new Graticule(myCanvas, myContext, [this.margins.canvas.left,
+    											  this.margins.canvas.top,
+    											  canvasSize[0] - (this.margins.canvas.right + this.margins.canvas.left),
+    											  canvasSize[1] - (this.margins.canvas.top + this.margins.canvas.bottom)],
+    									this.margins.labels.left, this.margins.labels.top,
     									[canvasSize[0], canvasSize[1]]);
     	this.hasPlot = true;
     	//parameters two and three "true" (doDraw, doResize) are ignored here :/
@@ -224,8 +232,8 @@ class MetricQWebView {
 	  var posGear = this.getTopLeft(rowBodyEle);
 	  posGear[0] += parseInt(rowBodyEle.offsetWidth) - parseInt(gearEle.offsetWidth);
 	  posGear[1] += parseInt(rowBodyEle.offsetHeight) - parseInt(gearEle.offsetHeight);
-	  posGear[0] += -35;
-	  posGear[1] += -30;
+	  posGear[0] += this.margins.gears.x.left;
+	  posGear[1] += this.margins.gears.x.top;
 	  gearEle.style.left = posGear[0] + "px";
 	  gearEle.style.top = posGear[1] + "px";  
 	}
@@ -236,8 +244,8 @@ class MetricQWebView {
 	  }
 	  gearEle.style.position = "absolute";
 	  var posGear = this.getTopLeft(rowBodyEle);
-	  posGear[0] += 20;
-	  posGear[1] += 70;
+	  posGear[0] += this.margins.gears.y.left;
+	  posGear[1] += this.margins.gears.y.top;
 	  gearEle.style.left = posGear[0] + "px";
 	  gearEle.style.top = posGear[1] + "px";    
 	}
