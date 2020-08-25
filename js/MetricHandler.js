@@ -98,6 +98,7 @@ class MetricHandler {
       if(!selfReference.checkIfMetricIsOk(metricName, matchingAggregatesCount, matchingAggregatesObj))
       {
         listOfFaultyMetrics.push(metricName);
+        console.log("Metric not ok:" + metricName);
         selfReference.receivedError(0, metricName);
       }
     }
@@ -111,7 +112,7 @@ class MetricHandler {
   {
     if(!metricName
     || 1 > aggregateCount
-    || !aggregateObj["count"])
+    || (!aggregateObj["count"] && !aggregateObj["raw"]))
     {
       return false;
     }
