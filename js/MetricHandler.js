@@ -7,7 +7,7 @@ class MetricHandler {
   	this.renderer = paramRenderer;
   	this.startTime = paramStartTime;
   	this.stopTime = paramStopTime;
-    this.metricQHistoric = new MetricQHistoric(METRICQ_BACKEND);
+    this.metricQHistory = new MetricQHistory(METRICQ_BACKEND);
 
     this.WIGGLEROOM_PERCENTAGE = 0.05;
 
@@ -48,7 +48,7 @@ class MetricHandler {
     }
     
                                            
-    var queryObj = this.metricQHistoric.query(this.startTime - timeMargin,
+    var queryObj = this.metricQHistory.query(this.startTime - timeMargin,
                                               this.stopTime  + timeMargin,
                                               maxDataPoints);
     var defaultAggregates = ['min', 'max', 'avg', 'count'];
@@ -70,7 +70,7 @@ class MetricHandler {
     }
     for(var i = 0; i < remainingMetrics.length; ++i)
     {
-      var queryObj = this.metricQHistoric.query(this.startTime - timeMargin,
+      var queryObj = this.metricQHistory.query(this.startTime - timeMargin,
                                                 this.stopTime  + timeMargin,
                                                 maxDataPoints);
       queryObj.target(remainingMetrics[i], defaultAggregates);
@@ -125,7 +125,7 @@ class MetricHandler {
   }
   searchMetricsPromise(inputStr)
   {
-    return this.metricQHistoric.search(inputStr);
+    return this.metricQHistory.search(inputStr);
   }
   //TODO: 'drop'/remove this function
   handleMetricResponse(selfReference, metricArr, evt)
