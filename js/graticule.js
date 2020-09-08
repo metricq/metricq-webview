@@ -15,8 +15,8 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
   this.data = new DataCache(paramMetricQHistoryReference);
   //TODO: take these non-changing parameters
   //      as parameters to initialisation
-  this.MAX_ZOOM_TIME = 20 * 365 * 24 * 3600 * 1000; //TODO: actually use this
-  this.MIN_ZOOM_TIME = 1000;
+  this.MAX_ZOOM_TIME = 20 * 365 * 24 * 3600 * 1000;
+  this.MIN_ZOOM_TIME = 10;
   this.DEFAULT_FONT = "sans-serif";
   this.resetData = function()
   {
@@ -166,47 +166,54 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
     for(var j = stepStart.getTime(); j < this.curTimeRange[1]; j += stepSize)
     {
       var curDate = new Date(j);
+      var stepItem = {
+        "timestamp": j,
+        "label": new Array()
+      };
       switch(i)
       {
-        case 0:
-          outArr.push([ j, "" + curDate.getFullYear()]);
+        case 0: // years
+          stepItem.label.push("" + curDate.getFullYear());
           break;
-        case 1:
+        case 1: // months
           if(0 == curDate.getMonth() || !previousCurDate || previousCurDate.getFullYear() != curDate.getFullYear())
           {
-            outArr.push([ j, monthNames[curDate.getMonth()] + " " + curDate.getFullYear()]);
+            stepItem.label.push(monthNames[curDate.getMonth()]);
+            stepItem.label.push("" + curDate.getFullYear());
           } else
           {
-            outArr.push([ j, monthNames[curDate.getMonth()]]);
+            stepItem.label.push(monthNames[curDate.getMonth()]);
           }
           stepSize = 0;
           j = (new Date((curDate.getFullYear() + Math.floor((curDate.getMonth() + moreBeautifulMultiplier) / 12)) + "-" + ((curDate.getMonth() + moreBeautifulMultiplier) % 12 + 1) + "-01")).getTime();
           break;
-        case 2:
+        case 2: // days
           if(1 == curDate.getDate() || !previousCurDate || previousCurDate.getMonth() != curDate.getMonth())
           {
-            outArr.push([j, monthNames[curDate.getMonth()] + " " + curDate.getDate()]);
+            stepItem.label.push("" + curDate.getDate());
+            stepItem.label.push(monthNames[curDate.getMonth()]);
           } else
           {
-            outArr.push([j, "" + curDate.getDate()]);
+            stepItem.label.push("" + curDate.getDate());
           }
           break;
-        case 3:
+        case 3: // hours
           if(0 == curDate.getHours() || !previousCurDate || previousCurDate.getDate() != curDate.getDate())
           {
-            outArr.push([j, curDate.getDate() + " " + monthNames[curDate.getMonth()] + " " + (curDate.getHours() < 10 ? "0" : "") + curDate.getHours() + ":00"]);
+            stepItem.label.push((curDate.getHours() < 10 ? "0" : "") + curDate.getHours() + ":" + (curDate.getMinutes() < 10 ? "0" : "") + curDate.getMinutes());
+            stepItem.label.push(curDate.getDate() + " " + monthNames[curDate.getMonth()]);
           } else
           {
-            outArr.push([j, (curDate.getHours() < 10 ? "0" : "") + curDate.getHours() + ":00"]);
+            stepItem.label.push((curDate.getHours() < 10 ? "0" : "") + curDate.getHours() + ":" + (curDate.getMinutes() < 10 ? "0" : "") + curDate.getMinutes());
           }
           break;
-        case 4:
-          outArr.push([j, (curDate.getHours() < 10 ? "0" : "") + curDate.getHours() + ":" + (curDate.getMinutes() < 10 ? "0" : "") + curDate.getMinutes()]);
+        case 4: // minutes
+          stepItem.label.push((curDate.getHours() < 10 ? "0" : "") + curDate.getHours() + ":" + (curDate.getMinutes() < 10 ? "0" : "") + curDate.getMinutes());
           break;
-        case 5:
-          outArr.push([j, (curDate.getHours() < 10 ? "0" : "") + curDate.getHours() + ":" + (curDate.getMinutes() < 10 ? "0" : "") + curDate.getMinutes() + ":" + (curDate.getSeconds() < 10 ? "0" : "") + curDate.getSeconds()]);
+        case 5: // seconds
+          stepItem.label.push((curDate.getHours() < 10 ? "0" : "") + curDate.getHours() + ":" + (curDate.getMinutes() < 10 ? "0" : "") + curDate.getMinutes() + ":" + (curDate.getSeconds() < 10 ? "0" : "") + curDate.getSeconds());
           break;
-        case 6:
+        case 6: // milliseconds
           var msString = "" + curDate.getMilliseconds();
           for(var k = msString.length; k < 3; ++k)
           {
@@ -214,12 +221,14 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
           }
           if(0 == curDate.getMilliseconds() || !previousCurDate)
           {
-            outArr.push([j, (curDate.getHours() < 10 ? "0" : "") + curDate.getHours() + ":" + (curDate.getMinutes() < 10 ? "0" : "") + curDate.getMinutes() + ":" + (curDate.getSeconds() < 10 ? "0" : "") + curDate.getSeconds() + "." + msString]);
+            stepItem.label.push((curDate.getSeconds() < 10 ? "0" : "") + curDate.getSeconds() + "." + msString);
+            stepItem.label.push((curDate.getHours() < 10 ? "0" : "") + curDate.getHours() + ":" + (curDate.getMinutes() < 10 ? "0" : "") + curDate.getMinutes() + ":" + (curDate.getSeconds() < 10 ? "0" : "") + curDate.getSeconds());
           } else
           {
-            outArr.push([j, (curDate.getSeconds() < 10 ? "0" : "") + curDate.getSeconds() + "." + msString]);
+            stepItem.label.push((curDate.getSeconds() < 10 ? "0" : "") + curDate.getSeconds() + "." + msString);
           }
       }
+      outArr.push(stepItem);
       previousCurDate = curDate;
     }
     return outArr;
@@ -280,7 +289,7 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
     var xPositions = new Array();
     for(var i = 0; i < xAxisSteps.length; ++i)
     {
-      var x = Math.round(this.graticuleDimensions[0] + ((xAxisSteps[i][0] - timeRange[0]) / timePerPixel));
+      var x = Math.round(this.graticuleDimensions[0] + ((xAxisSteps[i].timestamp - timeRange[0]) / timePerPixel));
       xPositions.push(x);
       this.ctx.fillRect( x, this.graticuleDimensions[1], 2, this.graticuleDimensions[3]);
     }
@@ -300,11 +309,15 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
     }
     /* draw text */
     this.ctx.fillStyle = "rgba(0,0,0,1)";
-    this.ctx.font = "14px " + this.DEFAULT_FONT;
+    var fontSize = 14;
+    this.ctx.font = fontSize + "px " + this.DEFAULT_FONT;
     for(var i = 0; i < xAxisSteps.length; ++i)
     {
-      var textWidth = this.ctx.measureText(xAxisSteps[i][1]).width;
-      this.ctx.fillText(xAxisSteps[i][1], xPositions[i] - Math.floor(textWidth / 2), this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom /2);
+      for(var j = 0; j < xAxisSteps[i].label.length; ++j)
+      {
+        var textWidth = this.ctx.measureText(xAxisSteps[i].label[j]).width;
+        this.ctx.fillText(xAxisSteps[i].label[j], xPositions[i] - Math.floor(textWidth / 2), this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom + fontSize * j);
+      }
 
     }
     //DEBUG
@@ -313,7 +326,8 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
     {
       if(yPositions[i] >= this.graticuleDimensions[1])
       {
-        this.ctx.fillText(yAxisSteps[i][1], this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i] + 4);
+        var textWidth = this.ctx.measureText(yAxisSteps[i][1]).width;
+        this.ctx.fillText(yAxisSteps[i][1], this.graticuleDimensions[0] - textWidth - this.pixelsLeft, yPositions[i] + 4);
       }
     }
   };
