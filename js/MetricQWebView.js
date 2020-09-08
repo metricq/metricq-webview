@@ -275,10 +275,10 @@ class MetricQWebView {
 	    encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj));
 	  } else
 	  {
-	    encodedStr = "." + this.handler.startTime + "_" + this.handler.stopTime;
+	    encodedStr = "." + this.handler.startTime + "*" + this.handler.stopTime;
 	    for(var metricBase in this.handler.allMetrics)
 	    {
-	      encodedStr += "_" + this.handler.allMetrics[metricBase].name;
+	      encodedStr += "*" + this.handler.allMetrics[metricBase].name;
 	    }
 	    encodedStr = encodeURIComponent(encodedStr);
 	  }
@@ -437,7 +437,7 @@ function importMetricUrl()
       return true;
     } else if("." == jsurlStr.charAt(0))
     {
-      const splitted = jsurlStr.split("_");
+      const splitted = jsurlStr.split("*");
       if(1 < splitted.length)
       {
         initializeMetrics(splitted.slice(2), parseInt(splitted[0].substring(1)), parseInt(splitted[1]));
