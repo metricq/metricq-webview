@@ -1,4 +1,4 @@
-function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
+function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
 {
   this.ele = paramEle;
   this.ctx = ctx;
@@ -12,7 +12,7 @@ function Graticule(paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsB
   this.pixelsBottom = paramPixelsBottom;
   this.clearSize = paramClearSize;
   this.lastRangeChangeTime = 0;
-  this.data = new DataCache();
+  this.data = new DataCache(paramMetricQHistoryReference);
   //TODO: take these non-changing parameters
   //      as parameters to initialisation
   this.MAX_ZOOM_TIME = 20 * 365 * 24 * 3600 * 1000; //TODO: actually use this

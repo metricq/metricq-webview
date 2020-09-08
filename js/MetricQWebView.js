@@ -146,7 +146,8 @@ class MetricQWebView {
     	this.ele = this.ele.appendChild(myCanvas);
     	var myContext = myCanvas.getContext("2d");
     	// Params: (ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
-    	this.graticule = new Graticule(myCanvas, myContext, [this.margins.canvas.left,
+    	this.graticule = new Graticule(this.handler.metricQHistory,
+    									myCanvas, myContext, [this.margins.canvas.left,
     											  this.margins.canvas.top,
     											  canvasSize[0] - (this.margins.canvas.right + this.margins.canvas.left),
     											  canvasSize[1] - (this.margins.canvas.top + this.margins.canvas.bottom)],

@@ -1,6 +1,7 @@
 
-function DataCache()
+function DataCache(paramMetricQHistoryReference)
 {
+  this.metricQHistory = paramMetricQHistoryReference;
   this.metrics = new Array();
   this.processMetricQDatapoints = function(datapointsJSON, doDraw, doResize)
   {
@@ -75,7 +76,7 @@ function DataCache()
       return foundMetric;
     } else
     {
-      var newMetric = new MetricCache(metricName);
+      var newMetric = new MetricCache(this.metricQHistory, metricName);
       this.metrics.push(newMetric);
       return newMetric;
     }
@@ -246,7 +247,7 @@ function DataCache()
   }
 }
 
-function MetricCache(paramMetricName)
+function MetricCache(paramMetricQReference, paramMetricName)
 {
   this.name = paramMetricName;
   this.series = {"min": undefined,
@@ -255,6 +256,8 @@ function MetricCache(paramMetricName)
                  "raw": undefined};
   this.band = undefined;
   this.allTime = undefined;
+  this.meta = undefined;
+  this.metricQHistory = paramMetricQReference;
   this.resetData = function()
   {
     delete this.series;
@@ -373,6 +376,11 @@ function MetricCache(paramMetricName)
       };
     }
   }
+  this.fetchMetadata = function()
+  {
+    this.metricQHistory.metadata(this.name).then((metadataObj) => { this.meta = metadataObj; });
+  }
+  //TODO: use Mario's metricq-js-API
   this.fetchAllTimeMinMax = function()
   {
     var reqJson = {
@@ -428,6 +436,7 @@ function MetricCache(paramMetricName)
     return [allMin, allMax];
   }
   this.fetchAllTimeMinMax();
+  this.fetchMetadata();
 }
 
 

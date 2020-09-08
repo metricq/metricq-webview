@@ -837,6 +837,7 @@ function initializeMetricPopup() {
             }
           }(myMetric.name, disablePopupFunc));
         });
+        document.getElementById("input_metric_name").focus();
       }
     }
   }
