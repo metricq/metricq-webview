@@ -12,6 +12,11 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
   this.pixelsBottom = paramPixelsBottom;
   this.clearSize = paramClearSize;
   this.lastRangeChangeTime = 0;
+  this.yRangeOverride = {
+    "type": "local",
+    "min": 0,
+    "max": 0
+  };
   this.data = new DataCache(paramMetricQHistoryReference);
   //TODO: take these non-changing parameters
   //      as parameters to initialisation
@@ -165,6 +170,7 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
     var previousCurDate = undefined;
     for(var j = stepStart.getTime(); j < this.curTimeRange[1]; j += stepSize)
     {
+      if(j < this.curTimeRange[0]) continue;
       var curDate = new Date(j);
       var stepItem = {
         "timestamp": j,
@@ -290,8 +296,16 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
     for(var i = 0; i < xAxisSteps.length; ++i)
     {
       var x = Math.round(this.graticuleDimensions[0] + ((xAxisSteps[i].timestamp - timeRange[0]) / timePerPixel));
-      xPositions.push(x);
-      this.ctx.fillRect( x, this.graticuleDimensions[1], 2, this.graticuleDimensions[3]);
+      if(x >= this.graticuleDimensions[0]
+      && x <= (this.graticuleDimensions[0] + this.graticuleDimensions[2]))
+      {
+        xPositions.push(x);
+        this.ctx.fillRect( x, this.graticuleDimensions[1], 2, this.graticuleDimensions[3]);
+      } else
+      {
+        xPositions.push(undefined);
+        console.log("Grid algorithm is broken, invalid x-axis grid line at " + xAxisSteps[i].label.join(","));
+      }
     }
 
     minDistanceBetweenGridLines = 30;
@@ -301,10 +315,18 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
     for(var i = 0; i < yAxisSteps.length; ++i)
     {
       var y = Math.round(this.graticuleDimensions[3] - ((yAxisSteps[i][0] - valueRange[0]) / valuesPerPixel) + this.graticuleDimensions[1]);
-      yPositions.push(y);
-      if(y >= this.graticuleDimensions[1])
+      if(y >= this.graticuleDimensions[1]
+      && y <= (this.graticuleDimensions[1] + this.graticuleDimensions[3]))
       {
-        this.ctx.fillRect( this.graticuleDimensions[0], y, this.graticuleDimensions[2], 2);
+        yPositions.push(y);
+        if(y >= this.graticuleDimensions[1])
+        {
+          this.ctx.fillRect( this.graticuleDimensions[0], y, this.graticuleDimensions[2], 2);
+        }
+      } else
+      {
+        yPositions.push(undefined);
+        console.log("Grid algorithm is broken, invalid y-axis grid line at " + yAxisSteps[i][0]);
       }
     }
     /* draw text */
@@ -329,6 +351,17 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
         var textWidth = this.ctx.measureText(yAxisSteps[i][1]).width;
         this.ctx.fillText(yAxisSteps[i][1], this.graticuleDimensions[0] - textWidth - this.pixelsLeft, yPositions[i] + 4);
       }
+    }
+    var curUnits = this.data.distinctUnits();
+    if(curUnits && 0 < curUnits.length)
+    {
+      var unitString = "";
+      curUnits.forEach((val, index, arr) => { unitString += (0 < unitString.length ? " / " : "") + val; } );
+      this.ctx.save();
+      this.ctx.rotate(Math.PI/2*3);
+      var textWidth = this.ctx.measureText(unitString).width;
+      this.ctx.fillText(unitString, (Math.round((this.graticuleDimensions[3] + textWidth) / 2) + this.graticuleDimensions[1]) * -1, fontSize);
+      this.ctx.restore();
     }
   };
   this.getTimeValueAtPoint = function(positionArr)
@@ -365,6 +398,31 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
     this.lastRangeChangeTime = (new Date()).getTime();
     return true;
   };
+  this.setValueRange = function (paramRangeStart, paramRangeEnd)
+  {
+    if(undefined !== paramRangeStart) this.curValueRange[0] = paramRangeStart;
+    if(undefined !== paramRangeEnd) this.curValueRange[1] = paramRangeEnd;
+    this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.graticuleDimensions[3];
+    this.lastRangeChangeTime = (new Date()).getTime();
+  };
+  this.setYRangeOverride = function(paramTypeStr, paramValueStart, paramValueEnd)
+  {
+    if("local" != paramTypeStr
+    && "global" != paramTypeStr
+    && "manual" != paramTypeStr
+    && undefined !== paramTypeStr)
+    {
+      throw `yRange Override must be either local, global or manual "${paramTypeStr}" is invalid.`;
+    }
+    if(undefined !== paramTypeStr)    this.yRangeOverride.type = paramTypeStr;
+    if(undefined !== paramValueStart) this.yRangeOverride.min  = paramValueStart;
+    if(undefined !== paramValueEnd)   this.yRangeOverride.max  = paramValueEnd;
+    if("manual" == paramTypeStr)
+    {
+      this.curValueRange[0] = paramValueStart;
+      this.curValueRange[1] = paramValueEnd;
+    }
+  };
   // is never called, why not remove this??
   this.zoomTimeAndValueAtPoint = function(pointAt, zoomDirection, zoomTime, zoomValue)
   {
@@ -392,7 +450,7 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
     this.lastRangeChangeTime = (new Date()).getTime();
     return couldZoom;
   };
-  this.automaticallyDetermineRanges = function(determineTimeRange, determineValueRange, allTimeValueRanges)
+  this.automaticallyDetermineRanges = function(determineTimeRange, determineValueRange)
   {
     // uh oh, this case is troublesome, when we wrap
     //   the time in a handler, like we do
@@ -401,9 +459,9 @@ function Graticule(paramMetricQHistoryReference, paramEle, ctx, offsetDimension,
       var times = this.figureOutTimeRange();
       this.setTimeRange(times[0], times[1]);
     }
-    if(determineValueRange)
+    if(determineValueRange && "local" == this.yRangeOverride.type)
     {
-      this.curValueRange = this.figureOutValueRange(allTimeValueRanges);
+      this.curValueRange = this.figureOutValueRange("global" == this.yRangeOverride.type);
       this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.graticuleDimensions[3];
     }
     if(determineTimeRange || determineValueRange)

@@ -104,7 +104,7 @@ function uiInteractZoomIn(metricQInstance, evtObj)
     {
       showUserHint("Zoom-Limit erreicht.");
     }
-    metricQInstance.graticule.automaticallyDetermineRanges(false, true, "global" == metricQInstance.yRangeType);
+    metricQInstance.graticule.automaticallyDetermineRanges(false, true);
     metricQInstance.reload(); // no need to throttle reload here
     metricQInstance.graticule.draw(false);
   }
@@ -155,7 +155,7 @@ function uiInteractZoomWheel(metricQInstance, evtObj)
       {
         showUserHint("Konnte nicht weiter zoomen, Limit erreicht");
       }
-      metricQInstance.graticule.automaticallyDetermineRanges(false, true, "global" == metricQInstance.yRangeType);
+      metricQInstance.graticule.automaticallyDetermineRanges(false, true);
       metricQInstance.throttledReload();
       metricQInstance.graticule.draw(false);
     }

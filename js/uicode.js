@@ -391,17 +391,17 @@ Vue.component("yaxis-popup", {
       cache: false,
       get: function()
       {
-        return "manual" != window.MetricQWebView.instances[0].yRangeType;
+        return "manual" != window.MetricQWebView.instances[0].graticule.yRangeOverride.type;
       },
       set: function(newValue)
       {
-        window.MetricQWebView.instances[0].yRangeType = "local";
+        window.MetricQWebView.instances[0].graticule.setYRangeOverride("local", undefined, undefined);
       }
     },
     "yaxisRange": {
       get: function()
       {
-        return window.MetricQWebView.instances[0].yRangeType;
+        return window.MetricQWebView.instances[0].graticule.yRangeOverride.type;
       },
       set: function(newValue)
       {
@@ -413,26 +413,27 @@ Vue.component("yaxis-popup", {
         }
         if("global" == newValue)
         {
-          window.MetricQWebView.instances[0].yRangeType = newValue;
-          window.MetricQWebView.instances[0].handler.loadGlobalMinMax();
+          window.MetricQWebView.instances[0].graticule.setYRangeOverride(newValue, undefined, undefined);
         } else
         {
           if("manual" == newValue)
           {
-            let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
-            window.MetricQWebView.instances[0].yRangeOverride = arr;
+            let arr = window.MetricQWebView.instances[0].handler.getAllMinMax();
+            window.MetricQWebView.instances[0].graticule.setYRangeOverride(newValue, arr[0], arr[1]);
             this.$forceUpdate();
+          } else
+          {
+            window.MetricQWebView.instances[0].graticule.setYRangeOverride(newValue, undefined, undefined);
           }
-          window.MetricQWebView.instances[0].yRangeType = newValue;
-          window.MetricQWebView.instances[0].setPlotRanges(false, true);
         }
+        window.MetricQWebView.instances[0].setPlotRanges(false, true);
       }
     },
     "allMin": {
       cache: false,
       get: function()
       {
-        let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
+        let arr = window.MetricQWebView.instances[0].handler.getAllMinMax();
         if(arr)
         {
           return (new Number(arr[0])).toFixed(3);
@@ -440,9 +441,9 @@ Vue.component("yaxis-popup", {
       },
       set: function(newValue)
       {
-        let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
-        arr = [newValue, arr[1]];
-        window.MetricQWebView.instances[0].yRangeOverride = arr;
+        let arr = window.MetricQWebView.instances[0].handler.getAllMinMax();
+        arr = [parseFloat(newValue), arr[1]];
+        window.MetricQWebView.instances[0].graticule.setYRangeOverride(undefined, arr[0], arr[1]);
         window.MetricQWebView.instances[0].setPlotRanges(false, true);
       }
     },
@@ -450,7 +451,7 @@ Vue.component("yaxis-popup", {
       cache: false,
       get: function()
       {
-        let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
+        let arr = window.MetricQWebView.instances[0].handler.getAllMinMax();
         if(arr)
         {
           return (new Number(arr[1])).toFixed(3);
@@ -458,9 +459,9 @@ Vue.component("yaxis-popup", {
       },
       set: function(newValue)
       {
-        let arr = window.MetricQWebView.instances[0].handler.queryAllMinMax();
-        arr = [arr[0], newValue];
-        window.MetricQWebView.instances[0].yRangeOverride = arr;
+        let arr = window.MetricQWebView.instances[0].handler.getAllMinMax();
+        arr = [arr[0], parseFloat(newValue)];
+        window.MetricQWebView.instances[0].graticule.setYRangeOverride(undefined, arr[0], arr[1]);
         window.MetricQWebView.instances[0].setPlotRanges(false, true);
       }
     }

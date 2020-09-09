@@ -245,6 +245,21 @@ function DataCache(paramMetricQHistoryReference)
     }
     return false;
   }
+  this.distinctUnits = function()
+  {
+    var units = new Array();
+    for(var i = 0; i < this.metrics.length; ++i)
+    {
+      if(this.metrics[i].meta && this.metrics[i].meta.unit)
+      {
+        if(!units.includes(this.metrics[i].meta.unit))
+        {
+          units.push(this.metrics[i].meta.unit);
+        }
+      }
+    }
+    return units;
+  }
 }
 
 function MetricCache(paramMetricQReference, paramMetricName)
@@ -412,14 +427,14 @@ function MetricCache(paramMetricQReference, paramMetricName)
       }
     });
     reqAjax.send(JSON.stringify(reqJson));
-  }
-  this.getAllMinMax = function() {
+  };
+  this.getAllMinMax = function(startTime, stopTime) {
     var allMin = undefined, allMax = undefined;
     for(var curAggregate in this.series)
     {
       if(this.series[curAggregate])
       {
-        let curMinMax = this.series[curAggregate].getValueRange();
+        let curMinMax = this.series[curAggregate].getValueRange(startTime, stopTime);
         if(curMinMax)
         {
           if(undefined === allMin || curMinMax[0] < allMin)
@@ -434,7 +449,7 @@ function MetricCache(paramMetricQReference, paramMetricName)
       }
     }
     return [allMin, allMax];
-  }
+  };
   this.fetchAllTimeMinMax();
   this.fetchMetadata();
 }

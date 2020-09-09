@@ -26,13 +26,13 @@ class MetricQWebView {
     this.countTraces = 0;
     this.hasPlot = false;
     this.graticule = undefined;
-    this.configuration = new Configuration(2, 10);
+    this.configuration = new Configuration(5, 10); //constructor(resolutionParam, zoomSpeedParam)
     this.margins = {
     	canvas: {
     		top: 10,
     		right: 35,
     		bottom: 40,
-    		left: 35
+    		left: 55
     	},
     	labels: {
     		left: 3,
@@ -49,66 +49,10 @@ class MetricQWebView {
     		}
     	}
     };
-    this.yRangeOverride = undefined;
-    this.yRangeType = 'local';
     this.lastThrottledReloadTime = 0;
     this.RELOAD_THROTTLING_DELAY = 150;
     this.reloadThrottleTimeout = undefined;
 
-    //TODO: Drop old Plotly Code
-    // see the source file
-    //   src/plots/cartesian/layout_attributes.js
-    // for a complete set of available options
-    this.plotlyLayout = {
-	  xaxis: {
-	    type: 'date',
-	    showticklabels: true,
-	    ticks: "outside",
-	    tickangle: 'auto',
-	    tickfont: {
-	      family: 'Open Sans, Sans, Verdana',
-	      size: 14,
-	      color: 'black'
-	    },
-        showgrid: false,
-	    exponentformat: 'e',
-	    showexponent: 'all'
-	  },
-	  yaxis: {
-	    showticklabels: true,
-	    tickangle: 'auto',
-	    tickmode: "last",
-	    tickfont: {
-	      family: 'Open Sans, Sans, Verdana',
-	      size: 14,
-	      color: 'black'
-	    },
-	    exponentformat: 'e',
-	    showexponent: 'all',
-	    fixedrange: true // disable y-zooming
-	  },
-	  showlegend: false,
-	  dragmode: "pan"
-	};
-    this.plotlyOptions = {
-	  scrollZoom: true,
-	  // see src/components/modebar/buttons.js
-	  // on how to modify hover behaviour:
-	  // 173 modeBarButtons.hoverClosestCartesian
-	  // "zoom2d", "zoomIn2d", "zoomOut2d"
-	  modeBarButtonsToRemove: [ "lasso2d", "autoScale2d", "resetScale2d", "select2d", "toggleHover", "toggleSpikelines", "hoverClosestCartesian", "hoverCompareCartesian", "toImage"],
-	  displaylogo: false, // don't show the plotly logo
-	  toImageButtonOptions: {
-	    format: "svg", // also available: jpeg, png, webp
-	    filename: "metricq-webview",
-	    height: 500,
-	    width: 800,
-	    scale: 1
-	  },
-	  responsive: true, // automatically adjust to window resize
-	  displayModeBar: true // icons always visible
-	}
-	//Plotly.d3.behavior.zoom.scaleBy = function(selection, k) { return k*100; };
     if(0 < paramMetricNamesArr.length)
     {
       this.handler.doRequest(400);
@@ -154,11 +98,11 @@ class MetricQWebView {
     									this.margins.labels.left, this.margins.labels.bottom,
     									[canvasSize[0], canvasSize[1]]);
     	this.hasPlot = true;
-    	//parameters two and three "true" (doDraw, doResize) are ignored here :/
     	this.handler.setTimeRange(this.handler.startTime, this.handler.stopTime);
+    	//parameters two and three "true" (doDraw, doResize) are ignored here :/
     	this.graticule.data.processMetricQDatapoints(datapointsJSON, true, true);
     	//URL import problem here: the response's start and end time are taken here :/
-    	this.graticule.automaticallyDetermineRanges(false, true, "global" == this.yRangeType);
+    	this.graticule.automaticallyDetermineRanges(false, true);
     	this.graticule.draw(false);
     	registerCallbacks(myCanvas);
 
@@ -294,8 +238,8 @@ class MetricQWebView {
 	    return;
 	  }
 	  //TODO: code me
-	  let allMinMax = this.handler.queryAllMinMax();
-	  this.graticule.curValueRange = [allMinMax[0], allMinMax[1]];
+	  let allMinMax = this.handler.getAllMinMax();
+	  this.graticule.setValueRange(allMinMax[0], allMinMax[1]);
 
 	  this.graticule.draw(false);
 	}

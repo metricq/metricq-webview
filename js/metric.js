@@ -97,16 +97,4 @@ class Metric
     this.updateColor(this.color);
     this.updateMarker(this.marker);
   }
-  getMinMax(startTime, stopTime)
-  {
-    if(this.renderer && this.renderer.graticule && this.renderer.graticule.data)
-    {
-      var metricCache = this.renderer.graticule.data.getMetricCache(this.name);
-      if(metricCache)
-      {
-        return metricCache.getAllMinMax();
-      }
-    }
-    return undefined;
-  }
 }
