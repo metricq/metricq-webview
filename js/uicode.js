@@ -469,7 +469,7 @@ Vue.component("yaxis-popup", {
 });
 Vue.component("preset-popup", {
   "template": "<div class=\"modal popup_div preset_popup_div\" tabindex=\"-1\" role=\"dialog\">"
-            + "<div class=\"modal-dialog modal-lg\" role=\"document\">"
+            + "<div class=\"modal-dialog modal-lg modal-dialog-scrollable\" role=\"document\">"
             + "<div class=\"modal-content\">"
             + "<div class=\"modal-header\">"
             + "<img src=\"img/metricq-logo.png\" width=\"150\" height=\"150\" style=\"margin: 0px auto;\"/>"

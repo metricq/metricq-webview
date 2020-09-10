@@ -474,4 +474,9 @@ window.MetricQWebView.instances[0].handler.setTimeRange(timeRange[0], timeRange[
 window.MetricQWebView.instances[0].throttledReload();
 window.MetricQWebView.instances[0].graticule.draw(false);
  });
-window.addEventListener("contextmenu", event => event.preventDefault());
+window.addEventListener("contextmenu", (event) => {
+	if(event.target && "CANVAS" == event.target.tagName)
+	{
+	  event.preventDefault();
+	}
+});
