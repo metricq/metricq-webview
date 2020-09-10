@@ -133,7 +133,6 @@ body {
   user-select: none;
 }
 .yaxis_popup_minmax {
-  float: left;
   margin: 0px 0px 0px 50px;
 }
 /* animation doesn't work in firefox :( */
