@@ -78,6 +78,7 @@ function initTest()
   });
   document.getElementById("button_configuration").addEventListener("click", function(evt) {
     configApp.togglePopup();
+    Vue.nextTick(initializeConfigPopup);
   });
 }
 
@@ -172,6 +173,46 @@ Vue.component("metric-popup", {
     }
   }
 });
+Vue.component("interaction-array-option", {
+  "props": ["action"],
+  "template": "<div class=\"form-group row\" >"
+            + "<div class=\"col-sm-6\">"
+            + "<input type=\"text\" class=\"form-control\" v-model=\"functionName\"/>"
+            + "</div>"
+            + "<div class=\"col-sm-3\">"
+            + "<input type=\"text\" class=\"form-control\" v-model=\"keyField\"/>"
+            + "</div>"
+            + "<div class=\"col-sm-3\">"
+            + "<input type=\"text\" class=\"form-control\" v-model=\"eventName\"/>"
+            + "</div>"
+            + "</div>",
+  "computed": {
+    "functionName": {
+      get: function() {
+        return this.action[2];
+      },
+      set: function(newValue) {
+        this.action[2] = newValue;
+      }
+    },
+    "keyField": {
+      get: function() {
+        return this.action[1].join(" ");
+      },
+      set: function(newValue) {
+        this.action[1] = newValue.split(" ");
+      }
+    },
+    "eventName": {
+      get: function() {
+        return this.action[0];
+      },
+      set: function(newValue) {
+        this.action[0] = newValue;
+      }
+    }
+  }
+});
 Vue.component("configuration-popup", {
   "props": ["config"],
   "template": "<div class=\"modal popup_div config_popup_div\" tabindex=\"-1\" role=\"dialog\">"
@@ -189,6 +230,11 @@ Vue.component("configuration-popup", {
             + "<div class=\"col-sm-6\">"
             + "<input type=\"range\" class=\"form-control\" id=\"zoom_speed_input\" v-model.sync=\"uiZoomSpeed\" min=\"1\" max=\"100\" step=\"0.5\"/>"
             + "</div></div>"
+            + "<h5 class=\"modal-title\">Bedienung</h5>"
+            + "<div id=\"ui_configurator\">" // TODO: fill this up uiInteractArr
+            //TODO: lots of clicky buttons here
+            + "<interaction-array-option v-for=\"action in uiInteractArr\" v-bind:action=\"action\" v-bind:key=\"action[2]\"></interaction-array-option>"
+            + "</div>"
             + "</div>"
             + "<div class=\"modal-footer\">"
             + "<button class=\"btn btn-primary popup_ok\">"
@@ -222,6 +268,16 @@ Vue.component("configuration-popup", {
       set: function(newValue) {
         window.MetricQWebView.instances[0].configuration.zoomSpeed = newValue;
         this.$emit("update:uiZoomSpeed", newValue);
+      }
+    },
+    "uiInteractArr": {
+      cache: false,
+      get: function()
+      {
+        return uiInteractArr;
+      },
+      set: function(newValue) {
+        uiInteractArr = newValue;
       }
     }
   },
@@ -842,6 +898,10 @@ function initializeMetricPopup() {
       }
     }
   }
+function initializeConfigPopup()
+{
+  // nothing to do here
+}
 
 var configApp = new Vue({
   "el": "#wrapper_popup_configuration",
