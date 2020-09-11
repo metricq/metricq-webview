@@ -177,15 +177,26 @@ Vue.component("interaction-array-option", {
   "props": ["action"],
   "template": "<div class=\"form-group row\" >"
             + "<div class=\"col-sm-6\">"
-            + "<input type=\"text\" class=\"form-control\" v-model=\"functionName\"/>"
+            + "<select class=\"form-control custom-select\" size=\"1\" v-model=\"functionName\">"
+            + "<option v-for=\"curFunction in functionList\" v-bind:value=\"curFunction\">{{ curFunction }}</option>"
+            + "</select>"
             + "</div>"
             + "<div class=\"col-sm-3\">"
             + "<input type=\"text\" class=\"form-control\" v-model=\"keyField\"/>"
             + "</div>"
             + "<div class=\"col-sm-3\">"
-            + "<input type=\"text\" class=\"form-control\" v-model=\"eventName\"/>"
+            + "<select class=\"form-control custom-select\" size=\"1\" v-model=\"eventName\">"
+            + "<option v-for=\"curEvent in eventList\" v-bind:value=\"curEvent\">{{ curEvent }}</option>"
+            + "</select>"
             + "</div>"
             + "</div>",
+  "data": function()
+  {
+    return {
+      "functionList": ["uiInteractPan", "uiInteractZoomArea", "uiInteractZoomIn", "uiInteractLegend", "uiInteractZoomWheel"],
+      "eventList": ["drag", "drop", "move", "wheel"]
+    };
+  },
   "computed": {
     "functionName": {
       get: function() {
