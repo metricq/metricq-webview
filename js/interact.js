@@ -218,14 +218,17 @@ function uiInteractCheck(eventType, pertainingElement, evtObj)
       var matchingSoFar = true;
       for(var j = 0; j < uiInteractArr[i][1].length; ++j)
       {
-        var allowedKey = "!" != uiInteractArr[i][1][j].charAt(0);
-        if(!allowedKey && keyDown.is(parseInt(uiInteractArr[i][1][j].substring(1))))
-        {
-          matchingSoFar = false;
-        }
-        if(allowedKey && !keyDown.is(parseInt(uiInteractArr[i][1][j])))
-        {
-          matchingSoFar = false;
+      	if(0 < (uiInteractArr[i][1][j] + "").length)
+      	{
+          var allowedKey = "!" != uiInteractArr[i][1][j].charAt(0);
+          if(!allowedKey && keyDown.is(parseInt(uiInteractArr[i][1][j].substring(1))))
+          {
+            matchingSoFar = false;
+          }
+          if(allowedKey && !keyDown.is(parseInt(uiInteractArr[i][1][j])))
+          {
+            matchingSoFar = false;
+          }
         }
       }
       if(matchingSoFar)

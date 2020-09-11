@@ -176,25 +176,21 @@ Vue.component("metric-popup", {
 Vue.component("interaction-array-option", {
   "props": ["action"],
   "template": "<div class=\"form-group row\" >"
-            + "<div class=\"col-sm-6\">"
-            + "<select class=\"form-control custom-select\" size=\"1\" v-model=\"functionName\">"
-            + "<option v-for=\"curFunction in functionList\" v-bind:value=\"curFunction\">{{ curFunction }}</option>"
+            + "<label class=\"col-sm-5 col-form-label\">{{ functionName }}</label>"
+            + "<div class=\"col-sm-4\">"
+            + "<select class=\"form-control custom-select\" size=\"1\" v-model=\"eventName\">"
+            + "<option v-for=\"curEvent in eventList\" v-bind:value=\"curEvent\">{{ curEvent }}</option>"
             + "</select>"
             + "</div>"
             + "<div class=\"col-sm-3\">"
             + "<input type=\"text\" class=\"form-control\" v-model=\"keyField\"/>"
-            + "</div>"
-            + "<div class=\"col-sm-3\">"
-            + "<select class=\"form-control custom-select\" size=\"1\" v-model=\"eventName\">"
-            + "<option v-for=\"curEvent in eventList\" v-bind:value=\"curEvent\">{{ curEvent }}</option>"
-            + "</select>"
             + "</div>"
             + "</div>",
   "data": function()
   {
     return {
       "functionList": ["uiInteractPan", "uiInteractZoomArea", "uiInteractZoomIn", "uiInteractLegend", "uiInteractZoomWheel"],
-      "eventList": ["drag", "drop", "move", "wheel"]
+      "eventList": ["none", "drag", "drop", "move", "wheel"]
     };
   },
   "computed": {
@@ -242,8 +238,12 @@ Vue.component("configuration-popup", {
             + "<input type=\"range\" class=\"form-control\" id=\"zoom_speed_input\" v-model.sync=\"uiZoomSpeed\" min=\"1\" max=\"100\" step=\"0.5\"/>"
             + "</div></div>"
             + "<h5 class=\"modal-title\">Bedienung</h5>"
-            + "<div id=\"ui_configurator\">" // TODO: fill this up uiInteractArr
-            //TODO: lots of clicky buttons here
+            + "<div id=\"ui_configurator\">"
+            + "<div class=\"form-group row\" >"
+            + "<label class=\"col-sm-5 col-form-label\">Funktion</label>"
+            + "<label class=\"col-sm-4 col-form-label\">Event</label>"
+            + "<label class=\"col-sm-3 col-form-label\">Tasten</label>"
+            + "</div>"
             + "<interaction-array-option v-for=\"action in uiInteractArr\" v-bind:action=\"action\" v-bind:key=\"action[2]\"></interaction-array-option>"
             + "</div>"
             + "</div>"

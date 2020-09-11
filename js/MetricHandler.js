@@ -62,7 +62,15 @@ class MetricHandler {
 
       //execute query
       //TODO: pass parameter nonErrorProneMetrics
-      queryObj.run().then(function(selfReference, requestedMetrics) { return function(dataset) { selfReference.handleResponse(selfReference, requestedMetrics, dataset); }; }(this, nonErrorProneMetrics));
+      var myPromise = queryObj.run().then(function(selfReference, requestedMetrics) {
+        return function(dataset) {
+          selfReference.handleResponse(selfReference, requestedMetrics, dataset);
+           }; }(this, nonErrorProneMetrics), function(selfReference, requestedMetrics, paramDataPoints) {
+        return function(errorObject) {
+          console.log("Request failed: " + requestedMetrics.join(","));
+          requestedMetrics.forEach((curVal) => { console.log("Marking as faulty: " + curVal); selfReference.receivedError(0, curVal); });
+          selfReference.doRequest(paramDataPoints);
+           }; }(this, nonErrorProneMetrics, maxDataPoints));
       //queryObj.run().then((dataset) => { this.handleResponse(dataset); });
 
 
