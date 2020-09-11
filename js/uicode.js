@@ -204,10 +204,71 @@ Vue.component("interaction-array-option", {
     },
     "keyField": {
       get: function() {
-        return this.action[1].join(" ");
+        var keyStr = "";
+        var keyCodeArray = this.action[1];
+        for(var i = 0; i < keyCodeArray.length; ++i)
+        {
+          var curKeyCode = keyCodeArray[i];
+          if(0 < curKeyCode.length)
+          {
+            var isNegated = ("!" == curKeyCode.charAt(0));
+            if(isNegated)
+            {
+              curKeyCode = curKeyCode.substring(1);
+            }
+            curKeyCode = parseInt(curKeyCode);
+            for(var curKeyName in window.KeyJS)
+            {
+              if(curKeyCode == window.KeyJS[curKeyName])
+              {
+                if(0 < keyStr.length)
+                {
+                  keyStr += " ";
+                }
+                if(isNegated)
+                {
+                  keyStr += "!";
+                }
+                keyStr += curKeyName;
+                break;
+              }
+            }
+          }
+        }
+        return keyStr;
       },
       set: function(newValue) {
-        this.action[1] = newValue.split(" ");
+        var rawEntriesArray = newValue.split(" ");
+        var actionKeyArray = new Array();
+        for(var i = 0; i < rawEntriesArray.length; ++i)
+        {
+          var curEntry = rawEntriesArray[i];
+          if(0 < curEntry.length)
+          {
+            var newEntry = "";
+            if("!" == curEntry.charAt(0))
+            {
+              curEntry = curEntry.substring(1);
+              newEntry += "!";
+              if(0 == curEntry.length)
+              {
+                continue;
+              }
+            }
+            if(curEntry.match(/^[0-9]+$/))
+            {
+              newEntry += curEntry;
+            } else
+            {
+              if(undefined !== window.KeyJS[curEntry.toUpperCase()])
+              {
+                newEntry += "" + window.KeyJS[curEntry.toUpperCase()];
+              }
+            }
+            actionKeyArray.push(newEntry);
+          }
+        }
+        this.action[1] = actionKeyArray;
       }
     },
     "eventName": {
