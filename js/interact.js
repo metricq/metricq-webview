@@ -180,15 +180,16 @@ function uiInteractLegend(metricQInstance, evtObj)
   for(var i = 0; i < allValuesAtTime.length; ++i)
   {
     var newEntry = [
-        allValuesAtTime[i][0],
-        allValuesAtTime[i][1]
+        allValuesAtTime[i][1],
+        allValuesAtTime[i][3],
+        allValuesAtTime[i][2]
       ];
-    var curTextLine = (new Number(newEntry[0])).toFixed(3) + " " + allValuesAtTime[i][1] + "/" + allValuesAtTime[i][2];
+    var curTextLine = (new Number(newEntry[0])).toFixed(3) + " " + allValuesAtTime[i][3] + "/" + allValuesAtTime[i][4];
     newEntry.push(curTextLine);
     newEntry.push(myCtx.measureText(curTextLine).width);
-    if(newEntry[3] > maxTextWidth)
+    if(newEntry[4] > maxTextWidth)
     {
-      maxTextWidth = newEntry[3];
+      maxTextWidth = newEntry[4];
     }
     metricsArray.push(newEntry);
   }
@@ -197,16 +198,27 @@ function uiInteractLegend(metricQInstance, evtObj)
     metricsArray.sort(function (a,b) { return b[0] - a[0]; } );
   }
   var posDate = new Date(curPoint[0]);
+  var smallestDelta = undefined;
+  for(var i = 0; i < allValuesAtTime.length; ++i)
+  {
+  	var curDelta = Math.abs(curPoint[0] - allValuesAtTime[i][0]);
+  	if(undefined === smallestDelta
+  	|| curDelta < smallestDelta)
+  	{
+  	  smallestDelta = curDelta;
+  	  posDate = new Date(allValuesAtTime[i][0]);
+  	}
+  }
   var timeString = posDate.toLocaleString();
   myCtx.fillText(timeString, curPosOnCanvas[0] + 10, 40 - 20);
   for(var i = 0; i < metricsArray.length; ++i)
   {
-    myCtx.fillStyle = determineColorForMetric(metricsArray[i][1]);
+    myCtx.fillStyle = metricsArray[i][2].styleOptions.color;
     myCtx.globalAlpha = 0.4;
     myCtx.fillRect(curPosOnCanvas[0] + 10, 40 + i * 20 - 15, maxTextWidth, 20);
     myCtx.fillStyle = "#000000";
     myCtx.globalAlpha = 1;
-    myCtx.fillText(metricsArray[i][2], curPosOnCanvas[0] + 10, 40 + i * 20);
+    myCtx.fillText(metricsArray[i][3], curPosOnCanvas[0] + 10, 40 + i * 20);
   }
 }
 function uiInteractCheck(eventType, pertainingElement, evtObj)

@@ -285,14 +285,15 @@ class MetricQWebView {
 	{
 		if(!this.handler.allMetrics["empty"])
 		{
-			this.handler.allMetrics["empty"] = new Metric(this, "", metricBaseToRgb(""), markerSymbols[0], new Array());
+			this.handler.allMetrics["empty"] = new Metric(this, "", undefined, markerSymbols[0], new Array());
 		}
 	}
 	deleteMetric(metricBase)
 	{
-		this.graticule.data.deleteMetric(metricBase);
+		if(this.graticule) this.graticule.data.deleteMetric(metricBase);
 		delete this.handler.allMetrics[metricBase];
-		this.graticule.draw(false);
+		//TODO: also clear this metric from MetricCache
+		if(this.graticule) this.graticule.draw(false);
 	}
 	deleteTraces(tracesArr)
 	{
@@ -302,18 +303,36 @@ class MetricQWebView {
 	}
 	changeMetricName(metricReference, newName, oldName)
 	{
+        /* reject metric names that already exist */
+		if(this.handler.allMetrics[newName])
+		{
+		  
+		  return false;
+		}
 		metricReference.updateName(newName);
         if("" == oldName)
         {
-            this.handler.allMetrics["empty"] = new Metric(this, "", metricBaseToRgb(""), markerSymbols[0], new Array());
+            this.handler.allMetrics["empty"] = new Metric(this, "", undefined, markerSymbols[0], new Array());
             this.handler.allMetrics[newName] = metricReference;
         } else
         {
-        	delete this.handler.allMetrics[oldName];
+        	this.deleteMetric(oldName);
         	this.handler.allMetrics[newName] = metricReference;
         }
-        /* TODO: reject metric names that already exist */
+        if(this.graticule)
+        {
+          var newCache = this.graticule.data.getMetricCache(newName);
+          if(!newCache)
+          {
+          	newCache = this.graticule.data.getMetricCache(newName);
+          	//TODO: call this.graticule.data.initializeCacheWithColor()
+          	this.graticule.data.initializeCacheWithColor(newName, metricReference.color);
+          	//WHAT SHALL WE DO WITH THE LEGEND'S COLOR?
+          	//WHAT SHALL WE DO WITH A DRUNKEN SAILOR IN THE MORNING?
+          }
+        }
         this.reload();
+        return true;
 	}
 	doExport()
 	{

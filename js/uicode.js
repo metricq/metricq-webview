@@ -14,6 +14,7 @@ new MetricQWebView(document.querySelector(".row_body"), new Array(), (new Date()
 
 var veil = {
   "myPopup": undefined,
+  "inDestroymentPhase": false,
   "create": function(destroyCallback, solidVeil)
    {
      var veilEle = document.createElement("div");
@@ -33,6 +34,11 @@ var veil = {
   "ondestroy": undefined,
   "destroy": function(evt)
   {
+    if(veil.inDestroymentPhase)
+    {
+      return undefined;;
+    }
+    veil.inDestroymentPhase = true;
     if(veil.ondestroy && evt) {
       veil.ondestroy(evt);
     }
@@ -44,6 +50,7 @@ var veil = {
 
     veil.myPopup = undefined;
     veil.ondestroy = undefined;
+    veil.inDestroymentPhase = false;
   },
   "attachPopup": function(popupEle)
   {
@@ -150,11 +157,11 @@ Vue.component("metric-popup", {
             + "</div></div>"
             + "</div>"
             + "<div class=\"modal-footer\">"
-            + "<button class=\"btn btn-danger\">"
+            + "<button v-if=\"!isEmpty\" class=\"btn btn-danger\">"
             + "<img src=\"img/icons/trash.svg\" class=\"popup_trashcan\" width=\"26\" height=\"26\" />"
             + "</button>"
             + "<button class=\"btn btn-primary popup_ok\">"
-            + "OK"
+            + "{{ saveButtonText }}"
             + "</button>"
             + "</div>"
             + "</div>"
@@ -165,6 +172,28 @@ Vue.component("metric-popup", {
       "markerSymbols": markerSymbols,
       "popupTitle": "Metrik-Eigenschaften"
      };
+  },
+  "computed": {
+    "saveButtonText": {
+      get: function()
+      {
+        return "" === this.metric.name ? "Erstellen" : "OK";
+      },
+      set: function(newValue)
+      {
+        //do nothing
+      }
+    },
+    "isEmpty": {
+      get: function()
+      {
+        return "" === this.metric.name;
+      },
+      set: function(newValue)
+      {
+        //do nothing
+      }
+    }
   },
   "methods": {
     "changeMarker": function()
@@ -878,22 +907,54 @@ function initializeMetricPopup() {
             popupApp.$forceUpdate();
             veil.destroy();
 
-            if("popup_trashcan" == evt.target.getAttribute("class"))
+            let oldName = evt.target.getAttribute("metric-old-name");
+
+            //special behavior when creating a new metric
+            if(null === oldName
+            || undefined === oldName)
             {
-              paramMyInstance.deleteMetric(paramMyMetric.name);
-              Vue.nextTick(function() { legendApp.$forceUpdate(); });
-            } else
-            {
-              if(paramMyMetric.name != evt.target.getAttribute("metric-old-name"))
+              if("popup_trashcan" == evt.target.getAttribute("class")) return;
+
+              if("popup_ok" == evt.target.getAttribute("class"))
               {
-                if("" == paramMyMetric.name && !evt.target.getAttribute("metric-old-name"))
+                // code duplication :(
+                if(paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute("metric-old-name")))
                 {
-                  //do nothing
-                } else
-                {
-                  paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute("metric-old-name"));
+                  nameChanged = true;
+                } else {
+                  paramMyMetric.updateName(oldName);
+                  showUserHint("Konnte Metrik-Namen nicht ändern. Metrik evtl. schon vorhanden?");
                 }
-              } else {
+              }
+            }
+            else
+            {
+              if("popup_trashcan" == evt.target.getAttribute("class"))
+              {
+                if(0 < oldName.length)
+                {
+                  paramMyInstance.deleteMetric(oldName);
+                  Vue.nextTick(function() { legendApp.$forceUpdate(); });
+                }
+              } else
+              {
+                var nameChanged = false;
+                if(paramMyMetric.name != oldName)
+                {
+                  if("" == paramMyMetric.name && !oldName)
+                  {
+                    //do nothing
+                  } else
+                  {
+                    if(paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute("metric-old-name")))
+                    {
+                      nameChanged = true;
+                    } else {
+                      paramMyMetric.updateName(oldName);
+                      showUserHint("Konnte Metrik-Namen nicht ändern. Metrik evtl. schon vorhanden?");
+                    }
+                  }
+                }
                 if(evt.target.getAttribute("metric-old-color") != paramMyMetric.color)
                 {
                   paramMyMetric.updateColor(paramMyMetric.color);
@@ -902,6 +963,11 @@ function initializeMetricPopup() {
                   {
                     colorEle[0].style.color = paramMyMetric.color;
                   }
+                }
+                if(nameChanged)
+                {
+                  //TODO: do something, in this case, do forceUpdate the legendApp
+                  //         so the metric's color will be shown
                 }
                 if(evt.target.getAttribute("metric-old-marker") != paramMyMetric.marker)
                 {
@@ -926,17 +992,22 @@ function initializeMetricPopup() {
           //TODO: implement throttling? 
           instance.handler.searchMetricsPromise(evt.target.value).then(function(myInstance, wrapperEle, paramMetric) { return function(searchSuggestions) {
             var datalistEle = document.getElementById("autocomplete_metric");
-            for(var i = datalistEle.childNodes.length - 1; i >= 0; --i)
+            if(!datalistEle)
             {
-              datalistEle.removeChild(datalistEle.childNodes[i]);
-            }
-            for(var i = 0; i < searchSuggestions.length; ++i)
+              showUserHint("Auto-Vervollständigung nicht verfügbar, konnte Element #autocomplete_metric nicht finden.");
+            } else
             {
-              var optionEle = document.createElement("option");
-              optionEle.setAttribute("value", searchSuggestions[i]);
-              datalistEle.appendChild(optionEle);
+              for(var i = datalistEle.childNodes.length - 1; i >= 0; --i)
+              {
+                datalistEle.removeChild(datalistEle.childNodes[i]);
+              }
+              for(var i = 0; i < searchSuggestions.length; ++i)
+              {
+                var optionEle = document.createElement("option");
+                optionEle.setAttribute("value", searchSuggestions[i]);
+                datalistEle.appendChild(optionEle);
+              }
             }
-
           }; }(instance, popupEle, myMetric));
         });
         var trashcanEle = popupEle.querySelector(".popup_trashcan");
@@ -953,18 +1024,24 @@ function initializeMetricPopup() {
         var okEle = document.querySelector(".popup_ok");
 
         [veilEle, inputEle, closeEle, trashcanEle, okEle].forEach(function(paramValue, paramIndex, paramArray) {
-          paramValue.setAttribute("metric-old-name", myMetric.name);
-          paramValue.setAttribute("metric-old-color", myMetric.color);
-          paramValue.setAttribute("metric-old-marker", myMetric.marker);
-          paramValue.setAttribute("metric-affected-traces", JSON.stringify(affectedTraces))
+          if(paramValue)
+          {
+            paramValue.setAttribute("metric-old-name", myMetric.name);
+            paramValue.setAttribute("metric-old-color", myMetric.color);
+            paramValue.setAttribute("metric-old-marker", myMetric.marker);
+            paramValue.setAttribute("metric-affected-traces", JSON.stringify(affectedTraces));
+          }
         });
 
         [okEle, closeEle, trashcanEle].forEach(function(paramValue, paramIndex, paramArray) {
-          paramValue.addEventListener("click", function(paramMetricName, disableFunc){
-            return function(evt) {
-              disableFunc(evt);
-            }
-          }(myMetric.name, disablePopupFunc));
+          if(paramValue)
+          {
+            paramValue.addEventListener("click", function(paramMetricName, disableFunc){
+              return function(evt) {
+                disableFunc(evt);
+              }
+            }(myMetric.name, disablePopupFunc));
+          }
         });
         document.getElementById("input_metric_name").focus();
       }

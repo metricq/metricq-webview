@@ -224,6 +224,8 @@ function DataCache(paramMetricQHistoryReference)
           {
             valueArr.push([
               result[0],
+              result[1],
+              this.metrics[i].series[curAggregate],
               this.metrics[i].name,
               curAggregate
             ]);
@@ -259,6 +261,24 @@ function DataCache(paramMetricQHistoryReference)
       }
     }
     return units;
+  }
+
+  this.initializeCacheWithColor = function(metricName, newColor)
+  {
+    var newCache = this.assureMetricExists(metricName);
+    Object.keys(newCache.series).forEach(aggregate => { this.newSeries(metricName, aggregate); });
+    if(!newCache.band)
+    {
+      this.newBand(metricName);
+    }
+    var toUpdate = [newCache.band];
+    Object.keys(newCache.series).forEach(aggregate => { toUpdate.push(newCache.series[aggregate]); });
+
+    toUpdate.forEach(val => {
+      val.styleOptions.color = newColor;
+     });
+
+    return newCache;
   }
 }
 
@@ -519,7 +539,7 @@ function Series(paramAggregate, paramStyleOptions)
   {
     if("number" !== typeof timeAt || 0 == this.points.length)
     {
-      return;
+      return undefined;
     }
     var middleIndex = undefined;
     var bottomIndex = 0
@@ -578,7 +598,7 @@ function Series(paramAggregate, paramStyleOptions)
         }
         var timeDelta = secondPoint.time - firstPoint.time;
         var valueDelta = secondPoint.value - firstPoint.value;
-        return [firstPoint.value + valueDelta * ((timeAt - firstPoint.time) / timeDelta), betterIndex];
+        return [timeAt, firstPoint.value + valueDelta * ((timeAt - firstPoint.time) / timeDelta), betterIndex];
       }
       if(0 > betterIndex)
       {
@@ -589,10 +609,10 @@ function Series(paramAggregate, paramStyleOptions)
         betterIndex = this.points.length - 1;
         return undefined;
       }
-      return [this.points[betterIndex].value, betterIndex];
+      return [this.points[betterIndex].time, this.points[betterIndex].value, betterIndex];
     } else
     {
-      return [this.points[closestPointIndex].value, betterIndex];
+      return [this.points[closestPointIndex].time, this.points[closestPointIndex].value, betterIndex];
     }
   };
   this.addPoint = function (newPoint, isBigger) {

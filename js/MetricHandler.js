@@ -22,10 +22,10 @@ class MetricHandler {
       var curMetricName = initialMetricNames[i];
       if(0 < curMetricName.length)
       {
-        this.allMetrics[curMetricName] = new Metric(this.renderer, curMetricName, metricBaseToRgb(curMetricName), markerSymbols[i * 4], new Array());
+        this.allMetrics[curMetricName] = new Metric(this.renderer, curMetricName, undefined, markerSymbols[i * 4], new Array());
       } else
       {
-        this.allMetrics["empty"] = new Metric(this.renderer, "", metricBaseToRgb(""), markerSymbols[i * 4], new Array());
+        this.allMetrics["empty"] = new Metric(this.renderer, "", undefined, markerSymbols[i * 4], new Array());
       }
     }
   }
@@ -358,7 +358,7 @@ class MetricHandler {
     let myMetric = this.allMetrics[metricBase];
     if(!myMetric)
     {
-      this.allMetrics[metricBase] = new Metric(this.renderer, metricBase, metricBaseToRgb(metricBase), markerSymbols[metricIndex * 4], metricTraces);
+      this.allMetrics[metricBase] = new Metric(this.renderer, metricBase, undefined, markerSymbols[metricIndex * 4], metricTraces);
     } else 
     {
       myMetric.setTraces(metricTraces);
@@ -441,7 +441,7 @@ class MetricHandler {
     // mark a metric so it is being excluded in bulk-requests
     if(this.allMetrics[metricBase])
     {
-      this.allMetrics[metricBase].errorprone = true;
+      this.allMetrics[metricBase].error();
     }
   }
   reload()

@@ -5,13 +5,6 @@
 var markerSymbols = [".", "o", "v", "^", "<", ">", "s", "p", "*", "h", "+", "x", "d", "|", "_"];
 
 
-function metricBaseToRgb(metricBase)
-{
-  var rgbArr = hslToRgb((crc32(metricBase) >> 24 & 255) / 255.00, 1, 0.46);
-  return "rgb(" + rgbArr[0] + "," + rgbArr[1] + "," + rgbArr[2] + ")";
-}
-
-
 
 class Metric
 {
@@ -20,12 +13,19 @@ class Metric
     this.renderer = paramRenderer;
   	this.updateName(paramName);
   	this.marker = paramMarker;
-    this.color = paramColor;
+    if(undefined === paramColor)
+    {
+      this.color = Metric.metricBaseToRgb(paramName);
+    } else
+    {
+      this.color = paramColor;      
+    }
   	this.traces = new Array();
     this.setTraces(paramTraces);
     this.globalMinmax = undefined;
     this.errorprone = false;
   	this.popup = false;
+    this.updateColor(this.color);
     //this.autocompleteList = new Array();
   }
   filterKey(paramKey)
@@ -37,13 +37,25 @@ class Metric
   	this.name = newName;
   	let computedKey = this.filterKey(newName);
   	this.popupKey = "popup_" + computedKey;
+    var htmlText = "";
     if("" === newName)
     {
-      this.htmlName = "<img src=\"img/icons/plus-circle.svg\" width=\"28\" height=\"28\" /> Neu ";
+      htmlText += "<img src=\"img/icons/plus-circle.svg\" width=\"28\" height=\"28\" /> Neu ";
     } else
     {
-      this.htmlName = newName;
+      htmlText += newName;
     }
+    // NOPE this does not work :(
+    //if(this.errorprone)
+    //{
+    //  htmlText += "⚠";
+    //}
+    this.htmlName = htmlText;
+  }
+  error()
+  {
+    this.errorprone = true;
+    this.updateName(this.name);
   }
   updateColor(newCssColor)
   {
@@ -96,5 +108,10 @@ class Metric
     this.traces = newTraces;
     this.updateColor(this.color);
     this.updateMarker(this.marker);
+  }
+  static metricBaseToRgb(metricBase)
+  {
+    var rgbArr = hslToRgb((crc32(metricBase) >> 24 & 255) / 255.00, 1, 0.46);
+    return "rgb(" + rgbArr[0] + "," + rgbArr[1] + "," + rgbArr[2] + ")";
   }
 }
