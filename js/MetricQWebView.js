@@ -380,25 +380,71 @@ function parseLocationHref()
 	return [baseUrl, jsurlStr];
 }
 
+function determineTimeRangeOfJsUrl(jsUrlObj)
+{
+  var timeStart, timeEnd;
+  if(jsUrlObj["start"] && jsUrlObj["stop"])
+  {
+    timeStart = parseInt(jsUrlObj.start);
+    timeEnd   = parseInt(jsUrlObj.stop);
+  } else if(jsUrlObj["value"] && jsUrlObj["unit"])
+  {
+    var unitsAssociation = {
+      "second": 1000,
+      "minute": 60000,
+      "hour": 3600000,
+      "day": 86400000,
+      "week": 86400000 * 7,
+      "month": 86400000 * 30,
+      "year": 86400000 * 365
+      };
+    var unitMultiplier = unitsAssociation[jsUrlObj["unit"]];
+    timeEnd = (new Date()).getTime();
+    var timeToSubtract = 2 * 3600 * 1000;
+    if(undefined === unitMultiplier)
+    {
+      console.warn(`Invalid unit "${jsUrlObj["unit"]}" in URL`);
+     } else {
+      timeToSubtract = jsUrlObj.value * unitMultiplier;
+    }
+    timeStart = timeEnd - timeToSubtract;
+  } else
+  {
+    console.info("No time specification given in URL");
+  }
+  return [timeStart, timeEnd];
+}
+
 function importMetricUrl()
 {
   var jsurlStr = parseLocationHref()[1];
   if(1 < jsurlStr.length)
   {
-    if("~" == jsurlStr.charAt(0))
+  	var firstChar = jsurlStr.charAt(0);
+  	var firstTwoChars = firstChar + jsurlStr.charAt(1);
+    if("/~" == firstTwoChars
+    || "~" == firstChar)
     {
       let metricsObj = undefined;
       try {
-        metricsObj = window.JSURL.parse(jsurlStr);
+      	if("/~" == firstTwoChars)
+      	{
+          metricsObj = window.JSURL.parse(jsurlStr.substring(1));
+      	} else
+      	{
+          metricsObj = window.JSURL.parse(jsurlStr);
+        }
       } catch(exc)
       {
         console.log("Could not interpret URL");
         console.log(exc);
         return false;
       }
-      initializeMetrics(metricsObj.cntr, parseInt(metricsObj.start), parseInt(metricsObj.stop));
+      var timeRanges = determineTimeRangeOfJsUrl(metricsObj);
+
+      initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1]);
       return true;
-    } else if("." == jsurlStr.charAt(0))
+    } else if("." == firstChar)
     {
       const splitted = jsurlStr.split("*");
       if(1 < splitted.length)
