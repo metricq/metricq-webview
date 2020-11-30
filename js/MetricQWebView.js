@@ -389,22 +389,33 @@ function determineTimeRangeOfJsUrl(jsUrlObj)
     timeEnd   = parseInt(jsUrlObj.stop);
   } else if(jsUrlObj["value"] && jsUrlObj["unit"])
   {
+  	//including the units from old tool settings.js  (line 62)
     var unitsAssociation = {
       "second": 1000,
+      "second(s)": 1000,
       "minute": 60000,
+      "minute(s)": 60000,
       "hour": 3600000,
+      "hour(s)": 3600000,
       "day": 86400000,
+      "day(s)": 86400000,
       "week": 86400000 * 7,
+      "week(s)": 86400000 * 7,
       "month": 86400000 * 30,
-      "year": 86400000 * 365
+      "month(s)": 86400000 * 30,
+      "year": 86400000 * 365,
+      "year(s)": 86400000 * 365
       };
+      //TODO: use these units:
+      
+      //	this.units = ['second(s)', 'minute(s)', 'hour(s)', 'day(s)', 'week(s)', 'month(s)', 'year(s)', 'data points'];
     var unitMultiplier = unitsAssociation[jsUrlObj["unit"]];
     timeEnd = (new Date()).getTime();
     var timeToSubtract = 2 * 3600 * 1000;
     if(undefined === unitMultiplier)
     {
       console.warn(`Invalid unit "${jsUrlObj["unit"]}" in URL`);
-     } else {
+    } else {
       timeToSubtract = jsUrlObj.value * unitMultiplier;
     }
     timeStart = timeEnd - timeToSubtract;

@@ -432,6 +432,8 @@ Vue.component("xaxis-popup", {
             + "<input type=\"date\" class=\"form-control col-sm-6\" v-model=\"endDate\" v-bind:min=\"startDate\" required /><input type=\"time\" class=\"form-control col-sm-6\" id=\"end_date_time\" v-model=\"endTime\" step=\"1\" required />"
             + "</div>"
             + "</div>"
+//TODO: put fancy time window selection here, like in ISSUE #17
+            + ""
             + "</div>"
             + "<div class=\"modal-footer\">"
             + "<button class=\"btn btn-primary popup_ok\">"
