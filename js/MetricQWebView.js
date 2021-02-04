@@ -83,7 +83,7 @@ class MetricQWebView {
 
     if(!this.hasPlot)
     {
-    	var canvasSize = [ parseInt(this.ele.offsetWidth), 400];
+    	var canvasSize = [ parseInt(this.ele.offsetWidth), document.body.scrollHeight-250];
     	var myCanvas = document.createElement("canvas");
     	myCanvas.setAttribute("width", canvasSize[0]);
     	myCanvas.setAttribute("height", canvasSize[1]);
