@@ -10,6 +10,7 @@ class Metric
 {
   constructor(paramRenderer, paramName, paramColor, paramMarker, paramTraces)
   {
+    this.description = "loading description"
     this.renderer = paramRenderer;
   	this.updateName(paramName);
   	this.marker = paramMarker;
@@ -51,6 +52,10 @@ class Metric
     //  htmlText += "⚠";
     //}
     this.htmlName = htmlText;
+  }
+  updateDescription(description)
+  {
+    this.description = description
   }
   error()
   {

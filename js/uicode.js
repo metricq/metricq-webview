@@ -101,6 +101,7 @@ Vue.component("metric-legend", {
             + "</div> &nbsp;"
             + "<span v-html=\"metric.htmlName\"></span>&nbsp;"
             + "<img v-if=\"metric.name\" src=\"img/icons/pencil.svg\" width=\"28\" height=\"28\" />"
+            + "<br/><span>{{ metric.description }}</span>&nbsp;"
             + "</li>",
   "methods": {
     "metricPopup": function(metricName) {
@@ -822,24 +823,9 @@ Vue.component("export-popup", {
 
 var legendApp = new Vue({
   "el": "#legend_list",
-  "computed": {
-    "metricsList": {
-      cache: false,
-      "get": function () {
-        if(window["MetricQWebView"])
-        {
-          return window.MetricQWebView.instances[0].handler.allMetrics;
-        } else
-        {
-          return new Object();
-        }
-      },
-      "set": function (newValue){
-        if(window["MetricQWebView"])
-        {
-          return window.MetricQWebView.instances[0].handler.allMetrics = newValue;
-        }
-      }
+  data () {
+    return {
+      "metricsList": window.MetricQWebView.instances[0].handler.allMetrics
     }
   }
 });
@@ -847,24 +833,9 @@ var popupApp = new Vue({
   "el": "#wrapper_popup_legend",
   "methods": {
   },
-  "computed": {
-    "metricsList": {
-      cache: false,
-      "get": function() {
-        if(window["MetricQWebView"])
-        {
-          return window.MetricQWebView.instances[0].handler.allMetrics;
-        } else
-        {
-          return new Object();
-        }
-      },
-      "set": function (newValue){
-        if(window["MetricQWebView"])
-        {
-          return window.MetricQWebView.instances[0].handler.allMetrics = newValue;
-        }
-      }
+  data () {
+    return {
+      "metricsList": window.MetricQWebView.instances[0].handler.allMetrics
     }
   },
   //not called by $forceUpdate :(

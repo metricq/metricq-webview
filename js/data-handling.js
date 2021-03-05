@@ -413,7 +413,17 @@ function MetricCache(paramMetricQReference, paramMetricName)
   }
   this.fetchMetadata = function()
   {
-    this.metricQHistory.metadata(this.name).then((metadataObj) => { this.meta = metadataObj; });
+    this.metricQHistory.metadata(this.name).then((metadataObj) => {
+      this.meta = metadataObj;
+      if (metadataObj.description)
+      {
+        window.MetricQWebView.instances[0].handler.allMetrics[this.name].updateDescription(metadataObj.description)
+      }
+      else
+      {
+        window.MetricQWebView.instances[0].handler.allMetrics[this.name].updateDescription("no description")
+      }
+    });
   }
   //TODO: use Mario's metricq-js-API
   this.fetchAllTimeMinMax = function()
@@ -840,4 +850,19 @@ function determineColorForMetric(metricBaseName)
 {
   var rgb = hslToRgb((crc32(metricBaseName) >> 24 & 255) / 255.00, 1, 0.46);
   return "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
+}
+
+function getDescription(paramMetricName, paramMetricQHistory, i) {
+  return new Promise((resolve, reject) => {
+    if (true) {
+      paramMetricQHistory.search(paramMetricName).then(matches => {
+        console.log(matches[0]);
+        return resolve(i);
+      }).catch(error =>
+          console.log('Something went wrong: ' + error)
+      )
+    } else {
+      return reject("0");
+    }
+  });
 }
