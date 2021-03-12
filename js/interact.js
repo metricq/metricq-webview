@@ -1,4 +1,4 @@
-var uiOptions = {
+const uiOptions = {
   horizontalScrolling: false,
   smoothScrollingExtraData: true,
   minimumXPixels: 0.5,
@@ -6,7 +6,7 @@ var uiOptions = {
   errorArrowInterval: 2000
 }
 
-var uiInteractArr = [
+const uiInteractArr = [
   ['drag', ['17'], 'uiInteractPan'],
   ['drag', ['!16', '!17'], 'uiInteractZoomArea'],
   ['drop', ['!16', '!17'], 'uiInteractZoomIn'],
@@ -15,9 +15,9 @@ var uiInteractArr = [
 ]
 
 function uiInteractPan (metricQInstance, evtObj) {
-  if (mouseDown.previousPos[0] !== mouseDown.currentPos[0]
-    || mouseDown.previousPos[1] !== mouseDown.currentPos[1]) {
-    var timeToMoveBy = (mouseDown.currentPos[0] - mouseDown.previousPos[0]) * -1 * metricQInstance.graticule.curTimePerPixel
+  if (mouseDown.previousPos[0] !== mouseDown.currentPos[0] ||
+    mouseDown.previousPos[1] !== mouseDown.currentPos[1]) {
+    const timeToMoveBy = (mouseDown.currentPos[0] - mouseDown.previousPos[0]) * -1 * metricQInstance.graticule.curTimePerPixel
     metricQInstance.handler.setTimeRange(metricQInstance.handler.startTime + timeToMoveBy,
       metricQInstance.handler.stopTime + timeToMoveBy)
     metricQInstance.throttledReload()
@@ -26,37 +26,37 @@ function uiInteractPan (metricQInstance, evtObj) {
 }
 
 function uiInteractZoomArea (metricQInstance, evtObj) {
-  if (mouseDown.previousPos[0] !== mouseDown.currentPos[0]
-    || mouseDown.previousPos[1] !== mouseDown.currentPos[1]) {
+  if (mouseDown.previousPos[0] !== mouseDown.currentPos[0] ||
+    mouseDown.previousPos[1] !== mouseDown.currentPos[1]) {
     metricQInstance.graticule.draw(false)
-    var myCtx = metricQInstance.graticule.ctx
+    const myCtx = metricQInstance.graticule.ctx
     myCtx.fillStyle = 'rgba(0,0,0,0.2)'
-    var minXPos = mouseDown.currentPos[0]
+    let minXPos = mouseDown.currentPos[0]
     if (mouseDown.startPos[0] < minXPos) {
       minXPos = mouseDown.startPos[0]
     }
-    var maxXPos = mouseDown.currentPos[0]
+    let maxXPos = mouseDown.currentPos[0]
     if (mouseDown.startPos[0] > maxXPos) {
       maxXPos = mouseDown.startPos[0]
     }
     myCtx.fillRect(minXPos, metricQInstance.graticule.graticuleDimensions[1], maxXPos - minXPos, metricQInstance.graticule.graticuleDimensions[3])
-    var timeValueStart = metricQInstance.graticule.getTimeValueAtPoint([minXPos, mouseDown.relativeStartPos[1]])
-    var timeValueEnd = metricQInstance.graticule.getTimeValueAtPoint([maxXPos, mouseDown.relativeStartPos[1]])
+    const timeValueStart = metricQInstance.graticule.getTimeValueAtPoint([minXPos, mouseDown.relativeStartPos[1]])
+    const timeValueEnd = metricQInstance.graticule.getTimeValueAtPoint([maxXPos, mouseDown.relativeStartPos[1]])
 
     if (timeValueStart && timeValueEnd) {
-      var timeDelta = timeValueEnd[0] - timeValueStart[0]
-      var centerPos = [
+      const timeDelta = timeValueEnd[0] - timeValueStart[0]
+      const centerPos = [
         Math.floor(minXPos + (maxXPos - minXPos) / 2),
         Math.floor(metricQInstance.graticule.graticuleDimensions[1] + (metricQInstance.graticule.graticuleDimensions[3] - metricQInstance.graticule.graticuleDimensions[1]) / 2)
       ]
-      var deltaString = ''
-      if (86400000 < timeDelta) {
+      let deltaString = ''
+      if (timeDelta > 86400000) {
         deltaString = (new Number(timeDelta / 86400000)).toFixed(2) + ' days'
-      } else if (3600000 < timeDelta) {
+      } else if (timeDelta > 3600000) {
         deltaString = (new Number(timeDelta / 3600000)).toFixed(2) + ' hours'
-      } else if (60000 < timeDelta) {
+      } else if (timeDelta > 60000) {
         deltaString = (new Number(timeDelta / 60000)).toFixed(1) + ' minutes'
-      } else if (1000 < timeDelta) {
+      } else if (timeDelta > 1000) {
         deltaString = (new Number(timeDelta / 1000)).toFixed(1) + ' seconds'
       } else {
         deltaString = Math.floor(timeDelta) + ' milliseconds'
@@ -70,16 +70,16 @@ function uiInteractZoomArea (metricQInstance, evtObj) {
 
 function uiInteractZoomIn (metricQInstance, evtObj) {
   evtObj.preventDefault()
-  var relativeStart = mouseDown.relativeStartPos
-  var relativeEnd = calculateActualMousePos(evtObj)
-  if (1 < Math.abs(relativeStart[0] - relativeEnd[0])) {
-    var posEnd = metricQInstance.graticule.getTimeValueAtPoint(relativeStart)
-    var posStart = metricQInstance.graticule.getTimeValueAtPoint(relativeEnd)
+  const relativeStart = mouseDown.relativeStartPos
+  const relativeEnd = calculateActualMousePos(evtObj)
+  if (Math.abs(relativeStart[0] - relativeEnd[0]) > 1) {
+    let posEnd = metricQInstance.graticule.getTimeValueAtPoint(relativeStart)
+    let posStart = metricQInstance.graticule.getTimeValueAtPoint(relativeEnd)
     if (!posEnd || !posStart) {
       return
     }
     if (posEnd[0] < posStart[0]) {
-      var swap = posEnd
+      const swap = posEnd
       posEnd = posStart
       posStart = swap
     }
@@ -99,13 +99,13 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
   evtObj.preventDefault()
   if (evtObj.deltaX && uiOptions.horizontalScrolling) // horizontal scrolling
   {
-    var deltaRange = metricQInstance.handler.stopTime - metricQInstance.handler.startTime//metricQInstance.graticule.curTimeRange[1] - metricQInstance.graticule.curTimeRange[0];
-    //TODO: set start and stopTime of the handler
-    if (0 > evtObj.deltaX) {
+    const deltaRange = metricQInstance.handler.stopTime - metricQInstance.handler.startTime// metricQInstance.graticule.curTimeRange[1] - metricQInstance.graticule.curTimeRange[0];
+    // TODO: set start and stopTime of the handler
+    if (evtObj.deltaX < 0) {
       if (!metricQInstance.handler.setTimeRange(metricQInstance.graticule.curTimeRange[0] - deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] - deltaRange * 0.2)) {
         showUserHint('Zoom-Limit erreicht.')
       }
-    } else if (0 < evtObj.deltaX) {
+    } else if (evtObj.deltaX > 0) {
       if (!metricQInstance.handler.setTimeRange(metricQInstance.graticule.curTimeRange[0] + deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] + deltaRange * 0.2)) {
         showUserHint('Zoom-Limit erreicht.')
       }
@@ -114,16 +114,16 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
     metricQInstance.graticule.draw(false)
   } else // vertical scrolling
   {
-    var scrollDirection = evtObj.deltaY
-    if (0 > scrollDirection) {
+    let scrollDirection = evtObj.deltaY
+    if (scrollDirection < 0) {
       scrollDirection = -0.2
     }
-    if (0 < scrollDirection) {
+    if (scrollDirection > 0) {
       scrollDirection = 0.2
     }
     scrollDirection *= metricQInstance.configuration.zoomSpeed / 10
-    var curPos = calculateActualMousePos(evtObj)
-    var curTimeValue = metricQInstance.graticule.getTimeValueAtPoint(curPos)
+    const curPos = calculateActualMousePos(evtObj)
+    const curTimeValue = metricQInstance.graticule.getTimeValueAtPoint(curPos)
     if (curTimeValue) {
       if (!metricQInstance.handler.zoomTimeAtPoint(curTimeValue, scrollDirection)) {
         showUserHint('Konnte nicht weiter zoomen, Limit erreicht')
@@ -136,26 +136,26 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
 }
 
 function uiInteractLegend (metricQInstance, evtObj) {
-  var curPosOnCanvas = calculateActualMousePos(evtObj)
-  var curPoint = metricQInstance.graticule.getTimeValueAtPoint(curPosOnCanvas)
+  const curPosOnCanvas = calculateActualMousePos(evtObj)
+  const curPoint = metricQInstance.graticule.getTimeValueAtPoint(curPosOnCanvas)
   if (!curPoint) {
     return
   }
   metricQInstance.graticule.draw(false)
-  var myCtx = metricQInstance.graticule.ctx
+  const myCtx = metricQInstance.graticule.ctx
   myCtx.fillStyle = 'rgba(0,0,0,0.8)'
   myCtx.fillRect(curPosOnCanvas[0] - 1, metricQInstance.graticule.graticuleDimensions[1], 2, metricQInstance.graticule.graticuleDimensions[3])
-  myCtx.font = '14px ' + metricQInstance.graticule.DEFAULT_FONT //actually it's sans-serif
-  var metricsArray = new Array()
-  var maxTextWidth = 0
-  var allValuesAtTime = metricQInstance.graticule.data.getAllValuesAtTime(curPoint[0])
+  myCtx.font = '14px ' + metricQInstance.graticule.DEFAULT_FONT // actually it's sans-serif
+  const metricsArray = new Array()
+  let maxTextWidth = 0
+  const allValuesAtTime = metricQInstance.graticule.data.getAllValuesAtTime(curPoint[0])
   for (var i = 0; i < allValuesAtTime.length; ++i) {
-    var newEntry = [
+    const newEntry = [
       allValuesAtTime[i][1],
       allValuesAtTime[i][3],
       allValuesAtTime[i][2]
     ]
-    var curTextLine = (new Number(newEntry[0])).toFixed(3) + ' ' + allValuesAtTime[i][3] + '/' + allValuesAtTime[i][4]
+    const curTextLine = (new Number(newEntry[0])).toFixed(3) + ' ' + allValuesAtTime[i][3] + '/' + allValuesAtTime[i][4]
     newEntry.push(curTextLine)
     newEntry.push(myCtx.measureText(curTextLine).width)
     if (newEntry[4] > maxTextWidth) {
@@ -166,17 +166,17 @@ function uiInteractLegend (metricQInstance, evtObj) {
   if (uiOptions.sortTooltip) {
     metricsArray.sort(function (a, b) { return b[0] - a[0] })
   }
-  var posDate = new Date(curPoint[0])
-  var smallestDelta = undefined
+  let posDate = new Date(curPoint[0])
+  let smallestDelta
   for (var i = 0; i < allValuesAtTime.length; ++i) {
-    var curDelta = Math.abs(curPoint[0] - allValuesAtTime[i][0])
-    if (undefined === smallestDelta
-      || curDelta < smallestDelta) {
+    const curDelta = Math.abs(curPoint[0] - allValuesAtTime[i][0])
+    if (undefined === smallestDelta ||
+      curDelta < smallestDelta) {
       smallestDelta = curDelta
       posDate = new Date(allValuesAtTime[i][0])
     }
   }
-  var timeString = posDate.toLocaleString()
+  const timeString = posDate.toLocaleString()
   myCtx.fillText(timeString, curPosOnCanvas[0] + 10, 40 - 20)
   for (var i = 0; i < metricsArray.length; ++i) {
     myCtx.fillStyle = metricsArray[i][2].styleOptions.color
@@ -189,12 +189,12 @@ function uiInteractLegend (metricQInstance, evtObj) {
 }
 
 function uiInteractCheck (eventType, pertainingElement, evtObj) {
-  for (var i = 0; i < uiInteractArr.length; ++i) {
+  for (let i = 0; i < uiInteractArr.length; ++i) {
     if (eventType == uiInteractArr[i][0]) {
-      var matchingSoFar = true
-      for (var j = 0; j < uiInteractArr[i][1].length; ++j) {
-        if (0 < (uiInteractArr[i][1][j] + '').length) {
-          var allowedKey = '!' != uiInteractArr[i][1][j].charAt(0)
+      let matchingSoFar = true
+      for (let j = 0; j < uiInteractArr[i][1].length; ++j) {
+        if ((uiInteractArr[i][1][j] + '').length > 0) {
+          const allowedKey = uiInteractArr[i][1][j].charAt(0) != '!'
           if (!allowedKey && keyDown.is(parseInt(uiInteractArr[i][1][j].substring(1)))) {
             matchingSoFar = false
           }
@@ -233,24 +233,24 @@ function registerCallbacks (anchoringObject) {
       }
     }
   }(anchoringObject))
-  anchoringObject.addEventListener('mouseout', function (myElement) {
+  anchoringObject.addEventListener('mouseout', (function (myElement) {
     return function (evtObj) {
       if (myElement) {
         window.MetricQWebView.getInstance(myElement).graticule.draw(false)
       }
     }
-  }(anchoringObject))
-  anchoringObject.addEventListener('wheel', function (myElement) {
+  }(anchoringObject)))
+  anchoringObject.addEventListener('wheel', (function (myElement) {
     return function (evtObj) {
       uiInteractCheck('wheel', myElement, evtObj)
     }
-  }(anchoringObject))
+  }(anchoringObject)))
 }
 
 function calculateActualMousePos (evtObj) {
-  var curPos = [evtObj.x - evtObj.target.offsetLeft,
+  const curPos = [evtObj.x - evtObj.target.offsetLeft,
     evtObj.y - evtObj.target.offsetTop]
-  var scrollOffset = calculateScrollOffset(evtObj.target)
+  const scrollOffset = calculateScrollOffset(evtObj.target)
   curPos[0] += scrollOffset[0]
   curPos[1] += scrollOffset[1]
   return curPos
@@ -272,7 +272,7 @@ var mouseDown = {
   dropCallbacks: new Array(),
   moveCallbacks: new Array(),
   calcRelativePos: function (evtObj) {
-    var curPos = [
+    const curPos = [
       evtObj.x,
       evtObj.y
     ]
@@ -280,7 +280,7 @@ var mouseDown = {
       curPos[0] -= mouseDown.startTarget.offsetLeft
       curPos[1] -= mouseDown.startTarget.offsetTop
 
-      var scrollOffset = calculateScrollOffset(mouseDown.startTarget)
+      const scrollOffset = calculateScrollOffset(mouseDown.startTarget)
       curPos[0] += scrollOffset[0]
       curPos[1] += scrollOffset[1]
     }
@@ -292,7 +292,7 @@ var mouseDown = {
     mouseDown.endTime = 0
     mouseDown.duration = 0
     mouseDown.startTime = evtObj.timestamp
-    var curPos = mouseDown.calcRelativePos(evtObj)
+    const curPos = mouseDown.calcRelativePos(evtObj)
     mouseDown.startPos = [curPos[0], curPos[1]]
     mouseDown.currentPos = [curPos[0], curPos[1]]
     mouseDown.previousPos = [curPos[0], curPos[1]]
@@ -300,7 +300,7 @@ var mouseDown = {
     mouseDown.isDown = true
   },
   moving: function (evtObj) {
-    if (true === mouseDown.isDown) {
+    if (mouseDown.isDown === true) {
       mouseDown.previousPos = mouseDown.currentPos
       mouseDown.currentPos = mouseDown.calcRelativePos(evtObj)
       for (var i = 0; i < mouseDown.dragCallbacks.length; ++i) {
@@ -318,7 +318,7 @@ var mouseDown = {
     mouseDown.duration = mouseDown.endTime - mouseDown.startTime
     mouseDown.endTarget = evtObj.target
     mouseDown.isDown = false
-    for (var i = 0; i < mouseDown.dropCallbacks.length; ++i) {
+    for (let i = 0; i < mouseDown.dropCallbacks.length; ++i) {
       mouseDown.dropCallbacks[i](evtObj)
     }
   },
@@ -338,7 +338,7 @@ var keyDown = {
     keyDown.keys.push(evtObj.keyCode)
   },
   keyUp: function (evtObj) {
-    for (var i = 0; i < keyDown.keys.length; ++i) {
+    for (let i = 0; i < keyDown.keys.length; ++i) {
       if (evtObj.keyCode == keyDown.keys[i]) {
         keyDown.keys.splice(i, 1)
         --i
@@ -346,7 +346,7 @@ var keyDown = {
     }
   },
   is: function (keyCode) {
-    for (var i = 0; i < keyDown.keys.length; ++i) {
+    for (let i = 0; i < keyDown.keys.length; ++i) {
       if (keyDown.keys[i] == keyCode) {
         return true
       }
@@ -355,7 +355,7 @@ var keyDown = {
   }
 }
 
-var userHintWindow = undefined
+let userHintWindow
 
 function showUserHint (messageText, showDuration) {
   if (undefined === showDuration) {
@@ -365,13 +365,13 @@ function showUserHint (messageText, showDuration) {
     userHintWindow.parentNode.removeChild(userHintWindow)
     userHintWindow = undefined
   }
-  var windowWidth = 10 + Math.min(messageText.length, 80) * 7
+  let windowWidth = 10 + Math.min(messageText.length, 80) * 7
   if (windowWidth > window.innerWidth) {
     windowWidth = window.innerWidth
   }
-  var windowHeight = Math.ceil(messageText.length / 80) * 27
+  const windowHeight = Math.ceil(messageText.length / 80) * 27
 
-  var windowEle = document.createElement('div')
+  let windowEle = document.createElement('div')
   windowEle.style.position = 'fixed'
   windowEle.style.left = Math.floor(window.innerWidth / 2 - windowWidth / 2)
   windowEle.style.top = Math.floor(window.innerHeight / 2 - windowHeight / 2)
@@ -384,7 +384,7 @@ function showUserHint (messageText, showDuration) {
   windowEle.style.backgroundColor = '#fdfddb'
   windowEle.appendChild(document.createTextNode(messageText))
   userHintWindow = windowEle = document.getElementsByTagName('body')[0].appendChild(windowEle)
-  setTimeout(function (hintEle) {
+  setTimeout((function (hintEle) {
     return function () {
       if (hintEle) {
         hintEle.animate([{ opacity: 1 }, { opacity: 0.01 }],
@@ -394,14 +394,14 @@ function showUserHint (messageText, showDuration) {
           })
       }
     }
-  }(windowEle), showDuration - 1200)
-  setTimeout(function (hintEle) { return function () { if (hintEle && hintEle.parentNode) { hintEle.parentNode.removeChild(hintEle) } } }(windowEle), showDuration)
+  }(windowEle)), showDuration - 1200)
+  setTimeout((function (hintEle) { return function () { if (hintEle && hintEle.parentNode) { hintEle.parentNode.removeChild(hintEle) } } }(windowEle)), showDuration)
 }
 
 /* figure out scroll offset */
 function calculateScrollOffset (curLevelElement) {
   var scrollOffset = [0, 0]
-  if (curLevelElement.parentNode && 'HTML' !== curLevelElement.tagName) {
+  if (curLevelElement.parentNode && curLevelElement.tagName !== 'HTML') {
     var scrollOffset = calculateScrollOffset(curLevelElement.parentNode)
   }
   scrollOffset[0] += curLevelElement.scrollLeft
@@ -419,8 +419,8 @@ document.addEventListener('keyup', keyDown.keyUp)
 window.addEventListener('gesturechange', function (evt) {
 // console.log(evt);
   evt.preventDefault()
-  var timeRange = window.MetricQWebView.instances[0].graticule.curTimeRange
-  var delta = timeRange[1] - timeRange[0]
+  const timeRange = window.MetricQWebView.instances[0].graticule.curTimeRange
+  const delta = timeRange[1] - timeRange[0]
   timeMargin = Math.round((delta * evt.scale - delta) / 2)
   timeRange[0] -= timeMargin
   timeRange[1] += timeMargin
@@ -429,7 +429,7 @@ window.addEventListener('gesturechange', function (evt) {
   window.MetricQWebView.instances[0].graticule.draw(false)
 })
 window.addEventListener('contextmenu', (event) => {
-  if (event.target && 'CANVAS' == event.target.tagName) {
+  if (event.target && event.target.tagName == 'CANVAS') {
     event.preventDefault()
   }
 })

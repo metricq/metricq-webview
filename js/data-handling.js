@@ -2,20 +2,20 @@ function DataCache (paramMetricQHistoryReference) {
   this.metricQHistory = paramMetricQHistoryReference
   this.metrics = new Array()
   this.processMetricQDatapoints = function (datapointsJSON, doDraw, doResize) {
-    //console.log(datapointsJSON);
-    var distinctMetrics = new Object()
-    var indexesOfCountData = new Array()
-    for (var targetName in datapointsJSON) {
-      var metric = datapointsJSON[targetName]
+    // console.log(datapointsJSON);
+    const distinctMetrics = new Object()
+    const indexesOfCountData = new Array()
+    for (const targetName in datapointsJSON) {
+      const metric = datapointsJSON[targetName]
       var metricParts = targetName.split('/')
-      if ('count' == metricParts[1]) {
+      if (metricParts[1] == 'count') {
         indexesOfCountData.push(targetName)
       } else {
         this.newSeries(metricParts[0], metricParts[1]).parseDatapoints(metric.data)
       }
-      if ('raw' == metricParts[1]) {
+      if (metricParts[1] == 'raw') {
         this.getMetricCache(metricParts[0]).clearNonRawAggregates()
-      } else if ('avg' == metricParts[1]) {
+      } else if (metricParts[1] == 'avg') {
         this.getMetricCache(metricParts[0]).clearRawAggregate()
       }
       if (undefined === distinctMetrics[metricParts[0]]) {
@@ -23,27 +23,27 @@ function DataCache (paramMetricQHistoryReference) {
       }
     }
 
-    for (var curMetricBase in distinctMetrics) {
+    for (const curMetricBase in distinctMetrics) {
       distinctMetrics[curMetricBase].generateBand()
     }
-    for (var i = 0; i < indexesOfCountData.length; ++i) {
+    for (let i = 0; i < indexesOfCountData.length; ++i) {
       var metricParts = indexesOfCountData[i].split('/')
       distinctMetrics[metricParts[0]].parseCountDatapoints(datapointsJSON[indexesOfCountData[i]].data)
     }
   }
   this.newSeries = function (metricName, metricAggregate) {
-    var relatedMetric = this.assureMetricExists(metricName)
+    const relatedMetric = this.assureMetricExists(metricName)
     if (relatedMetric.series[metricAggregate]) {
       relatedMetric.series[metricAggregate].clear()
       return relatedMetric.series[metricAggregate]
     } else {
-      var newSeries = new Series(metricAggregate, defaultSeriesStyling(metricName, metricAggregate))
+      const newSeries = new Series(metricAggregate, defaultSeriesStyling(metricName, metricAggregate))
       relatedMetric.series[metricAggregate] = newSeries
       return newSeries
     }
   }
   this.newBand = function (metricName) {
-    var foundMetric = this.getMetricCache(metricName)
+    const foundMetric = this.getMetricCache(metricName)
     if (foundMetric) {
       foundMetric.generateBand()
       return foundMetric.band
@@ -52,17 +52,17 @@ function DataCache (paramMetricQHistoryReference) {
     }
   }
   this.assureMetricExists = function (metricName) {
-    var foundMetric = this.getMetricCache(metricName)
+    const foundMetric = this.getMetricCache(metricName)
     if (foundMetric) {
       return foundMetric
     } else {
-      var newMetric = new MetricCache(this.metricQHistory, metricName)
+      const newMetric = new MetricCache(this.metricQHistory, metricName)
       this.metrics.push(newMetric)
       return newMetric
     }
   }
   this.getMetricCache = function (metricName) {
-    for (var i = 0; i < this.metrics.length; ++i) {
+    for (let i = 0; i < this.metrics.length; ++i) {
       if (metricName == this.metrics[i].name) {
         return this.metrics[i]
       }
@@ -70,12 +70,12 @@ function DataCache (paramMetricQHistoryReference) {
     return undefined
   }
   this.getTimeRange = function () {
-    var min = undefined,
-      max = undefined
-    for (var i = 0; i < this.metrics.length; ++i) {
-      for (var curAggregate in this.metrics[i].series) {
+    let min
+    let max
+    for (let i = 0; i < this.metrics.length; ++i) {
+      for (const curAggregate in this.metrics[i].series) {
         if (this.metrics[i].series[curAggregate]) {
-          var curTimeRange = this.metrics[i].series[curAggregate].getTimeRange()
+          const curTimeRange = this.metrics[i].series[curAggregate].getTimeRange()
           if (undefined === min) {
             min = curTimeRange[0]
             max = curTimeRange[1]
@@ -93,9 +93,9 @@ function DataCache (paramMetricQHistoryReference) {
     return [min, max]
   }
   this.getValueRange = function (doGetAllTime, timeRangeStart, timeRangeEnd) {
-    var min = undefined,
-      max = undefined
-    for (var i = 0; i < this.metrics.length; ++i) {
+    let min
+    let max
+    for (let i = 0; i < this.metrics.length; ++i) {
       if (doGetAllTime && this.metrics[i].allTime) {
         if (undefined === min || min > this.metrics[i].allTime.min) {
           min = this.metrics[i].allTime.min
@@ -105,9 +105,9 @@ function DataCache (paramMetricQHistoryReference) {
         }
         continue
       } else {
-        for (var curAggregate in this.metrics[i].series) {
+        for (const curAggregate in this.metrics[i].series) {
           if (this.metrics[i].series[curAggregate]) {
-            var curValueRange = this.metrics[i].series[curAggregate].getValueRange(timeRangeStart, timeRangeEnd)
+            const curValueRange = this.metrics[i].series[curAggregate].getValueRange(timeRangeStart, timeRangeEnd)
             if (undefined !== curValueRange) {
               if (undefined === min) {
                 min = curValueRange[0]
@@ -128,9 +128,9 @@ function DataCache (paramMetricQHistoryReference) {
     return [min, max]
   }
   this.hasSeriesToPlot = function () {
-    for (var i = 0; i < this.metrics.length; ++i) {
-      for (var curAggregate in this.metrics[i].series) {
-        if (this.metrics[i].series[curAggregate] && 0 < this.metrics[i].series[curAggregate].points.length) {
+    for (let i = 0; i < this.metrics.length; ++i) {
+      for (const curAggregate in this.metrics[i].series) {
+        if (this.metrics[i].series[curAggregate] && this.metrics[i].series[curAggregate].points.length > 0) {
           return true
         }
       }
@@ -138,16 +138,16 @@ function DataCache (paramMetricQHistoryReference) {
     return false
   }
   this.hasBandToPlot = function () {
-    for (var i = 0; i < this.metrics.length; ++i) {
-      if (this.metrics[i].band && 0 < this.metrics[i].band.points.length) {
+    for (let i = 0; i < this.metrics.length; ++i) {
+      if (this.metrics[i].band && this.metrics[i].band.points.length > 0) {
         return true
       }
     }
     return false
   }
   this.updateStyling = function () {
-    for (var i = 0; i < this.metrics.length; ++i) {
-      for (var curAggregate in this.metrics[i].series) {
+    for (let i = 0; i < this.metrics.length; ++i) {
+      for (const curAggregate in this.metrics[i].series) {
         if (this.metrics[i].series[curAggregate]) {
           this.metrics[i].series[curAggregate].styleOptions = defaultSeriesStyling(this.metrics[i].name, curAggregate)
         }
@@ -156,11 +156,11 @@ function DataCache (paramMetricQHistoryReference) {
     }
   }
   this.getAllValuesAtTime = function (timeAt) {
-    var valueArr = new Array()
-    for (var i = 0; i < this.metrics.length; ++i) {
-      for (var curAggregate in this.metrics[i].series) {
-        if (this.metrics[i].series[curAggregate] && 0 < this.metrics[i].series[curAggregate].points.length) {
-          var result = this.metrics[i].series[curAggregate].getValueAtTimeAndIndex(timeAt)
+    const valueArr = new Array()
+    for (let i = 0; i < this.metrics.length; ++i) {
+      for (const curAggregate in this.metrics[i].series) {
+        if (this.metrics[i].series[curAggregate] && this.metrics[i].series[curAggregate].points.length > 0) {
+          const result = this.metrics[i].series[curAggregate].getValueAtTimeAndIndex(timeAt)
           if (result) {
             valueArr.push([
               result[0],
@@ -176,7 +176,7 @@ function DataCache (paramMetricQHistoryReference) {
     return valueArr
   }
   this.deleteMetric = function (metricName) {
-    for (var i = 0; i < this.metrics.length; ++i) {
+    for (let i = 0; i < this.metrics.length; ++i) {
       if (metricName == this.metrics[i].name) {
         this.metrics.splice(i, 1)
         return true
@@ -185,8 +185,8 @@ function DataCache (paramMetricQHistoryReference) {
     return false
   }
   this.distinctUnits = function () {
-    var units = new Array()
-    for (var i = 0; i < this.metrics.length; ++i) {
+    const units = new Array()
+    for (let i = 0; i < this.metrics.length; ++i) {
       if (this.metrics[i].meta && this.metrics[i].meta.unit) {
         if (!units.includes(this.metrics[i].meta.unit)) {
           units.push(this.metrics[i].meta.unit)
@@ -197,12 +197,12 @@ function DataCache (paramMetricQHistoryReference) {
   }
 
   this.initializeCacheWithColor = function (metricName, newColor) {
-    var newCache = this.assureMetricExists(metricName)
+    const newCache = this.assureMetricExists(metricName)
     Object.keys(newCache.series).forEach(aggregate => { this.newSeries(metricName, aggregate) })
     if (!newCache.band) {
       this.newBand(metricName)
     }
-    var toUpdate = [newCache.band]
+    const toUpdate = [newCache.band]
     Object.keys(newCache.series).forEach(aggregate => { toUpdate.push(newCache.series[aggregate]) })
 
     toUpdate.forEach(val => {
@@ -216,10 +216,10 @@ function DataCache (paramMetricQHistoryReference) {
 function MetricCache (paramMetricQReference, paramMetricName) {
   this.name = paramMetricName
   this.series = {
-    'min': undefined,
-    'max': undefined,
-    'avg': undefined,
-    'raw': undefined
+    min: undefined,
+    max: undefined,
+    avg: undefined,
+    raw: undefined
   }
   this.band = undefined
   this.allTime = undefined
@@ -232,8 +232,8 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     this.bands = new Array()
   }
   this.clearNonRawAggregates = function () {
-    for (var curAggregate in this.series) {
-      if ('raw' != curAggregate && this.series[curAggregate]) {
+    for (const curAggregate in this.series) {
+      if (curAggregate != 'raw' && this.series[curAggregate]) {
         this.series[curAggregate].clear()
       }
     }
@@ -242,8 +242,8 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     }
   }
   this.clearRawAggregate = function () {
-    if (this.series['raw']) {
-      this.series['raw'].clear()
+    if (this.series.raw) {
+      this.series.raw.clear()
     }
   }
   this.generateBand = function () {
@@ -252,13 +252,13 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     } else {
       this.band = new Band(defaultBandStyling(this.name))
     }
-    if (this.series['min'] && this.series['max']) {
-      var minSeries = this.series['min']
+    if (this.series.min && this.series.max) {
+      const minSeries = this.series.min
       for (var i = 0; i < minSeries.points.length; ++i) {
         this.band.addPoint(minSeries.points[i].clone())
       }
       this.band.setSwitchOverIndex()
-      var maxSeries = this.series['max']
+      const maxSeries = this.series.max
       for (var i = maxSeries.points.length - 1; i >= 0; --i) {
         this.band.addPoint(maxSeries.points[i].clone())
       }
@@ -268,7 +268,7 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     }
   }
   this.clearSeries = function (seriesSpecifier) {
-    var curSeries = this.getSeries(seriesSpecifier)
+    const curSeries = this.getSeries(seriesSpecifier)
     if (curSeries) {
       curSeries.clear()
       return curSeries
@@ -276,11 +276,11 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     return undefined
   }
   this.parseCountDatapoints = function (countDatapoints) {
-    for (var curAggregate in this.series) {
-      var curSeries = this.series[curAggregate]
-      if (curSeries && 0 < curSeries.points.length) {
+    for (const curAggregate in this.series) {
+      const curSeries = this.series[curAggregate]
+      if (curSeries && curSeries.points.length > 0) {
         if (curSeries.points.length == countDatapoints.length) {
-          for (var j = 0; j < curSeries.points.length && j < countDatapoints.length; ++j) {
+          for (let j = 0; j < curSeries.points.length && j < countDatapoints.length; ++j) {
             curSeries.points[j].count = countDatapoints[j].value
           }
         }
@@ -288,17 +288,17 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     }
   }
   this.processAllTimeQuery = function (selfReference, jsonResponse) {
-    var allTimeMin = undefined
-    var allTimeMax = undefined
-    for (var i = 0; i < jsonResponse.length; ++i) {
-      var metricParts = jsonResponse[i].target.split('/')
-      if ('min' == metricParts[1]) {
+    let allTimeMin
+    let allTimeMax
+    for (let i = 0; i < jsonResponse.length; ++i) {
+      const metricParts = jsonResponse[i].target.split('/')
+      if (metricParts[1] == 'min') {
         for (var j = 0; j < jsonResponse[i].datapoints.length; ++j) {
           if (undefined == allTimeMin || allTimeMin > jsonResponse[i].datapoints[j][0]) {
             allTimeMin = jsonResponse[i].datapoints[j][0]
           }
         }
-      } else if ('max' == metricParts[1]) {
+      } else if (metricParts[1] == 'max') {
         for (var j = 0; j < jsonResponse[i].datapoints.length; ++j) {
           if (undefined == allTimeMax || allTimeMax < jsonResponse[i].datapoints[j][0]) {
             allTimeMax = jsonResponse[i].datapoints[j][0]
@@ -308,34 +308,34 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     }
     if (undefined !== allTimeMin || undefined !== allTimeMax) {
       selfReference.allTime = {
-        'min': allTimeMin,
-        'max': allTimeMax
+        min: allTimeMin,
+        max: allTimeMax
       }
     }
   }
   this.fetchMetadata = function () {
     this.metricQHistory.metadata(this.name).then((metadataObj) => { this.meta = metadataObj })
   }
-  //TODO: use Mario's metricq-js-API
+  // TODO: use Mario's metricq-js-API
   this.fetchAllTimeMinMax = function () {
-    var reqJson = {
-      'range': {
-        'from': (new Date('2010-01-01')).toISOString(),
-        'to': (new Date()).toISOString()
+    const reqJson = {
+      range: {
+        from: (new Date('2010-01-01')).toISOString(),
+        to: (new Date()).toISOString()
       },
-      'maxDataPoints': 1,
-      'targets': [
+      maxDataPoints: 1,
+      targets: [
         {
-          'metric': this.name,
-          'functions': ['min', 'max']
+          metric: this.name,
+          functions: ['min', 'max']
         }
       ]
     }
-    var reqAjax = new XMLHttpRequest()
+    const reqAjax = new XMLHttpRequest()
     reqAjax.open('POST', METRICQ_BACKEND + '/query', true)
-    reqAjax.processingFunction = function (ref) { return function (json) {ref.processAllTimeQuery(ref, json) } }(this)
+    reqAjax.processingFunction = (function (ref) { return function (json) { ref.processAllTimeQuery(ref, json) } }(this))
     reqAjax.addEventListener('load', function (evtObj) {
-      var parsedJson = undefined
+      let parsedJson
       try {
         parsedJson = JSON.parse(evtObj.target.responseText)
       } catch (exc) {
@@ -347,10 +347,10 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     reqAjax.send(JSON.stringify(reqJson))
   }
   this.getAllMinMax = function (startTime, stopTime) {
-    var allMin = undefined, allMax = undefined
-    for (var curAggregate in this.series) {
+    let allMin; let allMax
+    for (const curAggregate in this.series) {
       if (this.series[curAggregate]) {
-        let curMinMax = this.series[curAggregate].getValueRange(startTime, stopTime)
+        const curMinMax = this.series[curAggregate].getValueRange(startTime, stopTime)
         if (curMinMax) {
           if (undefined === allMin || curMinMax[0] < allMin) {
             allMin = curMinMax[0]
@@ -379,18 +379,18 @@ function Band (paramStyleOptions) {
     this.switchOverIndex = this.points.length
   }
   this.getTimeRange = function () {
-    if (0 == this.points.length) {
+    if (this.points.length == 0) {
       return [0, 0]
     } else {
       return [this.points[0].time, this.points[this.points.length - 1].time]
     }
   }
   this.getValueRange = function () {
-    if (0 == this.points.length) {
+    if (this.points.length == 0) {
       return [0, 0]
     }
-    var min = this.points[0].value, max = this.points[0].value
-    for (var i = 1; i < this.points.length; ++i) {
+    let min = this.points[0].value; let max = this.points[0].value
+    for (let i = 1; i < this.points.length; ++i) {
       if (this.points[i].value < min) {
         min = this.points[i].value
       } else if (this.points[i].value > max) {
@@ -415,13 +415,13 @@ function Series (paramAggregate, paramStyleOptions) {
     this.points = new Array()
   }
   this.getValueAtTimeAndIndex = function (timeAt) {
-    if ('number' !== typeof timeAt || 0 == this.points.length) {
+    if (typeof timeAt !== 'number' || this.points.length == 0) {
       return undefined
     }
-    var middleIndex = undefined
-    var bottomIndex = 0
-    var headIndex = this.points.length - 1
-    while (10 < (headIndex - bottomIndex)) {
+    let middleIndex
+    let bottomIndex = 0
+    let headIndex = this.points.length - 1
+    while ((headIndex - bottomIndex) > 10) {
       middleIndex = bottomIndex + Math.floor((headIndex - bottomIndex) / 2)
       if (this.points[middleIndex].time < timeAt) {
         bottomIndex = middleIndex
@@ -429,43 +429,43 @@ function Series (paramAggregate, paramStyleOptions) {
         headIndex = middleIndex
       }
     }
-    var i = bottomIndex
-    var closestIndex = bottomIndex
-    var closestDelta = 99999999999999
+    let i = bottomIndex
+    let closestIndex = bottomIndex
+    let closestDelta = 99999999999999
     for (; i <= headIndex; ++i) {
-      var curDelta = Math.abs(this.points[i].time - timeAt)
+      const curDelta = Math.abs(this.points[i].time - timeAt)
       if (curDelta < closestDelta) {
         closestDelta = curDelta
         closestIndex = i
       }
     }
-    var closestPointIndex = closestIndex
-    if (this.points[closestPointIndex].time !== timeAt
-      && this.styleOptions && this.styleOptions.connect && 'none' != this.styleOptions.connect) {
+    const closestPointIndex = closestIndex
+    if (this.points[closestPointIndex].time !== timeAt &&
+      this.styleOptions && this.styleOptions.connect && this.styleOptions.connect != 'none') {
       var betterIndex = closestPointIndex
-      if ('next' == this.styleOptions.connect) {
+      if (this.styleOptions.connect == 'next') {
         if (this.points[betterIndex].time > timeAt) {
           --betterIndex
         }
-      } else if ('last' == this.styleOptions.connect) {
+      } else if (this.styleOptions.connect == 'last') {
         if (this.points[betterIndex].time < timeAt) {
           ++betterIndex
         }
-      } else if ('direct' == this.styleOptions.connect) // linear-interpolation
+      } else if (this.styleOptions.connect == 'direct') // linear-interpolation
       {
-        var firstPoint, secondPoint
-        if ((timeAt < this.points[betterIndex].time && 0 > betterIndex) || (betterIndex + 1) >= this.points.length) {
+        let firstPoint, secondPoint
+        if ((timeAt < this.points[betterIndex].time && betterIndex < 0) || (betterIndex + 1) >= this.points.length) {
           firstPoint = this.points[betterIndex - 1]
           secondPoint = this.points[betterIndex]
         } else {
           firstPoint = this.points[betterIndex]
           secondPoint = this.points[betterIndex + 1]
         }
-        var timeDelta = secondPoint.time - firstPoint.time
-        var valueDelta = secondPoint.value - firstPoint.value
+        const timeDelta = secondPoint.time - firstPoint.time
+        const valueDelta = secondPoint.value - firstPoint.value
         return [timeAt, firstPoint.value + valueDelta * ((timeAt - firstPoint.time) / timeDelta), betterIndex]
       }
-      if (0 > betterIndex) {
+      if (betterIndex < 0) {
         betterIndex = 0
         return undefined
       } else if (betterIndex >= this.points.length) {
@@ -478,15 +478,15 @@ function Series (paramAggregate, paramStyleOptions) {
     }
   }
   this.addPoint = function (newPoint, isBigger) {
-    if (isBigger || 0 == this.points.length) {
+    if (isBigger || this.points.length == 0) {
       this.points.push(newPoint)
       return newPoint
     } else {
-      var middleIndex = undefined,
-        bottom = 0
+      let middleIndex
+      let bottom = 0
       head = this.points.length - 1
       // binary search, where to insert the new point
-      while (10 < (head - bottom)) {
+      while ((head - bottom) > 10) {
         middleIndex = bottom + Math.floor((head - bottom) / 2)
         if (this.points[middleIndex].time < newPoint.time) {
           bottom = middleIndex
@@ -495,7 +495,7 @@ function Series (paramAggregate, paramStyleOptions) {
         }
       }
       // for the remaining 10 elements binary search is too time intensive
-      var i
+      let i
       for (i = bottom; i <= head; ++i) {
         if (this.points[i].time > newPoint.time) {
           this.points.splice(i, 0, [newPoint])
@@ -510,23 +510,23 @@ function Series (paramAggregate, paramStyleOptions) {
     return newPoint
   }
   this.parseDatapoints = function (metricDatapoints) {
-    for (var i = 0; i < metricDatapoints.length; ++i) {
-      var ms = metricDatapoints[i].time.unix() * 1000 + metricDatapoints[i].time.millisecond()
+    for (let i = 0; i < metricDatapoints.length; ++i) {
+      const ms = metricDatapoints[i].time.unix() * 1000 + metricDatapoints[i].time.millisecond()
       this.addPoint(new Point(ms, metricDatapoints[i].value), true)
     }
   }
   this.getTimeRange = function () {
-    if (0 == this.points.length) {
+    if (this.points.length == 0) {
       return [0, 0]
     } else {
       return [this.points[0].time, this.points[this.points.length - 1].time]
     }
   }
   this.getValueRange = function (timeRangeStart, timeRangeEnd) {
-    if (0 == this.points.length) {
+    if (this.points.length == 0) {
       return undefined
     }
-    var min = this.points[0].value, max = this.points[0].value
+    let min = this.points[0].value; let max = this.points[0].value
     if (undefined !== timeRangeStart && undefined !== timeRangeEnd) {
       var i = 0
       for (i = 0; i < this.points.length; ++i) {
@@ -567,9 +567,9 @@ function Point (paramTime, paramValue) {
   }
 }
 
-var timers = new Object()
+const timers = new Object()
 
-var stylingOptions = {
+const stylingOptions = {
   list: [
     {
       nameRegex: 'series:[^/]+/avg',
@@ -612,7 +612,7 @@ var stylingOptions = {
       color: 'default',
       connect: 'none',
       width: 8,
-      dots: true,
+      dots: true
     },
     {
       nameRegex: 'band:.*',
@@ -625,29 +625,29 @@ var stylingOptions = {
 }
 
 function defaultBandStyling (metricBaseName) {
-  var options = matchStylingOptions('band:' + metricBaseName)
-  if ('default' === options.color) {
+  const options = matchStylingOptions('band:' + metricBaseName)
+  if (options.color === 'default') {
     options.color = determineColorForMetric(metricBaseName)
   }
   return options
 }
 
 function defaultSeriesStyling (metricBaseName, aggregateName) {
-  var options = matchStylingOptions('series:' + metricBaseName + '/' + aggregateName)
-  if ('default' === options.color) {
+  const options = matchStylingOptions('series:' + metricBaseName + '/' + aggregateName)
+  if (options.color === 'default') {
     options.color = determineColorForMetric(metricBaseName)
   }
   return options
 }
 
 function matchStylingOptions (fullMetricName) {
-  if (typeof fullMetricName != 'string') {
+  if (typeof fullMetricName !== 'string') {
     return undefined
   }
-  for (var i = 0; i < stylingOptions.list.length; ++i) {
-    if (stylingOptions.list[i].nameMatch == fullMetricName
-      || fullMetricName.match(new RegExp(stylingOptions.list[i].nameRegex))) {
-      //clone the options
+  for (let i = 0; i < stylingOptions.list.length; ++i) {
+    if (stylingOptions.list[i].nameMatch == fullMetricName ||
+      fullMetricName.match(new RegExp(stylingOptions.list[i].nameRegex))) {
+      // clone the options
       return JSON.parse(JSON.stringify(stylingOptions.list[i]))
     }
   }
@@ -655,6 +655,6 @@ function matchStylingOptions (fullMetricName) {
 }
 
 function determineColorForMetric (metricBaseName) {
-  var rgb = hslToRgb((crc32(metricBaseName) >> 24 & 255) / 255.00, 1, 0.46)
+  const rgb = hslToRgb((crc32(metricBaseName) >> 24 & 255) / 255.00, 1, 0.46)
   return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')'
 }

@@ -1,5 +1,5 @@
-//At Startup:
-if (-1 < window.location.href.indexOf('#')) {
+// At Startup:
+if (window.location.href.indexOf('#') > -1) {
   try {
     importMetricUrl()
   } catch (exc) {
@@ -10,15 +10,15 @@ if (-1 < window.location.href.indexOf('#')) {
   Vue.nextTick(function () { globalPopup.presetSelection = true })
 }
 
-var presetApp = new Vue({
-  'el': '#wrapper_popup_preset',
-  'data': {
-    'globalPopup': globalPopup
+const presetApp = new Vue({
+  el: '#wrapper_popup_preset',
+  data: {
+    globalPopup: globalPopup
   },
   updated () {
-    var popupEle = document.querySelector('.preset_popup_div')
+    const popupEle = document.querySelector('.preset_popup_div')
     if (popupEle) {
-      var disablePopupFunc = function () {
+      const disablePopupFunc = function () {
         globalPopup.presetSelection = false
         window.MetricQWebView.instances[0].reload()
       }
@@ -29,7 +29,7 @@ var presetApp = new Vue({
       popupEle.style.left = '0px'
       popupEle.style.top = '0px'
       setTimeout(function () {
-        var selectEle = document.getElementById('preset_select')
+        const selectEle = document.getElementById('preset_select')
         selectEle.focus()
       }, 100)
     }

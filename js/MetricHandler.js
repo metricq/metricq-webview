@@ -1,4 +1,4 @@
-var METRICQ_BACKEND = 'https://grafana.metricq.zih.tu-dresden.de/metricq'
+const METRICQ_BACKEND = 'https://grafana.metricq.zih.tu-dresden.de/metricq'
 
 class MetricHandler {
   constructor (paramRenderer, paramMetricsArr, paramStartTime, paramStopTime) {
@@ -15,23 +15,23 @@ class MetricHandler {
 
   initializeMetrics (initialMetricNames) {
     this.allMetrics = new Object()
-    for (var i = 0; i < initialMetricNames.length; ++i) {
-      var curMetricName = initialMetricNames[i]
-      if (0 < curMetricName.length) {
+    for (let i = 0; i < initialMetricNames.length; ++i) {
+      const curMetricName = initialMetricNames[i]
+      if (curMetricName.length > 0) {
         this.allMetrics[curMetricName] = new Metric(this.renderer, curMetricName, undefined, markerSymbols[i * 4], new Array())
       } else {
-        this.allMetrics['empty'] = new Metric(this.renderer, '', undefined, markerSymbols[i * 4], new Array())
+        this.allMetrics.empty = new Metric(this.renderer, '', undefined, markerSymbols[i * 4], new Array())
       }
     }
   }
 
   doRequest (maxDataPoints) {
-    var timeMargin = (this.stopTime - this.startTime) * this.TIME_MARGIN_FACTOR
-    var nonErrorProneMetrics = new Array()
-    var remainingMetrics = new Array()
-    for (var metricBase in this.allMetrics) {
-      var curMetric = this.allMetrics[metricBase]
-      if (0 < curMetric.name.length) {
+    const timeMargin = (this.stopTime - this.startTime) * this.TIME_MARGIN_FACTOR
+    const nonErrorProneMetrics = new Array()
+    const remainingMetrics = new Array()
+    for (const metricBase in this.allMetrics) {
+      const curMetric = this.allMetrics[metricBase]
+      if (curMetric.name.length > 0) {
         if (curMetric.errorprone) {
           remainingMetrics.push(curMetric.name)
         } else {
@@ -43,20 +43,20 @@ class MetricHandler {
     var queryObj = this.metricQHistory.query(this.startTime - timeMargin,
       this.stopTime + timeMargin,
       Math.round(maxDataPoints + (maxDataPoints * this.TIME_MARGIN_FACTOR * 2)))
-    var defaultAggregates = ['min', 'max', 'avg', 'count']
+    const defaultAggregates = ['min', 'max', 'avg', 'count']
     for (var i = 0; i < nonErrorProneMetrics.length; ++i) {
       queryObj.target(nonErrorProneMetrics[i], defaultAggregates)
     }
-    if (0 < queryObj.targets.length) {
-      //TODO: register some callback
+    if (queryObj.targets.length > 0) {
+      // TODO: register some callback
 
-      //execute query
-      //TODO: pass parameter nonErrorProneMetrics
-      var myPromise = queryObj.run().then(function (selfReference, requestedMetrics) {
+      // execute query
+      // TODO: pass parameter nonErrorProneMetrics
+      const myPromise = queryObj.run().then((function (selfReference, requestedMetrics) {
         return function (dataset) {
           selfReference.handleResponse(selfReference, requestedMetrics, dataset)
         }
-      }(this, nonErrorProneMetrics), function (selfReference, requestedMetrics, paramDataPoints) {
+      }(this, nonErrorProneMetrics)), (function (selfReference, requestedMetrics, paramDataPoints) {
         return function (errorObject) {
           console.log('Request failed: ' + requestedMetrics.join(','))
           requestedMetrics.forEach((curVal) => {
@@ -65,9 +65,8 @@ class MetricHandler {
           })
           selfReference.doRequest(paramDataPoints)
         }
-      }(this, nonErrorProneMetrics, maxDataPoints))
-      //queryObj.run().then((dataset) => { this.handleResponse(dataset); });
-
+      }(this, nonErrorProneMetrics, maxDataPoints)))
+      // queryObj.run().then((dataset) => { this.handleResponse(dataset); });
     }
     for (var i = 0; i < remainingMetrics.length; ++i) {
       var queryObj = this.metricQHistory.query(this.startTime - timeMargin,
@@ -80,13 +79,13 @@ class MetricHandler {
   }
 
   handleResponse (selfReference, requestedMetrics, myData) {
-    var listOfFaultyMetrics = new Array()
-    for (var i = 0; i < requestedMetrics.length; ++i) {
-      var metricName = requestedMetrics[i]
-      var matchingAggregatesObj = new Object()
-      var matchingAggregatesCount = 0
-      for (var curMetricName in myData) {
-        var splitted = curMetricName.split('/')
+    const listOfFaultyMetrics = new Array()
+    for (let i = 0; i < requestedMetrics.length; ++i) {
+      const metricName = requestedMetrics[i]
+      const matchingAggregatesObj = new Object()
+      let matchingAggregatesCount = 0
+      for (const curMetricName in myData) {
+        const splitted = curMetricName.split('/')
         if (splitted[0] === requestedMetrics[i]) {
           matchingAggregatesObj[splitted[1]] = true
           matchingAggregatesCount += 1
@@ -98,20 +97,20 @@ class MetricHandler {
         selfReference.receivedError(0, metricName)
       }
     }
-    if (0 < listOfFaultyMetrics) {
+    if (listOfFaultyMetrics > 0) {
       showUserHint('Error with metrics: ' + listOfFaultyMetrics.join(', '))
     }
     selfReference.renderer.renderMetrics(myData)
   }
 
   checkIfMetricIsOk (metricName, aggregateCount, aggregateObj) {
-    if (!metricName
-      || 1 > aggregateCount
-      || (!aggregateObj['count'] && !aggregateObj['raw'])) {
+    if (!metricName ||
+      aggregateCount < 1 ||
+      (!aggregateObj.count && !aggregateObj.raw)) {
       return false
     }
-    if (!((aggregateObj['raw'] && !aggregateObj['min'] && !aggregateObj['max'])
-      || (!aggregateObj['raw'] && aggregateObj['min'] && aggregateObj['max']))) {
+    if (!((aggregateObj.raw && !aggregateObj.min && !aggregateObj.max) ||
+      (!aggregateObj.raw && aggregateObj.min && aggregateObj.max))) {
       return false
     }
     return true
@@ -121,19 +120,19 @@ class MetricHandler {
     return this.metricQHistory.search(inputStr)
   }
 
-  //TODO: 'drop'/remove this function
+  // TODO: 'drop'/remove this function
   handleMetricResponse (selfReference, metricArr, evt) {
-    if (4 == evt.target.readyState) {
-      if (200 <= evt.target.status
-        && 300 > evt.target.status) {
-        var parsedObj = undefined
+    if (evt.target.readyState == 4) {
+      if (evt.target.status >= 200 &&
+        evt.target.status < 300) {
+        let parsedObj
         try {
           parsedObj = JSON.parse(evt.target.responseText)
-          //selfReference.parseResponse(parsedObj, metricArr);
-          //console.log("old Data format:");
-          //console.log(parsedObj);
+          // selfReference.parseResponse(parsedObj, metricArr);
+          // console.log("old Data format:");
+          // console.log(parsedObj);
           console.log('Dropping data...')
-          //selfReference.renderer.renderMetrics(parsedObj);
+          // selfReference.renderer.renderMetrics(parsedObj);
         } catch (exc) {
           console.log('Couldn\'t parse')
           console.log(exc)
@@ -161,42 +160,42 @@ class MetricHandler {
     if (!maxDataPoints) {
       maxDataPoints = 400
     }
-    var queryObj = {
-      'range':
+    const queryObj = {
+      range:
         {
-          'from': new Date(startTime).toISOString(),
-          'to': new Date(stopTime).toISOString()
+          from: new Date(startTime).toISOString(),
+          to: new Date(stopTime).toISOString()
         },
-      'maxDataPoints': maxDataPoints,
-      'targets': new Array()
+      maxDataPoints: maxDataPoints,
+      targets: new Array()
     }
-    for (var i = 0; i < metricArr.length; ++i) {
-      var targetObj = {
-        'metric': metricArr[i],
-        'functions': metricFunctions
+    for (let i = 0; i < metricArr.length; ++i) {
+      const targetObj = {
+        metric: metricArr[i],
+        functions: metricFunctions
       }
       queryObj.targets.push(targetObj)
     }
     return JSON.stringify(queryObj)
   }
 
-  //TODO: move this function to DataCache, maybe?
+  // TODO: move this function to DataCache, maybe?
   getAllMinMax () {
-    let referenceAttribute = 'minmax'
-    if ('manual' == this.renderer.graticule.yRangeOverride.type) {
+    const referenceAttribute = 'minmax'
+    if (this.renderer.graticule.yRangeOverride.type == 'manual') {
       return [this.renderer.graticule.yRangeOverride.min, this.renderer.graticule.yRangeOverride.max]
     }
     let allMinMax = [undefined, undefined]
-    let timeFrame = this.renderer.graticule.curTimeRange
-    for (var metricBase in this.allMetrics) {
-      let curMetric = this.allMetrics[metricBase]
-      let curCache = this.renderer.graticule.data.getMetricCache(metricBase)
+    const timeFrame = this.renderer.graticule.curTimeRange
+    for (const metricBase in this.allMetrics) {
+      const curMetric = this.allMetrics[metricBase]
+      const curCache = this.renderer.graticule.data.getMetricCache(metricBase)
       if (curCache) {
-        let curMinMax = undefined
-        if ('global' == this.renderer.graticule.yRangeOverride.type) {
+        let curMinMax
+        if (this.renderer.graticule.yRangeOverride.type == 'global') {
           curMinMax = [curCache.allTime.min, curCache.allTime.max]
         }
-        if ('local' == this.renderer.graticule.yRangeOverride.type) {
+        if (this.renderer.graticule.yRangeOverride.type == 'local') {
           curMinMax = curCache.getAllMinMax(timeFrame[0], timeFrame[1])
         }
         if (curMinMax) {
@@ -213,7 +212,7 @@ class MetricHandler {
         }
       }
     }
-    //add a little wiggle room, so that markers won't be cut off
+    // add a little wiggle room, so that markers won't be cut off
     const delta = allMinMax[1] - allMinMax[0]
     allMinMax[0] -= delta * this.WIGGLEROOM_PERCENTAGE
     allMinMax[1] += delta * this.WIGGLEROOM_PERCENTAGE
@@ -221,19 +220,19 @@ class MetricHandler {
   }
 
   parseTrace (metricBase, metricAggregate, datapointsArr) {
-    var curTrace = {
-      'x': new Array(),
-      'y': new Array(),
-      'name': metricBase + '/' + metricAggregate,
-      'type': 'scatter',
-      'hoverinfo': 'skip'
+    const curTrace = {
+      x: new Array(),
+      y: new Array(),
+      name: metricBase + '/' + metricAggregate,
+      type: 'scatter',
+      hoverinfo: 'skip'
     }
     switch (metricAggregate) {
       case 'min':
       case 'max': /* fall-through */
       case 'avg': /* fall-through */
       case 'raw': /* fall-through */
-        for (var j = 0; j < datapointsArr.length; ++j) {
+        for (let j = 0; j < datapointsArr.length; ++j) {
           curTrace.x.push(datapointsArr[j][1])
           curTrace.y.push(datapointsArr[j][0])
         }
@@ -245,62 +244,62 @@ class MetricHandler {
   processTracesArr (tracesAll) {
     // parse multiple metrics/traces
     let i = 0
-    for (var curMetric in tracesAll) {
-      var curTraces = tracesAll[curMetric]
-      if (curTraces['min'] && curTraces['max']) {
-        var storeTraces = [curTraces['min'], curTraces['max']]
+    for (const curMetric in tracesAll) {
+      const curTraces = tracesAll[curMetric]
+      if (curTraces.min && curTraces.max) {
+        const storeTraces = [curTraces.min, curTraces.max]
         storeTraces[1].fill = 'tonexty'
-        if (curTraces['avg']) {
-          storeTraces.push(curTraces['avg'])
+        if (curTraces.avg) {
+          storeTraces.push(curTraces.avg)
         }
         storeTraces.forEach(function (paramValue, paramIndex, paramArray) {
           paramValue.mode = 'lines'
           paramValue.line = {
-            'width': 0,
-            'color': undefined,
-            'shape': 'vh'
+            width: 0,
+            color: undefined,
+            shape: 'vh'
           } // connect "next"
-          //"shape": "hv" // connect "last"
-          //"shape": "linear" // connect "direct"
+          // "shape": "hv" // connect "last"
+          // "shape": "linear" // connect "direct"
         })
-        if (curTraces['avg']) {
+        if (curTraces.avg) {
           storeTraces[2].line.dash = 'dash'
           storeTraces[2].line.width = 2
         }
-        //add traces to metricList, create an object of metric class in before
+        // add traces to metricList, create an object of metric class in before
         this.loadedMetric(curMetric, storeTraces, i)
-      } else if (curTraces['raw']) {
-        var rawTrace = [curTraces['raw']]
+      } else if (curTraces.raw) {
+        const rawTrace = [curTraces.raw]
         rawTrace[0].mode = 'markers'
         rawTrace[0].marker = {
-          'size': 10,
-          'color': undefined,
-          'symbol': undefined
+          size: 10,
+          color: undefined,
+          symbol: undefined
         }
         this.loadedMetric(curMetric, rawTrace, i)
       }
       ++i
     }
-    if (0 < i) {
+    if (i > 0) {
       this.renderer.renderMetrics()
     }
   }
 
   parseResponse (parsedJson, paramMetricsArr) {
-    //TODO: track metrics thate were requested but got no response,
+    // TODO: track metrics thate were requested but got no response,
     //        mark these as errorpone=true
-    let tracesAll = new Object()
-    let metricBase = undefined
-    let metricAggregate = undefined
-    for (var i = 0; i < parsedJson.length; ++i) {
-      let fullMetric = parsedJson[i].target
-      if (-1 < fullMetric.indexOf('/')
-        && parsedJson[i]['datapoints']
-        && parsedJson[i].datapoints[0]) {
+    const tracesAll = new Object()
+    let metricBase
+    let metricAggregate
+    for (let i = 0; i < parsedJson.length; ++i) {
+      const fullMetric = parsedJson[i].target
+      if (fullMetric.indexOf('/') > -1 &&
+        parsedJson[i].datapoints &&
+        parsedJson[i].datapoints[0]) {
         metricBase = fullMetric.substring(0, fullMetric.indexOf('/'))
         metricAggregate = fullMetric.substring(fullMetric.indexOf('/') + 1)
 
-        let parsedTrace = this.parseTrace(metricBase, metricAggregate, parsedJson[i].datapoints)
+        const parsedTrace = this.parseTrace(metricBase, metricAggregate, parsedJson[i].datapoints)
         if (parsedTrace) {
           if (!tracesAll[metricBase]) {
             tracesAll[metricBase] = new Object()
@@ -313,7 +312,7 @@ class MetricHandler {
   }
 
   loadedMetric (metricBase, metricTraces, metricIndex) {
-    let myMetric = this.allMetrics[metricBase]
+    const myMetric = this.allMetrics[metricBase]
     if (!myMetric) {
       this.allMetrics[metricBase] = new Metric(this.renderer, metricBase, undefined, markerSymbols[metricIndex * 4], metricTraces)
     } else {
@@ -322,8 +321,8 @@ class MetricHandler {
   }
 
   setTimeRange (paramStartTime, paramStopTime) {
-    //TODO: check for zoom area if it is too narrow (i.e. less than 1000 ms)
-    //TODO: sync the aforementioned minimum time window
+    // TODO: check for zoom area if it is too narrow (i.e. less than 1000 ms)
+    // TODO: sync the aforementioned minimum time window
     if (undefined === paramStartTime) {
       paramStartTime = this.startTime
     }
@@ -338,7 +337,7 @@ class MetricHandler {
       throw `startTime(${paramStartTime}) is not smaller than stopTime(${paramStopTime})`
     }
 
-    var timeSuitable = true
+    let timeSuitable = true
     if ((paramStopTime - paramStartTime) < this.renderer.graticule.MIN_ZOOM_TIME) {
       var oldDelta = paramStopTime - paramStartTime
       var newDelta = this.renderer.graticule.MIN_ZOOM_TIME
@@ -359,23 +358,23 @@ class MetricHandler {
 
     this.renderer.updateMetricUrl()
 
-    //maybe move this line to MetricQWebView.setPlotRanges()? NAW
+    // maybe move this line to MetricQWebView.setPlotRanges()? NAW
     this.renderer.graticule.setTimeRange(this.startTime, this.stopTime)
     return timeSuitable
-    //this.lastRangeChangeTime = (new Date()).getTime();
-    //TODO: return false when intended zoom area is smaller than e.g. 1000 ms
-    //TODO: define a CONSTANT that is MINIMUM_ZOOM_AREA
+    // this.lastRangeChangeTime = (new Date()).getTime();
+    // TODO: return false when intended zoom area is smaller than e.g. 1000 ms
+    // TODO: define a CONSTANT that is MINIMUM_ZOOM_AREA
 
-    //TODO: call url export here?
-    //return true;
+    // TODO: call url export here?
+    // return true;
   }
 
   zoomTimeAtPoint (pointAt, zoomDirection) {
-    var zoomFactor = 1 + zoomDirection
-    var newTimeDelta = (this.stopTime - this.startTime) * zoomFactor
-    var couldZoom = false
+    const zoomFactor = 1 + zoomDirection
+    const newTimeDelta = (this.stopTime - this.startTime) * zoomFactor
+    let couldZoom = false
     if (newTimeDelta > this.renderer.graticule.MIN_ZOOM_TIME) {
-      var relationalPositionOfPoint = (pointAt[0] - this.startTime) / (this.stopTime - this.startTime)
+      const relationalPositionOfPoint = (pointAt[0] - this.startTime) / (this.stopTime - this.startTime)
       if (this.setTimeRange(pointAt[0] - (newTimeDelta * relationalPositionOfPoint),
         pointAt[0] + (newTimeDelta * (1 - relationalPositionOfPoint)))) {
         couldZoom = true
@@ -392,9 +391,8 @@ class MetricHandler {
   }
 
   reload () {
-    let rowBodyEle = document.querySelector('.row_body')
-    let maxDataPoints = Math.round(rowBodyEle.offsetWidth / this.renderer.configuration.resolution)
+    const rowBodyEle = document.querySelector('.row_body')
+    const maxDataPoints = Math.round(rowBodyEle.offsetWidth / this.renderer.configuration.resolution)
     this.doRequest(maxDataPoints)
   }
-
 }

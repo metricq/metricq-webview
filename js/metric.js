@@ -1,8 +1,8 @@
-//adapted from https://plot.ly/python/marker-style/
+// adapted from https://plot.ly/python/marker-style/
 // not working:
 //   "cross-thin", "x-thin", "asterisk", "hash", "hash-dot", "y-up", "y-down", "y-left", "y-right",
 //   "line-ew", "line-ns", "line-ne", "line-nw"
-var markerSymbols = ['.', 'o', 'v', '^', '<', '>', 's', 'p', '*', 'h', '+', 'x', 'd', '|', '_']
+const markerSymbols = ['.', 'o', 'v', '^', '<', '>', 's', 'p', '*', 'h', '+', 'x', 'd', '|', '_']
 
 class Metric {
   constructor (paramRenderer, paramName, paramColor, paramMarker, paramTraces) {
@@ -20,7 +20,7 @@ class Metric {
     this.errorprone = false
     this.popup = false
     this.updateColor(this.color)
-    //this.autocompleteList = new Array();
+    // this.autocompleteList = new Array();
   }
 
   filterKey (paramKey) {
@@ -29,19 +29,19 @@ class Metric {
 
   updateName (newName) {
     this.name = newName
-    let computedKey = this.filterKey(newName)
+    const computedKey = this.filterKey(newName)
     this.popupKey = 'popup_' + computedKey
-    var htmlText = ''
-    if ('' === newName) {
+    let htmlText = ''
+    if (newName === '') {
       htmlText += '<img src="img/icons/plus-circle.svg" width="28" height="28" /> Neu '
     } else {
       htmlText += newName
     }
     // NOPE this does not work :(
-    //if(this.errorprone)
-    //{
+    // if(this.errorprone)
+    // {
     //  htmlText += "⚠";
-    //}
+    // }
     this.htmlName = htmlText
   }
 
@@ -53,10 +53,10 @@ class Metric {
   updateColor (newCssColor) {
     this.color = newCssColor
     if (this.renderer && this.renderer.graticule && this.renderer.graticule.data) {
-      var metricCache = this.renderer.graticule.data.getMetricCache(this.name)
+      const metricCache = this.renderer.graticule.data.getMetricCache(this.name)
       if (metricCache) {
         metricCache.band.styleOptions.color = newCssColor
-        for (var curSeries in metricCache.series) {
+        for (const curSeries in metricCache.series) {
           if (metricCache.series[curSeries]) {
             metricCache.series[curSeries].styleOptions.color = newCssColor
           }
@@ -73,10 +73,10 @@ class Metric {
       }
     })
     if (this.renderer && this.renderer.graticule && this.renderer.graticule.data) {
-      var metricCache = this.renderer.graticule.data.getMetricCache(this.name)
+      const metricCache = this.renderer.graticule.data.getMetricCache(this.name)
       if (metricCache) {
-        for (var curSeries in metricCache.series) {
-          //TODO: change this so that marker type ist being stored
+        for (const curSeries in metricCache.series) {
+          // TODO: change this so that marker type ist being stored
           //        but it only applies marker to /raw aggregate
           if (metricCache.series[curSeries]) {
             metricCache.series[curSeries].styleOptions.dots = newMarker
@@ -93,7 +93,7 @@ class Metric {
   }
 
   static metricBaseToRgb (metricBase) {
-    var rgbArr = hslToRgb((crc32(metricBase) >> 24 & 255) / 255.00, 1, 0.46)
+    const rgbArr = hslToRgb((crc32(metricBase) >> 24 & 255) / 255.00, 1, 0.46)
     return 'rgb(' + rgbArr[0] + ',' + rgbArr[1] + ',' + rgbArr[2] + ')'
   }
 }

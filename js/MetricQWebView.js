@@ -1,11 +1,11 @@
 class MetricQWebView {
   constructor (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime) {
     this.id = 'metricqwebview_' + (new Date()).getTime()
-    if (!window['MetricQWebView']) {
+    if (!window.MetricQWebView) {
       window.MetricQWebView = {
         instances: new Array(),
         getInstance: function (htmlEle) {
-          for (var i = 0; i < window.MetricQWebView.instances.length; ++i) {
+          for (let i = 0; i < window.MetricQWebView.instances.length; ++i) {
             if (window.MetricQWebView.instances[i].ele.isSameNode(htmlEle)) {
               return window.MetricQWebView.instances[i]
             }
@@ -22,7 +22,7 @@ class MetricQWebView {
     this.countTraces = 0
     this.hasPlot = false
     this.graticule = undefined
-    this.configuration = new Configuration(5, 10) //constructor(resolutionParam, zoomSpeedParam)
+    this.configuration = new Configuration(5, 10) // constructor(resolutionParam, zoomSpeedParam)
     this.margins = {
       canvas: {
         top: 10,
@@ -49,10 +49,10 @@ class MetricQWebView {
     this.RELOAD_THROTTLING_DELAY = 150
     this.reloadThrottleTimeout = undefined
 
-    if (0 < paramMetricNamesArr.length) {
+    if (paramMetricNamesArr.length > 0) {
       this.handler.doRequest(400)
     }
-    window.addEventListener('resize', function (selfReference) { return function (evt) { selfReference.windowResize(evt) }}(this))
+    window.addEventListener('resize', (function (selfReference) { return function (evt) { selfReference.windowResize(evt) } }(this)))
   }
 
   reinitialize (metricsArr, startTime, stopTime) {
@@ -65,23 +65,23 @@ class MetricQWebView {
   renderMetrics (datapointsJSON) {
     let allTraces = new Array()
 
-    for (var metricBase in this.handler.allMetrics) {
-      let curMetric = this.handler.allMetrics[metricBase]
+    for (const metricBase in this.handler.allMetrics) {
+      const curMetric = this.handler.allMetrics[metricBase]
       if (curMetric.traces) {
         allTraces = allTraces.concat(curMetric.traces)
       }
     }
 
     this.updateMetricUrl()
-    //console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
+    // console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
 
     if (!this.hasPlot) {
-      var canvasSize = [parseInt(this.ele.offsetWidth), document.body.scrollHeight - 250]
-      var myCanvas = document.createElement('canvas')
+      const canvasSize = [parseInt(this.ele.offsetWidth), document.body.scrollHeight - 250]
+      const myCanvas = document.createElement('canvas')
       myCanvas.setAttribute('width', canvasSize[0])
       myCanvas.setAttribute('height', canvasSize[1])
       this.ele = this.ele.appendChild(myCanvas)
-      var myContext = myCanvas.getContext('2d')
+      const myContext = myCanvas.getContext('2d')
       // Params: (ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
       this.graticule = new Graticule(this.handler.metricQHistory,
         myCanvas, myContext, [this.margins.canvas.left,
@@ -92,15 +92,15 @@ class MetricQWebView {
         [canvasSize[0], canvasSize[1]])
       this.hasPlot = true
       this.handler.setTimeRange(this.handler.startTime, this.handler.stopTime)
-      //parameters two and three "true" (doDraw, doResize) are ignored here :/
+      // parameters two and three "true" (doDraw, doResize) are ignored here :/
       this.graticule.data.processMetricQDatapoints(datapointsJSON, true, true)
-      //URL import problem here: the response's start and end time are taken here :/
+      // URL import problem here: the response's start and end time are taken here :/
       this.graticule.automaticallyDetermineRanges(false, true)
       this.graticule.draw(false)
       registerCallbacks(myCanvas)
 
       /* TODO: externalize gear stuff */
-      var gearEle = document.getElementById('gear_xaxis')
+      let gearEle = document.getElementById('gear_xaxis')
       if (gearEle) {
         gearEle.parentNode.removeChild(gearEle)
         gearEle = document.getElementById('gear_yaxis')
@@ -108,26 +108,26 @@ class MetricQWebView {
       }
       const BODY = document.getElementsByTagName('body')[0]
       /* TODO: abstract gear creation into separate class */
-      var gearImages = [undefined, undefined, undefined, undefined]
-      var gearSrc = ['img/icons/gear.svg',
+      const gearImages = [undefined, undefined, undefined, undefined]
+      const gearSrc = ['img/icons/gear.svg',
         'img/icons/arrow-left-right.svg',
         'img/icons/gear.svg',
         'img/icons/arrow-up-down.svg']
       for (var i = 0; i < 4; ++i) {
         gearImages[i] = document.createElement('img')
-        var img = new Image()
+        const img = new Image()
         img.src = gearSrc[i]
         gearImages[i].src = img.src
-        if (-1 < gearSrc[i].indexOf('gear')) {
+        if (gearSrc[i].indexOf('gear') > -1) {
           gearImages[i].setAttribute('class', 'gear_axis')
         }
         gearImages[i].setAttribute('width', '28')
         gearImages[i].setAttribute('height', '28')
       }
-      var gearWrapper = [undefined, undefined]
-      //TODO: THIS IS NOT MULTI-INSTANCE-SAFE
-      //TODO: RENAME THESE ids SO THAT THEY GET NEW INDIVIDUAL ids EACH AND EVERY TIME
-      var gearIds = ['gear_xaxis', 'gear_yaxis']
+      const gearWrapper = [undefined, undefined]
+      // TODO: THIS IS NOT MULTI-INSTANCE-SAFE
+      // TODO: RENAME THESE ids SO THAT THEY GET NEW INDIVIDUAL ids EACH AND EVERY TIME
+      const gearIds = ['gear_xaxis', 'gear_yaxis']
       for (var i = 0; i < 2; ++i) {
         gearWrapper[i] = document.createElement('div')
         gearWrapper[i].setAttribute('id', gearIds[i])
@@ -144,9 +144,8 @@ class MetricQWebView {
       gearWrapper[1].addEventListener('click', function () {
         globalPopup.yaxis = !globalPopup.yaxis
       })
-
     } else {
-      //Parameters: JSON, doDraw, doResize
+      // Parameters: JSON, doDraw, doResize
       this.graticule.data.processMetricQDatapoints(datapointsJSON, true, false)
       this.graticule.draw(false)
     }
@@ -161,7 +160,7 @@ class MetricQWebView {
       return
     }
     gearEle.style.position = 'absolute'
-    var posGear = this.getTopLeft(rowBodyEle)
+    const posGear = this.getTopLeft(rowBodyEle)
     posGear[0] += parseInt(rowBodyEle.offsetWidth) - parseInt(gearEle.offsetWidth)
     posGear[1] += parseInt(rowBodyEle.offsetHeight) - parseInt(gearEle.offsetHeight)
     posGear[0] += this.margins.gears.x.left
@@ -175,7 +174,7 @@ class MetricQWebView {
       return
     }
     gearEle.style.position = 'absolute'
-    var posGear = this.getTopLeft(rowBodyEle)
+    const posGear = this.getTopLeft(rowBodyEle)
     posGear[0] += this.margins.gears.y.left
     posGear[1] += this.margins.gears.y.top
     gearEle.style.left = posGear[0] + 'px'
@@ -183,8 +182,8 @@ class MetricQWebView {
   }
 
   getTopLeft (ele) {
-    var topLeft = [0, 0]
-    let eleRect = ele.getBoundingClientRect()
+    const topLeft = [0, 0]
+    const eleRect = ele.getBoundingClientRect()
     topLeft[0] = eleRect.left + window.scrollX
     topLeft[1] = eleRect.top + window.scrollY
     return topLeft
@@ -192,12 +191,12 @@ class MetricQWebView {
 
   updateMetricUrl () {
     let encodedStr = ''
-    //old style:
+    // old style:
     if (false) {
-      let jsurlObj = {
-        'cntr': new Array(),
-        'start': this.handler.startTime,
-        'stop': this.handler.stopTime,
+      const jsurlObj = {
+        cntr: new Array(),
+        start: this.handler.startTime,
+        stop: this.handler.stopTime
       }
       for (var metricBase in this.handler.allMetrics) {
         jsurlObj.cntr.push(this.handler.allMetrics[metricBase].name)
@@ -211,17 +210,17 @@ class MetricQWebView {
       encodedStr = encodeURIComponent(encodedStr)
     }
     window.location.href =
-      parseLocationHref()[0]
-      + '#'
-      + encodedStr
+      parseLocationHref()[0] +
+      '#' +
+      encodedStr
   }
 
   setPlotRanges (updateXAxis, updateYAxis) {
     if (!updateXAxis && !updateYAxis) {
       return
     }
-    //TODO: code me
-    let allMinMax = this.handler.getAllMinMax()
+    // TODO: code me
+    const allMinMax = this.handler.getAllMinMax()
     this.graticule.setValueRange(allMinMax[0], allMinMax[1])
 
     this.graticule.draw(false)
@@ -232,29 +231,28 @@ class MetricQWebView {
   }
 
   throttledReload () {
-
-    //TODO: implement feature to throttle requests
+    // TODO: implement feature to throttle requests
     // (i.e. 150 ms without new call to this function)
-    var now = (new Date()).getTime()
-    if (this.reloadThrottleTimeout
-      && (now - this.lastThrottledReloadTime) >= this.RELOAD_THROTTLING_DELAY) {
+    const now = (new Date()).getTime()
+    if (this.reloadThrottleTimeout &&
+      (now - this.lastThrottledReloadTime) >= this.RELOAD_THROTTLING_DELAY) {
       this.reload()
     } else {
       if (this.reloadThrottleTimeout) {
         clearTimeout(this.reloadThrottleTimeout)
       }
-      this.reloadThrottleTimeout = setTimeout(function (selfReference) {
+      this.reloadThrottleTimeout = setTimeout((function (selfReference) {
         return function () {
           selfReference.throttledReload()
           selfReference.reloadThrottleTimeout = undefined
         }
-      }(this), this.RELOAD_THROTTLING_DELAY + 5)
+      }(this)), this.RELOAD_THROTTLING_DELAY + 5)
     }
     this.lastThrottledReloadTime = now
   }
 
   getMetric (metricName) {
-    for (var metricBase in this.handler.allMetrics) {
+    for (const metricBase in this.handler.allMetrics) {
       if (this.handler.allMetrics[metricBase].name == metricName) {
         return this.handler.allMetrics[metricBase]
       }
@@ -263,46 +261,45 @@ class MetricQWebView {
   }
 
   newEmptyMetric () {
-    if (!this.handler.allMetrics['empty']) {
-      this.handler.allMetrics['empty'] = new Metric(this, '', undefined, markerSymbols[0], new Array())
+    if (!this.handler.allMetrics.empty) {
+      this.handler.allMetrics.empty = new Metric(this, '', undefined, markerSymbols[0], new Array())
     }
   }
 
   deleteMetric (metricBase) {
     if (this.graticule) this.graticule.data.deleteMetric(metricBase)
     delete this.handler.allMetrics[metricBase]
-    //TODO: also clear this metric from MetricCache
+    // TODO: also clear this metric from MetricCache
     if (this.graticule) this.graticule.draw(false)
   }
 
   deleteTraces (tracesArr) {
-    //TODO: REFACTOR
-    //Plotly.deleteTraces(this.ele, tracesArr);
+    // TODO: REFACTOR
+    // Plotly.deleteTraces(this.ele, tracesArr);
     this.countTraces -= tracesArr.length
   }
 
   changeMetricName (metricReference, newName, oldName) {
     /* reject metric names that already exist */
     if (this.handler.allMetrics[newName]) {
-
       return false
     }
     metricReference.updateName(newName)
-    if ('' == oldName) {
-      this.handler.allMetrics['empty'] = new Metric(this, '', undefined, markerSymbols[0], new Array())
+    if (oldName == '') {
+      this.handler.allMetrics.empty = new Metric(this, '', undefined, markerSymbols[0], new Array())
       this.handler.allMetrics[newName] = metricReference
     } else {
       this.deleteMetric(oldName)
       this.handler.allMetrics[newName] = metricReference
     }
     if (this.graticule) {
-      var newCache = this.graticule.data.getMetricCache(newName)
+      let newCache = this.graticule.data.getMetricCache(newName)
       if (!newCache) {
         newCache = this.graticule.data.getMetricCache(newName)
-        //TODO: call this.graticule.data.initializeCacheWithColor()
+        // TODO: call this.graticule.data.initializeCacheWithColor()
         this.graticule.data.initializeCacheWithColor(newName, metricReference.color)
-        //WHAT SHALL WE DO WITH THE LEGEND'S COLOR?
-        //WHAT SHALL WE DO WITH A DRUNKEN SAILOR IN THE MORNING?
+        // WHAT SHALL WE DO WITH THE LEGEND'S COLOR?
+        // WHAT SHALL WE DO WITH A DRUNKEN SAILOR IN THE MORNING?
       }
     }
     this.reload()
@@ -310,18 +307,18 @@ class MetricQWebView {
   }
 
   doExport () {
-    //TODO: heed width and height parameters!
-    //this.configuration.exportWidth;
+    // TODO: heed width and height parameters!
+    // this.configuration.exportWidth;
 
     let filenameStr = 'MetricQ-WebView.'
     let filetypeStr = 'image/'
     filenameStr += this.configuration.exportFormat
     filetypeStr += this.configuration.exportFormat
-    let canvasImageData = this.graticule.ele.toDataURL(filetypeStr)
-    var linkEle = document.createElement('a')
+    const canvasImageData = this.graticule.ele.toDataURL(filetypeStr)
+    let linkEle = document.createElement('a')
     linkEle.setAttribute('href', canvasImageData)
     linkEle.setAttribute('download', filenameStr)
-    //linkEle.setAttribute("onclick", "this.parentNode.removeChild(this);");
+    // linkEle.setAttribute("onclick", "this.parentNode.removeChild(this);");
     linkEle.appendChild(document.createTextNode('Export'))
     linkEle = document.body.appendChild(linkEle)
 
@@ -338,10 +335,10 @@ class MetricQWebView {
 }
 
 function parseLocationHref () {
-  let hashPos = window.location.href.indexOf('#')
+  const hashPos = window.location.href.indexOf('#')
   let baseUrl = ''
   let jsurlStr = ''
-  if (-1 == hashPos) {
+  if (hashPos == -1) {
     baseUrl = window.location.href
   } else {
     baseUrl = window.location.href.substring(0, hashPos)
@@ -351,36 +348,36 @@ function parseLocationHref () {
 }
 
 function determineTimeRangeOfJsUrl (jsUrlObj) {
-  var timeStart, timeEnd
-  if (jsUrlObj['start'] && jsUrlObj['stop']) {
+  let timeStart, timeEnd
+  if (jsUrlObj.start && jsUrlObj.stop) {
     timeStart = parseInt(jsUrlObj.start)
     timeEnd = parseInt(jsUrlObj.stop)
-  } else if (jsUrlObj['value'] && jsUrlObj['unit']) {
-    //including the units from old tool settings.js  (line 62)
-    var unitsAssociation = {
-      'second': 1000,
+  } else if (jsUrlObj.value && jsUrlObj.unit) {
+    // including the units from old tool settings.js  (line 62)
+    const unitsAssociation = {
+      second: 1000,
       'second(s)': 1000,
-      'minute': 60000,
+      minute: 60000,
       'minute(s)': 60000,
-      'hour': 3600000,
+      hour: 3600000,
       'hour(s)': 3600000,
-      'day': 86400000,
+      day: 86400000,
       'day(s)': 86400000,
-      'week': 86400000 * 7,
+      week: 86400000 * 7,
       'week(s)': 86400000 * 7,
-      'month': 86400000 * 30,
+      month: 86400000 * 30,
       'month(s)': 86400000 * 30,
-      'year': 86400000 * 365,
+      year: 86400000 * 365,
       'year(s)': 86400000 * 365
     }
-    //TODO: use these units:
+    // TODO: use these units:
 
     //	this.units = ['second(s)', 'minute(s)', 'hour(s)', 'day(s)', 'week(s)', 'month(s)', 'year(s)', 'data points'];
-    var unitMultiplier = unitsAssociation[jsUrlObj['unit']]
+    const unitMultiplier = unitsAssociation[jsUrlObj.unit]
     timeEnd = (new Date()).getTime()
-    var timeToSubtract = 2 * 3600 * 1000
+    let timeToSubtract = 2 * 3600 * 1000
     if (undefined === unitMultiplier) {
-      console.warn(`Invalid unit "${jsUrlObj['unit']}" in URL`)
+      console.warn(`Invalid unit "${jsUrlObj.unit}" in URL`)
     } else {
       timeToSubtract = jsUrlObj.value * unitMultiplier
     }
@@ -392,15 +389,15 @@ function determineTimeRangeOfJsUrl (jsUrlObj) {
 }
 
 function importMetricUrl () {
-  var jsurlStr = parseLocationHref()[1]
-  if (1 < jsurlStr.length) {
-    var firstChar = jsurlStr.charAt(0)
-    var firstTwoChars = firstChar + jsurlStr.charAt(1)
-    if ('/~' == firstTwoChars
-      || '~' == firstChar) {
-      let metricsObj = undefined
+  const jsurlStr = parseLocationHref()[1]
+  if (jsurlStr.length > 1) {
+    const firstChar = jsurlStr.charAt(0)
+    const firstTwoChars = firstChar + jsurlStr.charAt(1)
+    if (firstTwoChars == '/~' ||
+      firstChar == '~') {
+      let metricsObj
       try {
-        if ('/~' == firstTwoChars) {
+        if (firstTwoChars == '/~') {
           metricsObj = window.JSURL.parse(jsurlStr.substring(1))
         } else {
           metricsObj = window.JSURL.parse(jsurlStr)
@@ -410,13 +407,13 @@ function importMetricUrl () {
         console.log(exc)
         return false
       }
-      var timeRanges = determineTimeRangeOfJsUrl(metricsObj)
+      const timeRanges = determineTimeRangeOfJsUrl(metricsObj)
 
       initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1])
       return true
-    } else if ('.' == firstChar) {
+    } else if (firstChar == '.') {
       const splitted = jsurlStr.split('*')
-      if (1 < splitted.length) {
+      if (splitted.length > 1) {
         initializeMetrics(splitted.slice(2), parseInt(splitted[0].substring(1)), parseInt(splitted[1]))
         return true
       }
@@ -427,7 +424,7 @@ function importMetricUrl () {
 
 /* TODO: generalize this for cases where is no "legendApp" */
 function initializeMetrics (metricNamesArr, timeStart, timeStop) {
-  let newManager = undefined
+  let newManager
   if (window.MetricQWebView) {
     newManager = window.MetricQWebView.instances[0]
     newManager.reinitialize(metricNamesArr, timeStart, timeStop)
