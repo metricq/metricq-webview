@@ -473,7 +473,7 @@ function Series (paramAggregate, paramStyleOptions) {
       }
       return [this.points[betterIndex].time, this.points[betterIndex].value, betterIndex]
     } else {
-      return [this.points[closestPointIndex].time, this.points[closestPointIndex].value, betterIndex]
+      return [this.points[closestPointIndex].time, this.points[closestPointIndex].value, closestPointIndex]
     }
   }
   this.addPoint = function (newPoint, isBigger) {

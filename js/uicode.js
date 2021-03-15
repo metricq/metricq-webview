@@ -104,10 +104,8 @@ function initializeMetricPopup () {
             if (evt.target.getAttribute('class') === 'popup_trashcan') return
 
             if (evt.target.getAttribute('class') === 'popup_ok') {
-              // code duplication :(
-              if (paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute('metric-old-name'))) {
-                nameChanged = true
-              } else {
+              // code duplication :( - not really
+              if (!paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute('metric-old-name'))) {
                 paramMyMetric.updateName(oldName)
                 showUserHint('Konnte Metrik-Namen nicht ändern. Metrik evtl. schon vorhanden?')
               }

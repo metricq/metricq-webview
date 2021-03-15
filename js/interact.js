@@ -109,7 +109,7 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
         showUserHint('Zoom-Limit erreicht.')
       }
     }
-    myMetricQInstance.throttledReload()
+    metricQInstance.throttledReload()
     metricQInstance.graticule.draw(false)
   } else { // vertical scrolling
     let scrollDirection = evtObj.deltaY
@@ -419,7 +419,7 @@ window.addEventListener('gesturechange', function (evt) {
   evt.preventDefault()
   const timeRange = window.MetricQWebView.instances[0].graticule.curTimeRange
   const delta = timeRange[1] - timeRange[0]
-  timeMargin = Math.round((delta * evt.scale - delta) / 2)
+  const timeMargin = Math.round((delta * evt.scale - delta) / 2)
   timeRange[0] -= timeMargin
   timeRange[1] += timeMargin
   window.MetricQWebView.instances[0].handler.setTimeRange(timeRange[0], timeRange[1])

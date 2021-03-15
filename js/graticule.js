@@ -407,7 +407,7 @@ function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension
       end: 0
     }
     if (adjustRanges === true) {
-      throw new Exception('Tried to automatically determine time ranges. That makes handler out of sync, disallowed!')
+      throw new Error('Tried to automatically determine time ranges. That makes handler out of sync, disallowed!')
       this.automaticallyDetermineRanges(true, true)
     } else if (undefined === this.curTimeRange) {
       console.log('Cowardly refusing to do draw() when I am not allowed to determine Time and Value Ranges')
