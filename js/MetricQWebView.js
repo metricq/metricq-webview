@@ -192,23 +192,23 @@ class MetricQWebView {
   updateMetricUrl () {
     let encodedStr = ''
     // old style:
-    if (false) {
-      const jsurlObj = {
-        cntr: [],
-        start: this.handler.startTime,
-        stop: this.handler.stopTime
-      }
-      for (const metricBase in this.handler.allMetrics) {
-        jsurlObj.cntr.push(this.handler.allMetrics[metricBase].name)
-      }
-      encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj))
-    } else {
-      encodedStr = '.' + this.handler.startTime + '*' + this.handler.stopTime
-      for (const metricBase in this.handler.allMetrics) {
-        encodedStr += '*' + this.handler.allMetrics[metricBase].name
-      }
-      encodedStr = encodeURIComponent(encodedStr)
+    // if (false) {
+    //   const jsurlObj = {
+    //     cntr: [],
+    //     start: this.handler.startTime,
+    //     stop: this.handler.stopTime
+    //   }
+    //   for (const metricBase in this.handler.allMetrics) {
+    //     jsurlObj.cntr.push(this.handler.allMetrics[metricBase].name)
+    //   }
+    //   encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj))
+    // } else {
+    encodedStr = '.' + this.handler.startTime + '*' + this.handler.stopTime
+    for (const metricBase in this.handler.allMetrics) {
+      encodedStr += '*' + this.handler.allMetrics[metricBase].name
     }
+    encodedStr = encodeURIComponent(encodedStr)
+    // }
     window.location.href =
       parseLocationHref()[0] +
       '#' +
