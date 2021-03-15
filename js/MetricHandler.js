@@ -331,10 +331,10 @@ class MetricHandler {
     }
 
     if (isNaN(paramStartTime) || isNaN(paramStopTime)) {
-      throw 'uh oh time is NaN'
+      throw new Error('uh oh time is NaN')
     }
     if (paramStartTime >= paramStopTime) {
-      throw `startTime(${paramStartTime}) is not smaller than stopTime(${paramStopTime})`
+      throw new Error(`startTime(${paramStartTime}) is not smaller than stopTime(${paramStopTime})`)
     }
 
     let timeSuitable = true

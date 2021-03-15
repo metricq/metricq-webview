@@ -351,7 +351,7 @@ function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension
       paramTypeStr !== 'global' &&
       paramTypeStr !== 'manual' &&
       undefined !== paramTypeStr) {
-      throw `yRange Override must be either local, global or manual "${paramTypeStr}" is invalid.`
+      throw new Error(`yRange Override must be either local, global or manual "${paramTypeStr}" is invalid.`)
     }
     if (undefined !== paramTypeStr) this.yRangeOverride.type = paramTypeStr
     if (undefined !== paramValueStart) this.yRangeOverride.min = paramValueStart
