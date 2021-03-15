@@ -1,1 +1,39 @@
-{"extends": ["standard", "standard-jsx"]}
+{
+  "extends": ["standard", "standard-jsx"],
+  "globals": {
+    "Vue": "readonly",
+    "veil": "readonly",
+    "globalPopup": "readonly",
+    "Colorchooser": "readonly",
+    "showUserHint": "readonly",
+    "metricPresets": "readonly",
+    "MetricQWebView": "readonly",
+    "configApp": "readonly",
+    "popupApp": "readonly",
+    "legendApp": "readonly",
+    "importMetricUrl": "readonly",
+    "globalSelectedPreset": "writable",
+    "initializeMetrics": "readonly",
+    "markerSymbols": "readonly",
+    "initializeMetricPopup": "readonly",
+    "uiInteractArr": "writable",
+    "crc32": "readonly",
+    "hslToRgb": "readonly",
+    "timers": "readonly",
+    "DataCache": "readonly",
+    "METRICQ_BACKEND": "readonly",
+    "rgbToHsl": "readonly",
+    "Metric": "readonly",
+    "MetricHandler": "readonly",
+    "Configuration": "readonly",
+    "Graticule": "readonly",
+    "MetricQHistory": "readonly",
+    "registerCallbacks": "readonly",
+    // Web API
+    "Image": "readonly",
+    "XMLHttpRequest": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": "off"
+  }
+}
