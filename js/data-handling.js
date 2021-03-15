@@ -1,21 +1,21 @@
 function DataCache (paramMetricQHistoryReference) {
   this.metricQHistory = paramMetricQHistoryReference
-  this.metrics = new Array()
+  this.metrics = []
   this.processMetricQDatapoints = function (datapointsJSON, doDraw, doResize) {
     // console.log(datapointsJSON);
-    const distinctMetrics = new Object()
-    const indexesOfCountData = new Array()
+    const distinctMetrics = {}
+    const indexesOfCountData = []
     for (const targetName in datapointsJSON) {
       const metric = datapointsJSON[targetName]
-      var metricParts = targetName.split('/')
-      if (metricParts[1] == 'count') {
+      const metricParts = targetName.split('/')
+      if (metricParts[1] === 'count') {
         indexesOfCountData.push(targetName)
       } else {
         this.newSeries(metricParts[0], metricParts[1]).parseDatapoints(metric.data)
       }
-      if (metricParts[1] == 'raw') {
+      if (metricParts[1] === 'raw') {
         this.getMetricCache(metricParts[0]).clearNonRawAggregates()
-      } else if (metricParts[1] == 'avg') {
+      } else if (metricParts[1] === 'avg') {
         this.getMetricCache(metricParts[0]).clearRawAggregate()
       }
       if (undefined === distinctMetrics[metricParts[0]]) {
@@ -27,7 +27,7 @@ function DataCache (paramMetricQHistoryReference) {
       distinctMetrics[curMetricBase].generateBand()
     }
     for (let i = 0; i < indexesOfCountData.length; ++i) {
-      var metricParts = indexesOfCountData[i].split('/')
+      const metricParts = indexesOfCountData[i].split('/')
       distinctMetrics[metricParts[0]].parseCountDatapoints(datapointsJSON[indexesOfCountData[i]].data)
     }
   }
@@ -63,7 +63,7 @@ function DataCache (paramMetricQHistoryReference) {
   }
   this.getMetricCache = function (metricName) {
     for (let i = 0; i < this.metrics.length; ++i) {
-      if (metricName == this.metrics[i].name) {
+      if (metricName === this.metrics[i].name) {
         return this.metrics[i]
       }
     }
@@ -156,7 +156,7 @@ function DataCache (paramMetricQHistoryReference) {
     }
   }
   this.getAllValuesAtTime = function (timeAt) {
-    const valueArr = new Array()
+    const valueArr = []
     for (let i = 0; i < this.metrics.length; ++i) {
       for (const curAggregate in this.metrics[i].series) {
         if (this.metrics[i].series[curAggregate] && this.metrics[i].series[curAggregate].points.length > 0) {
@@ -177,7 +177,7 @@ function DataCache (paramMetricQHistoryReference) {
   }
   this.deleteMetric = function (metricName) {
     for (let i = 0; i < this.metrics.length; ++i) {
-      if (metricName == this.metrics[i].name) {
+      if (metricName === this.metrics[i].name) {
         this.metrics.splice(i, 1)
         return true
       }
@@ -185,7 +185,7 @@ function DataCache (paramMetricQHistoryReference) {
     return false
   }
   this.distinctUnits = function () {
-    const units = new Array()
+    const units = []
     for (let i = 0; i < this.metrics.length; ++i) {
       if (this.metrics[i].meta && this.metrics[i].meta.unit) {
         if (!units.includes(this.metrics[i].meta.unit)) {
@@ -228,12 +228,12 @@ function MetricCache (paramMetricQReference, paramMetricName) {
   this.resetData = function () {
     delete this.series
     delete this.bands
-    this.series = new Array()
-    this.bands = new Array()
+    this.series = []
+    this.bands = []
   }
   this.clearNonRawAggregates = function () {
     for (const curAggregate in this.series) {
-      if (curAggregate != 'raw' && this.series[curAggregate]) {
+      if (curAggregate !== 'raw' && this.series[curAggregate]) {
         this.series[curAggregate].clear()
       }
     }
@@ -254,12 +254,12 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     }
     if (this.series.min && this.series.max) {
       const minSeries = this.series.min
-      for (var i = 0; i < minSeries.points.length; ++i) {
+      for (let i = 0; i < minSeries.points.length; ++i) {
         this.band.addPoint(minSeries.points[i].clone())
       }
       this.band.setSwitchOverIndex()
       const maxSeries = this.series.max
-      for (var i = maxSeries.points.length - 1; i >= 0; --i) {
+      for (let i = maxSeries.points.length - 1; i >= 0; --i) {
         this.band.addPoint(maxSeries.points[i].clone())
       }
       return this.band
@@ -279,7 +279,7 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     for (const curAggregate in this.series) {
       const curSeries = this.series[curAggregate]
       if (curSeries && curSeries.points.length > 0) {
-        if (curSeries.points.length == countDatapoints.length) {
+        if (curSeries.points.length === countDatapoints.length) {
           for (let j = 0; j < curSeries.points.length && j < countDatapoints.length; ++j) {
             curSeries.points[j].count = countDatapoints[j].value
           }
@@ -292,15 +292,15 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     let allTimeMax
     for (let i = 0; i < jsonResponse.length; ++i) {
       const metricParts = jsonResponse[i].target.split('/')
-      if (metricParts[1] == 'min') {
-        for (var j = 0; j < jsonResponse[i].datapoints.length; ++j) {
-          if (undefined == allTimeMin || allTimeMin > jsonResponse[i].datapoints[j][0]) {
+      if (metricParts[1] === 'min') {
+        for (let j = 0; j < jsonResponse[i].datapoints.length; ++j) {
+          if (undefined === allTimeMin || allTimeMin > jsonResponse[i].datapoints[j][0]) {
             allTimeMin = jsonResponse[i].datapoints[j][0]
           }
         }
-      } else if (metricParts[1] == 'max') {
-        for (var j = 0; j < jsonResponse[i].datapoints.length; ++j) {
-          if (undefined == allTimeMax || allTimeMax < jsonResponse[i].datapoints[j][0]) {
+      } else if (metricParts[1] === 'max') {
+        for (let j = 0; j < jsonResponse[i].datapoints.length; ++j) {
+          if (undefined === allTimeMax || allTimeMax < jsonResponse[i].datapoints[j][0]) {
             allTimeMax = jsonResponse[i].datapoints[j][0]
           }
         }
@@ -368,7 +368,7 @@ function MetricCache (paramMetricQReference, paramMetricName) {
 }
 
 function Band (paramStyleOptions) {
-  this.points = new Array()
+  this.points = []
   this.styleOptions = paramStyleOptions
   this.switchOverIndex = 0
   this.addPoint = function (newPoint) {
@@ -379,14 +379,14 @@ function Band (paramStyleOptions) {
     this.switchOverIndex = this.points.length
   }
   this.getTimeRange = function () {
-    if (this.points.length == 0) {
+    if (this.points.length === 0) {
       return [0, 0]
     } else {
       return [this.points[0].time, this.points[this.points.length - 1].time]
     }
   }
   this.getValueRange = function () {
-    if (this.points.length == 0) {
+    if (this.points.length === 0) {
       return [0, 0]
     }
     let min = this.points[0].value; let max = this.points[0].value
@@ -401,21 +401,21 @@ function Band (paramStyleOptions) {
   }
   this.clear = function () {
     delete this.points
-    this.points = new Array()
+    this.points = []
   }
 }
 
 function Series (paramAggregate, paramStyleOptions) {
-  this.points = new Array()
+  this.points = []
   this.aggregate = paramAggregate
   this.styleOptions = paramStyleOptions
   this.allTime = undefined
   this.clear = function () {
     delete this.points
-    this.points = new Array()
+    this.points = []
   }
   this.getValueAtTimeAndIndex = function (timeAt) {
-    if (typeof timeAt !== 'number' || this.points.length == 0) {
+    if (typeof timeAt !== 'number' || this.points.length === 0) {
       return undefined
     }
     let middleIndex
@@ -441,18 +441,17 @@ function Series (paramAggregate, paramStyleOptions) {
     }
     const closestPointIndex = closestIndex
     if (this.points[closestPointIndex].time !== timeAt &&
-      this.styleOptions && this.styleOptions.connect && this.styleOptions.connect != 'none') {
-      var betterIndex = closestPointIndex
-      if (this.styleOptions.connect == 'next') {
+      this.styleOptions && this.styleOptions.connect && this.styleOptions.connect !== 'none') {
+      let betterIndex = closestPointIndex
+      if (this.styleOptions.connect === 'next') {
         if (this.points[betterIndex].time > timeAt) {
           --betterIndex
         }
-      } else if (this.styleOptions.connect == 'last') {
+      } else if (this.styleOptions.connect === 'last') {
         if (this.points[betterIndex].time < timeAt) {
           ++betterIndex
         }
-      } else if (this.styleOptions.connect == 'direct') // linear-interpolation
-      {
+      } else if (this.styleOptions.connect === 'direct') { // linear-interpolation
         let firstPoint, secondPoint
         if ((timeAt < this.points[betterIndex].time && betterIndex < 0) || (betterIndex + 1) >= this.points.length) {
           firstPoint = this.points[betterIndex - 1]
@@ -478,13 +477,13 @@ function Series (paramAggregate, paramStyleOptions) {
     }
   }
   this.addPoint = function (newPoint, isBigger) {
-    if (isBigger || this.points.length == 0) {
+    if (isBigger || this.points.length === 0) {
       this.points.push(newPoint)
       return newPoint
     } else {
       let middleIndex
       let bottom = 0
-      head = this.points.length - 1
+      let head = this.points.length - 1
       // binary search, where to insert the new point
       while ((head - bottom) > 10) {
         middleIndex = bottom + Math.floor((head - bottom) / 2)
@@ -503,7 +502,7 @@ function Series (paramAggregate, paramStyleOptions) {
         }
       }
       // if we could not insert the newPoint somewhere in between, put it at the end
-      if (i == (head + 1)) {
+      if (i === (head + 1)) {
         this.points.push(newPoint)
       }
     }
@@ -516,19 +515,19 @@ function Series (paramAggregate, paramStyleOptions) {
     }
   }
   this.getTimeRange = function () {
-    if (this.points.length == 0) {
+    if (this.points.length === 0) {
       return [0, 0]
     } else {
       return [this.points[0].time, this.points[this.points.length - 1].time]
     }
   }
   this.getValueRange = function (timeRangeStart, timeRangeEnd) {
-    if (this.points.length == 0) {
+    if (this.points.length === 0) {
       return undefined
     }
     let min = this.points[0].value; let max = this.points[0].value
     if (undefined !== timeRangeStart && undefined !== timeRangeEnd) {
-      var i = 0
+      let i = 0
       for (i = 0; i < this.points.length; ++i) {
         if (this.points[i].time >= timeRangeStart) {
           break
@@ -546,7 +545,7 @@ function Series (paramAggregate, paramStyleOptions) {
         }
       }
     } else {
-      for (var i = 1; i < this.points.length; ++i) {
+      for (let i = 1; i < this.points.length; ++i) {
         if (this.points[i].value < min) {
           min = this.points[i].value
         } else if (this.points[i].value > max) {
@@ -567,7 +566,7 @@ function Point (paramTime, paramValue) {
   }
 }
 
-const timers = new Object()
+const timers = {}
 
 const stylingOptions = {
   list: [
@@ -645,7 +644,7 @@ function matchStylingOptions (fullMetricName) {
     return undefined
   }
   for (let i = 0; i < stylingOptions.list.length; ++i) {
-    if (stylingOptions.list[i].nameMatch == fullMetricName ||
+    if (stylingOptions.list[i].nameMatch === fullMetricName ||
       fullMetricName.match(new RegExp(stylingOptions.list[i].nameRegex))) {
       // clone the options
       return JSON.parse(JSON.stringify(stylingOptions.list[i]))

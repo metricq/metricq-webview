@@ -14,21 +14,21 @@ class MetricHandler {
   }
 
   initializeMetrics (initialMetricNames) {
-    this.allMetrics = new Object()
+    this.allMetrics = {}
     for (let i = 0; i < initialMetricNames.length; ++i) {
       const curMetricName = initialMetricNames[i]
       if (curMetricName.length > 0) {
-        this.allMetrics[curMetricName] = new Metric(this.renderer, curMetricName, undefined, markerSymbols[i * 4], new Array())
+        this.allMetrics[curMetricName] = new Metric(this.renderer, curMetricName, undefined, markerSymbols[i * 4], [])
       } else {
-        this.allMetrics.empty = new Metric(this.renderer, '', undefined, markerSymbols[i * 4], new Array())
+        this.allMetrics.empty = new Metric(this.renderer, '', undefined, markerSymbols[i * 4], [])
       }
     }
   }
 
   doRequest (maxDataPoints) {
     const timeMargin = (this.stopTime - this.startTime) * this.TIME_MARGIN_FACTOR
-    const nonErrorProneMetrics = new Array()
-    const remainingMetrics = new Array()
+    const nonErrorProneMetrics = []
+    const remainingMetrics = []
     for (const metricBase in this.allMetrics) {
       const curMetric = this.allMetrics[metricBase]
       if (curMetric.name.length > 0) {
@@ -40,11 +40,11 @@ class MetricHandler {
       }
     }
 
-    var queryObj = this.metricQHistory.query(this.startTime - timeMargin,
+    const queryObj = this.metricQHistory.query(this.startTime - timeMargin,
       this.stopTime + timeMargin,
       Math.round(maxDataPoints + (maxDataPoints * this.TIME_MARGIN_FACTOR * 2)))
     const defaultAggregates = ['min', 'max', 'avg', 'count']
-    for (var i = 0; i < nonErrorProneMetrics.length; ++i) {
+    for (let i = 0; i < nonErrorProneMetrics.length; ++i) {
       queryObj.target(nonErrorProneMetrics[i], defaultAggregates)
     }
     if (queryObj.targets.length > 0) {
@@ -68,8 +68,8 @@ class MetricHandler {
       }(this, nonErrorProneMetrics, maxDataPoints)))
       // queryObj.run().then((dataset) => { this.handleResponse(dataset); });
     }
-    for (var i = 0; i < remainingMetrics.length; ++i) {
-      var queryObj = this.metricQHistory.query(this.startTime - timeMargin,
+    for (let i = 0; i < remainingMetrics.length; ++i) {
+      const queryObj = this.metricQHistory.query(this.startTime - timeMargin,
         this.stopTime + timeMargin,
         maxDataPoints)
       queryObj.target(remainingMetrics[i], defaultAggregates)
@@ -79,10 +79,10 @@ class MetricHandler {
   }
 
   handleResponse (selfReference, requestedMetrics, myData) {
-    const listOfFaultyMetrics = new Array()
+    const listOfFaultyMetrics = []
     for (let i = 0; i < requestedMetrics.length; ++i) {
       const metricName = requestedMetrics[i]
-      const matchingAggregatesObj = new Object()
+      const matchingAggregatesObj = {}
       let matchingAggregatesCount = 0
       for (const curMetricName in myData) {
         const splitted = curMetricName.split('/')
@@ -122,7 +122,7 @@ class MetricHandler {
 
   // TODO: 'drop'/remove this function
   handleMetricResponse (selfReference, metricArr, evt) {
-    if (evt.target.readyState == 4) {
+    if (evt.target.readyState === 4) {
       if (evt.target.status >= 200 &&
         evt.target.status < 300) {
         let parsedObj
@@ -167,7 +167,7 @@ class MetricHandler {
           to: new Date(stopTime).toISOString()
         },
       maxDataPoints: maxDataPoints,
-      targets: new Array()
+      targets: []
     }
     for (let i = 0; i < metricArr.length; ++i) {
       const targetObj = {
@@ -182,7 +182,7 @@ class MetricHandler {
   // TODO: move this function to DataCache, maybe?
   getAllMinMax () {
     const referenceAttribute = 'minmax'
-    if (this.renderer.graticule.yRangeOverride.type == 'manual') {
+    if (this.renderer.graticule.yRangeOverride.type === 'manual') {
       return [this.renderer.graticule.yRangeOverride.min, this.renderer.graticule.yRangeOverride.max]
     }
     let allMinMax = [undefined, undefined]
@@ -192,10 +192,10 @@ class MetricHandler {
       const curCache = this.renderer.graticule.data.getMetricCache(metricBase)
       if (curCache) {
         let curMinMax
-        if (this.renderer.graticule.yRangeOverride.type == 'global') {
+        if (this.renderer.graticule.yRangeOverride.type === 'global') {
           curMinMax = [curCache.allTime.min, curCache.allTime.max]
         }
-        if (this.renderer.graticule.yRangeOverride.type == 'local') {
+        if (this.renderer.graticule.yRangeOverride.type === 'local') {
           curMinMax = curCache.getAllMinMax(timeFrame[0], timeFrame[1])
         }
         if (curMinMax) {
@@ -221,8 +221,8 @@ class MetricHandler {
 
   parseTrace (metricBase, metricAggregate, datapointsArr) {
     const curTrace = {
-      x: new Array(),
-      y: new Array(),
+      x: [],
+      y: [],
       name: metricBase + '/' + metricAggregate,
       type: 'scatter',
       hoverinfo: 'skip'
@@ -288,7 +288,7 @@ class MetricHandler {
   parseResponse (parsedJson, paramMetricsArr) {
     // TODO: track metrics thate were requested but got no response,
     //        mark these as errorpone=true
-    const tracesAll = new Object()
+    const tracesAll = {}
     let metricBase
     let metricAggregate
     for (let i = 0; i < parsedJson.length; ++i) {
@@ -302,7 +302,7 @@ class MetricHandler {
         const parsedTrace = this.parseTrace(metricBase, metricAggregate, parsedJson[i].datapoints)
         if (parsedTrace) {
           if (!tracesAll[metricBase]) {
-            tracesAll[metricBase] = new Object()
+            tracesAll[metricBase] = {}
           }
           tracesAll[metricBase][metricAggregate] = parsedTrace
         }
@@ -339,15 +339,15 @@ class MetricHandler {
 
     let timeSuitable = true
     if ((paramStopTime - paramStartTime) < this.renderer.graticule.MIN_ZOOM_TIME) {
-      var oldDelta = paramStopTime - paramStartTime
-      var newDelta = this.renderer.graticule.MIN_ZOOM_TIME
+      const oldDelta = paramStopTime - paramStartTime
+      const newDelta = this.renderer.graticule.MIN_ZOOM_TIME
       paramStartTime -= Math.round((newDelta - oldDelta) / 2.00)
       paramStopTime += Math.round((newDelta - oldDelta) / 2.00)
       timeSuitable = false
     }
     if ((paramStopTime - paramStartTime) > this.renderer.graticule.MAX_ZOOM_TIME) {
-      var oldDelta = paramStopTime - paramStartTime
-      var newDelta = this.renderer.graticule.MAX_ZOOM_TIME
+      const oldDelta = paramStopTime - paramStartTime
+      const newDelta = this.renderer.graticule.MAX_ZOOM_TIME
       paramStartTime += Math.round((oldDelta - newDelta) / 2.00)
       paramStopTime -= Math.round((oldDelta - newDelta) / 2.00)
       timeSuitable = false

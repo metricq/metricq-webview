@@ -81,10 +81,10 @@ Vue.component('preset-popup', {
       globalPopup.presetSelection = false
       let hasEmptyMetric = false
       let i = 0
-      const metricNamesArr = new Array()
+      const metricNamesArr = []
       for (; i < globalSelectedPreset.length; ++i) {
         const metricName = globalSelectedPreset[i]
-        if (metricName.length == 0) hasEmptyMetric = true
+        if (metricName.length === 0) hasEmptyMetric = true
         metricNamesArr.push(metricName)
       }
       if (!hasEmptyMetric) {

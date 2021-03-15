@@ -20,7 +20,7 @@ class Colorchooser {
     const barBaseY = 15
     const barHeight = 14
     for (let i = 0; i < 256; ++i) {
-      var rgbArr = hslToRgb(i / 256.00, 1, 0.46)
+      const rgbArr = hslToRgb(i / 256.00, 1, 0.46)
       this.ctx.fillStyle = 'rgb(' + rgbArr[0] + ',' + rgbArr[1] + ',' + rgbArr[2] + ')'
       // this.ctx.beginPath();
       // this.ctx.moveTo(i, 30);
@@ -32,7 +32,7 @@ class Colorchooser {
     this.ctx.strokeRect(0.5, barBaseY - 0.5, 259, barHeight + 1)
 
     const colorX = this.colorVal * 256 + 1.5
-    var rgbArr = hslToRgb(this.colorVal, 1, 0.46)
+    const rgbArr = hslToRgb(this.colorVal, 1, 0.46)
     this.ctx.fillStyle = 'rgb(' + rgbArr[0] + ',' + rgbArr[1] + ',' + rgbArr[2] + ')'
     this.ctx.beginPath()
     this.ctx.moveTo(colorX - 1, barBaseY - 4)

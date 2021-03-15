@@ -46,7 +46,7 @@ Vue.component('yaxis-popup', {
     manualDisabled: {
       cache: false,
       get: function () {
-        return window.MetricQWebView.instances[0].graticule.yRangeOverride.type != 'manual'
+        return window.MetricQWebView.instances[0].graticule.yRangeOverride.type !== 'manual'
       },
       set: function (newValue) {
         window.MetricQWebView.instances[0].graticule.setYRangeOverride('local', undefined, undefined)
@@ -59,14 +59,14 @@ Vue.component('yaxis-popup', {
       set: function (newValue) {
         let ele = document.getElementById('yaxis_min')
         if (ele) {
-          ele.disabled = newValue != 'manual'
+          ele.disabled = newValue !== 'manual'
           ele = document.getElementById('yaxis_max')
-          ele.disabled = newValue != 'manual'
+          ele.disabled = newValue !== 'manual'
         }
-        if (newValue == 'global') {
+        if (newValue === 'global') {
           window.MetricQWebView.instances[0].graticule.setYRangeOverride(newValue, undefined, undefined)
         } else {
-          if (newValue == 'manual') {
+          if (newValue === 'manual') {
             const arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
             window.MetricQWebView.instances[0].graticule.setYRangeOverride(newValue, arr[0], arr[1])
             this.$forceUpdate()
@@ -82,7 +82,7 @@ Vue.component('yaxis-popup', {
       get: function () {
         const arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
         if (arr) {
-          return (new Number(arr[0])).toFixed(3)
+          return (Number(arr[0])).toFixed(3)
         }
       },
       set: function (newValue) {
@@ -97,7 +97,7 @@ Vue.component('yaxis-popup', {
       get: function () {
         const arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
         if (arr) {
-          return (new Number(arr[1])).toFixed(3)
+          return (Number(arr[1])).toFixed(3)
         }
       },
       set: function (newValue) {

@@ -9,9 +9,9 @@ for (const attrib in metricPresets) {
   globalSelectedPreset = metricPresets[attrib]
   break
 }
-new MetricQWebView(document.querySelector('.row_body'), new Array(), (new Date()).getTime() - 7200 * 1000, (new Date()).getTime())
+new MetricQWebView(document.querySelector('.row_body'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime())
 
-var veil = {
+const veil = {
   myPopup: undefined,
   inDestroymentPhase: false,
   create: function (destroyCallback, solidVeil) {
@@ -68,7 +68,7 @@ function initTest () {
 function initializeMetricPopup () {
   const instance = window.MetricQWebView.instances[0]
   let myMetric
-  for (var metricBase in instance.handler.allMetrics) {
+  for (const metricBase in instance.handler.allMetrics) {
     if (instance.handler.allMetrics[metricBase].popup) {
       myMetric = instance.handler.allMetrics[metricBase]
       break
@@ -78,12 +78,12 @@ function initializeMetricPopup () {
     const popupEle = document.getElementById(myMetric.popupKey)
     if (popupEle) {
       // TODO: remove this 'affectedTraces' stuff
-      const affectedTraces = new Array()
+      const affectedTraces = []
       let j = 0
-      for (var metricBase in instance.handler.allMetrics) {
+      for (const metricBase in instance.handler.allMetrics) {
         if (instance.handler.allMetrics[metricBase].traces) {
           for (let k = 0; k < instance.handler.allMetrics[metricBase].traces.length; ++k) {
-            if (metricBase == myMetric.name) {
+            if (metricBase === myMetric.name) {
               affectedTraces.push(j)
             }
             ++j
@@ -101,9 +101,9 @@ function initializeMetricPopup () {
           // special behavior when creating a new metric
           if (oldName === null ||
             undefined === oldName) {
-            if (evt.target.getAttribute('class') == 'popup_trashcan') return
+            if (evt.target.getAttribute('class') === 'popup_trashcan') return
 
-            if (evt.target.getAttribute('class') == 'popup_ok') {
+            if (evt.target.getAttribute('class') === 'popup_ok') {
               // code duplication :(
               if (paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute('metric-old-name'))) {
                 nameChanged = true
@@ -113,15 +113,15 @@ function initializeMetricPopup () {
               }
             }
           } else {
-            if (evt.target.getAttribute('class') == 'popup_trashcan') {
+            if (evt.target.getAttribute('class') === 'popup_trashcan') {
               if (oldName.length > 0) {
                 paramMyInstance.deleteMetric(oldName)
                 Vue.nextTick(function () { legendApp.$forceUpdate() })
               }
             } else {
-              var nameChanged = false
-              if (paramMyMetric.name != oldName) {
-                if (paramMyMetric.name == '' && !oldName) {
+              let nameChanged = false
+              if (paramMyMetric.name !== oldName) {
+                if (paramMyMetric.name === '' && !oldName) {
                   // do nothing
                 } else {
                   if (paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute('metric-old-name'))) {
@@ -132,7 +132,7 @@ function initializeMetricPopup () {
                   }
                 }
               }
-              if (evt.target.getAttribute('metric-old-color') != paramMyMetric.color) {
+              if (evt.target.getAttribute('metric-old-color') !== paramMyMetric.color) {
                 paramMyMetric.updateColor(paramMyMetric.color)
                 const colorEle = document.getElementsByClassName(paramMyMetric.popupKey)
                 if (colorEle && colorEle[0]) {
@@ -143,7 +143,7 @@ function initializeMetricPopup () {
                 // TODO: do something, in this case, do forceUpdate the legendApp
                 //         so the metric's color will be shown
               }
-              if (evt.target.getAttribute('metric-old-marker') != paramMyMetric.marker) {
+              if (evt.target.getAttribute('metric-old-marker') !== paramMyMetric.marker) {
                 paramMyMetric.updateMarker(paramMyMetric.marker)
               }
               // don't do a complete repaint
@@ -157,14 +157,14 @@ function initializeMetricPopup () {
       const closeEle = popupEle.querySelector('.popup_close_button')
       const modalEle = document.querySelector('.modal')
       modalEle.addEventListener('click', function (evt) {
-        if (evt.target.getAttribute('role') == 'dialog') {
+        if (evt.target.getAttribute('role') === 'dialog') {
           veil.destroy()
           disablePopupFunc(evt)
         }
       })
       const inputEle = popupEle.querySelector('.popup_input')
       inputEle.addEventListener('keyup', function (evt) {
-        if (evt.key.toLowerCase() == 'enter') {
+        if (evt.key.toLowerCase() === 'enter') {
           disablePopupFunc(evt)
         }
         // TODO: implement throttling?
@@ -174,10 +174,10 @@ function initializeMetricPopup () {
             if (!datalistEle) {
               showUserHint('Auto-Vervollständigung nicht verfügbar, konnte Element #autocomplete_metric nicht finden.')
             } else {
-              for (var i = datalistEle.childNodes.length - 1; i >= 0; --i) {
+              for (let i = datalistEle.childNodes.length - 1; i >= 0; --i) {
                 datalistEle.removeChild(datalistEle.childNodes[i])
               }
-              for (var i = 0; i < searchSuggestions.length; ++i) {
+              for (let i = 0; i < searchSuggestions.length; ++i) {
                 const optionEle = document.createElement('option')
                 optionEle.setAttribute('value', searchSuggestions[i])
                 datalistEle.appendChild(optionEle)

@@ -22,7 +22,7 @@ const yaxisApp = new Vue({
       })
       const modalEle = document.querySelector('.modal')
       modalEle.addEventListener('click', function (evt) {
-        if (evt.target.getAttribute('role') == 'dialog') {
+        if (evt.target.getAttribute('role') === 'dialog') {
           veil.destroy()
           disablePopupFunc()
         }

@@ -33,13 +33,13 @@ Vue.component('interaction-array-option', {
         for (let i = 0; i < keyCodeArray.length; ++i) {
           let curKeyCode = keyCodeArray[i]
           if (curKeyCode.length > 0) {
-            const isNegated = (curKeyCode.charAt(0) == '!')
+            const isNegated = (curKeyCode.charAt(0) === '!')
             if (isNegated) {
               curKeyCode = curKeyCode.substring(1)
             }
             curKeyCode = parseInt(curKeyCode)
             for (const curKeyName in window.KeyJS) {
-              if (curKeyCode == window.KeyJS[curKeyName]) {
+              if (curKeyCode === window.KeyJS[curKeyName]) {
                 if (keyStr.length > 0) {
                   keyStr += ' '
                 }
@@ -56,15 +56,15 @@ Vue.component('interaction-array-option', {
       },
       set: function (newValue) {
         const rawEntriesArray = newValue.split(' ')
-        const actionKeyArray = new Array()
+        const actionKeyArray = []
         for (let i = 0; i < rawEntriesArray.length; ++i) {
           let curEntry = rawEntriesArray[i]
           if (curEntry.length > 0) {
             let newEntry = ''
-            if (curEntry.charAt(0) == '!') {
+            if (curEntry.charAt(0) === '!') {
               curEntry = curEntry.substring(1)
               newEntry += '!'
-              if (curEntry.length == 0) {
+              if (curEntry.length === 0) {
                 continue
               }
             }

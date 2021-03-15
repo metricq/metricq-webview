@@ -3,7 +3,7 @@ class MetricQWebView {
     this.id = 'metricqwebview_' + (new Date()).getTime()
     if (!window.MetricQWebView) {
       window.MetricQWebView = {
-        instances: new Array(),
+        instances: [],
         getInstance: function (htmlEle) {
           for (let i = 0; i < window.MetricQWebView.instances.length; ++i) {
             if (window.MetricQWebView.instances[i].ele.isSameNode(htmlEle)) {
@@ -63,7 +63,7 @@ class MetricQWebView {
   }
 
   renderMetrics (datapointsJSON) {
-    let allTraces = new Array()
+    let allTraces = []
 
     for (const metricBase in this.handler.allMetrics) {
       const curMetric = this.handler.allMetrics[metricBase]
@@ -113,7 +113,7 @@ class MetricQWebView {
         'img/icons/arrow-left-right.svg',
         'img/icons/gear.svg',
         'img/icons/arrow-up-down.svg']
-      for (var i = 0; i < 4; ++i) {
+      for (let i = 0; i < 4; ++i) {
         gearImages[i] = document.createElement('img')
         const img = new Image()
         img.src = gearSrc[i]
@@ -128,7 +128,7 @@ class MetricQWebView {
       // TODO: THIS IS NOT MULTI-INSTANCE-SAFE
       // TODO: RENAME THESE ids SO THAT THEY GET NEW INDIVIDUAL ids EACH AND EVERY TIME
       const gearIds = ['gear_xaxis', 'gear_yaxis']
-      for (var i = 0; i < 2; ++i) {
+      for (let i = 0; i < 2; ++i) {
         gearWrapper[i] = document.createElement('div')
         gearWrapper[i].setAttribute('id', gearIds[i])
         gearWrapper[i].appendChild(gearImages[i * 2])
@@ -194,17 +194,17 @@ class MetricQWebView {
     // old style:
     if (false) {
       const jsurlObj = {
-        cntr: new Array(),
+        cntr: [],
         start: this.handler.startTime,
         stop: this.handler.stopTime
       }
-      for (var metricBase in this.handler.allMetrics) {
+      for (const metricBase in this.handler.allMetrics) {
         jsurlObj.cntr.push(this.handler.allMetrics[metricBase].name)
       }
       encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj))
     } else {
       encodedStr = '.' + this.handler.startTime + '*' + this.handler.stopTime
-      for (var metricBase in this.handler.allMetrics) {
+      for (const metricBase in this.handler.allMetrics) {
         encodedStr += '*' + this.handler.allMetrics[metricBase].name
       }
       encodedStr = encodeURIComponent(encodedStr)
@@ -253,7 +253,7 @@ class MetricQWebView {
 
   getMetric (metricName) {
     for (const metricBase in this.handler.allMetrics) {
-      if (this.handler.allMetrics[metricBase].name == metricName) {
+      if (this.handler.allMetrics[metricBase].name === metricName) {
         return this.handler.allMetrics[metricBase]
       }
     }
@@ -262,7 +262,7 @@ class MetricQWebView {
 
   newEmptyMetric () {
     if (!this.handler.allMetrics.empty) {
-      this.handler.allMetrics.empty = new Metric(this, '', undefined, markerSymbols[0], new Array())
+      this.handler.allMetrics.empty = new Metric(this, '', undefined, markerSymbols[0], [])
     }
   }
 
@@ -285,8 +285,8 @@ class MetricQWebView {
       return false
     }
     metricReference.updateName(newName)
-    if (oldName == '') {
-      this.handler.allMetrics.empty = new Metric(this, '', undefined, markerSymbols[0], new Array())
+    if (oldName === '') {
+      this.handler.allMetrics.empty = new Metric(this, '', undefined, markerSymbols[0], [])
       this.handler.allMetrics[newName] = metricReference
     } else {
       this.deleteMetric(oldName)
@@ -338,7 +338,7 @@ function parseLocationHref () {
   const hashPos = window.location.href.indexOf('#')
   let baseUrl = ''
   let jsurlStr = ''
-  if (hashPos == -1) {
+  if (hashPos === -1) {
     baseUrl = window.location.href
   } else {
     baseUrl = window.location.href.substring(0, hashPos)
@@ -372,7 +372,7 @@ function determineTimeRangeOfJsUrl (jsUrlObj) {
     }
     // TODO: use these units:
 
-    //	this.units = ['second(s)', 'minute(s)', 'hour(s)', 'day(s)', 'week(s)', 'month(s)', 'year(s)', 'data points'];
+    //  this.units = ['second(s)', 'minute(s)', 'hour(s)', 'day(s)', 'week(s)', 'month(s)', 'year(s)', 'data points'];
     const unitMultiplier = unitsAssociation[jsUrlObj.unit]
     timeEnd = (new Date()).getTime()
     let timeToSubtract = 2 * 3600 * 1000
@@ -393,11 +393,11 @@ function importMetricUrl () {
   if (jsurlStr.length > 1) {
     const firstChar = jsurlStr.charAt(0)
     const firstTwoChars = firstChar + jsurlStr.charAt(1)
-    if (firstTwoChars == '/~' ||
-      firstChar == '~') {
+    if (firstTwoChars === '/~' ||
+      firstChar === '~') {
       let metricsObj
       try {
-        if (firstTwoChars == '/~') {
+        if (firstTwoChars === '/~') {
           metricsObj = window.JSURL.parse(jsurlStr.substring(1))
         } else {
           metricsObj = window.JSURL.parse(jsurlStr)
@@ -411,7 +411,7 @@ function importMetricUrl () {
 
       initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1])
       return true
-    } else if (firstChar == '.') {
+    } else if (firstChar === '.') {
       const splitted = jsurlStr.split('*')
       if (splitted.length > 1) {
         initializeMetrics(splitted.slice(2), parseInt(splitted[0].substring(1)), parseInt(splitted[1]))

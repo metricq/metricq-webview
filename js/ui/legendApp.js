@@ -7,12 +7,12 @@ const legendApp = new Vue({
         if (window.MetricQWebView) {
           return window.MetricQWebView.instances[0].handler.allMetrics
         } else {
-          return new Object()
+          return {}
         }
       },
       set: function (newValue) {
         if (window.MetricQWebView) {
-          return window.MetricQWebView.instances[0].handler.allMetrics = newValue
+          window.MetricQWebView.instances[0].handler.allMetrics = newValue
         }
       }
     }

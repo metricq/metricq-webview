@@ -14,7 +14,7 @@ class Metric {
     } else {
       this.color = paramColor
     }
-    this.traces = new Array()
+    this.traces = []
     this.setTraces(paramTraces)
     this.globalMinmax = undefined
     this.errorprone = false
