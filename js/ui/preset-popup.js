@@ -61,9 +61,7 @@ Vue.component('preset-popup', {
         if (ele) {
           return metricPresets[ele.value]
         } else {
-          for (const attrib in metricPresets) {
-            return metricPresets[attrib]
-          }
+          return Object.values(metricPresets).shift()
         }
       },
       set: function (newValue) {}

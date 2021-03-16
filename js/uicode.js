@@ -4,11 +4,8 @@ const globalPopup = {
   xaxis: false,
   presetSelection: false
 }
-let globalSelectedPreset
-for (const attrib in metricPresets) {
-  globalSelectedPreset = metricPresets[attrib]
-  break
-}
+let globalSelectedPreset = Object.values(metricPresets).shift() // eslint-disable-line prefer-const
+
 new MetricQWebView(document.querySelector('.row_body'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime())
 
 const veil = {
