@@ -9,13 +9,13 @@ TODO: Refactoring Javascript Source code (especially in uicode.js)
 We use [standardJS](https://standardjs.com), but since we need some global variables, the linter should be called like this:
 
 ```
-eslint --ext .js js
+yarn lint [--fix]
 ```
 
-or 
+or
 
 ```
-eslint --ext .js --fix js
+eslint --ext .js [--fix] js
 ```
 
 ### Installation
