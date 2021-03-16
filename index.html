@@ -1,47 +1,58 @@
 <!DOCTYPE html5>
 <html>
 <head>
-<meta charset="utf8" />
-<title>MetricQ WebView</title>
-<link rel="icon" href="img/icons/graph-up.svg" />
-<link rel="stylesheet" href="css/bootstrap.min.css" />
-<link rel="stylesheet" href="css/style.css" />
-<script src="lib/vue.js"></script>
-<script src="lib/plotly.min.js"></script>
-<script src="lib/pseudo-crc32.js"></script>
-<script src="lib/color-conversion.js"></script>
-<script src="lib/jsurl.js"></script>
-<script src="lib/key.js"></script>
-<script src="https://api.metricq.zih.tu-dresden.de/metricq-history-v2.js"></script>
-<script src="js/MetricQWebView.js"></script>
-<script src="js/MetricHandler.js"></script>
-<script src="js/presets.js"></script>
-<script src="js/metric.js"></script>
-<script src="js/colorchooser.js"></script>
-<script src="js/configuration.js"></script>
-<script src="js/graticule.js"></script>
-<script src="js/data-handling.js"></script>
-<script src="js/interact.js"></script>
+  <meta charset="utf8"/>
+  <title>MetricQ WebView</title>
+  <link rel="icon" href="img/icons/graph-up.svg"/>
+  <link rel="stylesheet" href="css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="lib/vue.js"></script>
+  <script src="lib/plotly.min.js"></script>
+  <script src="lib/pseudo-crc32.js"></script>
+  <script src="lib/color-conversion.js"></script>
+  <script src="lib/jsurl.js"></script>
+  <script src="lib/key.js"></script>
+  <script src="https://api.metricq.zih.tu-dresden.de/metricq-history-v2.js"></script>
+  <script src="js/MetricQWebView.js"></script>
+  <script src="js/MetricHandler.js"></script>
+  <script src="js/presets.js"></script>
+  <script src="js/metric.js"></script>
+  <script src="js/colorchooser.js"></script>
+  <script src="js/configuration.js"></script>
+  <script src="js/graticule.js"></script>
+  <script src="js/data-handling.js"></script>
+  <script src="js/interact.js"></script>
+  <script src="js/ui/metric-legend.js"></script>
+  <script src="js/ui/metric-popup.js"></script>
+  <script src="js/ui/popup-header.js"></script>
+  <script src="js/ui/configuration-popup.js"></script>
+  <script src="js/ui/export-popup.js"></script>
+  <script src="js/ui/interaction-array-option.js"></script>
+  <script src="js/ui/preset-popup.js"></script>
+  <script src="js/ui/xaxis-popup.js"></script>
+  <script src="js/ui/yaxis-popup.js"></script>
 
 
-<!-- need to prevent safari users to do fancy two-finger-zooming on the webpage -->
-<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <!-- need to prevent safari users to do fancy two-finger-zooming on the webpage -->
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 
 </head>
 <body>
 <div class="row_head">
   <nav class="navbar navbar-light bg-light">
     <a class="navbar-brand" href="?">
-      <img src="img/metricq-logo.png" width="50" height="50" alt="MetricQ-Logo" style="border-radius: .25rem;" />
+      <img src="img/metricq-logo.png" width="50" height="50" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
       MetricQ-WebView
     </a>
-  
+
     <button class="btn btn-outline-primary" id="button_configuration">
-      <img src="img/icons/tools.svg" width="28" height="28" />
+      <img src="img/icons/tools.svg" width="28" height="28"/>
       Einstellungen
-    </button><br/>
+    </button>
+    <br/>
     <button class="btn btn-outline-primary" id="button_export">
-      <img src="img/icons/file-earmark-arrow-down.svg" width="28" height="28" />
+      <img src="img/icons/file-earmark-arrow-down.svg" width="28" height="28"/>
       Export
     </button>
   </nav>
@@ -51,53 +62,60 @@
   </div>
 </div>
 <div class="row_foot">
-	<ul id="legend_list">
-		<metric-legend
-		  v-for="metric in metricsList"
-		  v-bind:metric="metric"
-		  v-bind:key="metric.name"
-		  ></metric-legend>
-	</ul>
-	<div id="wrapper_popup_legend">
-		<metric-popup
-		  v-for="metric in metricsList"
-		  v-bind:metric="metric"
-		  v-bind:key="metric.popupKey"
-		  v-if="metric.popup"
-		  ></metric-popup>
-	</div>
-	<div id="wrapper_popup_configuration">
-		<configuration-popup
-		  v-bind:config="config"
-		  v-bind:key="config.key"
-		  v-if="config.popup"
-		  ></configuration-popup>
-	</div>
-	<div id="wrapper_popup_xaxis">
-		<xaxis-popup
-		  v-bind:globalPopup="globalPopup"
-		  v-if="globalPopup.xaxis"
-		  ></xaxis-popup>
-	</div>
-	<div id="wrapper_popup_yaxis">
-		<yaxis-popup
-		  v-bind:globalPopup="globalPopup"
-		  v-if="globalPopup.yaxis"
-		  ></yaxis-popup>
-	</div>
-	<div id="wrapper_popup_preset">
-		<preset-popup
-	      v-bind:globalPopup="globalPopup"
-		  v-if="globalPopup.presetSelection"
-		  ></preset-popup>
-	</div>
-    <div id="wrapper_popup_export">
-		<export-popup
-	      v-bind:globalPopup="globalPopup"
-		  v-if="globalPopup.export"
-		  ></export-popup>
-	</div>
+  <ul id="legend_list">
+    <metric-legend
+      v-for="metric in metricsList"
+      v-bind:metric="metric"
+      v-bind:key="metric.name"
+    ></metric-legend>
+  </ul>
+  <div id="wrapper_popup_legend">
+    <metric-popup
+      v-for="metric in metricsList"
+      v-bind:metric="metric"
+      v-bind:key="metric.popupKey"
+      v-if="metric.popup"
+    ></metric-popup>
+  </div>
+  <div id="wrapper_popup_configuration">
+    <configuration-popup
+      v-bind:config="config"
+      v-bind:key="config.key"
+      v-if="config.popup"
+    ></configuration-popup>
+  </div>
+  <div id="wrapper_popup_xaxis">
+    <xaxis-popup
+      v-bind:globalPopup="globalPopup"
+      v-if="globalPopup.xaxis"
+    ></xaxis-popup>
+  </div>
+  <div id="wrapper_popup_yaxis">
+    <yaxis-popup
+      v-bind:globalPopup="globalPopup"
+      v-if="globalPopup.yaxis"
+    ></yaxis-popup>
+  </div>
+  <div id="wrapper_popup_preset">
+    <preset-popup
+      v-bind:globalPopup="globalPopup"
+      v-if="globalPopup.presetSelection"
+    ></preset-popup>
+  </div>
+  <div id="wrapper_popup_export">
+    <export-popup
+      v-bind:globalPopup="globalPopup"
+      v-if="globalPopup.export"
+    ></export-popup>
+  </div>
 </div>
 <script src="js/uicode.js"></script>
+<script src="js/ui/legendApp.js"></script>
+<script src="js/ui/popupApp.js"></script>
+<script src="js/ui/configApp.js"></script>
+<script src="js/ui/exportApp.js"></script>
+<script src="js/ui/presetApp.js"></script>
+<script src="js/ui/xaxisApp.js"></script>
+<script src="js/ui/yaxisApp.js"></script>
 </body>
 </html>
