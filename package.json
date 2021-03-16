@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "main": "index.html",
   "author": "ZIH, Technische Universität Dresden",
+  "scripts": {
+    "lint": "eslint --ext .js js"
+  },
   "devDependencies": {
     "eslint": "^7.21.0",
     "eslint-config-standard": "^16.0.2",
