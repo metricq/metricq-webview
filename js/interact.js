@@ -6,7 +6,7 @@ const uiOptions = {
   errorArrowInterval: 2000
 }
 
-const uiInteractArr = [
+let uiInteractArr = [ // eslint-disable-line prefer-const
   ['drag', ['17'], 'uiInteractPan'],
   ['drag', ['!16', '!17'], 'uiInteractZoomArea'],
   ['drop', ['!16', '!17'], 'uiInteractZoomIn'],
