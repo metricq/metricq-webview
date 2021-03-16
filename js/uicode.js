@@ -6,7 +6,7 @@ const globalPopup = {
 }
 let globalSelectedPreset = Object.values(metricPresets).shift() // eslint-disable-line prefer-const
 
-new MetricQWebView(document.querySelector('.row_body'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime())
+createGlobalMetricQWebview(document.querySelector('.row_body'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime())
 
 const veil = {
   myPopup: undefined,

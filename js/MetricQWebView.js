@@ -1,3 +1,8 @@
+function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime) {
+  const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime)
+  window.MetricQWebView.instances.push(webview)
+}
+
 class MetricQWebView {
   constructor (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime) {
     this.id = 'metricqwebview_' + (new Date()).getTime()
@@ -14,7 +19,6 @@ class MetricQWebView {
         }
       }
     }
-    window.MetricQWebView.instances.push(this)
 
     this.ele = paramParentEle
     this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime)

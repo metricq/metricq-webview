@@ -7,7 +7,7 @@
     "Colorchooser": "readonly",
     "showUserHint": "readonly",
     "metricPresets": "readonly",
-    "MetricQWebView": "readonly",
+    "createGlobalMetricQWebview": "readonly",
     "configApp": "readonly",
     "popupApp": "readonly",
     "legendApp": "readonly",
