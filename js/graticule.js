@@ -193,7 +193,7 @@ function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension
         case 5: // seconds
           stepItem.label.push((curDate.getHours() < 10 ? '0' : '') + curDate.getHours() + ':' + (curDate.getMinutes() < 10 ? '0' : '') + curDate.getMinutes() + ':' + (curDate.getSeconds() < 10 ? '0' : '') + curDate.getSeconds())
           break
-        case 6: // milliseconds
+        case 6: { // milliseconds
           let msString = '' + curDate.getMilliseconds()
           for (let k = msString.length; k < 3; ++k) {
             msString = '0' + msString
@@ -204,6 +204,7 @@ function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension
           } else {
             stepItem.label.push((curDate.getSeconds() < 10 ? '0' : '') + curDate.getSeconds() + '.' + msString)
           }
+        }
       }
       outArr.push(stepItem)
       previousCurDate = curDate
@@ -481,7 +482,7 @@ function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension
         if ((typeof styleOptions.dots) === 'string') {
           const dotMarker = styleOptions.dots.charAt(0)
           switch (dotMarker) {
-            case '.': /* point marker */
+            case '.': { /* point marker */
               let referencedLineWidth = parsedObj.pointWidth
               if (styleKeys.includes('lineWidth')) {
                 referencedLineWidth = parseFloat(styleOptions.lineWidth)
@@ -499,6 +500,7 @@ function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension
                 }
               }(referencedLineWidth))
               break
+            }
             case 'o': /* circle marker */
               parsedObj.drawDots.func = function (ctx, width, height) {
                 ctx.beginPath()
