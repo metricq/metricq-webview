@@ -1,3 +1,6 @@
+import { popupApp } from './popupApp.js'
+import { initializeMetricPopup } from '../uicode.js'
+
 Vue.component('metric-legend', {
   props: ['metric'],
   template: '<li class="btn btn-light legend_item" style="background-color: #FFFFFF; margin-top: 10px;" v-on:click="metricPopup(metric.name)">' +

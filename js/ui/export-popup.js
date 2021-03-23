@@ -1,3 +1,5 @@
+import { veil, globalPopup } from '../uicode.js'
+
 Vue.component('export-popup', {
   template: '<div class="modal popup_div export_popup_div" tabindex="-1" role="dialog">' +
     '<div class="modal-dialog" role="document">' +

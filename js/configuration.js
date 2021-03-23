@@ -1,4 +1,4 @@
-class Configuration {
+export class Configuration {
   constructor (resolutionParam, zoomSpeedParam) {
     this.resolution = resolutionParam
     this.zoomSpeed = zoomSpeedParam

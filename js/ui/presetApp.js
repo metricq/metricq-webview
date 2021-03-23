@@ -1,3 +1,6 @@
+import { globalPopup, veil } from '../uicode.js'
+import { importMetricUrl } from '../MetricQWebView.js'
+
 // At Startup:
 if (window.location.href.indexOf('#') > -1) {
   try {

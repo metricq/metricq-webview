@@ -40,3 +40,5 @@ const metricPresets = {
     'elab.diana.power'
   ]
 }
+
+export { metricPresets }

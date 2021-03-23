@@ -1,3 +1,11 @@
+import { metricPresets } from './presets.js'
+import { createGlobalMetricQWebview } from './MetricQWebView.js'
+import { Colorchooser } from './colorchooser.js'
+import { popupApp } from './ui/popupApp.js'
+import { configApp } from './ui/configApp.js'
+import { legendApp } from './ui/legendApp.js'
+import { showUserHint } from './interact.js'
+
 const globalPopup = {
   export: false,
   yaxis: false,
@@ -5,6 +13,8 @@ const globalPopup = {
   presetSelection: false
 }
 let globalSelectedPreset = Object.values(metricPresets).shift() // eslint-disable-line prefer-const
+
+export { globalPopup, globalSelectedPreset }
 
 createGlobalMetricQWebview(document.querySelector('.row_body'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime())
 
@@ -52,6 +62,8 @@ const veil = {
   }
 }
 
+export { veil }
+
 function initTest () {
   document.getElementById('button_export').addEventListener('click', function (evt) {
     globalPopup.export = !globalPopup.export
@@ -62,7 +74,7 @@ function initTest () {
   })
 }
 
-function initializeMetricPopup () {
+export function initializeMetricPopup () {
   const instance = window.MetricQWebView.instances[0]
   let myMetric
   for (const metricBase in instance.handler.allMetrics) {

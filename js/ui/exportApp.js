@@ -1,3 +1,5 @@
+import { veil, globalPopup } from '../uicode.js'
+
 const exportApp = new Vue({
   el: '#wrapper_popup_export',
   data: {

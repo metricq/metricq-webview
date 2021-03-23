@@ -22,3 +22,5 @@ const popupApp = new Vue({
   updated () {
   }
 })
+
+export { popupApp }

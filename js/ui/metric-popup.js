@@ -1,3 +1,5 @@
+import { markerSymbols } from '../metric.js'
+
 Vue.component('metric-popup', {
   props: ['metric'],
   template: '<div v-bind:id="metric.popupKey" class="modal popup_div metric_popup_div" tabindex="-1" role="dialog">' +

@@ -1,3 +1,5 @@
+import { globalPopup, veil } from '../uicode.js'
+
 const yaxisApp = new Vue({
   el: '#wrapper_popup_yaxis',
   data: {
@@ -30,3 +32,5 @@ const yaxisApp = new Vue({
     }
   }
 })
+
+// export { yaxisApp }

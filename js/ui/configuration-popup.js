@@ -1,3 +1,5 @@
+import { uiInteractArr } from '../interact.js'
+
 Vue.component('configuration-popup', {
   props: ['config'],
   template: '<div class="modal popup_div config_popup_div" tabindex="-1" role="dialog">' +

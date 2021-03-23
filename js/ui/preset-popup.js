@@ -1,3 +1,9 @@
+import { metricPresets } from '../presets.js'
+import { globalPopup, veil, globalSelectedPreset } from '../uicode.js'
+import { initializeMetrics } from '../MetricQWebView.js'
+
+import { legendApp } from './legendApp.js'
+
 Vue.component('preset-popup', {
   template: '<div class="modal popup_div preset_popup_div" tabindex="-1" role="dialog">' +
     '<div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">' +

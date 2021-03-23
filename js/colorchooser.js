@@ -1,5 +1,7 @@
+import { rgbToHsl, hslToRgb } from '../lib/color-conversion.js'
+
 /* TODO: implement this as a vue-js component, maybe? */
-class Colorchooser {
+export class Colorchooser {
   constructor (canvasEle, metricParam) {
     this.canvas = canvasEle
     this.metric = metricParam

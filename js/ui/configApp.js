@@ -1,4 +1,6 @@
-const configApp = new Vue({
+import { veil } from '../uicode.js'
+
+export const configApp = new Vue({
   el: '#wrapper_popup_configuration',
   methods: {
     togglePopup: function () {

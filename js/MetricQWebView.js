@@ -1,4 +1,12 @@
-function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime) {
+import { MetricHandler } from './MetricHandler.js'
+import { Configuration } from './configuration.js'
+import { Graticule } from './graticule.js'
+import { markerSymbols, Metric } from './metric.js'
+import { registerCallbacks } from './interact.js'
+import { globalPopup } from './uicode.js'
+import { legendApp } from './ui/legendApp.js'
+
+export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime) {
   const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime)
   window.MetricQWebView.instances.push(webview)
 }
@@ -392,7 +400,7 @@ function determineTimeRangeOfJsUrl (jsUrlObj) {
   return [timeStart, timeEnd]
 }
 
-function importMetricUrl () {
+export function importMetricUrl () {
   const jsurlStr = parseLocationHref()[1]
   if (jsurlStr.length > 1) {
     const firstChar = jsurlStr.charAt(0)
@@ -427,7 +435,7 @@ function importMetricUrl () {
 }
 
 /* TODO: generalize this for cases where is no "legendApp" */
-function initializeMetrics (metricNamesArr, timeStart, timeStop) {
+export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
   let newManager
   if (window.MetricQWebView) {
     newManager = window.MetricQWebView.instances[0]

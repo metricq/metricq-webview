@@ -1,6 +1,11 @@
+import { Metric, markerSymbols } from './metric.js'
+import { showUserHint } from './interact.js'
+
 const METRICQ_BACKEND = 'https://grafana.metricq.zih.tu-dresden.de/metricq'
 
-class MetricHandler {
+export { METRICQ_BACKEND }
+
+export class MetricHandler {
   constructor (paramRenderer, paramMetricsArr, paramStartTime, paramStopTime) {
     this.renderer = paramRenderer
     this.startTime = paramStartTime
