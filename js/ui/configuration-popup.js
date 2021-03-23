@@ -1,4 +1,4 @@
-import { uiInteractArr } from '../interact.js'
+import { setUiInteractArr, uiInteractArr } from '../interact.js'
 
 Vue.component('configuration-popup', {
   props: ['config'],
@@ -67,7 +67,7 @@ Vue.component('configuration-popup', {
         return uiInteractArr
       },
       set: function (newValue) {
-        uiInteractArr = newValue
+        setUiInteractArr(newValue)
       }
     }
   },

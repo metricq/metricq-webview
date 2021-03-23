@@ -1,5 +1,5 @@
 import { metricPresets } from '../presets.js'
-import { globalPopup, veil, globalSelectedPreset } from '../uicode.js'
+import { globalPopup, veil, globalSelectedPreset, setGlobalSelectedPreset } from '../uicode.js'
 import { initializeMetrics } from '../MetricQWebView.js'
 
 import { legendApp } from './legendApp.js'
@@ -75,7 +75,7 @@ Vue.component('preset-popup', {
   },
   methods: {
     updateList: function () {
-      globalSelectedPreset = metricPresets[document.getElementById('preset_select').value]
+      setGlobalSelectedPreset(metricPresets[document.getElementById('preset_select').value])
       this.$emit('update:metricMetriclist', metricPresets[document.getElementById('preset_select').value])
       // BEHOLD, the MAGIC of forceUpdate!
       this.$forceUpdate()

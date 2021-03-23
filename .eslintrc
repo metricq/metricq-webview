@@ -8,7 +8,6 @@
     "XMLHttpRequest": "readonly"
   },
   "rules": {
-    "no-unused-vars": "off",
-    "no-import-assign": "off"
+    "no-unused-vars": "off"
   }
 }

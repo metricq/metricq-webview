@@ -12,7 +12,11 @@ const globalPopup = {
   xaxis: false,
   presetSelection: false
 }
-let globalSelectedPreset = Object.values(metricPresets).shift() // eslint-disable-line prefer-const
+let globalSelectedPreset = Object.values(metricPresets).shift()
+
+export function setGlobalSelectedPreset (newPreset) {
+  globalSelectedPreset = newPreset
+}
 
 export { globalPopup, globalSelectedPreset }
 
