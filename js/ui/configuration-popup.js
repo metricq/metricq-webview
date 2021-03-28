@@ -8,7 +8,11 @@ export const ConfigurationPopup = {
     InteractionArrayOption,
     PopupHeader
   },
-  props: ['config'],
+  props: {
+    config: {
+      type: Object, required: true
+    }
+  },
   data: function () {
     return {
       popupTitle: 'Globale-Einstellungen'

@@ -1,6 +1,11 @@
 // @vue/component
 export const PopupHeader = {
-  props: ['popupTitle'],
+  props: {
+    popupTitle: {
+      type: String,
+      default: ''
+    }
+  },
   template: `<div class="modal-header">
     <h5 class="modal-title">{{ popupTitle }}</h5>
     <button type="button" class="close popup_close_button" data-dismiss="modal" aria-label="Close">

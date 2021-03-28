@@ -4,7 +4,12 @@ import { PopupHeader } from './popup-header.js'
 // @vue/component
 export const MetricPopup = {
   components: { PopupHeader },
-  props: ['metric'],
+  props: {
+    metric: {
+      type: Object,
+      required: true
+    }
+  },
   data: function () {
     return {
       markerSymbols: markerSymbols,

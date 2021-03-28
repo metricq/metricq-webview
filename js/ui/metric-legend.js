@@ -3,7 +3,12 @@ import { initializeMetricPopup } from '../uicode.js'
 
 // @vue/component
 export const MetricLegend = {
-  props: ['metric'],
+  props: {
+    metric: {
+      type: Object,
+      required: true
+    }
+  },
   methods: {
     metricPopup: function (metricName) {
       // console.log(metricName);
