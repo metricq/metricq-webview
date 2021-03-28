@@ -1,12 +1,10 @@
 import { veil } from '../uicode.js'
+import { ConfigurationPopup } from './configuration-popup.js'
 
 export const configApp = new Vue({
   el: '#wrapper_popup_configuration',
-  methods: {
-    togglePopup: function () {
-      window.MetricQWebView.instances[0].configuration.popup = !window.MetricQWebView.instances[0].configuration.popup
-      this.$forceUpdate()
-    }
+  components: {
+    ConfigurationPopup
   },
   computed: {
     config: {
@@ -48,6 +46,12 @@ export const configApp = new Vue({
           disablePopupFunc()
         }
       })
+    }
+  },
+  methods: {
+    togglePopup: function () {
+      window.MetricQWebView.instances[0].configuration.popup = !window.MetricQWebView.instances[0].configuration.popup
+      this.$forceUpdate()
     }
   }
 })

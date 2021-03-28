@@ -1,7 +1,11 @@
 import { globalPopup, veil } from '../uicode.js'
+import { YaxisPopup } from './yaxis-popup.js'
 
 const yaxisApp = new Vue({
   el: '#wrapper_popup_yaxis',
+  components: {
+    YaxisPopup
+  },
   data: {
     globalPopup: globalPopup
   },

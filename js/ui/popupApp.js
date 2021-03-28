@@ -1,6 +1,8 @@
+import { MetricPopup } from './metric-popup.js'
+
 const popupApp = new Vue({
   el: '#wrapper_popup_legend',
-  methods: {},
+  components: { MetricPopup },
   computed: {
     metricsList: {
       cache: false,
@@ -20,7 +22,8 @@ const popupApp = new Vue({
   },
   // not called by $forceUpdate :(
   updated () {
-  }
+  },
+  methods: {}
 })
 
 export { popupApp }

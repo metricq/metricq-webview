@@ -1,5 +1,10 @@
+import { MetricLegend } from './metric-legend.js'
+
 const legendApp = new Vue({
   el: '#legend_list',
+  components: {
+    MetricLegend
+  },
   computed: {
     metricsList: {
       cache: false,

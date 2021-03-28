@@ -1,5 +1,6 @@
 import { globalPopup, veil } from '../uicode.js'
 import { importMetricUrl } from '../MetricQWebView.js'
+import { PresetPopup } from './preset-popup.js'
 
 // At Startup:
 if (window.location.href.indexOf('#') > -1) {
@@ -15,6 +16,7 @@ if (window.location.href.indexOf('#') > -1) {
 
 const presetApp = new Vue({
   el: '#wrapper_popup_preset',
+  components: { PresetPopup },
   data: {
     globalPopup: globalPopup
   },

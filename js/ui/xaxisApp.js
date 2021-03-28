@@ -1,7 +1,11 @@
 import { globalPopup, veil } from '../uicode.js'
+import { XaxisPopup } from './xaxis-popup.js'
 
 const xaxisApp = new Vue({
   el: '#wrapper_popup_xaxis',
+  components: {
+    XaxisPopup
+  },
   data: {
     globalPopup: globalPopup
   },
