@@ -1,5 +1,5 @@
 {
-  "extends": ["standard", "standard-jsx"],
+  "extends": ["standard", "standard-jsx", "plugin:vue/recommended"],
   "globals": {
     "Vue": "readonly",
     "MetricQHistory": "readonly",
