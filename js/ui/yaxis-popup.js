@@ -52,6 +52,7 @@ export const YaxisPopup = {
         if (arr) {
           return (Number(arr[0])).toFixed(3)
         }
+        return 0
       },
       set: function (newValue) {
         let arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
@@ -67,6 +68,7 @@ export const YaxisPopup = {
         if (arr) {
           return (Number(arr[1])).toFixed(3)
         }
+        return 1
       },
       set: function (newValue) {
         let arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
