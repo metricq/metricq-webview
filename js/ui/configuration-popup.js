@@ -99,7 +99,7 @@ export const ConfigurationPopup = {
                 <label class="col-sm-4 col-form-label">Event</label>
                 <label class="col-sm-3 col-form-label">Tasten</label>
               </div>
-              <interaction-array-option v-for="action in uiInteractArr" v-bind:action="action" v-bind:key="action[2]"></interaction-array-option>
+              <interaction-array-option v-for="(action, index) in uiInteractArr" v-bind:action="action" v-on:input="uiInteractArr[index]=$event" v-bind:key="action[2]"></interaction-array-option>
             </div>
           </div>
           <div class="modal-footer">

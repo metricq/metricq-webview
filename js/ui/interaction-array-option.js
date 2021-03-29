@@ -1,6 +1,11 @@
 // @vue/component
 export const InteractionArrayOption = {
-  props: ['action'],
+  props: {
+    action: {
+      type: Array,
+      required: true
+    }
+  },
   data: function () {
     return {
       functionList: ['uiInteractPan', 'uiInteractZoomArea', 'uiInteractZoomIn', 'uiInteractLegend', 'uiInteractZoomWheel'],
@@ -13,7 +18,9 @@ export const InteractionArrayOption = {
         return this.action[2]
       },
       set: function (newValue) {
-        this.action[2] = newValue
+        const newAction = this.action
+        newAction[2] = newValue
+        this.$emit('input', newAction)
       }
     },
     keyField: {
@@ -68,7 +75,10 @@ export const InteractionArrayOption = {
             actionKeyArray.push(newEntry)
           }
         }
-        this.action[1] = actionKeyArray
+        const newAction = this.action
+        newAction[1] = actionKeyArray
+        this.$emit('input', newAction)
+        // this.action[1] = actionKeyArray
       }
     },
     eventName: {
@@ -76,7 +86,10 @@ export const InteractionArrayOption = {
         return this.action[0]
       },
       set: function (newValue) {
-        this.action[0] = newValue
+        const newAction = this.action
+        newAction[0] = newValue
+        this.$emit('input', newAction)
+        // this.action[0] = newValue
       }
     }
   },
