@@ -1,11 +1,20 @@
 import { metricPresets } from '../presets.js'
 import { veil } from './veil.js'
 import { initializeMetrics } from '../MetricQWebView.js'
-import { globalPopup } from '../app.js'
 import { Store } from '../store.js'
 
 // @vue/component
 export const PresetPopup = {
+  model: {
+    prop: 'popupStatus',
+    event: 'toggle'
+  },
+  props: {
+    popupStatus: {
+      type: Boolean,
+      required: true
+    }
+  },
   computed: {
     metricPresets () {
       return metricPresets
@@ -37,8 +46,8 @@ export const PresetPopup = {
   mounted () {
     const popupEle = document.querySelector('.preset_popup_div')
     if (popupEle) {
-      const disablePopupFunc = function () {
-        globalPopup.presetSelection = false
+      const disablePopupFunc = () => {
+        this.$emit('toggle', false)
         window.MetricQWebView.instances[0].reload()
       }
       veil.create(disablePopupFunc, true)
@@ -60,7 +69,7 @@ export const PresetPopup = {
     },
     showMetrics: function () {
       veil.destroy()
-      globalPopup.presetSelection = false
+      this.$emit('toggle', false)
       let hasEmptyMetric = false
       let i = 0
       const metricNamesArr = []

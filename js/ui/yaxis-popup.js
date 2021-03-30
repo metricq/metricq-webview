@@ -1,11 +1,20 @@
 import { PopupHeader } from './popup-header.js'
 import { veil } from './veil.js'
-import { globalPopup } from '../app.js'
 
 // @vue/component
 export const YaxisPopup = {
   components: {
     PopupHeader
+  },
+  model: {
+    prop: 'popupStatus',
+    event: 'toggle'
+  },
+  props: {
+    popupStatus: {
+      type: Boolean,
+      required: true
+    }
   },
   data: function () {
     return {
@@ -83,27 +92,11 @@ export const YaxisPopup = {
   mounted () {
     const popupEle = document.querySelector('.yaxis_popup_div')
     if (popupEle) {
-      const disablePopupFunc = function () {
-        globalPopup.yaxis = false
+      const disablePopupFunc = () => {
+        this.$emit('toggle', false)
         window.MetricQWebView.instances[0].reload()
       }
-      veil.create(disablePopupFunc)
-      veil.attachPopup(popupEle)
-      const closeButtonEle = popupEle.querySelector('.popup_close_button')
-      const okEle = popupEle.querySelector('.popup_ok');
-      [closeButtonEle, okEle].forEach(function (paramValue, paramIndex, paramArr) {
-        paramValue.addEventListener('click', function () {
-          veil.destroy()
-          disablePopupFunc()
-        })
-      })
-      const modalEle = document.querySelector('.modal')
-      modalEle.addEventListener('click', function (evt) {
-        if (evt.target.getAttribute('role') === 'dialog') {
-          veil.destroy()
-          disablePopupFunc()
-        }
-      })
+      veil.initializePopup(popupEle, disablePopupFunc)
     }
   },
   /* use vue-js for radio buttons */

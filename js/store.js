@@ -5,7 +5,14 @@ export class StoreClass {
     this.state = {
       configuration: new Configuration(5, 10),
       allMetrics: {},
-      selectedPreset: []
+      selectedPreset: [],
+      popups: {
+        export: false,
+        yaxis: false,
+        xaxis: false,
+        presetSelection: false,
+        configuration: false
+      }
     }
   }
 
@@ -13,10 +20,6 @@ export class StoreClass {
     console.log('Reset allMetrics')
     const allMetrics = this.state.allMetrics
     Object.keys(allMetrics).forEach(function (key) { if (!key.startsWith('_')) { delete allMetrics[key] } })
-  }
-
-  disablePopup () {
-    Vue.set(this.state.configuration, 'popup', false)
   }
 
   setMetric (metricKey, metric) {
@@ -45,6 +48,10 @@ export class StoreClass {
 
   setSelectedPreset (newPreset) {
     Store.state.selectedPreset = [].concat(newPreset)
+  }
+
+  togglePopup (name) {
+    Vue.set(this.state.popups, name, this.state.popups[name] || true)
   }
 }
 

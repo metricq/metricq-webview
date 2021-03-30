@@ -2,7 +2,6 @@ import { MetricHandler } from './MetricHandler.js'
 import { Graticule } from './graticule.js'
 import { markerSymbols, Metric } from './metric.js'
 import { registerCallbacks } from './interact.js'
-import { globalPopup } from './app.js'
 
 export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store) {
   const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store)
@@ -148,12 +147,12 @@ class MetricQWebView {
         gearWrapper[i] = BODY.appendChild(gearWrapper[i])
       }
       this.positionXAxisGear(this.ele, gearWrapper[0])
-      gearWrapper[0].addEventListener('click', function () {
-        globalPopup.xaxis = !globalPopup.xaxis
+      gearWrapper[0].addEventListener('click', () => {
+        this.store.togglePopup('xaxis')
       })
       this.positionYAxisGear(this.ele, gearWrapper[1])
-      gearWrapper[1].addEventListener('click', function () {
-        globalPopup.yaxis = !globalPopup.yaxis
+      gearWrapper[1].addEventListener('click', () => {
+        this.store.togglePopup('yaxis')
       })
     } else {
       // Parameters: JSON, doDraw, doResize

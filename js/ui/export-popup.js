@@ -1,11 +1,20 @@
 import { veil } from './veil.js'
 import { PopupHeader } from './popup-header.js'
-import { globalPopup } from '../app.js'
 import { Store } from '../store.js'
 
 // @vue/component
 export const ExportPopup = {
   components: { PopupHeader },
+  model: {
+    prop: 'popupStatus',
+    event: 'toggle'
+  },
+  props: {
+    popupStatus: {
+      type: Boolean,
+      required: true
+    }
+  },
   data: function () {
     return {
       popupTitle: 'Export',
@@ -45,24 +54,11 @@ export const ExportPopup = {
   mounted () {
     const popupEle = document.querySelector('.export_popup_div')
     if (popupEle) {
-      const disablePopupFunc = function () {
-        globalPopup.export = false
+      const disablePopupFunc = () => {
+        this.$emit('toggle', false)
         window.MetricQWebView.instances[0].reload()
       }
-      veil.create(disablePopupFunc)
-      veil.attachPopup(popupEle)
-      const closeButtonEle = popupEle.querySelector('.popup_close_button')
-      closeButtonEle.addEventListener('click', function () {
-        veil.destroy()
-        disablePopupFunc()
-      })
-      const modalEle = document.querySelector('.modal')
-      modalEle.addEventListener('click', function (evt) {
-        if (evt.target.getAttribute('role') === 'dialog') {
-          veil.destroy()
-          disablePopupFunc()
-        }
-      })
+      veil.initializePopup(popupEle, disablePopupFunc)
     }
   },
   methods: {
@@ -70,7 +66,7 @@ export const ExportPopup = {
       const instance = window.MetricQWebView.instances[0]
       instance.doExport()
       veil.destroy()
-      globalPopup.export = false
+      this.$emit('toggle', false)
     }
   },
   template: `<div class="modal popup_div export_popup_div" tabindex="-1" role="dialog">

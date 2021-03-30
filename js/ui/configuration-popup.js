@@ -10,9 +10,17 @@ export const ConfigurationPopup = {
     InteractionArrayOption,
     PopupHeader
   },
+  model: {
+    prop: 'popupStatus',
+    event: 'toggle'
+  },
   props: {
     config: {
       type: Object, required: true
+    },
+    popupStatus: {
+      type: Boolean,
+      required: true
     }
   },
   data: function () {
@@ -54,27 +62,11 @@ export const ConfigurationPopup = {
   mounted () {
     const popupEle = document.querySelector('.config_popup_div')
     if (popupEle) {
-      const disablePopupFunc = function () {
-        Store.disablePopup()
+      const disablePopupFunc = () => {
+        this.$emit('toggle', false)
         window.MetricQWebView.instances[0].reload()
       }
-      veil.create(function (evt) { disablePopupFunc() })
-      veil.attachPopup(popupEle)
-      const closeButtonEle = popupEle.querySelector('.popup_close_button')
-      const okEle = popupEle.querySelector('.popup_ok');
-      [closeButtonEle, okEle].forEach(function (paramValue, paramIndex, paramArr) {
-        paramValue.addEventListener('click', function () {
-          veil.destroy()
-          disablePopupFunc()
-        })
-      })
-      const modalEle = document.querySelector('.modal')
-      modalEle.addEventListener('click', function (evt) {
-        if (evt.target.getAttribute('role') === 'dialog') {
-          veil.destroy()
-          disablePopupFunc()
-        }
-      })
+      veil.initializePopup(popupEle, disablePopupFunc)
     }
   },
   /* TODO: remove the following functions as they are no longer needed */

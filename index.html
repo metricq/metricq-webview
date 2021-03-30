@@ -56,31 +56,32 @@
     <configuration-popup
       v-bind:config="configuration"
       v-bind:key="configuration.key"
-      v-if="configuration.popup"
+      v-model="popups.configuration"
+      v-if="popups.configuration"
     ></configuration-popup>
   </div>
   <div id="wrapper_popup_xaxis">
     <xaxis-popup
-      v-bind:globalPopup="globalPopup"
-      v-if="globalPopup.xaxis"
+      v-model="popups.xaxis"
+      v-if="popups.xaxis"
     ></xaxis-popup>
   </div>
   <div id="wrapper_popup_yaxis">
     <yaxis-popup
-      v-bind:globalPopup="globalPopup"
-      v-if="globalPopup.yaxis"
+      v-model="popups.yaxis"
+      v-if="popups.yaxis"
     ></yaxis-popup>
   </div>
   <div id="wrapper_popup_preset">
     <preset-popup
-      v-bind:globalPopup="globalPopup"
-      v-if="globalPopup.presetSelection"
+      v-model="popups.presetSelection"
+      v-if="popups.presetSelection"
     ></preset-popup>
   </div>
   <div id="wrapper_popup_export">
     <export-popup
-      v-bind:globalPopup="globalPopup"
-      v-if="globalPopup.export"
+      v-model="popups.export"
+      v-if="popups.export"
     ></export-popup>
   </div>
 </div>
