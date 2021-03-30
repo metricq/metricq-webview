@@ -39,24 +39,5 @@ export const veil = {
     popupEle.style.left = Math.round(window.innerWidth / 2 - popupEle.offsetWidth / 2) + 'px'
     popupEle.style.zIndex = 500
     veil.myPopup = popupEle
-  },
-  initializePopup (popupElement, disablePopupFunction) {
-    veil.create(disablePopupFunction)
-    veil.attachPopup(popupElement)
-    const closeButtonEle = popupElement.querySelector('.popup_close_button')
-    const okEle = popupElement.querySelector('.popup_ok');
-    [closeButtonEle, okEle].forEach(function (paramValue, paramIndex, paramArr) {
-      if (paramValue) {
-        paramValue.addEventListener('click', function (evt) {
-          veil.destroy(evt)
-        })
-      }
-    })
-    const modalEle = document.querySelector('.modal')
-    modalEle.addEventListener('click', function (evt) {
-      if (evt.target.getAttribute('role') === 'dialog') {
-        veil.destroy(evt)
-      }
-    })
   }
 }

@@ -58,7 +58,8 @@ export const ExportPopup = {
         this.$emit('toggle', false)
         window.MetricQWebView.instances[0].reload()
       }
-      veil.initializePopup(popupEle, disablePopupFunc)
+      veil.create(disablePopupFunc)
+      veil.attachPopup(popupEle)
     }
   },
   methods: {
@@ -67,9 +68,14 @@ export const ExportPopup = {
       instance.doExport()
       veil.destroy()
       this.$emit('toggle', false)
+    },
+    closePopupModal: function (evt) {
+      if (evt.target.getAttribute('role') === 'dialog') {
+        veil.destroy(evt)
+      }
     }
   },
-  template: `<div class="modal popup_div export_popup_div" tabindex="-1" role="dialog">
+  template: `<div class="modal popup_div export_popup_div" tabindex="-1" role="dialog" v-on:click="closePopupModal">
     <div class="modal-dialog" role="document">
     <div class="modal-content">
     <popup-header v-bind:popupTitle="popupTitle"></popup-header>

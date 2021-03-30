@@ -66,7 +66,8 @@ export const ConfigurationPopup = {
         this.$emit('toggle', false)
         window.MetricQWebView.instances[0].reload()
       }
-      veil.initializePopup(popupEle, disablePopupFunc)
+      veil.create(disablePopupFunc)
+      veil.attachPopup(popupEle)
     }
   },
   /* TODO: remove the following functions as they are no longer needed */
@@ -92,10 +93,18 @@ export const ConfigurationPopup = {
         newValue = parseFloat(ele.getAttribute('max'))
       }
       return newValue
+    },
+    closePopup (evt) {
+      veil.destroy(evt)
+    },
+    closePopupModal: function (evt) {
+      if (evt.target.getAttribute('role') === 'dialog') {
+        veil.destroy(evt)
+      }
     }
   },
   template: `
-    <div class="modal popup_div config_popup_div" tabindex="-1" role="dialog">
+    <div class="modal popup_div config_popup_div" tabindex="-1" role="dialog" v-on:click="closePopupModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <popup-header v-bind:popupTitle="popupTitle"></popup-header>
@@ -123,7 +132,7 @@ export const ConfigurationPopup = {
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary popup_ok">
+            <button class="btn btn-primary popup_ok" v-on:click="closePopup">
             OK
             </button>
           </div>

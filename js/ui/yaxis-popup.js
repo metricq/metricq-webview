@@ -96,11 +96,22 @@ export const YaxisPopup = {
         this.$emit('toggle', false)
         window.MetricQWebView.instances[0].reload()
       }
-      veil.initializePopup(popupEle, disablePopupFunc)
+      veil.create(disablePopupFunc)
+      veil.attachPopup(popupEle)
+    }
+  },
+  methods: {
+    closePopup (evt) {
+      veil.destroy(evt)
+    },
+    closePopupModal: function (evt) {
+      if (evt.target.getAttribute('role') === 'dialog') {
+        veil.destroy(evt)
+      }
     }
   },
   /* use vue-js for radio buttons */
-  template: `<div class="modal popup_div yaxis_popup_div" tabindex="-1" role="dialog">
+  template: `<div class="modal popup_div yaxis_popup_div" tabindex="-1" role="dialog" v-on:click="closePopupModal">
     <div class="modal-dialog" role="document">
     <div class="modal-content">
     <popup-header v-bind:popupTitle="popupTitle"></popup-header>
@@ -129,7 +140,7 @@ export const YaxisPopup = {
     </div>
     </div>
     <div class="modal-footer">
-    <button class="btn btn-primary popup_ok">
+    <button class="btn btn-primary popup_ok" v-on:click="closePopup">
     OK
     </button>
     </div>

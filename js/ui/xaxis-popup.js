@@ -72,10 +72,21 @@ export const XaxisPopup = {
         this.$emit('toggle', false)
         window.MetricQWebView.instances[0].reload()
       }
-      veil.initializePopup(popupEle, disablePopupFunc)
+      veil.create(disablePopupFunc)
+      veil.attachPopup(popupEle)
     }
   },
-  template: `<div class="modal popup_div xaxis_popup_div" tabindex="-1" role="dialog">
+  methods: {
+    closePopup (evt) {
+      veil.destroy(evt)
+    },
+    closePopupModal: function (evt) {
+      if (evt.target.getAttribute('role') === 'dialog') {
+        veil.destroy(evt)
+      }
+    }
+  },
+  template: `<div class="modal popup_div xaxis_popup_div" tabindex="-1" role="dialog" v-on:click="closePopupModal">
     <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
     <popup-header v-bind:popupTitle="popupTitle"></popup-header>
@@ -96,7 +107,7 @@ export const XaxisPopup = {
     
     </div>
     <div class="modal-footer">
-    <button class="btn btn-primary popup_ok">
+    <button class="btn btn-primary popup_ok" v-on:click="closePopup">
     OK
     </button>
     </div>
