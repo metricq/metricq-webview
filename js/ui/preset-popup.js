@@ -34,6 +34,25 @@ export const PresetPopup = {
       return Store.state.selectedPreset
     }
   },
+  mounted () {
+    const popupEle = document.querySelector('.preset_popup_div')
+    if (popupEle) {
+      const disablePopupFunc = function () {
+        globalPopup.presetSelection = false
+        window.MetricQWebView.instances[0].reload()
+      }
+      veil.create(disablePopupFunc, true)
+      veil.attachPopup(popupEle)
+      popupEle.style.width = '100%'
+      popupEle.style.height = '100%'
+      popupEle.style.left = '0px'
+      popupEle.style.top = '0px'
+      setTimeout(function () {
+        const selectEle = document.getElementById('preset_select')
+        selectEle.focus()
+      }, 100)
+    }
+  },
   methods: {
     updateList: function () {
       Store.setSelectedPreset(metricPresets[document.getElementById('preset_select').value])

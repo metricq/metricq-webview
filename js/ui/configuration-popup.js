@@ -2,6 +2,7 @@ import { setUiInteractArr, uiInteractArr } from '../interact.js'
 import { PopupHeader } from './popup-header.js'
 import { InteractionArrayOption } from './interaction-array-option.js'
 import { Store } from '../store.js'
+import { veil } from './veil.js'
 
 // @vue/component
 export const ConfigurationPopup = {
@@ -48,6 +49,32 @@ export const ConfigurationPopup = {
       set: function (newValue) {
         setUiInteractArr(newValue)
       }
+    }
+  },
+  mounted () {
+    const popupEle = document.querySelector('.config_popup_div')
+    if (popupEle) {
+      const disablePopupFunc = function () {
+        Store.disablePopup()
+        window.MetricQWebView.instances[0].reload()
+      }
+      veil.create(function (evt) { disablePopupFunc() })
+      veil.attachPopup(popupEle)
+      const closeButtonEle = popupEle.querySelector('.popup_close_button')
+      const okEle = popupEle.querySelector('.popup_ok');
+      [closeButtonEle, okEle].forEach(function (paramValue, paramIndex, paramArr) {
+        paramValue.addEventListener('click', function () {
+          veil.destroy()
+          disablePopupFunc()
+        })
+      })
+      const modalEle = document.querySelector('.modal')
+      modalEle.addEventListener('click', function (evt) {
+        if (evt.target.getAttribute('role') === 'dialog') {
+          veil.destroy()
+          disablePopupFunc()
+        }
+      })
     }
   },
   /* TODO: remove the following functions as they are no longer needed */
