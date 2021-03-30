@@ -1,5 +1,5 @@
 import { initializeMetricPopup } from '../uicode.js'
-import { mainApp } from '../app.js'
+import { Store } from '../store.js'
 
 // @vue/component
 export const MetricLegend = {
@@ -10,17 +10,13 @@ export const MetricLegend = {
     }
   },
   methods: {
-    metricPopup: function (metricName) {
-      // console.log(metricName);
-      const myMetric = window.MetricQWebView.instances[0].getMetric(metricName)
-      if (myMetric) {
-        myMetric.popup = !myMetric.popup
-      }
-      mainApp.$forceUpdate()
+    metricPopup: function () {
+      const metricBase = Store.getMetricBase(this.$props.metric.name)
+      Store.setMetricPopup(metricBase, !this.$props.metric.popup)
       Vue.nextTick(initializeMetricPopup)
     }
   },
-  template: `<li class="btn btn-light legend_item" style="background-color: #FFFFFF; margin-top: 10px;" v-on:click="metricPopup(metric.name)">
+  template: `<li class="btn btn-light legend_item" style="background-color: #FFFFFF; margin-top: 10px;" v-on:click="metricPopup">
     <div v-if="metric.name" v-bind:class="metric.popupKey" v-bind:style="{ backgroundColor: metric.color}">
     &nbsp; ${/* "<img src=\"img/icons/droplet.svg\" width=\"24\" height=\"24\">" */''}
     </div> &nbsp;

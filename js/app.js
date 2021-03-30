@@ -6,7 +6,7 @@ import { MetricPopup } from './ui/metric-popup.js'
 import { PresetPopup } from './ui/preset-popup.js'
 import { XaxisPopup } from './ui/xaxis-popup.js'
 import { YaxisPopup } from './ui/yaxis-popup.js'
-import { metricPresets } from './presets.js'
+import { Store } from './store.js'
 
 const globalPopup = {
   export: false,
@@ -14,13 +14,8 @@ const globalPopup = {
   xaxis: false,
   presetSelection: false
 }
-let globalSelectedPreset = Object.values(metricPresets).shift()
 
-export function setGlobalSelectedPreset (newPreset) {
-  globalSelectedPreset = newPreset
-}
-
-export { globalPopup, globalSelectedPreset }
+export { globalPopup }
 
 export const mainApp = new Vue({
   el: '#main_app',
@@ -34,45 +29,19 @@ export const mainApp = new Vue({
     YaxisPopup
   },
   data: {
-    globalPopup
+    globalPopup,
+    state: Store.state,
+    configuration: Store.state.configuration,
+    metricsList: Store.state.allMetrics
   },
   computed: {
-    config: {
-      cache: false,
-      get: function () {
-        if (window.MetricQWebView) {
-          return window.MetricQWebView.instances[0].configuration
-        } else {
-          return { resolution: 2, zoomSpeed: 4 }
-        }
-      },
-      set: function (newValue) {
-        window.MetricQWebView.instances[0].configuration = newValue
-      }
-    },
-    metricsList: {
-      cache: false,
-      get: function () {
-        if (window.MetricQWebView) {
-          return window.MetricQWebView.instances[0].handler.allMetrics
-        } else {
-          return {}
-        }
-      },
-      set: function (newValue) {
-        if (window.MetricQWebView) {
-          window.MetricQWebView.instances[0].handler.allMetrics = newValue
-        }
-      }
-    }
   },
   updated () {
     {
       const popupEle = document.querySelector('.config_popup_div')
       if (popupEle) {
         const disablePopupFunc = function () {
-          window.MetricQWebView.instances[0].configuration.popup = false
-          mainApp.$forceUpdate()
+          Store.disablePopup()
           window.MetricQWebView.instances[0].reload()
         }
         veil.create(function (evt) { disablePopupFunc() })
@@ -191,8 +160,7 @@ export const mainApp = new Vue({
   },
   methods: {
     togglePopup: function () {
-      window.MetricQWebView.instances[0].configuration.popup = !window.MetricQWebView.instances[0].configuration.popup
-      this.$forceUpdate()
+      this.configuration.popup = !this.configuration.popup
     }
   }
 })

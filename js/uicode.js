@@ -2,8 +2,9 @@ import { createGlobalMetricQWebview, importMetricUrl } from './MetricQWebView.js
 import { Colorchooser } from './colorchooser.js'
 import { showUserHint } from './interact.js'
 import { globalPopup, mainApp } from './app.js'
+import { Store } from './store.js'
 
-createGlobalMetricQWebview(document.querySelector('.row_body'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime())
+createGlobalMetricQWebview(document.querySelector('.row_body'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime(), Store)
 
 const veil = {
   myPopup: undefined,
@@ -64,9 +65,9 @@ function initTest () {
 export function initializeMetricPopup () {
   const instance = window.MetricQWebView.instances[0]
   let myMetric
-  for (const metricBase in instance.handler.allMetrics) {
-    if (instance.handler.allMetrics[metricBase].popup) {
-      myMetric = instance.handler.allMetrics[metricBase]
+  for (const metricBase in Store.state.allMetrics) {
+    if (Store.state.allMetrics[metricBase].popup) {
+      myMetric = Store.state.allMetrics[metricBase]
       break
     }
   }
@@ -76,9 +77,9 @@ export function initializeMetricPopup () {
       // TODO: remove this 'affectedTraces' stuff
       const affectedTraces = []
       let j = 0
-      for (const metricBase in instance.handler.allMetrics) {
-        if (instance.handler.allMetrics[metricBase].traces) {
-          for (let k = 0; k < instance.handler.allMetrics[metricBase].traces.length; ++k) {
+      for (const metricBase in Store.state.allMetrics) {
+        if (Store.state.allMetrics[metricBase].traces) {
+          for (let k = 0; k < Store.state.allMetrics[metricBase].traces.length; ++k) {
             if (metricBase === myMetric.name) {
               affectedTraces.push(j)
             }
@@ -88,8 +89,8 @@ export function initializeMetricPopup () {
       }
       const disablePopupFunc = (function (paramMyMetric, paramMyInstance, paramMyTraces) {
         return function (evt) {
-          myMetric.popup = false
-          mainApp.$forceUpdate()
+          const metricBase = Store.getMetricBase(myMetric.name)
+          Store.setMetricPopup(metricBase, false)
           veil.destroy()
 
           const oldName = evt.target.getAttribute('metric-old-name')
@@ -110,7 +111,6 @@ export function initializeMetricPopup () {
             if (evt.target.getAttribute('class') === 'popup_trashcan') {
               if (oldName.length > 0) {
                 paramMyInstance.deleteMetric(oldName)
-                Vue.nextTick(function () { mainApp.$forceUpdate() })
               }
             } else {
               let nameChanged = false

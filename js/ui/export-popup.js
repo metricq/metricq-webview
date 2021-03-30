@@ -1,43 +1,44 @@
 import { veil } from '../uicode.js'
 import { PopupHeader } from './popup-header.js'
 import { globalPopup } from '../app.js'
+import { Store } from '../store.js'
 
 // @vue/component
 export const ExportPopup = {
   components: { PopupHeader },
   data: function () {
     return {
-      popupTitle: 'Export'
+      popupTitle: 'Export',
+      configuration: Store.state.configuration
     }
   },
   computed: {
-
     fileformats () {
       return ['png', 'jpeg']
     },
     selectedFileformat: {
       get: function () {
-        return window.MetricQWebView.instances[0].configuration.exportFormat
+        return this.configuration.exportFormat
       },
       set: function (newValue) {
-        window.MetricQWebView.instances[0].configuration.exportFormat = newValue
+        this.configuration.exportFormat = newValue
       }
     },
     exportWidth: {
       get: function () {
-        return window.MetricQWebView.instances[0].configuration.exportWidth
+        return this.configuration.exportWidth
       },
       set: function (newValue) {
-        window.MetricQWebView.instances[0].configuration.exportWidth = parseInt(newValue)
+        this.configuration.exportWidth = parseInt(newValue)
       }
     },
     exportHeight:
       {
         get: function () {
-          return window.MetricQWebView.instances[0].configuration.exportHeight
+          return this.configuration.exportHeight
         },
         set: function (newValue) {
-          window.MetricQWebView.instances[0].configuration.exportHeight = parseInt(newValue)
+          this.configuration.exportHeight = parseInt(newValue)
         }
       }
   },

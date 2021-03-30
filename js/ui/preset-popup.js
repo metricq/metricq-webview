@@ -1,7 +1,8 @@
 import { metricPresets } from '../presets.js'
 import { veil } from '../uicode.js'
 import { initializeMetrics } from '../MetricQWebView.js'
-import { mainApp, globalPopup, globalSelectedPreset, setGlobalSelectedPreset } from '../app.js'
+import { globalPopup } from '../app.js'
+import { Store } from '../store.js'
 
 // @vue/component
 export const PresetPopup = {
@@ -29,25 +30,14 @@ export const PresetPopup = {
       },
       set: function (newValue) { }
     },
-    metricMetriclist: {
-      cache: false,
-      get: function () {
-        const ele = document.getElementById('preset_select')
-        if (ele) {
-          return metricPresets[ele.value]
-        } else {
-          return Object.values(metricPresets).shift()
-        }
-      },
-      set: function (newValue) {}
+    metricMetriclist () {
+      return Store.state.selectedPreset
     }
   },
   methods: {
     updateList: function () {
-      setGlobalSelectedPreset(metricPresets[document.getElementById('preset_select').value])
+      Store.setSelectedPreset(metricPresets[document.getElementById('preset_select').value])
       this.$emit('update:metricMetriclist', metricPresets[document.getElementById('preset_select').value])
-      // BEHOLD, the MAGIC of forceUpdate!
-      this.$forceUpdate()
     },
     showMetrics: function () {
       veil.destroy()
@@ -55,8 +45,8 @@ export const PresetPopup = {
       let hasEmptyMetric = false
       let i = 0
       const metricNamesArr = []
-      for (; i < globalSelectedPreset.length; ++i) {
-        const metricName = globalSelectedPreset[i]
+      for (; i < Store.state.selectedPreset.length; ++i) {
+        const metricName = Store.state.selectedPreset[i]
         if (metricName.length === 0) hasEmptyMetric = true
         metricNamesArr.push(metricName)
       }
@@ -64,7 +54,6 @@ export const PresetPopup = {
         metricNamesArr.push('')
       }
       initializeMetrics(metricNamesArr, (new Date()).getTime() - 3600 * 1000 * 2, (new Date()).getTime())
-      mainApp.$forceUpdate()
     }
   },
   template: `<div class="modal popup_div preset_popup_div" tabindex="-1" role="dialog">
@@ -82,7 +71,7 @@ export const PresetPopup = {
     <option class="fullwidth" v-for="(presetValue, presetIndex) in metricPresets" v-bind:value="presetIndex">{{ presetIndex }}</option>
     </select>
     </div></div>
-    <div v-if="anyMetrics" class="row">
+    <div v-if="metricMetriclist.length > 0" class="row">
     <div class="col-sm-3" style="padding-left: 0px;"><label class="leftalign form-control-plaintext">Metriken:</label></div>
     <div class="col-sm-9">
     <ul class="list-group list_preset_show fullwidth">

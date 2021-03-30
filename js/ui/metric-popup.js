@@ -56,7 +56,7 @@ export const MetricPopup = {
     <div class="form-group row">
     <label class="col-sm-2 col-form-label">Farbe</label>
     <div class="col-sm-10">
-    <canvas class="popup_colorchooser form-control" width="345" height="32"></canvas>' + ${/* 270,45 */''}
+    <canvas class="popup_colorchooser form-control" width="345" height="32"></canvas> ${/* 270,45 */''}
     </div></div>
     <div class="form-group row">
     <label class="col-sm-2 col-form-label" for="select_marker">Symbol</label>

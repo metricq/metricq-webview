@@ -1,17 +1,17 @@
 import { MetricHandler } from './MetricHandler.js'
-import { Configuration } from './configuration.js'
 import { Graticule } from './graticule.js'
 import { markerSymbols, Metric } from './metric.js'
 import { registerCallbacks } from './interact.js'
-import { mainApp, globalPopup } from './app.js'
+import { globalPopup } from './app.js'
 
-export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime) {
-  const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime)
+export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store) {
+  const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store)
   window.MetricQWebView.instances.push(webview)
 }
 
 class MetricQWebView {
-  constructor (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime) {
+  constructor (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store) {
+    this.store = store
     this.id = 'metricqwebview_' + (new Date()).getTime()
     if (!window.MetricQWebView) {
       window.MetricQWebView = {
@@ -28,12 +28,12 @@ class MetricQWebView {
     }
 
     this.ele = paramParentEle
-    this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime)
+    this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime, this.store)
     this.postRender = undefined
     this.countTraces = 0
     this.hasPlot = false
     this.graticule = undefined
-    this.configuration = new Configuration(5, 10) // constructor(resolutionParam, zoomSpeedParam)
+    this.configuration = this.store.state.configuration // constructor(resolutionParam, zoomSpeedParam)
     this.margins = {
       canvas: {
         top: 10,
@@ -76,8 +76,8 @@ class MetricQWebView {
   renderMetrics (datapointsJSON) {
     let allTraces = []
 
-    for (const metricBase in this.handler.allMetrics) {
-      const curMetric = this.handler.allMetrics[metricBase]
+    for (const metricBase in this.store.state.allMetrics) {
+      const curMetric = this.store.state.allMetrics[metricBase]
       if (curMetric.traces) {
         allTraces = allTraces.concat(curMetric.traces)
       }
@@ -215,8 +215,8 @@ class MetricQWebView {
     //   encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj))
     // } else {
     encodedStr = '.' + this.handler.startTime + '*' + this.handler.stopTime
-    for (const metricBase in this.handler.allMetrics) {
-      encodedStr += '*' + this.handler.allMetrics[metricBase].name
+    for (const metricBase in this.store.state.allMetrics) {
+      encodedStr += '*' + this.store.state.allMetrics[metricBase].name
     }
     encodedStr = encodeURIComponent(encodedStr)
     // }
@@ -262,24 +262,24 @@ class MetricQWebView {
     this.lastThrottledReloadTime = now
   }
 
-  getMetric (metricName) {
-    for (const metricBase in this.handler.allMetrics) {
-      if (this.handler.allMetrics[metricBase].name === metricName) {
-        return this.handler.allMetrics[metricBase]
+  getMetricBase (metricName) {
+    for (const metricBase in this.store.state.allMetrics) {
+      if (this.store.state.allMetrics[metricBase].name === metricName) {
+        return metricBase
       }
     }
     return undefined
   }
 
   newEmptyMetric () {
-    if (!this.handler.allMetrics.empty) {
-      this.handler.allMetrics.empty = new Metric(this, '', undefined, markerSymbols[0], [])
+    if (!this.store.state.allMetrics.empty) {
+      this.store.setMetric('empty', new Metric(this, '', undefined, markerSymbols[0], []))
     }
   }
 
   deleteMetric (metricBase) {
     if (this.graticule) this.graticule.data.deleteMetric(metricBase)
-    delete this.handler.allMetrics[metricBase]
+    this.store.deleteMetric(metricBase)
     // TODO: also clear this metric from MetricCache
     if (this.graticule) this.graticule.draw(false)
   }
@@ -292,16 +292,16 @@ class MetricQWebView {
 
   changeMetricName (metricReference, newName, oldName) {
     /* reject metric names that already exist */
-    if (this.handler.allMetrics[newName]) {
+    if (this.store.state.allMetrics[newName]) {
       return false
     }
     metricReference.updateName(newName)
     if (oldName === '') {
-      this.handler.allMetrics.empty = new Metric(this, '', undefined, markerSymbols[0], [])
-      this.handler.allMetrics[newName] = metricReference
+      this.store.setMetric('empty', new Metric(this, '', undefined, markerSymbols[0], []))
+      this.store.setMetric(newName, metricReference)
     } else {
       this.deleteMetric(oldName)
-      this.handler.allMetrics[newName] = metricReference
+      this.store.setMetric(newName, metricReference)
     }
     if (this.graticule) {
       let newCache = this.graticule.data.getMetricCache(newName)
@@ -440,12 +440,12 @@ export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
     newManager = window.MetricQWebView.instances[0]
     newManager.reinitialize(metricNamesArr, timeStart, timeStop)
     newManager.postRender = function () {
-      mainApp.$forceUpdate()
+      // mainApp.$forceUpdate()
     }
   } else {
     newManager = new MetricQWebView(document.querySelector('.row_body'), metricNamesArr, timeStart, timeStop)
     newManager.postRender = function () {
-      mainApp.$forceUpdate()
+      // mainApp.$forceUpdate()
     }
   }
 }

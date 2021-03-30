@@ -1,6 +1,7 @@
 import { setUiInteractArr, uiInteractArr } from '../interact.js'
 import { PopupHeader } from './popup-header.js'
 import { InteractionArrayOption } from './interaction-array-option.js'
+import { Store } from '../store.js'
 
 // @vue/component
 export const ConfigurationPopup = {
@@ -22,20 +23,20 @@ export const ConfigurationPopup = {
     uiResolution: {
       cache: false,
       get: function () {
-        return 30 - window.MetricQWebView.instances[0].configuration.resolution
+        return 30 - this.config.resolution
       },
       set: function (newValue) {
-        window.MetricQWebView.instances[0].configuration.resolution = 30 - newValue
+        Store.state.configuration.resolution = 30 - newValue
         this.$emit('update:uiResolution', newValue)
       }
     },
     uiZoomSpeed: {
       cache: false,
       get: function () {
-        return window.MetricQWebView.instances[0].configuration.zoomSpeed
+        return this.config.zoomSpeed
       },
       set: function (newValue) {
-        window.MetricQWebView.instances[0].configuration.zoomSpeed = newValue
+        Store.state.configuration.zoomSpeed = newValue
         this.$emit('update:uiZoomSpeed', newValue)
       }
     },
@@ -55,14 +56,14 @@ export const ConfigurationPopup = {
       let newValue = parseFloat(this.uiResolution) + increment
       newValue = this.withinRange(document.getElementById('resolution_input'), newValue)
       this.uiResolution = newValue
-      this.$forceUpdate()
+      // this.$forceUpdate()
     },
     manipulateZoomSpeed: function (increment) {
       let newValue = parseFloat(this.uiZoomSpeed) + increment
       newValue = this.withinRange(document.getElementById('zoom_speed_input'), newValue)
       this.uiZoomSpeed = newValue
       // make vue js update using force
-      this.$forceUpdate()
+      // this.$forceUpdate()
     },
     withinRange: function (ele, newValue) {
       if (newValue < parseFloat(ele.getAttribute('min'))) {
