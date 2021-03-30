@@ -1,5 +1,5 @@
 import { metricPresets } from '../presets.js'
-import { veil } from '../uicode.js'
+import { veil } from './veil.js'
 import { initializeMetrics } from '../MetricQWebView.js'
 import { globalPopup } from '../app.js'
 import { Store } from '../store.js'

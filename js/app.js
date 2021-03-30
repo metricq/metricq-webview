@@ -1,4 +1,4 @@
-import { veil } from './uicode.js'
+import { veil } from './ui/veil.js'
 import { ConfigurationPopup } from './ui/configuration-popup.js'
 import { ExportPopup } from './ui/export-popup.js'
 import { MetricLegend } from './ui/metric-legend.js'
