@@ -31,6 +31,4 @@ function initNonVueButtons () {
   })
 }
 
-
-
 document.addEventListener('DOMContentLoaded', initNonVueButtons)
