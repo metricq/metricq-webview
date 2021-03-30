@@ -3,8 +3,7 @@ import { Configuration } from './configuration.js'
 import { Graticule } from './graticule.js'
 import { markerSymbols, Metric } from './metric.js'
 import { registerCallbacks } from './interact.js'
-import { globalPopup } from './uicode.js'
-import { legendApp } from './ui/legendApp.js'
+import { mainApp, globalPopup } from './app.js'
 
 export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime) {
   const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime)
@@ -441,12 +440,12 @@ export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
     newManager = window.MetricQWebView.instances[0]
     newManager.reinitialize(metricNamesArr, timeStart, timeStop)
     newManager.postRender = function () {
-      legendApp.$forceUpdate()
+      mainApp.$forceUpdate()
     }
   } else {
     newManager = new MetricQWebView(document.querySelector('.row_body'), metricNamesArr, timeStart, timeStop)
     newManager.postRender = function () {
-      legendApp.$forceUpdate()
+      mainApp.$forceUpdate()
     }
   }
 }

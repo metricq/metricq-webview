@@ -1,8 +1,7 @@
 import { metricPresets } from '../presets.js'
-import { globalPopup, veil, globalSelectedPreset, setGlobalSelectedPreset } from '../uicode.js'
+import { veil } from '../uicode.js'
 import { initializeMetrics } from '../MetricQWebView.js'
-
-import { legendApp } from './legendApp.js'
+import { mainApp, globalPopup, globalSelectedPreset, setGlobalSelectedPreset } from '../app.js'
 
 // @vue/component
 export const PresetPopup = {
@@ -65,7 +64,7 @@ export const PresetPopup = {
         metricNamesArr.push('')
       }
       initializeMetrics(metricNamesArr, (new Date()).getTime() - 3600 * 1000 * 2, (new Date()).getTime())
-      legendApp.$forceUpdate()
+      mainApp.$forceUpdate()
     }
   },
   template: `<div class="modal popup_div preset_popup_div" tabindex="-1" role="dialog">

@@ -1,5 +1,5 @@
-import { popupApp } from './popupApp.js'
 import { initializeMetricPopup } from '../uicode.js'
+import { mainApp } from '../app.js'
 
 // @vue/component
 export const MetricLegend = {
@@ -16,7 +16,7 @@ export const MetricLegend = {
       if (myMetric) {
         myMetric.popup = !myMetric.popup
       }
-      popupApp.$forceUpdate()
+      mainApp.$forceUpdate()
       Vue.nextTick(initializeMetricPopup)
     }
   },

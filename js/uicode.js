@@ -1,24 +1,7 @@
-import { metricPresets } from './presets.js'
-import { createGlobalMetricQWebview } from './MetricQWebView.js'
+import { createGlobalMetricQWebview, importMetricUrl } from './MetricQWebView.js'
 import { Colorchooser } from './colorchooser.js'
-import { popupApp } from './ui/popupApp.js'
-import { configApp } from './ui/configApp.js'
-import { legendApp } from './ui/legendApp.js'
 import { showUserHint } from './interact.js'
-
-const globalPopup = {
-  export: false,
-  yaxis: false,
-  xaxis: false,
-  presetSelection: false
-}
-let globalSelectedPreset = Object.values(metricPresets).shift()
-
-export function setGlobalSelectedPreset (newPreset) {
-  globalSelectedPreset = newPreset
-}
-
-export { globalPopup, globalSelectedPreset }
+import { globalPopup, mainApp } from './app.js'
 
 createGlobalMetricQWebview(document.querySelector('.row_body'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime())
 
@@ -73,7 +56,7 @@ function initTest () {
     globalPopup.export = !globalPopup.export
   })
   document.getElementById('button_configuration').addEventListener('click', function (evt) {
-    configApp.togglePopup()
+    mainApp.togglePopup()
     Vue.nextTick(initializeConfigPopup)
   })
 }
@@ -106,7 +89,7 @@ export function initializeMetricPopup () {
       const disablePopupFunc = (function (paramMyMetric, paramMyInstance, paramMyTraces) {
         return function (evt) {
           myMetric.popup = false
-          popupApp.$forceUpdate()
+          mainApp.$forceUpdate()
           veil.destroy()
 
           const oldName = evt.target.getAttribute('metric-old-name')
@@ -127,7 +110,7 @@ export function initializeMetricPopup () {
             if (evt.target.getAttribute('class') === 'popup_trashcan') {
               if (oldName.length > 0) {
                 paramMyInstance.deleteMetric(oldName)
-                Vue.nextTick(function () { legendApp.$forceUpdate() })
+                Vue.nextTick(function () { mainApp.$forceUpdate() })
               }
             } else {
               let nameChanged = false
@@ -239,6 +222,18 @@ export function initializeMetricPopup () {
 
 function initializeConfigPopup () {
   // nothing to do here
+}
+
+// At Startup:
+if (window.location.href.indexOf('#') > -1) {
+  try {
+    importMetricUrl()
+  } catch (exc) {
+    console.log('Could not import metrics.')
+    console.log(exc)
+  }
+} else {
+  Vue.nextTick(function () { globalPopup.presetSelection = true })
 }
 
 document.addEventListener('DOMContentLoaded', initTest)

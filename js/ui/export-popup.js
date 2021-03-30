@@ -1,5 +1,6 @@
-import { veil, globalPopup } from '../uicode.js'
+import { veil } from '../uicode.js'
 import { PopupHeader } from './popup-header.js'
+import { globalPopup } from '../app.js'
 
 // @vue/component
 export const ExportPopup = {
