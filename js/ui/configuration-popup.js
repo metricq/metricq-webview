@@ -76,14 +76,12 @@ export const ConfigurationPopup = {
       let newValue = parseFloat(this.uiResolution) + increment
       newValue = this.withinRange(document.getElementById('resolution_input'), newValue)
       this.uiResolution = newValue
-      // this.$forceUpdate()
     },
     manipulateZoomSpeed: function (increment) {
       let newValue = parseFloat(this.uiZoomSpeed) + increment
       newValue = this.withinRange(document.getElementById('zoom_speed_input'), newValue)
       this.uiZoomSpeed = newValue
       // make vue js update using force
-      // this.$forceUpdate()
     },
     withinRange: function (ele, newValue) {
       if (newValue < parseFloat(ele.getAttribute('min'))) {

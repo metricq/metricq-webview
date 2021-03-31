@@ -439,12 +439,10 @@ export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
     newManager = window.MetricQWebView.instances[0]
     newManager.reinitialize(metricNamesArr, timeStart, timeStop)
     newManager.postRender = function () {
-      // mainApp.$forceUpdate()
     }
   } else {
     newManager = new MetricQWebView(document.querySelector('.row_body'), metricNamesArr, timeStart, timeStop)
     newManager.postRender = function () {
-      // mainApp.$forceUpdate()
     }
   }
 }
