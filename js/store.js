@@ -51,7 +51,7 @@ export class StoreClass {
   }
 
   togglePopup (name) {
-    Vue.set(this.state.popups, name, this.state.popups[name] || true)
+    Vue.set(this.state.popups, name, !(this.state.popups[name]))
   }
 }
 
