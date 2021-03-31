@@ -47,11 +47,11 @@ export class StoreClass {
   }
 
   setSelectedPreset (newPreset) {
-    Store.state.selectedPreset = [].concat(newPreset)
+    Store.state.selectedPreset = [...newPreset]
   }
 
   togglePopup (name) {
-    Vue.set(this.state.popups, name, !(this.state.popups[name]))
+    Vue.set(this.state.popups, name, !this.state.popups[name])
   }
 }
 
