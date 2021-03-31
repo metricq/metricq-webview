@@ -17,7 +17,8 @@ export const MetricPopup = {
   data: function () {
     return {
       markerSymbols: markerSymbols,
-      popupTitle: 'Metrik-Eigenschaften'
+      popupTitle: 'Metrik-Eigenschaften',
+      oldMetric: Object.assign({}, this.metric)
     }
   },
   computed: {
@@ -59,13 +60,13 @@ export const MetricPopup = {
       }
     }
 
-    const disablePopupFunc = (function (paramMyMetric, paramMyInstance, paramMyTraces) {
+    const disablePopupFunc = (function (paramMyMetric, paramMyOldMetric, paramMyInstance, paramMyTraces) {
       return function (evt) {
         const metricBase = Store.getMetricBase(paramMyMetric.name)
         Store.setMetricPopup(metricBase, false)
         veil.destroy()
 
-        const oldName = evt.target.getAttribute('metric-old-name')
+        const oldName = paramMyOldMetric.name
 
         // special behavior when creating a new metric
         if (oldName === null ||
@@ -74,7 +75,7 @@ export const MetricPopup = {
 
           if (evt.target.getAttribute('class') === 'popup_ok') {
             // code duplication :( - not really
-            if (!paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute('metric-old-name'))) {
+            if (!paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, oldName)) {
               paramMyMetric.updateName(oldName)
               showUserHint('Konnte Metrik-Namen nicht ändern. Metrik evtl. schon vorhanden?')
             }
@@ -90,7 +91,7 @@ export const MetricPopup = {
               if (paramMyMetric.name === '' && !oldName) {
                 // do nothing
               } else {
-                if (paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, evt.target.getAttribute('metric-old-name'))) {
+                if (paramMyInstance.changeMetricName(paramMyMetric, paramMyMetric.name, oldName)) {
                   nameChanged = true
                 } else {
                   paramMyMetric.updateName(oldName)
@@ -98,7 +99,7 @@ export const MetricPopup = {
                 }
               }
             }
-            if (evt.target.getAttribute('metric-old-color') !== paramMyMetric.color) {
+            if (paramMyOldMetric.color !== paramMyMetric.color) {
               paramMyMetric.updateColor(paramMyMetric.color)
               const colorEle = document.getElementsByClassName(paramMyMetric.popupKey)
               if (colorEle && colorEle[0]) {
@@ -109,7 +110,7 @@ export const MetricPopup = {
               // TODO: do something, in this case, do forceUpdate the legendApp
               //         so the metric's color will be shown
             }
-            if (evt.target.getAttribute('metric-old-marker') !== paramMyMetric.marker) {
+            if (paramMyOldMetric.marker !== paramMyMetric.marker) {
               paramMyMetric.updateMarker(paramMyMetric.marker)
             }
             // don't do a complete repaint
@@ -117,25 +118,35 @@ export const MetricPopup = {
           }
         }
       }
-    }(this.metric, instance, affectedTraces))
-    const veilEle = veil.create(disablePopupFunc)
+    }(this.metric, this.oldMetric, instance, affectedTraces))
+    veil.create(disablePopupFunc)
     veil.attachPopup(popupEle)
-    const closeEle = popupEle.querySelector('.popup_close_button')
-    const modalEle = document.querySelector('.modal')
-    modalEle.addEventListener('click', function (evt) {
-      if (evt.target.getAttribute('role') === 'dialog') {
-        veil.destroy()
-        disablePopupFunc(evt)
+
+    const colorchooserEle = popupEle.querySelector('.popup_colorchooser')
+    const colorchooserObj = new Colorchooser(colorchooserEle, this.metric)
+    colorchooserObj.onchange = (function (myTraces, paramMyMetric) {
+      return function () {
+        paramMyMetric.renderer.graticule.draw(false)
       }
-    })
-    const inputEle = popupEle.querySelector('.popup_input')
-    inputEle.addEventListener('keyup', function (evt) {
+    }(affectedTraces, this.metric))
+
+    document.getElementById('input_metric_name').focus()
+  },
+  methods: {
+    changeMarker: function (evt) {
+      this.metric.updateMarker(evt.target.value)
+    },
+    trashcanClicked: function (evt) {
+      veil.destroy(evt)
+    },
+    metricNameKeyup: function (evt) {
+      const instance = window.MetricQWebView.instances[0]
       if (evt.key.toLowerCase() === 'enter') {
-        disablePopupFunc(evt)
+        veil.destroy(evt)
       }
       // TODO: implement throttling?
-      instance.handler.searchMetricsPromise(evt.target.value).then(function (myInstance, wrapperEle, paramMetric) {
-        return function (searchSuggestions) {
+      instance.handler.searchMetricsPromise(evt.target.value).then(
+        function (searchSuggestions) {
           const datalistEle = document.getElementById('autocomplete_metric')
           if (!datalistEle) {
             showUserHint('Auto-Vervollständigung nicht verfügbar, konnte Element #autocomplete_metric nicht finden.')
@@ -150,55 +161,18 @@ export const MetricPopup = {
             }
           }
         }
-      }(instance, popupEle, this.metric))
-    })
-    const trashcanEle = popupEle.querySelector('.popup_trashcan')
-
-    const colorchooserEle = popupEle.querySelector('.popup_colorchooser')
-    const colorchooserObj = new Colorchooser(colorchooserEle, this.metric)
-    colorchooserObj.onchange = (function (myTraces, paramMyMetric) {
-      return function () {
-        document.querySelector('div.' + paramMyMetric.popupKey).style.backgroundColor = paramMyMetric.color
-        paramMyMetric.renderer.graticule.draw(false)
+      )
+    },
+    closePopup: function (evt) {
+      veil.destroy(evt)
+    },
+    closePopupModal: function (evt) {
+      if (evt.target.getAttribute('role') === 'dialog') {
+        veil.destroy(evt)
       }
-    }(affectedTraces, this.metric))
-    popupEle.querySelector('.popup_legend_select').addEventListener('change', (function (myTraces, paramMyMetric) {
-      return function (evt) {
-        paramMyMetric.updateMarker(paramMyMetric.marker)
-      }
-    }(affectedTraces, this.metric)))
-    const okEle = document.querySelector('.popup_ok');
-
-    [veilEle, inputEle, closeEle, trashcanEle, okEle].forEach(function (myMetric) {
-      return function (paramValue, paramIndex, paramArray) {
-        if (paramValue) {
-          paramValue.setAttribute('metric-old-name', myMetric.name)
-          paramValue.setAttribute('metric-old-color', myMetric.color)
-          paramValue.setAttribute('metric-old-marker', myMetric.marker)
-          paramValue.setAttribute('metric-affected-traces', JSON.stringify(affectedTraces))
-        }
-      }
-    }(this.metric));
-
-    [okEle, closeEle, trashcanEle].forEach(function (myMetric) {
-      return function (paramValue, paramIndex, paramArray) {
-        if (paramValue) {
-          paramValue.addEventListener('click', (function (paramMetricName, disableFunc) {
-            return function (evt) {
-              disableFunc(evt)
-            }
-          }(myMetric.name, disablePopupFunc)))
-        }
-      }
-    }(this.metric))
-    document.getElementById('input_metric_name').focus()
-  },
-  methods: {
-    changeMarker: function () {
-      this.metric.updateMarker(document.querySelector('.popup_legend_select').value)
     }
   },
-  template: `<div v-bind:id="metric.popupKey" class="modal popup_div metric_popup_div" tabindex="-1" role="dialog">
+  template: `<div v-bind:id="metric.popupKey" class="modal popup_div metric_popup_div" tabindex="-1" role="dialog" v-on:click="closePopupModal">
     <div class="modal-dialog" role="document">
     <div class="modal-content">
     <popup-header v-bind:popupTitle="popupTitle"></popup-header>
@@ -206,7 +180,7 @@ export const MetricPopup = {
     <div class="form-group row">
     <label class="col-sm-2 col-form-label" for="input_metric_name">Name</label>
     <div class="col-sm-10">
-    <input type="text" list="autocomplete_metric" id="input_metric_name" class="popup_input form-control" v-model="metric.name" />
+    <input type="text" list="autocomplete_metric" id="input_metric_name" class="popup_input form-control" v-model="metric.name" v-on:keyup="metricNameKeyup" />
     <datalist id="autocomplete_metric">
     ${/* using v-for here doesn't work :( */''}
     ${/* + "<option v-for=\"suggestion in autocompleteList\" v-bind:value=\"suggestion\">{{ suggestion }}</option>" */''}
@@ -226,10 +200,10 @@ export const MetricPopup = {
     </div></div>
     </div>
     <div class="modal-footer">
-    <button v-if="!isEmpty" class="btn btn-danger">
+    <button v-if="!isEmpty" class="btn btn-danger" v-on:click="trashcanClicked">
     <img src="img/icons/trash.svg" class="popup_trashcan" width="26" height="26" />
     </button>
-    <button class="btn btn-primary popup_ok">
+    <button class="btn btn-primary popup_ok" v-on:click="closePopup">
     {{ saveButtonText }}
     </button>
     </div>
