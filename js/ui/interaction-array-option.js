@@ -93,15 +93,16 @@ export const InteractionArrayOption = {
       }
     }
   },
-  template: `<div class="form-group row" >
-    <label class="col-sm-5 col-form-label">{{ functionName }}</label>
-    <div class="col-sm-4">
-    <select class="form-control custom-select" size="1" v-model="eventName">
-    <option v-for="curEvent in eventList" v-bind:value="curEvent">{{ curEvent }}</option>
-    </select>
-    </div>
-    <div class="col-sm-3">
-    <input type="text" class="form-control" v-model="keyField"/>
-    </div>
+  template: `
+    <div class="form-group row" >
+      <label class="col-sm-5 col-form-label">{{ functionName }}</label>
+      <div class="col-sm-4">
+        <select class="form-control custom-select" size="1" v-model="eventName">
+          <option v-for="curEvent in eventList" v-bind:value="curEvent">{{ curEvent }}</option>
+        </select>
+      </div>
+      <div class="col-sm-3">
+        <input type="text" class="form-control" v-model="keyField" />
+      </div>
     </div>`
 }
