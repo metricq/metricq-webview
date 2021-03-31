@@ -9,7 +9,7 @@ import { Store } from './store.js'
 
 import './app.js'
 
-createGlobalMetricQWebview(document.querySelector('.row_body'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime(), Store)
+createGlobalMetricQWebview(document.getElementById('webview_container'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime(), Store)
 
 // At Startup:
 if (window.location.href.indexOf('#') > -1) {
