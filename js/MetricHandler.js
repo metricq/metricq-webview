@@ -24,11 +24,10 @@ export class MetricHandler {
     for (let i = 0; i < initialMetricNames.length; ++i) {
       const curMetricName = initialMetricNames[i]
       if (curMetricName.length > 0) {
-        this.store.setMetric(curMetricName, new Metric(this.renderer, curMetricName, undefined, markerSymbols[i * 4], []))
-      } else {
-        this.store.setMetric('empty', new Metric(this.renderer, '', undefined, markerSymbols[i * 4], []))
+        this.store.setMetric(curMetricName, new Metric(this.renderer, curMetricName, undefined, markerSymbols[(i * 4) % markerSymbols.length], []))
       }
     }
+    this.store.setMetric('empty', new Metric(this.renderer, '', undefined, markerSymbols[markerSymbols.length - 1], []))
   }
 
   doRequest (maxDataPoints) {
