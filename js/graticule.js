@@ -1,4 +1,6 @@
-function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize) {
+import { DataCache } from './data-handling.js'
+
+export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize) {
   this.ele = paramEle
   this.ctx = ctx
   this.canvasSize = [paramEle.offsetWidth, paramEle.offsetHeight]
@@ -403,10 +405,10 @@ function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension
   // since automaticallyDetermineRanges is not suitable anymore,
   //  parameter 'adjustRanges' should never be true!
   this.draw = function (adjustRanges) {
-    timers.drawing = {
-      start: (new Date()).getTime(),
-      end: 0
-    }
+    // timers.drawing = {
+    //   start: (new Date()).getTime(),
+    //   end: 0
+    // }
     if (adjustRanges === true) {
       throw new Error('Tried to automatically determine time ranges. That makes handler out of sync, disallowed!')
       // this.automaticallyDetermineRanges(true, true)
@@ -427,7 +429,7 @@ function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension
       this.drawSeries(this.curTimeRange, this.curValueRange, this.curTimePerPixel, this.curValuesPerPixel)
       this.ctx.restore()
     }
-    timers.drawing.end = (new Date()).getTime()
+    // timers.drawing.end = (new Date()).getTime()
     // TODO: Make timings accessible
     // showTimers();
   }

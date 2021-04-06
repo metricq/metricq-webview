@@ -6,13 +6,19 @@ const uiOptions = {
   errorArrowInterval: 2000
 }
 
-let uiInteractArr = [ // eslint-disable-line prefer-const
+let uiInteractArr = [
   ['drag', ['17'], 'uiInteractPan'],
   ['drag', ['!16', '!17'], 'uiInteractZoomArea'],
   ['drop', ['!16', '!17'], 'uiInteractZoomIn'],
   ['move', [], 'uiInteractLegend'],
   ['wheel', [], 'uiInteractZoomWheel']
 ]
+
+export function setUiInteractArr (newValue) {
+  uiInteractArr = newValue
+}
+
+export { uiInteractArr }
 
 function uiInteractPan (metricQInstance, evtObj) {
   if (mouseDown.previousPos[0] !== mouseDown.currentPos[0] ||
@@ -186,6 +192,14 @@ function uiInteractLegend (metricQInstance, evtObj) {
   }
 }
 
+const uiFunctions = {
+  uiInteractPan: uiInteractPan,
+  uiInteractLegend: uiInteractLegend,
+  uiInteractZoomArea: uiInteractZoomArea,
+  uiInteractZoomIn: uiInteractZoomIn,
+  uiInteractZoomWheel: uiInteractZoomWheel
+}
+
 function uiInteractCheck (eventType, pertainingElement, evtObj) {
   for (let i = 0; i < uiInteractArr.length; ++i) {
     if (eventType === uiInteractArr[i][0]) {
@@ -202,13 +216,13 @@ function uiInteractCheck (eventType, pertainingElement, evtObj) {
         }
       }
       if (matchingSoFar) {
-        window[uiInteractArr[i][2]](window.MetricQWebView.getInstance(pertainingElement), evtObj)
+        uiFunctions[uiInteractArr[i][2]](window.MetricQWebView.getInstance(pertainingElement), evtObj)
       }
     }
   }
 }
 
-function registerCallbacks (anchoringObject) {
+export function registerCallbacks (anchoringObject) {
   mouseDown.registerDragCallback(function (myElement) {
     return function (evtObj) {
       if (myElement && mouseDown.startTarget && mouseDown.startTarget.isSameNode(myElement)) {
@@ -355,7 +369,7 @@ const keyDown = {
 
 let userHintWindow
 
-function showUserHint (messageText, showDuration) {
+export function showUserHint (messageText, showDuration) {
   if (undefined === showDuration) {
     showDuration = 2000 + messageText.length * 50
   }

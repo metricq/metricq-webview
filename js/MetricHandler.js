@@ -1,7 +1,13 @@
+import { Metric, markerSymbols } from './metric.js'
+import { showUserHint } from './interact.js'
+
 const METRICQ_BACKEND = 'https://grafana.metricq.zih.tu-dresden.de/metricq'
 
-class MetricHandler {
-  constructor (paramRenderer, paramMetricsArr, paramStartTime, paramStopTime) {
+export { METRICQ_BACKEND }
+
+export class MetricHandler {
+  constructor (paramRenderer, paramMetricsArr, paramStartTime, paramStopTime, store) {
+    this.store = store
     this.renderer = paramRenderer
     this.startTime = paramStartTime
     this.stopTime = paramStopTime
@@ -14,13 +20,13 @@ class MetricHandler {
   }
 
   initializeMetrics (initialMetricNames) {
-    this.allMetrics = {}
+    this.store.resetAllMetrics()
     for (let i = 0; i < initialMetricNames.length; ++i) {
       const curMetricName = initialMetricNames[i]
       if (curMetricName.length > 0) {
-        this.allMetrics[curMetricName] = new Metric(this.renderer, curMetricName, undefined, markerSymbols[i * 4], [])
+        this.store.setMetric(curMetricName, new Metric(this.renderer, curMetricName, undefined, markerSymbols[i * 4], []))
       } else {
-        this.allMetrics.empty = new Metric(this.renderer, '', undefined, markerSymbols[i * 4], [])
+        this.store.setMetric('empty', new Metric(this.renderer, '', undefined, markerSymbols[i * 4], []))
       }
     }
   }
@@ -29,8 +35,8 @@ class MetricHandler {
     const timeMargin = (this.stopTime - this.startTime) * this.TIME_MARGIN_FACTOR
     const nonErrorProneMetrics = []
     const remainingMetrics = []
-    for (const metricBase in this.allMetrics) {
-      const curMetric = this.allMetrics[metricBase]
+    for (const metricBase in this.store.state.allMetrics) {
+      const curMetric = this.store.state.allMetrics[metricBase]
       if (curMetric.name.length > 0) {
         if (curMetric.errorprone) {
           remainingMetrics.push(curMetric.name)
@@ -187,8 +193,8 @@ class MetricHandler {
     }
     let allMinMax = [undefined, undefined]
     const timeFrame = this.renderer.graticule.curTimeRange
-    for (const metricBase in this.allMetrics) {
-      const curMetric = this.allMetrics[metricBase]
+    for (const metricBase in this.store.state.allMetrics) {
+      const curMetric = this.store.state.allMetrics[metricBase]
       const curCache = this.renderer.graticule.data.getMetricCache(metricBase)
       if (curCache) {
         let curMinMax
@@ -312,9 +318,9 @@ class MetricHandler {
   }
 
   loadedMetric (metricBase, metricTraces, metricIndex) {
-    const myMetric = this.allMetrics[metricBase]
+    const myMetric = this.store.state.allMetrics[metricBase]
     if (!myMetric) {
-      this.allMetrics[metricBase] = new Metric(this.renderer, metricBase, undefined, markerSymbols[metricIndex * 4], metricTraces)
+      this.store.setMetric(metricBase, new Metric(this.renderer, metricBase, undefined, markerSymbols[metricIndex * 4], metricTraces))
     } else {
       myMetric.setTraces(metricTraces)
     }
@@ -385,8 +391,8 @@ class MetricHandler {
 
   receivedError (errorCode, metricBase) {
     // mark a metric so it is being excluded in bulk-requests
-    if (this.allMetrics[metricBase]) {
-      this.allMetrics[metricBase].error()
+    if (this.store.state.allMetrics[metricBase]) {
+      this.store.state.allMetrics[metricBase].error()
     }
   }
 

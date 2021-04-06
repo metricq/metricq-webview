@@ -1,4 +1,8 @@
-function DataCache (paramMetricQHistoryReference) {
+import { crc32 } from '../lib/pseudo-crc32.js'
+import { hslToRgb } from '../lib/color-conversion.js'
+import { METRICQ_BACKEND } from './MetricHandler.js'
+
+export function DataCache (paramMetricQHistoryReference) {
   this.metricQHistory = paramMetricQHistoryReference
   this.metrics = []
   this.processMetricQDatapoints = function (datapointsJSON, doDraw, doResize) {

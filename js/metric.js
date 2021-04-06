@@ -1,10 +1,14 @@
+import { hslToRgb } from '../lib/color-conversion.js'
+import { crc32 } from '../lib/pseudo-crc32.js'
+
 // adapted from https://plot.ly/python/marker-style/
 // not working:
 //   "cross-thin", "x-thin", "asterisk", "hash", "hash-dot", "y-up", "y-down", "y-left", "y-right",
 //   "line-ew", "line-ns", "line-ne", "line-nw"
 const markerSymbols = ['.', 'o', 'v', '^', '<', '>', 's', 'p', '*', 'h', '+', 'x', 'd', '|', '_']
+export { markerSymbols }
 
-class Metric {
+export class Metric {
   constructor (paramRenderer, paramName, paramColor, paramMarker, paramTraces) {
     this.renderer = paramRenderer
     this.updateName(paramName)

@@ -1,16 +1,11 @@
-Vue.component('interaction-array-option', {
-  props: ['action'],
-  template: '<div class="form-group row" >' +
-    '<label class="col-sm-5 col-form-label">{{ functionName }}</label>' +
-    '<div class="col-sm-4">' +
-    '<select class="form-control custom-select" size="1" v-model="eventName">' +
-    '<option v-for="curEvent in eventList" v-bind:value="curEvent">{{ curEvent }}</option>' +
-    '</select>' +
-    '</div>' +
-    '<div class="col-sm-3">' +
-    '<input type="text" class="form-control" v-model="keyField"/>' +
-    '</div>' +
-    '</div>',
+// @vue/component
+export const InteractionArrayOption = {
+  props: {
+    action: {
+      type: Array,
+      required: true
+    }
+  },
   data: function () {
     return {
       functionList: ['uiInteractPan', 'uiInteractZoomArea', 'uiInteractZoomIn', 'uiInteractLegend', 'uiInteractZoomWheel'],
@@ -23,7 +18,9 @@ Vue.component('interaction-array-option', {
         return this.action[2]
       },
       set: function (newValue) {
-        this.action[2] = newValue
+        const newAction = this.action
+        newAction[2] = newValue
+        this.$emit('input', newAction)
       }
     },
     keyField: {
@@ -78,7 +75,10 @@ Vue.component('interaction-array-option', {
             actionKeyArray.push(newEntry)
           }
         }
-        this.action[1] = actionKeyArray
+        const newAction = this.action
+        newAction[1] = actionKeyArray
+        this.$emit('input', newAction)
+        // this.action[1] = actionKeyArray
       }
     },
     eventName: {
@@ -86,8 +86,23 @@ Vue.component('interaction-array-option', {
         return this.action[0]
       },
       set: function (newValue) {
-        this.action[0] = newValue
+        const newAction = this.action
+        newAction[0] = newValue
+        this.$emit('input', newAction)
+        // this.action[0] = newValue
       }
     }
-  }
-})
+  },
+  template: `
+    <div class="form-group row" >
+      <label class="col-sm-5 col-form-label">{{ functionName }}</label>
+      <div class="col-sm-4">
+        <select class="form-control custom-select" size="1" v-model="eventName">
+          <option v-for="curEvent in eventList" v-bind:value="curEvent">{{ curEvent }}</option>
+        </select>
+      </div>
+      <div class="col-sm-3">
+        <input type="text" class="form-control" v-model="keyField" />
+      </div>
+    </div>`
+}
