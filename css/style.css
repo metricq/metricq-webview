@@ -1,245 +1,295 @@
 * {
-  font-family: Open Sans, Sans, Verdana;
-  font-size: 15pt;
+    font-family: Open Sans, Sans, Verdana;
+    font-size: 15pt;
 }
+
 body {
-  background-color: #EDEDED;
+    background-color: #EDEDED;
 }
+
 .row_head {
-  margin-bottom: 10px;
+    margin-bottom: 10px;
 }
+
 .wrapper_logo {
-  float: left;
-  width: 150px;
-  margin-left: calc(50% - 75px - 6em - 2px);
+    float: left;
+    width: 150px;
+    margin-left: calc(50% - 75px - 6em - 2px);
 }
+
 .wrapper_headoptions {
-  float: left;
-  padding-top: 5px;
+    float: left;
+    padding-top: 5px;
 }
+
 .button_head {
-  margin: 14px 3px 3px 14px;
+    margin: 14px 3px 3px 14px;
 }
+
 .row_body {
-  
+
 }
+
 .wrapper_body {
-  border: 1px solid #C8C8C8;
-  margin: 0px 10px 0px 10px;
-  padding: 5px;
-  border-radius: 4px;
-  background-color: white;
-  box-shadow: 0px 1px 2px 1px #D0D0D0;
+    border: 1px solid #C8C8C8;
+    margin: 0px 10px 0px 10px;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0px 1px 2px 1px #D0D0D0;
 }
+
 .row_foot {
-  width: 100%;
-  text-align: center;
+    width: 100%;
+    text-align: center;
 }
+
 #legend_list {
-  list-style-type: none;
-  margin: 0px auto 0px auto;
+    list-style-type: none;
+    margin: 0px auto 0px auto;
 }
+
 .legend_item {
-  display: inline-block;
-  margin: 0px 13px 4px 4px;
-  /*
-  padding: 1px 4px 3px 2px;
-  border: 1px solid #808080;
-  border-radius: 3px;
-  box-shadow: 2px 2px 3px 0px #a0a0a0;
-  */
+    display: inline-block;
+    margin: 0px 13px 4px 4px;
+    /*
+    padding: 1px 4px 3px 2px;
+    border: 1px solid #808080;
+    border-radius: 3px;
+    box-shadow: 2px 2px 3px 0px #a0a0a0;
+    */
 }
+
 .legend_item:hover {
-  box-shadow: 2px 2px 3px 3px #B0B0B0;
+    box-shadow: 2px 2px 3px 3px #B0B0B0;
 }
+
 .legend_item div {
-  display: inline-block;
-  width: 30px;
-  height: 30px;
-  border-radius: 4px;
-  box-shadow: 0px 0px 2px 0px #000000;
-  margin: 0px 3px 0px 0px;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    box-shadow: 0px 0px 2px 0px #000000;
+    margin: 0px 3px 0px 0px;
 }
+
 #popup_veil {
-  position: fixed;
-  left: 0px;
-  top: 0px;
-  background-color: #000000;
-  opacity: 0.5;
-  z-index: 1;
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    background-color: #000000;
+    opacity: 0.5;
+    z-index: 1;
 }
+
 .popup_header {
-  border-bottom: 1px solid #d0d0d0;
-  background-color: #e8e8e8;
-  height: 29px;
-  text-align: left;
-  padding: 0px 0px 0px 0.5em;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  box-shadow: inset -4px -1px 4px 0px #a0a0a0;
-  user-select: none;
+    border-bottom: 1px solid #d0d0d0;
+    background-color: #e8e8e8;
+    height: 29px;
+    text-align: left;
+    padding: 0px 0px 0px 0.5em;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    box-shadow: inset -4px -1px 4px 0px #a0a0a0;
+    user-select: none;
 }
+
 .popup_div {
-  display: block;
+    display: block;
 }
+
 .metric_popup_div {
 }
+
 .popup_input {
-  
+
 }
+
 .popup_legend_select {
-  font-size: 12pt;
-  width: 100%;
+    font-size: 12pt;
+    width: 100%;
 }
+
 .popup_legend_select option {
-  font-size: 12pt;
+    font-size: 12pt;
 }
+
 .popup_trashcan {
-  margin: 2px;
+    margin: 2px;
 }
+
 .popup_close_button {
-  float: right;
-  transform: translate(11px, -24px) scale(0.8);
+    float: right;
+    transform: translate(11px, -24px) scale(0.8);
 }
+
 .popup_close_button:hover {
-  transform: translate(11px, -24px) scale(1);
+    transform: translate(11px, -24px) scale(1);
 }
+
 .popup_close_image {
-  pointer-events: none;
+    pointer-events: none;
 }
+
 .button_resolution, .button_zoom_speed {
-  border: none;
-  margin: 0px;
-  padding: 0px 2px 0px 2px;
-  transform: translate(0, -8px);
-  background-color: transparent;
+    border: none;
+    margin: 0px;
+    padding: 0px 2px 0px 2px;
+    transform: translate(0, -8px);
+    background-color: transparent;
 }
+
 .xaxis_popup_div {
-/*  width: 340px; */
+    /*  width: 340px; */
 }
+
 .xaxis_popup_labels {
-  float: left;
+    float: left;
 }
+
 .xaxis_popup_time {
-  float: left;
+    float: left;
 }
+
 .yaxis_popup_div {
-  text-align: left;
+    text-align: left;
 }
+
 .yaxis_popup_radio {
-  float: left;
+    float: left;
 }
+
 .yaxis_popup_radio label {
-  user-select: none;
+    user-select: none;
 }
+
 .yaxis_popup_minmax {
-  margin: 0px 0px 0px 50px;
+    margin: 0px 0px 0px 50px;
 }
+
 /* animation doesn't work in firefox :( */
 .gear_axis:hover {
-  animation: gear_rotate 5s linear infinite !important;
-  pointer-events: none;
-  user-select: none;
+    animation: gear_rotate 5s linear infinite !important;
+    pointer-events: none;
+    user-select: none;
 }
+
 @keyframes gear_rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
+
 #preset_select {
 }
+
 .button_preset_show {
-  width: 7em;
+    width: 7em;
 }
+
 .generic_button {
-  background: transparent none scroll no-repeat left top;
-  border: 1px solid #808080;
-  margin: 15px 4px 4px 4px;
-  border-radius: 3px;
-  box-shadow: 2px 2px 3px 0px #a0a0a0;
+    background: transparent none scroll no-repeat left top;
+    border: 1px solid #808080;
+    margin: 15px 4px 4px 4px;
+    border-radius: 3px;
+    box-shadow: 2px 2px 3px 0px #a0a0a0;
 }
+
 .generic_select {
-  background: transparent none scroll no-repeat left top;
-  border: 1px solid #808080;
-  margin: 15px 4px 4px 4px;
-  border-radius: 3px;
-  box-shadow: 2px 2px 3px 0px #a0a0a0;
+    background: transparent none scroll no-repeat left top;
+    border: 1px solid #808080;
+    margin: 15px 4px 4px 4px;
+    border-radius: 3px;
+    box-shadow: 2px 2px 3px 0px #a0a0a0;
 }
+
 .list_preset_show {
-  text-align: left;
+    text-align: left;
 }
+
 .export_resolution {
-  width: 80px;
+    width: 80px;
 }
+
 .export_popup_labels {
-  float: left;
-  line-height: 26pt;
-  text-align: left;
+    float: left;
+    line-height: 26pt;
+    text-align: left;
 }
+
 .preset_popup_div {
-  border: none;
+    border: none;
 }
+
 .preset_popup_div .modal-dialog {
-  margin-top: 0px;
+    margin-top: 0px;
 }
+
 .yaxis_popup_label_minmax {
-  display: inline-block;
-  width: 2.5em;
+    display: inline-block;
+    width: 2.5em;
 }
 
 .close_button_symbol {
-  font-size: 36pt;
+    font-size: 36pt;
 }
+
 .list_arrow_icon {
-  margin: 0px 5px 0px 0px;
-  transform: translate(-3px, -3px);
+    margin: 0px 5px 0px 0px;
+    transform: translate(-3px, -3px);
 }
+
 .export_popup_label {
-  width: 6em;
-  user-select: none;
+    width: 6em;
+    user-select: none;
 }
+
 .config_popup_label {
-  width: 11em;
-  user-select: none;
+    width: 11em;
+    user-select: none;
 }
+
 .metric_popup_label {
-  width: 4em;
+    width: 4em;
 }
+
 .xaxis_popup_label {
-  width: 5.5em;
+    width: 5.5em;
 }
+
 .xaxis_date_field {
-  width: 10em;
+    width: 10em;
 }
 
 .form-check-input {
-  display: inline-block;
-  height: 15px;
-  margin-top: 16px;
+    display: inline-block;
+    height: 15px;
+    margin-top: 16px;
 }
 
 .col-form-label, .leftalign {
-  text-align: left;
+    text-align: left;
 }
 
 .modebar-btn .icon {
-  width: 28px;
-  height: 28px;
+    width: 28px;
+    height: 28px;
 }
 
 .navbar {
-  align-items: center;
-  justify-content: flex-start;
+    align-items: center;
+    justify-content: flex-start;
 }
+
 .navbar .btn {
-  margin-left: 12px;
-  margin-right: 24px;
+    margin-left: 12px;
+    margin-right: 24px;
 }
 
 .fullwidth {
-  width: 100%;
-  box-sizing: initial;
+    width: 100%;
+    box-sizing: initial;
 }
