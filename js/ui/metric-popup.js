@@ -70,7 +70,7 @@ export const MetricPopup = {
 
         // special behavior when creating a new metric
         if (oldName === null ||
-      undefined === oldName) {
+          undefined === oldName) {
           if (evt.target.getAttribute('class') === 'popup_trashcan') return
 
           if (evt.target.getAttribute('class') === 'popup_ok') {
@@ -205,7 +205,7 @@ export const MetricPopup = {
           </div>
           <div class="modal-footer">
             <button v-if="!isEmpty" class="btn btn-danger" v-on:click="trashcanClicked">
-              <img src="img/icons/trash.svg" class="popup_trashcan" width="26" height="26" />
+              <img src="img/icons/trash.svg" class="popup_trashcan" width="18" height="18" />
             </button>
             <button class="btn btn-primary popup_ok" v-on:click="closePopup">
               {{ saveButtonText }}

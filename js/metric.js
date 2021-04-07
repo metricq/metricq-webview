@@ -37,7 +37,7 @@ export class Metric {
     this.popupKey = 'popup_' + computedKey
     let htmlText = ''
     if (newName === '') {
-      htmlText += '<img src="img/icons/plus-circle.svg" width="28" height="28" /> Neu '
+      htmlText += '<img src="img/icons/plus-circle.svg" width="20" height="20" /> Neu '
     } else {
       htmlText += newName
     }
