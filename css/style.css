@@ -71,6 +71,13 @@ body {
     border-radius: 4px;
     box-shadow: 0px 0px 2px 0px #000000;
     margin: 0px 3px 0px 0px;
+
+.legend_item img {
+    width: 14px;
+    height: 14px;
+    position: relative;
+    right: 2px;
+    bottom: 1px;
 }
 
 #popup_veil {
