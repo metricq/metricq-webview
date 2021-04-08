@@ -15,7 +15,6 @@ export const MetricLegend = {
     },
     trashcanClicked: function () {
       const metricBase = Store.getMetricBase(this.$props.metric.name)
-      Store.deleteMetric(metricBase)
       window.MetricQWebView.instances[0].deleteMetric(metricBase)
     }
   },
