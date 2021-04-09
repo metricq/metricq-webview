@@ -304,3 +304,11 @@ body {
     width: 100%;
     box-sizing: initial;
 }
+
+.new_metric_popup_div {
+    text-align: left;
+}
+
+.btn-metric {
+    margin-top: 230px
+}

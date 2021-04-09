@@ -6,6 +6,7 @@
   <link rel="icon" href="img/icons/graph-up.svg"/>
   <link rel="stylesheet" href="css/bootstrap.min.css"/>
   <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
 
 
   <!-- need to prevent safari users to do fancy two-finger-zooming on the webpage -->
@@ -43,6 +44,7 @@
       v-bind:metric="metric"
       v-bind:key="metric.name"
     ></metric-legend>
+    <new-metric-legend></new-metric-legend>
   </ul>
   <div id="wrapper_popup_legend">
     <metric-popup
@@ -51,6 +53,12 @@
       v-bind:key="metric.popupKey"
       v-if="metric.popup"
     ></metric-popup>
+  </div>
+  <div id="wrapper_popup_newlegend">
+    <new-metric-popup
+      v-model="popups.newmetric"
+      v-if="popups.newmetric"
+    ></new-metric-popup>
   </div>
   <div id="wrapper_popup_configuration">
     <configuration-popup
@@ -85,6 +93,7 @@
     ></export-popup>
   </div>
 </div>
+<script src="https://unpkg.com/vue-multiselect@2.1.0"></script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>

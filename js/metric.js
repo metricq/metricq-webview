@@ -9,15 +9,11 @@ const markerSymbols = ['.', 'o', 'v', '^', '<', '>', 's', 'p', '*', 'h', '+', 'x
 export { markerSymbols }
 
 export class Metric {
-  constructor (paramRenderer, paramName, paramColor, paramMarker, paramTraces) {
+  constructor (paramRenderer, paramName, paramTraces) {
     this.renderer = paramRenderer
     this.updateName(paramName)
-    this.marker = paramMarker
-    if (undefined === paramColor) {
-      this.color = Metric.metricBaseToRgb(paramName)
-    } else {
-      this.color = paramColor
-    }
+    this.marker = Metric.metricBaseToMarker(paramName)
+    this.color = Metric.metricBaseToRgb(paramName)
     this.traces = []
     this.setTraces(paramTraces)
     this.globalMinmax = undefined
@@ -36,11 +32,7 @@ export class Metric {
     const computedKey = this.filterKey(newName)
     this.popupKey = 'popup_' + computedKey
     let htmlText = ''
-    if (newName === '') {
-      htmlText += '<img src="img/icons/plus-circle.svg" width="20" height="20" /> Neu '
-    } else {
-      htmlText += newName
-    }
+    htmlText += newName
     // NOPE this does not work :(
     // if(this.errorprone)
     // {
@@ -99,5 +91,9 @@ export class Metric {
   static metricBaseToRgb (metricBase) {
     const rgbArr = hslToRgb((crc32(metricBase) >> 24 & 255) / 255.00, 1, 0.46)
     return 'rgb(' + rgbArr[0] + ',' + rgbArr[1] + ',' + rgbArr[2] + ')'
+  }
+
+  static metricBaseToMarker (metricBase) {
+    return markerSymbols[crc32(metricBase) % markerSymbols.length]
   }
 }

@@ -11,7 +11,8 @@ export class StoreClass {
         yaxis: false,
         xaxis: false,
         presetSelection: false,
-        configuration: false
+        configuration: false,
+        newmetric: false
       }
     }
   }

@@ -70,16 +70,10 @@ export const PresetPopup = {
     showMetrics: function () {
       veil.destroy()
       this.$emit('toggle', false)
-      let hasEmptyMetric = false
-      let i = 0
       const metricNamesArr = []
-      for (; i < Store.state.selectedPreset.length; ++i) {
+      for (let i = 0; i < Store.state.selectedPreset.length; ++i) {
         const metricName = Store.state.selectedPreset[i]
-        if (metricName.length === 0) hasEmptyMetric = true
         metricNamesArr.push(metricName)
-      }
-      if (!hasEmptyMetric) {
-        metricNamesArr.push('')
       }
       initializeMetrics(metricNamesArr, (new Date()).getTime() - 3600 * 1000 * 2, (new Date()).getTime())
     }

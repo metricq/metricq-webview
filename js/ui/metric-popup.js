@@ -22,14 +22,6 @@ export const MetricPopup = {
     }
   },
   computed: {
-    saveButtonText: {
-      get: function () {
-        return this.metric.name === '' ? 'Erstellen' : 'OK'
-      },
-      set: function (newValue) {
-        // do nothing
-      }
-    },
     isEmpty: {
       get: function () {
         return this.metric.name === ''
@@ -208,7 +200,7 @@ export const MetricPopup = {
               <img src="img/icons/trash.svg" class="popup_trashcan" width="18" height="18" />
             </button>
             <button class="btn btn-primary popup_ok" v-on:click="closePopup">
-              {{ saveButtonText }}
+              OK
             </button>
           </div>
         </div>
