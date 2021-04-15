@@ -12,6 +12,7 @@ export class StoreClass {
         xaxis: false,
         presetSelection: false,
         configuration: false,
+        link: false,
         newmetric: false
       }
     }

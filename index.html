@@ -21,15 +21,16 @@
       <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
       MetricQ-WebView
     </a>
-
     <button class="btn btn-outline-primary" id="button_configuration">
-      <img src="img/icons/tools.svg" width="20" height="20"/>
+      <img class="navimg" src="img/icons/tools.svg"/>
       Einstellungen
     </button>
-    <br/>
     <button class="btn btn-outline-primary" id="button_export">
-      <img src="img/icons/file-earmark-arrow-down.svg" width="20" height="20"/>
+      <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
       Export
+    </button>
+    <button class="btn btn-outline-primary" id="button_link">
+      <img class="navimg" src="img/icons/question-circle.svg"/>
     </button>
   </nav>
 </div>
@@ -91,6 +92,12 @@
       v-model="popups.export"
       v-if="popups.export"
     ></export-popup>
+  </div>
+  <div id="wrapper_popup_link">
+    <link-popup
+      v-model="popups.link"
+      v-if="popups.link"
+    ></link-popup>
   </div>
 </div>
 <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>

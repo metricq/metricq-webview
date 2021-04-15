@@ -32,6 +32,9 @@ function initNonVueButtons () {
   document.getElementById('button_configuration').addEventListener('click', function (evt) {
     Store.togglePopup('configuration')
   })
+  document.getElementById('button_link').addEventListener('click', function (evt) {
+    Store.togglePopup('link')
+  })
 }
 
 document.addEventListener('DOMContentLoaded', initNonVueButtons)
