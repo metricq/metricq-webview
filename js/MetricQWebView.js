@@ -58,6 +58,7 @@ class MetricQWebView {
     this.lastThrottledReloadTime = 0
     this.RELOAD_THROTTLING_DELAY = 150
     this.reloadThrottleTimeout = undefined
+    this.relative = false
 
     if (paramMetricNamesArr.length > 0) {
       this.handler.doRequest(400)
@@ -82,7 +83,7 @@ class MetricQWebView {
       }
     }
 
-    this.updateMetricUrl()
+    //this.updateMetricUrl()
     // console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
 
     if (!this.hasPlot) {
@@ -213,7 +214,25 @@ class MetricQWebView {
     //   }
     //   encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj))
     // } else {
-    encodedStr = '.' + this.handler.startTime + '*' + this.handler.stopTime
+    if (!this.relative) {
+      encodedStr = '.' + this.handler.startTime + '*' + this.handler.stopTime
+    } else {
+      const now = moment()
+      const timeArray = ['y', 'M', 'd', 'h', 'm']
+      const times = [moment(this.handler.startTime), moment(this.handler.stopTime)]
+      times.forEach((timePoint, index) => {
+        let tempStr = 'now'
+        timeArray.forEach(time => {
+          const timediff = now.diff(times[index], time)
+          if (timediff > 0) {
+            times[index].add(timediff, time)
+            tempStr += '-' + timediff + time
+          }
+        })
+        times[index] = tempStr
+      })
+      encodedStr = '.' + times[0] + '*' + times[1]
+    }
     for (const metricBase in this.store.state.allMetrics) {
       encodedStr += '*' + this.store.state.allMetrics[metricBase].name
     }
@@ -418,13 +437,32 @@ export function importMetricUrl () {
         return false
       }
       const timeRanges = determineTimeRangeOfJsUrl(metricsObj)
-
       initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1])
       return true
     } else if (firstChar === '.') {
       const splitted = jsurlStr.split('*')
       if (splitted.length > 1) {
-        initializeMetrics(splitted.slice(2), parseInt(splitted[0].substring(1)), parseInt(splitted[1]))
+        if (splitted[0].substring(1, 4) === 'now') {
+          const now = moment()
+          const timeArray = ['y', 'M', 'd', 'h', 'm']
+          for (let i = 0; i <= 1; i++) {
+            const splitTime = splitted[i].split('-')
+            splitted[i] = now.clone()
+            for (let j = 1; j < splitTime.length; j++) {
+              if (timeArray.includes(splitTime[j].charAt(splitTime[j].length - 1))) {
+                splitted[i].subtract(parseInt(splitTime[j].substring(0, splitTime[j].length - 1)), splitTime[j].charAt(splitTime[j].length - 1))
+              } else {
+                console.log('could not interpret URL')
+                return false
+              }
+            }
+          }
+          window.MetricQWebView.instances[0].relative = true
+          initializeMetrics(splitted.slice(2), splitted[0].valueOf(), splitted[1].valueOf())
+        } else {
+          console.log(splitted[0].substring(1, 3))
+          initializeMetrics(splitted.slice(2), parseInt(splitted[0].substring(1)), parseInt(splitted[1]))
+        }
         return true
       }
     }

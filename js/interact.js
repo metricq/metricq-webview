@@ -32,6 +32,7 @@ function uiInteractPan (metricQInstance, evtObj) {
 }
 
 function uiInteractZoomArea (metricQInstance, evtObj) {
+  window.MetricQWebView.instances[0].relative = false
   if (mouseDown.previousPos[0] !== mouseDown.currentPos[0] ||
     mouseDown.previousPos[1] !== mouseDown.currentPos[1]) {
     metricQInstance.graticule.draw(false)
@@ -75,6 +76,7 @@ function uiInteractZoomArea (metricQInstance, evtObj) {
 }
 
 function uiInteractZoomIn (metricQInstance, evtObj) {
+  window.MetricQWebView.instances[0].relative = false
   evtObj.preventDefault()
   const relativeStart = mouseDown.relativeStartPos
   const relativeEnd = calculateActualMousePos(evtObj)
@@ -99,6 +101,7 @@ function uiInteractZoomIn (metricQInstance, evtObj) {
 }
 
 function uiInteractZoomWheel (metricQInstance, evtObj) {
+  window.MetricQWebView.instances[0].relative = false
   if (!evtObj.target || !metricQInstance) {
     return
   }
