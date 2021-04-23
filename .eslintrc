@@ -1,11 +1,17 @@
 {
-  "extends": ["standard", "standard-jsx", "plugin:vue/recommended"],
+  "extends": [
+    "standard",
+    "standard-jsx",
+    "plugin:vue/recommended"
+  ],
   "globals": {
     "Vue": "readonly",
     "MetricQHistory": "readonly",
     // Web API
     "Image": "readonly",
-    "XMLHttpRequest": "readonly"
+    "XMLHttpRequest": "readonly",
+    //moment.js
+    "moment": "readonly"
   },
   "rules": {
     "no-unused-vars": "off"

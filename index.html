@@ -4,9 +4,10 @@
   <meta charset="utf8"/>
   <title>MetricQ WebView</title>
   <link rel="icon" href="img/icons/graph-up.svg"/>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
   <link rel="stylesheet" href="css/bootstrap.min.css"/>
   <link rel="stylesheet" href="css/style.css"/>
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+
 
   <!-- need to prevent safari users to do fancy two-finger-zooming on the webpage -->
   <meta name="viewport"
@@ -20,7 +21,6 @@
       <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
       MetricQ-WebView
     </a>
-
     <button class="btn btn-outline-primary" id="button_configuration">
       <img src="img/icons/tools.svg" width="20" height="20"/>
       Einstellungen
@@ -30,7 +30,10 @@
       <img src="img/icons/file-earmark-arrow-down.svg" width="20" height="20"/>
       Export
     </button>
-    <input type="text" name="daterange"/>
+    <div id="date_range" class="btn btn-outline-primary" align="right">
+      <img src="img/icons/clock.svg" width="20" height="20">&nbsp;
+      <span></span>
+    </div>
   </nav>
 </div>
 <div class="wrapper_body">

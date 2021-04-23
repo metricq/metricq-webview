@@ -82,8 +82,6 @@ class MetricQWebView {
         allTraces = allTraces.concat(curMetric.traces)
       }
     }
-
-    //this.updateMetricUrl()
     // console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
 
     if (!this.hasPlot) {

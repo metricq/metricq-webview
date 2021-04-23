@@ -1,3 +1,5 @@
+/* eslint-env jquery */
+
 import './../lib/vue.js'
 
 import './../lib/jsurl.js'
@@ -33,58 +35,61 @@ function initNonVueButtons () {
     Store.togglePopup('configuration')
   })
   $(function () {
-    $('input[name="daterange"]').daterangepicker({
+    const daterange = $('#date_range')
+
+    const start = moment(window.MetricQWebView.instances[0].handler.startTime)
+    const end = moment(window.MetricQWebView.instances[0].handler.stopTime)
+
+    function cb (start, end) {
+      $('#date_range span').html(start.format('DD/MM/YYYY HH:mm') + ' - ' + end.format('DD/MM/YYYY HH:mm'))
+    }
+
+    cb(start, end)
+    daterange.daterangepicker({
       opens: 'left',
-      'timePicker': true,
-      'timePicker24Hour': true,
-      'showCustomRangeLabel': false,
-      'locale': {
-        'format': 'DD/MM/YYYY HH:mm',
-        'firstDay': 1
+      timePicker: true,
+      timePicker24Hour: true,
+      showCustomRangeLabel: false,
+      alwaysShowCalendars: true,
+      locale: {
+        format: 'DD/MM/YYYY HH:mm',
+        firstDay: 1
       },
+      startDate: start,
+      endDate: end,
       ranges: {
-        'Last 5 minutes': [,],
-        'Last 15 minutes': [,],
-        'Last 30 minutes': [,],
-        'Last 1 hour': [,],
-        'Last 3 hours': [,],
-        'Last 6 hours': [,],
-        'Last 12 hours': [,],
-        'Last 24 hours': [,],
-        'Last 2 days': [,],
-        'Last 7 days': [,],
-        'Last 30 days': [,],
-        'Last 90 days': [,],
-        'Last 6 months': [,],
-        'Last 1 year': [,],
-        'Today': [,],
-        'Yesterday': [,],
-        'This week': [,],
-        'This month': [,],
-        'Last month': [,]
-      },
-      'alwaysShowCalendars': true,
-      'startDate': moment(window.MetricQWebView.instances[0].handler.startTime),
-      'endDate': moment(window.MetricQWebView.instances[0].handler.stopTime)
-    }, function (start, end, label) {
+        'Last 5 minutes': [],
+        'Last 15 minutes': [],
+        'Last 30 minutes': [],
+        'Last 1 hour': [],
+        'Last 3 hours': [],
+        'Last 6 hours': [],
+        'Last 12 hours': [],
+        'Last 24 hours': [],
+        'Last 2 days': [],
+        'Last 7 days': [],
+        'Last 30 days': [],
+        'Last 90 days': [],
+        'Last 6 months': [],
+        'Last 1 year': [],
+        Today: [],
+        Yesterday: [],
+        'This week': [],
+        'This month': [],
+        'Last month': []
+      }
+    }, function (start, end) {
+      cb(start, end)
       if (Math.abs(moment().unix() - end.unix()) < 60 * 2) {
         window.MetricQWebView.instances[0].relative = true
-        window.MetricQWebView.instances[0].handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
       } else {
         window.MetricQWebView.instances[0].relative = false
-        window.MetricQWebView.instances[0].handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
       }
+      window.MetricQWebView.instances[0].handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
       window.MetricQWebView.instances[0].reload()
     })
-    $('input[name="daterange"]').on('show.daterangepicker', function (ev, picker) {
+    daterange.on('show.daterangepicker', function (ev, picker) {
       picker.ranges = {
-        'last 3 hours': [moment().subtract(3, 'hours'), moment()],
-        'Today': [moment().startOf('day'), moment()],
-        'Yesterday': [moment().subtract(1, 'days').startOf('day'), moment().startOf('day')],
-        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-        'This Month': [moment().startOf('month'), moment()],
-        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
         'Last 5 minutes': [moment().subtract(5, 'minutes'), moment()],
         'Last 15 minutes': [moment().subtract(15, 'minutes'), moment()],
         'Last 30 minutes': [moment().subtract(30, 'minutes'), moment()],
@@ -99,8 +104,8 @@ function initNonVueButtons () {
         'Last 90 days': [moment().subtract(90, 'days'), moment()],
         'Last 6 months': [moment().subtract(6, 'months'), moment()],
         'Last 1 year': [moment().subtract(1, 'years'), moment()],
-        'Today': [moment().startOf('day'), moment()],
-        'Yesterday': [moment().subtract(1, 'days').startOf('day'), moment().startOf('day')],
+        Today: [moment().startOf('day'), moment()],
+        Yesterday: [moment().subtract(1, 'days').startOf('day'), moment().startOf('day')],
         'This week': [moment().startOf('week'), moment()],
         'This month': [moment().startOf('month'), moment()],
         'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
