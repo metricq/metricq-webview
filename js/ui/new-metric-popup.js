@@ -1,7 +1,7 @@
 import { PopupHeader } from './popup-header.js'
 import { veil } from './veil.js'
 import { Store } from '../store.js'
-import { markerSymbols, Metric } from '../metric.js'
+import { Metric } from '../metric.js'
 
 export const NewMetricPopup = {
   components: {
@@ -37,7 +37,10 @@ export const NewMetricPopup = {
     }
   },
   methods: {
-    customLabel ({ title, desc }) {
+    customLabel ({ title }) {
+      return `${title}`
+    },
+    multiselectLabel (title, desc) {
       if (desc) {
         if (title.length + desc.length >= 50) {
           return `${title} – ${desc.substring(0, 50 - title.length)} ...`
@@ -97,7 +100,10 @@ export const NewMetricPopup = {
           <popup-header v-bind:popupTitle="popupTitle"></popup-header>
           <div class="modal-body " >
             <VueMultiSelect v-model="value" ref="multi" track-by="title" :options="options" :multiple="true" :searchable="true" :internal-search="false" :clear-on-select="false" :close-on-select="false" :options-limit="3000" :limit="5" :limit-text="limitText" :max-height="250" :show-no-results="false" :hide-selected="false" :custom-label="customLabel" @open="firstSearch" @search-change="changeSearch" @close="keepOpen" placeholder="Metrik suchen" >
-           </VueMultiSelect>
+              <template slot="option" slot-scope="props">
+                <span>{{ multiselectLabel(props.option.title,props.option.desc) }}</span>
+              </template>
+            </VueMultiSelect>
           </div>
           <div class="modal-footer">
             <button class="btn btn-primary btn-metric" v-on:click="addMetrics">
