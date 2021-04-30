@@ -24,8 +24,9 @@ function uiInteractPan (metricQInstance, evtObj) {
   if (mouseDown.previousPos[0] !== mouseDown.currentPos[0] ||
     mouseDown.previousPos[1] !== mouseDown.currentPos[1]) {
     const timeToMoveBy = (mouseDown.currentPos[0] - mouseDown.previousPos[0]) * -1 * metricQInstance.graticule.curTimePerPixel
-    metricQInstance.handler.setTimeRange(metricQInstance.handler.startTime + timeToMoveBy,
-      metricQInstance.handler.stopTime + timeToMoveBy)
+    // TODO: handler.shifttimerange
+    metricQInstance.handler.setTimeRange(metricQInstance.handler.startTime.getUnix() + timeToMoveBy,
+      metricQInstance.handler.stopTime.getUnix() + timeToMoveBy)
     metricQInstance.throttledReload()
     metricQInstance.graticule.draw(false)
   }
@@ -107,7 +108,7 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
   }
   evtObj.preventDefault()
   if (evtObj.deltaX && uiOptions.horizontalScrolling) { // horizontal scrolling
-    const deltaRange = metricQInstance.handler.stopTime - metricQInstance.handler.startTime// metricQInstance.graticule.curTimeRange[1] - metricQInstance.graticule.curTimeRange[0];
+    const deltaRange = metricQInstance.handler.stopTime.getUnix() - metricQInstance.handler.startTime.getUnix()// metricQInstance.graticule.curTimeRange[1] - metricQInstance.graticule.curTimeRange[0];
     // TODO: set start and stopTime of the handler
     if (evtObj.deltaX < 0) {
       if (!metricQInstance.handler.setTimeRange(metricQInstance.graticule.curTimeRange[0] - deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] - deltaRange * 0.2)) {

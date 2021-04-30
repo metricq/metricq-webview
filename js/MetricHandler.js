@@ -1,4 +1,5 @@
 import { Metric, markerSymbols } from './metric.js'
+import { MetricTimestamp } from './MetricTimestamp.js'
 import { showUserHint } from './interact.js'
 
 const METRICQ_BACKEND = 'https://grafana.metricq.zih.tu-dresden.de/metricq'
@@ -9,14 +10,37 @@ export class MetricHandler {
   constructor (paramRenderer, paramMetricsArr, paramStartTime, paramStopTime, store) {
     this.store = store
     this.renderer = paramRenderer
-    this.startTime = paramStartTime
-    this.stopTime = paramStopTime
+    this.startTime = new MetricTimestamp(paramStartTime)
+    this.stopTime = new MetricTimestamp(paramStopTime)
     this.metricQHistory = new MetricQHistory(METRICQ_BACKEND)
 
     this.WIGGLEROOM_PERCENTAGE = 0.05
     this.TIME_MARGIN_FACTOR = 1.00 / 3
 
     this.initializeMetrics(paramMetricsArr)
+
+    this.labelMap = {
+      'Last 5 minutes': ['now-5m', 'now'],
+      'Last 15 minutes': ['now-15m', 'now'],
+      'Last 30 minutes': ['now-30m', 'now'],
+      'Last 1 hour': ['now-1h', 'now'],
+      'Last 3 hours': ['now-3h', 'now'],
+      'Last 6 hours': ['now-6h', 'now'],
+      'Last 12 hours': ['now-12h', 'now'],
+      'Last 24 hours': ['now-24h', 'now'],
+      'Last 2 days': ['now-2d', 'now'],
+      'Last 7 days': ['now-7d', 'now'],
+      'Last 30 days': ['now-30d', 'now'],
+      'Last 90 days': ['now-90d', 'now'],
+      'Last 6 months': ['now-6M', 'now'],
+      'Last 1 year': ['now-1y', 'now'],
+      Today: ['startday', 'now'],
+      Yesterday: ['startday-1d', 'startday'],
+      'This week': ['startweek', 'now'],
+      'Last week': ['startweek-7d', 'startweek'],
+      'This month': ['startmonth', 'now'],
+      'Last month': ['startmonth-1M', 'now']
+    }
   }
 
   initializeMetrics (initialMetricNames) {
@@ -31,7 +55,7 @@ export class MetricHandler {
   }
 
   doRequest (maxDataPoints) {
-    const timeMargin = (this.stopTime - this.startTime) * this.TIME_MARGIN_FACTOR
+    const timeMargin = (this.stopTime.getUnix() - this.startTime.getUnix()) * this.TIME_MARGIN_FACTOR
     const nonErrorProneMetrics = []
     const remainingMetrics = []
     for (const metricBase in this.store.state.allMetrics) {
@@ -45,8 +69,8 @@ export class MetricHandler {
       }
     }
 
-    const queryObj = this.metricQHistory.query(this.startTime - timeMargin,
-      this.stopTime + timeMargin,
+    const queryObj = this.metricQHistory.query(this.startTime.getUnix() - timeMargin,
+      this.stopTime.getUnix() + timeMargin,
       Math.round(maxDataPoints + (maxDataPoints * this.TIME_MARGIN_FACTOR * 2)))
     const defaultAggregates = ['min', 'max', 'avg', 'count']
     for (let i = 0; i < nonErrorProneMetrics.length; ++i) {
@@ -74,8 +98,8 @@ export class MetricHandler {
       // queryObj.run().then((dataset) => { this.handleResponse(dataset); });
     }
     for (let i = 0; i < remainingMetrics.length; ++i) {
-      const queryObj = this.metricQHistory.query(this.startTime - timeMargin,
-        this.stopTime + timeMargin,
+      const queryObj = this.metricQHistory.query(this.startTime.getUnix() - timeMargin,
+        this.stopTime.getUnix() + timeMargin,
         maxDataPoints)
       queryObj.target(remainingMetrics[i], defaultAggregates)
 
@@ -147,41 +171,6 @@ export class MetricHandler {
         selfReference.receivedError(evt.target.status, metricArr)
       }
     }
-  }
-
-  createMetricQQuery (startTime, stopTime, maxDataPoints, metricArr, metricFunctions) {
-    if (startTime instanceof Date) {
-      startTime = startTime.getTime()
-    }
-    if (stopTime instanceof Date) {
-      stopTime = stopTime.getTime()
-    }
-    startTime = parseInt(startTime)
-    stopTime = parseInt(stopTime)
-    maxDataPoints = parseInt(maxDataPoints)
-    if (!(startTime < stopTime)) {
-      return undefined
-    }
-    if (!maxDataPoints) {
-      maxDataPoints = 400
-    }
-    const queryObj = {
-      range:
-        {
-          from: new Date(startTime).toISOString(),
-          to: new Date(stopTime).toISOString()
-        },
-      maxDataPoints: maxDataPoints,
-      targets: []
-    }
-    for (let i = 0; i < metricArr.length; ++i) {
-      const targetObj = {
-        metric: metricArr[i],
-        functions: metricFunctions
-      }
-      queryObj.targets.push(targetObj)
-    }
-    return JSON.stringify(queryObj)
   }
 
   // TODO: move this function to DataCache, maybe?
@@ -328,11 +317,15 @@ export class MetricHandler {
   setTimeRange (paramStartTime, paramStopTime) {
     // TODO: check for zoom area if it is too narrow (i.e. less than 1000 ms)
     // TODO: sync the aforementioned minimum time window
-    if (undefined === paramStartTime) {
-      paramStartTime = this.startTime
+    if (undefined === paramStartTime || paramStartTime instanceof MetricTimestamp) {
+      paramStartTime = this.startTime.getUnix()
+    } else {
+      this.startTime.timeString = paramStartTime
     }
-    if (undefined === paramStopTime) {
-      paramStopTime = this.stopTime
+    if (undefined === paramStopTime || paramStopTime instanceof MetricTimestamp) {
+      paramStopTime = this.stopTime.getUnix()
+    } else {
+      this.stopTime.timeString = paramStopTime
     }
 
     if (isNaN(paramStartTime) || isNaN(paramStopTime)) {
@@ -358,13 +351,10 @@ export class MetricHandler {
       timeSuitable = false
     }
 
-    this.startTime = paramStartTime
-    this.stopTime = paramStopTime
-
     this.renderer.updateMetricUrl()
 
     // maybe move this line to MetricQWebView.setPlotRanges()? NAW
-    this.renderer.graticule.setTimeRange(this.startTime, this.stopTime)
+    this.renderer.graticule.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())
     return timeSuitable
     // this.lastRangeChangeTime = (new Date()).getTime();
     // TODO: return false when intended zoom area is smaller than e.g. 1000 ms
@@ -376,10 +366,10 @@ export class MetricHandler {
 
   zoomTimeAtPoint (pointAt, zoomDirection) {
     const zoomFactor = 1 + zoomDirection
-    const newTimeDelta = (this.stopTime - this.startTime) * zoomFactor
+    const newTimeDelta = (this.stopTime.getUnix() - this.startTime.getUnix()) * zoomFactor
     let couldZoom = false
     if (newTimeDelta > this.renderer.graticule.MIN_ZOOM_TIME) {
-      const relationalPositionOfPoint = (pointAt[0] - this.startTime) / (this.stopTime - this.startTime)
+      const relationalPositionOfPoint = (pointAt[0] - this.startTime.getUnix()) / (this.stopTime.getUnix() - this.startTime.getUnix())
       if (this.setTimeRange(pointAt[0] - (newTimeDelta * relationalPositionOfPoint),
         pointAt[0] + (newTimeDelta * (1 - relationalPositionOfPoint)))) {
         couldZoom = true
@@ -399,5 +389,11 @@ export class MetricHandler {
     const rowBodyEle = document.querySelector('.row_body')
     const maxDataPoints = Math.round(rowBodyEle.offsetWidth / this.renderer.configuration.resolution)
     this.doRequest(maxDataPoints)
+  }
+
+  setrelativeTimes (paramLabel) {
+    this.startTime.timeString = this.labelMap[paramLabel][0]
+    this.stopTime.timeString = this.labelMap[paramLabel][1]
+    this.setTimeRange(this.startTime, this.stopTime)
   }
 }

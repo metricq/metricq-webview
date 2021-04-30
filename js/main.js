@@ -37,8 +37,8 @@ function initNonVueButtons () {
   $(function () {
     const daterange = $('#date_range')
 
-    const start = moment(window.MetricQWebView.instances[0].handler.startTime)
-    const end = moment(window.MetricQWebView.instances[0].handler.stopTime)
+    const start = moment(window.MetricQWebView.instances[0].handler.startTime.getUnix())
+    const end = moment(window.MetricQWebView.instances[0].handler.stopTime.getUnix())
 
     function cb (start, end) {
       $('#date_range span').html(start.format('DD/MM/YYYY HH:mm') + ' - ' + end.format('DD/MM/YYYY HH:mm'))
@@ -57,59 +57,17 @@ function initNonVueButtons () {
       },
       startDate: start,
       endDate: end,
-      ranges: {
-        'Last 5 minutes': [],
-        'Last 15 minutes': [],
-        'Last 30 minutes': [],
-        'Last 1 hour': [],
-        'Last 3 hours': [],
-        'Last 6 hours': [],
-        'Last 12 hours': [],
-        'Last 24 hours': [],
-        'Last 2 days': [],
-        'Last 7 days': [],
-        'Last 30 days': [],
-        'Last 90 days': [],
-        'Last 6 months': [],
-        'Last 1 year': [],
-        Today: [],
-        Yesterday: [],
-        'This week': [],
-        'This month': [],
-        'Last month': []
-      }
-    }, function (start, end) {
+      ranges: window.MetricQWebView.instances[0].handler.labelMap
+    }, function (start, end, label) {
+      console.log(label)
+      // TODO: vue nutzen
       cb(start, end)
-      if (Math.abs(moment().unix() - end.unix()) < 60 * 2) {
-        window.MetricQWebView.instances[0].relative = true
+      if (label) {
+        window.MetricQWebView.instances[0].handler.setrelativeTimes(label)
       } else {
-        window.MetricQWebView.instances[0].relative = false
+        window.MetricQWebView.instances[0].handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
       }
-      window.MetricQWebView.instances[0].handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
       window.MetricQWebView.instances[0].reload()
-    })
-    daterange.on('show.daterangepicker', function (ev, picker) {
-      picker.ranges = {
-        'Last 5 minutes': [moment().subtract(5, 'minutes'), moment()],
-        'Last 15 minutes': [moment().subtract(15, 'minutes'), moment()],
-        'Last 30 minutes': [moment().subtract(30, 'minutes'), moment()],
-        'Last 1 hour': [moment().subtract(1, 'hours'), moment()],
-        'Last 3 hours': [moment().subtract(3, 'hours'), moment()],
-        'Last 6 hours': [moment().subtract(6, 'hours'), moment()],
-        'Last 12 hours': [moment().subtract(12, 'hours'), moment()],
-        'Last 24 hours': [moment().subtract(24, 'hours'), moment()],
-        'Last 2 days': [moment().subtract(2, 'days'), moment()],
-        'Last 7 days': [moment().subtract(7, 'days'), moment()],
-        'Last 30 days': [moment().subtract(30, 'days'), moment()],
-        'Last 90 days': [moment().subtract(90, 'days'), moment()],
-        'Last 6 months': [moment().subtract(6, 'months'), moment()],
-        'Last 1 year': [moment().subtract(1, 'years'), moment()],
-        Today: [moment().startOf('day'), moment()],
-        Yesterday: [moment().subtract(1, 'days').startOf('day'), moment().startOf('day')],
-        'This week': [moment().startOf('week'), moment()],
-        'This month': [moment().startOf('month'), moment()],
-        'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-      }
     })
   })
 }

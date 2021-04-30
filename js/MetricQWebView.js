@@ -28,7 +28,6 @@ class MetricQWebView {
 
     this.ele = paramParentEle
     this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime, this.store)
-    this.postRender = undefined
     this.countTraces = 0
     this.hasPlot = false
     this.graticule = undefined
@@ -58,7 +57,6 @@ class MetricQWebView {
     this.lastThrottledReloadTime = 0
     this.RELOAD_THROTTLING_DELAY = 150
     this.reloadThrottleTimeout = undefined
-    this.relative = false
 
     if (paramMetricNamesArr.length > 0) {
       this.handler.doRequest(400)
@@ -68,14 +66,13 @@ class MetricQWebView {
 
   reinitialize (metricsArr, startTime, stopTime) {
     this.handler.initializeMetrics(metricsArr)
-    this.handler.startTime = startTime
-    this.handler.stopTime = stopTime
+    this.handler.startTime.timeString = startTime
+    this.handler.stopTime.timeString = stopTime
     this.handler.doRequest(400)
   }
 
   renderMetrics (datapointsJSON) {
     let allTraces = []
-
     for (const metricBase in this.store.state.allMetrics) {
       const curMetric = this.store.state.allMetrics[metricBase]
       if (curMetric.traces) {
@@ -100,6 +97,7 @@ class MetricQWebView {
         this.margins.labels.left, this.margins.labels.bottom,
         [canvasSize[0], canvasSize[1]])
       this.hasPlot = true
+      // TODO: neue Funktion handler.refreshTimeRange?
       this.handler.setTimeRange(this.handler.startTime, this.handler.stopTime)
       // parameters two and three "true" (doDraw, doResize) are ignored here :/
       this.graticule.data.processMetricQDatapoints(datapointsJSON, true, true)
@@ -158,10 +156,6 @@ class MetricQWebView {
       this.graticule.data.processMetricQDatapoints(datapointsJSON, true, false)
       this.graticule.draw(false)
     }
-
-    if (this.postRender) {
-      this.postRender()
-    }
   }
 
   positionXAxisGear (rowBodyEle, gearEle) {
@@ -212,25 +206,7 @@ class MetricQWebView {
     //   }
     //   encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj))
     // } else {
-    if (!this.relative) {
-      encodedStr = '.' + this.handler.startTime + '*' + this.handler.stopTime
-    } else {
-      const now = moment()
-      const timeArray = ['y', 'M', 'd', 'h', 'm']
-      const times = [moment(this.handler.startTime), moment(this.handler.stopTime)]
-      times.forEach((timePoint, index) => {
-        let tempStr = 'now'
-        timeArray.forEach(time => {
-          const timediff = now.diff(times[index], time)
-          if (timediff > 0) {
-            times[index].add(timediff, time)
-            tempStr += '-' + timediff + time
-          }
-        })
-        times[index] = tempStr
-      })
-      encodedStr = '.' + times[0] + '*' + times[1]
-    }
+    encodedStr = '.' + this.handler.startTime.timeString + '*' + this.handler.stopTime.timeString
     for (const metricBase in this.store.state.allMetrics) {
       encodedStr += '*' + this.store.state.allMetrics[metricBase].name
     }
@@ -435,32 +411,13 @@ export function importMetricUrl () {
         return false
       }
       const timeRanges = determineTimeRangeOfJsUrl(metricsObj)
-      initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1])
+      // initializeMetric hier unnötig? auskommentieren scheint erstmal nichts zu zerstören
+      // initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1])
       return true
     } else if (firstChar === '.') {
       const splitted = jsurlStr.split('*')
       if (splitted.length > 1) {
-        if (splitted[0].substring(1, 4) === 'now') {
-          const now = moment()
-          const timeArray = ['y', 'M', 'd', 'h', 'm']
-          for (let i = 0; i <= 1; i++) {
-            const splitTime = splitted[i].split('-')
-            splitted[i] = now.clone()
-            for (let j = 1; j < splitTime.length; j++) {
-              if (timeArray.includes(splitTime[j].charAt(splitTime[j].length - 1))) {
-                splitted[i].subtract(parseInt(splitTime[j].substring(0, splitTime[j].length - 1)), splitTime[j].charAt(splitTime[j].length - 1))
-              } else {
-                console.log('could not interpret URL')
-                return false
-              }
-            }
-          }
-          window.MetricQWebView.instances[0].relative = true
-          initializeMetrics(splitted.slice(2), splitted[0].valueOf(), splitted[1].valueOf())
-        } else {
-          console.log(splitted[0].substring(1, 3))
-          initializeMetrics(splitted.slice(2), parseInt(splitted[0].substring(1)), parseInt(splitted[1]))
-        }
+        initializeMetrics(splitted.slice(2), splitted[0].substring(1), splitted[1])
         return true
       }
     }
@@ -474,11 +431,11 @@ export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
   if (window.MetricQWebView) {
     newManager = window.MetricQWebView.instances[0]
     newManager.reinitialize(metricNamesArr, timeStart, timeStop)
-    newManager.postRender = function () {
-    }
-  } else {
+  } // else Zweig wird anscheinend nie benötigt
+  /* else {
+    console.log('2')
     newManager = new MetricQWebView(document.querySelector('.row_body'), metricNamesArr, timeStart, timeStop)
     newManager.postRender = function () {
     }
-  }
+  } */
 }
