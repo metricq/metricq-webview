@@ -9,7 +9,6 @@ export class StoreClass {
       popups: {
         export: false,
         yaxis: false,
-        xaxis: false,
         presetSelection: false,
         configuration: false
       },
@@ -65,7 +64,6 @@ export class StoreClass {
   setEndTime (time) {
     Vue.set(this.state.timestamp, 'end', time)
   }
-
 }
 
 export const Store = new StoreClass()

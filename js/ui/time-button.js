@@ -1,3 +1,4 @@
+/* eslint-env jquery */
 // @vue/component
 export const TimeButton = {
   props: {
