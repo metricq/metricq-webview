@@ -66,8 +66,8 @@ class MetricQWebView {
 
   reinitialize (metricsArr, startTime, stopTime) {
     this.handler.initializeMetrics(metricsArr)
-    this.handler.startTime.timeString = startTime
-    this.handler.stopTime.timeString = stopTime
+    this.handler.startTime.updateTime(startTime)
+    this.handler.stopTime.updateTime(stopTime)
     this.handler.doRequest(400)
   }
 

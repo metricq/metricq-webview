@@ -1,7 +1,18 @@
+import { Store } from './store.js'
+
 export class MetricTimestamp {
-  constructor (paramTime) {
+  constructor (paramStartEnd) {
     // TODO: besserer Name für timeString und Erklärung
+    this.startEnd = paramStartEnd
+  }
+
+  updateTime (paramTime) {
     this.timeString = paramTime
+    if (this.startEnd === 'start') {
+      Store.setStartTime(this.getUnix())
+    } else if (this.startEnd === 'end') {
+      Store.setEndTime(this.getUnix())
+    }
   }
 
   getUnix () {

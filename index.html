@@ -15,78 +15,80 @@
 
 </head>
 <body>
-<div class="row_head">
-  <nav class="navbar navbar-light bg-light">
-    <a class="navbar-brand" href="?">
-      <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
-      MetricQ-WebView
-    </a>
-    <button class="btn btn-outline-primary" id="button_configuration">
-      <img src="img/icons/tools.svg" width="20" height="20"/>
-      Einstellungen
-    </button>
-    <br/>
-    <button class="btn btn-outline-primary" id="button_export">
-      <img src="img/icons/file-earmark-arrow-down.svg" width="20" height="20"/>
-      Export
-    </button>
-    <div id="date_range" class="btn btn-outline-primary" align="right">
-      <img src="img/icons/clock.svg" width="20" height="20">&nbsp;
-      <span></span>
+<div id="main_app">
+  <div class="row_head">
+    <nav class="navbar navbar-light bg-light">
+      <a class="navbar-brand" href="?">
+        <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
+        MetricQ-WebView
+      </a>
+      <button class="btn btn-outline-primary" id="button_configuration">
+        <img src="img/icons/tools.svg" width="20" height="20"/>
+        Einstellungen
+      </button>
+      <br/>
+      <button class="btn btn-outline-primary" id="button_export">
+        <img src="img/icons/file-earmark-arrow-down.svg" width="20" height="20"/>
+        Export
+      </button>
+      <time-button id="date_range" class="btn btn-outline-primary"
+                   v-bind:tstart="timestamp.start"
+                   v-bind:tend="timestamp.end">
+      </time-button>
+    </nav>
+  </div>
+  <div class="wrapper_body">
+    <div id="webview_container" class="row_body">
     </div>
-  </nav>
-</div>
-<div class="wrapper_body">
-  <div id="webview_container" class="row_body">
   </div>
-</div>
-<div class="row_foot" id="main_app">
-  <ul id="legend_list">
-    <metric-legend
-      v-for="metric in metricsList"
-      v-bind:metric="metric"
-      v-bind:key="metric.name"
-    ></metric-legend>
-  </ul>
-  <div id="wrapper_popup_legend">
-    <metric-popup
-      v-for="metric in metricsList"
-      v-bind:metric="metric"
-      v-bind:key="metric.popupKey"
-      v-if="metric.popup"
-    ></metric-popup>
-  </div>
-  <div id="wrapper_popup_configuration">
-    <configuration-popup
-      v-bind:config="configuration"
-      v-bind:key="configuration.key"
-      v-model="popups.configuration"
-      v-if="popups.configuration"
-    ></configuration-popup>
-  </div>
-  <div id="wrapper_popup_xaxis">
-    <xaxis-popup
-      v-model="popups.xaxis"
-      v-if="popups.xaxis"
-    ></xaxis-popup>
-  </div>
-  <div id="wrapper_popup_yaxis">
-    <yaxis-popup
-      v-model="popups.yaxis"
-      v-if="popups.yaxis"
-    ></yaxis-popup>
-  </div>
-  <div id="wrapper_popup_preset">
-    <preset-popup
-      v-model="popups.presetSelection"
-      v-if="popups.presetSelection"
-    ></preset-popup>
-  </div>
-  <div id="wrapper_popup_export">
-    <export-popup
-      v-model="popups.export"
-      v-if="popups.export"
-    ></export-popup>
+  <div class="row_foot">
+    <ul id="legend_list">
+      <metric-legend
+        v-for="metric in metricsList"
+        v-bind:metric="metric"
+        v-bind:key="metric.name"
+      ></metric-legend>
+    </ul>
+    <div id="wrapper_popup_legend">
+      <metric-popup
+        v-for="metric in metricsList"
+        v-bind:metric="metric"
+        v-bind:key="metric.popupKey"
+        v-if="metric.popup"
+      ></metric-popup>
+    </div>
+    <div id="wrapper_popup_configuration">
+      <configuration-popup
+        v-bind:config="configuration"
+        v-bind:key="configuration.key"
+        v-model="popups.configuration"
+        v-if="popups.configuration"
+      ></configuration-popup>
+    </div>
+    <div id="wrapper_popup_xaxis">
+      <xaxis-popup
+        v-model="popups.xaxis"
+        v-if="popups.xaxis"
+      ></xaxis-popup>
+    </div>
+    <div id="wrapper_popup_yaxis">
+      <yaxis-popup
+        v-model="popups.yaxis"
+        v-if="popups.yaxis"
+      ></yaxis-popup>
+    </div>
+    <div id="wrapper_popup_preset">
+      <preset-popup
+        v-model="popups.presetSelection"
+        v-if="popups.presetSelection"
+      ></preset-popup>
+    </div>
+    <div id="wrapper_popup_export">
+      <export-popup
+        v-model="popups.export"
+        v-if="popups.export"
+      ></export-popup>
+    </div>
   </div>
 </div>
 <script type="module" src="js/main.js"></script>

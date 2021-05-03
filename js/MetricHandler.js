@@ -10,8 +10,8 @@ export class MetricHandler {
   constructor (paramRenderer, paramMetricsArr, paramStartTime, paramStopTime, store) {
     this.store = store
     this.renderer = paramRenderer
-    this.startTime = new MetricTimestamp(paramStartTime)
-    this.stopTime = new MetricTimestamp(paramStopTime)
+    this.startTime = new MetricTimestamp('start')
+    this.stopTime = new MetricTimestamp('end')
     this.metricQHistory = new MetricQHistory(METRICQ_BACKEND)
 
     this.WIGGLEROOM_PERCENTAGE = 0.05
@@ -320,12 +320,12 @@ export class MetricHandler {
     if (undefined === paramStartTime || paramStartTime instanceof MetricTimestamp) {
       paramStartTime = this.startTime.getUnix()
     } else {
-      this.startTime.timeString = paramStartTime
+      this.startTime.updateTime(paramStartTime)
     }
     if (undefined === paramStopTime || paramStopTime instanceof MetricTimestamp) {
       paramStopTime = this.stopTime.getUnix()
     } else {
-      this.stopTime.timeString = paramStopTime
+      this.stopTime.updateTime(paramStopTime)
     }
 
     if (isNaN(paramStartTime) || isNaN(paramStopTime)) {
@@ -392,8 +392,8 @@ export class MetricHandler {
   }
 
   setrelativeTimes (paramLabel) {
-    this.startTime.timeString = this.labelMap[paramLabel][0]
-    this.stopTime.timeString = this.labelMap[paramLabel][1]
+    this.startTime.updateTime(this.labelMap[paramLabel][0])
+    this.stopTime.updateTime(this.labelMap[paramLabel][1])
     this.setTimeRange(this.startTime, this.stopTime)
   }
 }
