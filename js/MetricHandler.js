@@ -23,11 +23,8 @@ export class MetricHandler {
     this.store.resetAllMetrics()
     for (let i = 0; i < initialMetricNames.length; ++i) {
       const curMetricName = initialMetricNames[i]
-      if (curMetricName.length > 0) {
-        this.store.setMetric(curMetricName, new Metric(this.renderer, curMetricName, undefined, markerSymbols[(i * 4) % markerSymbols.length], []))
-      }
+      this.store.setMetric(curMetricName, new Metric(this.renderer, curMetricName, []))
     }
-    this.store.setMetric('empty', new Metric(this.renderer, '', undefined, markerSymbols[markerSymbols.length - 1], []))
   }
 
   doRequest (maxDataPoints) {
@@ -319,7 +316,7 @@ export class MetricHandler {
   loadedMetric (metricBase, metricTraces, metricIndex) {
     const myMetric = this.store.state.allMetrics[metricBase]
     if (!myMetric) {
-      this.store.setMetric(metricBase, new Metric(this.renderer, metricBase, undefined, markerSymbols[metricIndex * 4], metricTraces))
+      this.store.setMetric(metricBase, new Metric(this.renderer, metricBase, metricTraces))
     } else {
       myMetric.setTraces(metricTraces)
     }

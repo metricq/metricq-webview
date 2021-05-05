@@ -270,12 +270,6 @@ class MetricQWebView {
     return undefined
   }
 
-  newEmptyMetric () {
-    if (!this.store.state.allMetrics.empty) {
-      this.store.setMetric('empty', new Metric(this, '', undefined, markerSymbols[0], []))
-    }
-  }
-
   deleteMetric (metricBase) {
     if (this.graticule) this.graticule.data.deleteMetric(metricBase)
     this.store.deleteMetric(metricBase)
@@ -295,13 +289,8 @@ class MetricQWebView {
       return false
     }
     metricReference.updateName(newName)
-    if (oldName === '') {
-      this.store.setMetric('empty', new Metric(this, '', undefined, markerSymbols[0], []))
-      this.store.setMetric(newName, metricReference)
-    } else {
-      this.deleteMetric(oldName)
-      this.store.setMetric(newName, metricReference)
-    }
+    this.deleteMetric(oldName)
+    this.store.setMetric(newName, metricReference)
     if (this.graticule) {
       let newCache = this.graticule.data.getMetricCache(newName)
       if (!newCache) {
