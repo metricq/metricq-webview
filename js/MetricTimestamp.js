@@ -7,7 +7,11 @@ export class MetricTimestamp {
   }
 
   updateTime (paramTime) {
-    this.timeString = paramTime
+    if (paramTime.toString().charAt(paramTime.length - 1) === 's') {
+      this.timeString = paramTime.substring(0, paramTime.length - 3)
+    } else {
+      this.timeString = paramTime
+    }
     if (this.startEnd === 'start') {
       Store.setStartTime(this.getUnix())
     } else if (this.startEnd === 'end') {
@@ -38,5 +42,9 @@ export class MetricTimestamp {
       }
       return unixTime.valueOf()
     }
+  }
+
+  getString () {
+    return this.timeString
   }
 }

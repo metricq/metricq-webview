@@ -181,7 +181,7 @@ class MetricQWebView {
     //   }
     //   encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj))
     // } else {
-    encodedStr = '.' + this.handler.startTime.timeString + '*' + this.handler.stopTime.timeString
+    encodedStr = '.' + this.handler.startTime.getString() + '*' + this.handler.stopTime.getString()
     for (const metricBase in this.store.state.allMetrics) {
       encodedStr += '*' + this.store.state.allMetrics[metricBase].name
     }

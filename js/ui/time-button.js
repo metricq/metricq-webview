@@ -35,13 +35,11 @@ export const TimeButton = {
         },
         ranges: window.MetricQWebView.instances[0].handler.labelMap
       }, function (start, end, label) {
-        console.log(label)
         if (label) {
           window.MetricQWebView.instances[0].handler.setrelativeTimes(label)
         } else {
           window.MetricQWebView.instances[0].handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
         }
-
         window.MetricQWebView.instances[0].reload()
       })
     })
@@ -49,7 +47,6 @@ export const TimeButton = {
   template: `
     <li>
       <img src="img/icons/clock.svg" width="20" height="20">&nbsp;
-      {{ststart}} - 
-      {{stend}}
+      {{ststart}} - {{stend}}
     </li>`
 }
