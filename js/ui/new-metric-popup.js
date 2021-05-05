@@ -55,7 +55,9 @@ export const NewMetricPopup = {
       return `und ${count} weitere Metriken`
     },
     keepOpen () {
-      this.$refs.multi.activate()
+      if (veil.myPopup) {
+        this.$refs.multi.activate()
+      }
     },
     addMetrics: function (evt) {
       if (this.value != null) {
