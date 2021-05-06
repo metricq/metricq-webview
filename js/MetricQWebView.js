@@ -306,7 +306,6 @@ class MetricQWebView {
 
   windowResize (evt) {
     if (this.graticule) {
-      this.positionXAxisGear(this.ele, document.getElementById('gear_xaxis'))
       this.graticule.windowResize(evt)
     }
   }

@@ -10,40 +10,27 @@ export class MetricHandler {
   constructor (paramRenderer, paramMetricsArr, paramStartTime, paramStopTime, store) {
     this.store = store
     this.renderer = paramRenderer
-    this.startTime = new MetricTimestamp('start')
-    this.stopTime = new MetricTimestamp('end')
+    this.startTime = new MetricTimestamp(paramStartTime, 'start')
+    this.stopTime = new MetricTimestamp(paramStopTime, 'end')
     this.metricQHistory = new MetricQHistory(METRICQ_BACKEND)
 
     this.WIGGLEROOM_PERCENTAGE = 0.05
     this.TIME_MARGIN_FACTOR = 1.00 / 3
 
     this.initializeMetrics(paramMetricsArr)
-//-*s is needed because the dateRangePicker seems to compare numbers in left and right side
-//=> if your choices are:
-// 'Last 30 minutes': ['now-30m', 'now'] and
-// 'Last 30 days': ['now-30d', 'now'] and you pick 'Last 30 days'
-// it will auto choose 'Last 30 minutes' the next time it is opened
     this.labelMap = {
-      'Last 5 minutes': ['now-5m', 'now'],
-      'Last 15 minutes': ['now-15m', 'now'],
-      'Last 30 minutes': ['now-30m', 'now'],
-      'Last 1 hour': ['now-1h', 'now'],
-      'Last 3 hours': ['now-3h', 'now'],
-      'Last 6 hours': ['now-6h', 'now'],
-      'Last 12 hours': ['now-12h', 'now'],
-      'Last 24 hours': ['now-24h', 'now'],
-      'Last 2 days': ['now-2d', 'now'],
-      'Last 7 days': ['now-7d', 'now'],
-      'Last 30 days': ['now-30d-1s', 'now'],
-      'Last 3 months': ['now-3M', 'now'],
-      'Last 6 months': ['now-6M-1s', 'now'],
-      'Last 1 year': ['now-1y-1s', 'now'],
-      Today: ['startday-4s', 'now-'],
-      Yesterday: ['startday-1d-1s', 'startday'],
-      'This week': ['startweek-8s', 'now'],
-      'Last week': ['startweek-7d-1s', 'startweek'],
-      'This month': ['startmonth-9s', 'now'],
-      'Last month': ['startmonth-1M-2s', 'now']
+      'Letzte 5 Minuten': ['now-5m', 'now'],
+      'Letzte 15 Minuten': ['now-15m', 'now'],
+      'Letzte Stunde': ['now-1h', 'now'],
+      'Letzte 6 Stunden': ['now-6h', 'now'],
+      'Letzte 24 Stunden': ['now-24h', 'now'],
+      'Letzte 2 Tage': ['now-2d', 'now'],
+      'Letzte 7 Tage': ['now-7d', 'now'],
+      'Letzte 30 Tage': ['now-30d', 'now'],
+      'Letzte 3 Monate': ['now-3M', 'now'],
+      'Letzte 6 Monate': ['now-6M', 'now'],
+      'Letztes Jahr': ['now-1y', 'now'],
+      Heute: ['startday', 'now']
     }
   }
 

@@ -24,6 +24,8 @@ export const TimeButton = {
       const daterange = $('#date_range')
 
       daterange.daterangepicker({
+        'startDate': moment(window.MetricQWebView.instances[0].handler.startTime.getUnix()),
+        'endDate': moment(window.MetricQWebView.instances[0].handler.stopTime.getUnix()),
         opens: 'left',
         timePicker: true,
         timePicker24Hour: true,
@@ -31,7 +33,30 @@ export const TimeButton = {
         alwaysShowCalendars: true,
         locale: {
           format: 'DD/MM/YYYY HH:mm',
-          firstDay: 1
+          firstDay: 1,
+          'daysOfWeek': [
+            'So',
+            'Mo',
+            'Di',
+            'Mi',
+            'Do',
+            'Fr',
+            'Sa'
+          ],
+          'monthNames': [
+            'Januar',
+            'Februar',
+            'März',
+            'April',
+            'Mai',
+            'Juni',
+            'Juli',
+            'August',
+            'September',
+            'Oktober',
+            'November',
+            'Dezember'
+          ]
         },
         ranges: window.MetricQWebView.instances[0].handler.labelMap
       }, function (start, end, label) {
@@ -41,6 +66,8 @@ export const TimeButton = {
           window.MetricQWebView.instances[0].handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
         }
         window.MetricQWebView.instances[0].reload()
+        this.startDate = moment(window.MetricQWebView.instances[0].handler.startTime.getUnix())
+        this.endDate = moment(window.MetricQWebView.instances[0].handler.stopTime.getUnix())
       })
     })
   },
