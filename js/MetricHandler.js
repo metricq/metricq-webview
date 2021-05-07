@@ -382,7 +382,7 @@ export class MetricHandler {
     this.doRequest(maxDataPoints)
   }
 
-  setrelativeTimes (paramLabel) {
+  setRelativeTimes (paramLabel) {
     this.startTime.updateTime(this.labelMap[paramLabel][0])
     this.stopTime.updateTime(this.labelMap[paramLabel][1])
     this.setTimeRange(this.startTime, this.stopTime)

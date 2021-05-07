@@ -2,13 +2,13 @@ import { Store } from './store.js'
 
 export class MetricTimestamp {
   constructor (paramTime, paramStartEnd) {
-    // TODO: besserer Name für timeString und Erklärung
     this.startEnd = paramStartEnd
     this.updateTime(paramTime)
   }
 
   updateTime (paramTime) {
-    this.timeString = paramTime
+    // timeValue is a string for relative times or a number for absolute times
+    this.timeValue = paramTime
     if (this.startEnd === 'start') {
       Store.setStartTime(this.getUnix())
     } else if (this.startEnd === 'end') {
@@ -17,17 +17,15 @@ export class MetricTimestamp {
   }
 
   getUnix () {
-    if (!isNaN(parseInt(this.timeString))) {
-      return parseInt(this.timeString)
+    if (!isNaN(parseInt(this.timeValue))) {
+      return parseInt(this.timeValue)
     } else {
       const stringToUnixMap = {
         now: moment(),
-        startday: moment().startOf('day'),
-        startweek: moment().startOf('week'),
-        startmonth: moment().startOf('month')
+        startday: moment().startOf('day')
       }
       const timeArray = ['y', 'M', 'd', 'h', 'm']
-      const splitTime = String(this.timeString).split('-')
+      const splitTime = String(this.timeValue).split('-')
       const unixTime = stringToUnixMap[splitTime[0]]
       for (let i = 1; i < splitTime.length; ++i) {
         const split = splitTime[i]
@@ -41,7 +39,7 @@ export class MetricTimestamp {
     }
   }
 
-  getString () {
-    return this.timeString
+  getValue () {
+    return this.timeValue
   }
 }

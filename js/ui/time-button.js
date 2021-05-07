@@ -2,21 +2,21 @@
 // @vue/component
 export const TimeButton = {
   props: {
-    tstart: {
+    starttime: {
       type: Number,
       required: true
     },
-    tend: {
+    endtime: {
       type: Number,
       required: true
     }
   },
   computed: {
-    ststart: function () {
-      return moment(this.tstart).format('DD/MM/YYYY HH:mm')
+    starttimeFormatted: function () {
+      return moment(this.starttime).format('DD/MM/YYYY HH:mm')
     },
-    stend: function () {
-      return moment(this.tend).format('DD/MM/YYYY HH:mm')
+    endtimeFormatted: function () {
+      return moment(this.endtime).format('DD/MM/YYYY HH:mm')
     }
   },
   mounted () {
@@ -24,8 +24,8 @@ export const TimeButton = {
       const daterange = $('#date_range')
 
       daterange.daterangepicker({
-        'startDate': moment(window.MetricQWebView.instances[0].handler.startTime.getUnix()),
-        'endDate': moment(window.MetricQWebView.instances[0].handler.stopTime.getUnix()),
+        startDate: moment(window.MetricQWebView.instances[0].handler.startTime.getUnix()),
+        endDate: moment(window.MetricQWebView.instances[0].handler.stopTime.getUnix()),
         opens: 'left',
         timePicker: true,
         timePicker24Hour: true,
@@ -34,7 +34,7 @@ export const TimeButton = {
         locale: {
           format: 'DD/MM/YYYY HH:mm',
           firstDay: 1,
-          'daysOfWeek': [
+          daysOfWeek: [
             'So',
             'Mo',
             'Di',
@@ -43,7 +43,7 @@ export const TimeButton = {
             'Fr',
             'Sa'
           ],
-          'monthNames': [
+          monthNames: [
             'Januar',
             'Februar',
             'März',
@@ -61,7 +61,7 @@ export const TimeButton = {
         ranges: window.MetricQWebView.instances[0].handler.labelMap
       }, function (start, end, label) {
         if (label) {
-          window.MetricQWebView.instances[0].handler.setrelativeTimes(label)
+          window.MetricQWebView.instances[0].handler.setRelativeTimes(label)
         } else {
           window.MetricQWebView.instances[0].handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
         }
@@ -74,6 +74,6 @@ export const TimeButton = {
   template: `
     <li>
       <img src="img/icons/clock.svg" width="20" height="20">&nbsp;
-      {{ststart}} - {{stend}}
+      {{starttimeFormatted}} - {{endtimeFormatted}}
     </li>`
 }
