@@ -2,7 +2,7 @@ const uiOptions = {
   horizontalScrolling: false,
   smoothScrollingExtraData: true,
   minimumXPixels: 0.5,
-  sortTooltip: false,
+  sortTooltip: true,
   errorArrowInterval: 2000
 }
 
@@ -152,23 +152,37 @@ function uiInteractLegend (metricQInstance, evtObj) {
   myCtx.font = '14px ' + metricQInstance.graticule.DEFAULT_FONT // actually it's sans-serif
   const metricsArray = []
   let maxTextWidth = 0
+  let minTextWidth = 0
   const allValuesAtTime = metricQInstance.graticule.data.getAllValuesAtTime(curPoint[0])
   for (let i = 0; i < allValuesAtTime.length; ++i) {
-    const newEntry = [
-      allValuesAtTime[i][1],
-      allValuesAtTime[i][3],
-      allValuesAtTime[i][2]
-    ]
-    const curTextLine = (Number(newEntry[0])).toFixed(3) + ' ' + allValuesAtTime[i][3] + '/' + allValuesAtTime[i][4]
-    newEntry.push(curTextLine)
-    newEntry.push(myCtx.measureText(curTextLine).width)
+    const newEntry = [allValuesAtTime[i][2]]
+    let curText = ''
+    let sortValue = 0
+    if (allValuesAtTime[i][4] === 'raw') {
+      curText = (Number(allValuesAtTime[i][1])).toFixed(3)
+      sortValue = Number(allValuesAtTime[i][1])
+    } else {
+      curText = '▼' + (Number(allValuesAtTime[i][1])).toFixed(3) + ' ⌀' +
+        (Number(allValuesAtTime[i + 2][1])).toFixed(3) + ' ▲' +
+        (Number(allValuesAtTime[i + 1][1])).toFixed(3)
+      sortValue = Number(allValuesAtTime[i + 2][1])
+      i += 2
+    }
+    newEntry.push(curText)
+    newEntry.push(allValuesAtTime[i][3])
+    newEntry.push(myCtx.measureText(curText).width)
+    newEntry.push(myCtx.measureText(allValuesAtTime[i][3]).width)
+    newEntry.push(sortValue)
+    if (newEntry[3] > minTextWidth) {
+      minTextWidth = newEntry[3]
+    }
     if (newEntry[4] > maxTextWidth) {
       maxTextWidth = newEntry[4]
     }
     metricsArray.push(newEntry)
   }
   if (uiOptions.sortTooltip) {
-    metricsArray.sort(function (a, b) { return b[0] - a[0] })
+    metricsArray.sort(function (a, b) { return b[5] - a[5] })
   }
   let posDate = new Date(curPoint[0])
   let smallestDelta
@@ -183,12 +197,13 @@ function uiInteractLegend (metricQInstance, evtObj) {
   const timeString = posDate.toLocaleString()
   myCtx.fillText(timeString, curPosOnCanvas[0] + 10, 40 - 20)
   for (let i = 0; i < metricsArray.length; ++i) {
-    myCtx.fillStyle = metricsArray[i][2].styleOptions.color
+    myCtx.fillStyle = metricsArray[i][0].styleOptions.color
     myCtx.globalAlpha = 0.4
-    myCtx.fillRect(curPosOnCanvas[0] + 10, 40 + i * 20 - 15, maxTextWidth, 20)
+    myCtx.fillRect(curPosOnCanvas[0] - minTextWidth - 10, 40 + i * 20 - 15, minTextWidth + maxTextWidth + 20, 20)
     myCtx.fillStyle = '#000000'
     myCtx.globalAlpha = 1
-    myCtx.fillText(metricsArray[i][3], curPosOnCanvas[0] + 10, 40 + i * 20)
+    myCtx.fillText(metricsArray[i][1], curPosOnCanvas[0] - metricsArray[i][3] - 10, 40 + i * 20)
+    myCtx.fillText(metricsArray[i][2], curPosOnCanvas[0] + 10, 40 + i * 20)
   }
 }
 
