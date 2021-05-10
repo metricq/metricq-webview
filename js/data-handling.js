@@ -351,7 +351,8 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     reqAjax.send(JSON.stringify(reqJson))
   }
   this.getAllMinMax = function (startTime, stopTime) {
-    let allMin; let allMax
+    let allMin
+    let allMax
     for (const curAggregate in this.series) {
       if (this.series[curAggregate]) {
         const curMinMax = this.series[curAggregate].getValueRange(startTime, stopTime)
@@ -393,7 +394,8 @@ function Band (paramStyleOptions) {
     if (this.points.length === 0) {
       return [0, 0]
     }
-    let min = this.points[0].value; let max = this.points[0].value
+    let min = this.points[0].value
+    let max = this.points[0].value
     for (let i = 1; i < this.points.length; ++i) {
       if (this.points[i].value < min) {
         min = this.points[i].value
@@ -529,7 +531,8 @@ function Series (paramAggregate, paramStyleOptions) {
     if (this.points.length === 0) {
       return undefined
     }
-    let min = this.points[0].value; let max = this.points[0].value
+    let min = this.points[0].value
+    let max = this.points[0].value
     if (undefined !== timeRangeStart && undefined !== timeRangeEnd) {
       let i = 0
       for (i = 0; i < this.points.length; ++i) {
