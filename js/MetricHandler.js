@@ -345,7 +345,9 @@ export class MetricHandler {
     this.renderer.updateMetricUrl()
 
     // maybe move this line to MetricQWebView.setPlotRanges()? NAW
-    this.renderer.graticule.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())
+    window.MetricQWebView.instances[0].graticule.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())
+    window.MetricQWebView.instances[0].graticule.automaticallyDetermineRanges()
+    //window.MetricQWebView.instances[0].graticule.draw(false)
     return timeSuitable
     // this.lastRangeChangeTime = (new Date()).getTime();
     // TODO: return false when intended zoom area is smaller than e.g. 1000 ms
@@ -385,6 +387,10 @@ export class MetricHandler {
   setRelativeTimes (paramLabel) {
     this.startTime.updateTime(this.labelMap[paramLabel][0])
     this.stopTime.updateTime(this.labelMap[paramLabel][1])
-    this.setTimeRange(this.startTime, this.stopTime)
+    if (this.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())) {
+      window.MetricQWebView.instances[0].graticule.automaticallyDetermineRanges(false, true)
+      window.MetricQWebView.instances[0].reload()
+      window.MetricQWebView.instances[0].graticule.draw(false)
+    }
   }
 }

@@ -143,6 +143,7 @@ class MetricQWebView {
     } else {
       // Parameters: JSON, doDraw, doResize
       this.graticule.data.processMetricQDatapoints(datapointsJSON, true, false)
+      this.graticule.automaticallyDetermineRanges(false, true)
       this.graticule.draw(false)
     }
   }
