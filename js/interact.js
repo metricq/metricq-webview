@@ -155,7 +155,7 @@ function uiInteractLegend (metricQInstance, evtObj) {
   let minTextWidth = 0
   const allValuesAtTime = metricQInstance.graticule.data.getAllValuesAtTime(curPoint[0])
   for (let i = 0; i < allValuesAtTime.length; ++i) {
-    const newEntry = [allValuesAtTime[i][2]]
+    const newEntry = { metric: allValuesAtTime[i][2] }
     let curText = ''
     let sortValue = 0
     if (allValuesAtTime[i][4] === 'raw') {
@@ -168,21 +168,22 @@ function uiInteractLegend (metricQInstance, evtObj) {
       sortValue = Number(allValuesAtTime[i + 2][1])
       i += 2
     }
-    newEntry.push(curText)
-    newEntry.push(allValuesAtTime[i][3])
-    newEntry.push(myCtx.measureText(curText).width)
-    newEntry.push(myCtx.measureText(allValuesAtTime[i][3]).width)
-    newEntry.push(sortValue)
-    if (newEntry[3] > minTextWidth) {
-      minTextWidth = newEntry[3]
+    newEntry.curText = curText
+    newEntry.name = allValuesAtTime[i][3]
+    newEntry.curTextWidth = myCtx.measureText(curText).width
+    newEntry.nameWidth = myCtx.measureText(allValuesAtTime[i][3]).width
+    // sortValue is either avg or raw
+    newEntry.sortValue = sortValue
+    if (newEntry.curTextWidth > minTextWidth) {
+      minTextWidth = newEntry.curTextWidth
     }
-    if (newEntry[4] > maxTextWidth) {
-      maxTextWidth = newEntry[4]
+    if (newEntry.nameWidth > maxTextWidth) {
+      maxTextWidth = newEntry.nameWidth
     }
     metricsArray.push(newEntry)
   }
   if (uiOptions.sortTooltip) {
-    metricsArray.sort(function (a, b) { return b[5] - a[5] })
+    metricsArray.sort(function (a, b) { return b.sortValue - a.sortValue })
   }
   let posDate = new Date(curPoint[0])
   let smallestDelta
@@ -197,13 +198,13 @@ function uiInteractLegend (metricQInstance, evtObj) {
   const timeString = posDate.toLocaleString()
   myCtx.fillText(timeString, curPosOnCanvas[0] + 10, 40 - 20)
   for (let i = 0; i < metricsArray.length; ++i) {
-    myCtx.fillStyle = metricsArray[i][0].styleOptions.color
+    myCtx.fillStyle = metricsArray[i].metric.styleOptions.color
     myCtx.globalAlpha = 0.4
     myCtx.fillRect(curPosOnCanvas[0] - minTextWidth - 10, 40 + i * 20 - 15, minTextWidth + maxTextWidth + 20, 20)
     myCtx.fillStyle = '#000000'
     myCtx.globalAlpha = 1
-    myCtx.fillText(metricsArray[i][1], curPosOnCanvas[0] - metricsArray[i][3] - 10, 40 + i * 20)
-    myCtx.fillText(metricsArray[i][2], curPosOnCanvas[0] + 10, 40 + i * 20)
+    myCtx.fillText(metricsArray[i].curText, curPosOnCanvas[0] - metricsArray[i].curTextWidth - 10, 40 + i * 20)
+    myCtx.fillText(metricsArray[i].name, curPosOnCanvas[0] + 10, 40 + i * 20)
   }
 }
 
