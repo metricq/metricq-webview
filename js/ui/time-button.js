@@ -31,8 +31,9 @@ export const TimeButton = {
         timePicker24Hour: true,
         showCustomRangeLabel: false,
         alwaysShowCalendars: true,
+        timePickerSeconds: true,
         locale: {
-          format: 'DD/MM/YYYY HH:mm',
+          format: 'DD/MM/YYYY HH:mm:ss',
           firstDay: 1,
           daysOfWeek: [
             'So',

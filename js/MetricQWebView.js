@@ -375,8 +375,7 @@ export function importMetricUrl () {
         return false
       }
       const timeRanges = determineTimeRangeOfJsUrl(metricsObj)
-      // initializeMetric hier unnötig? auskommentieren scheint erstmal nichts zu zerstören
-      // initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1])
+      initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1])
       return true
     } else if (firstChar === '.') {
       const splitted = jsurlStr.split('*')

@@ -24,7 +24,7 @@ export class MetricTimestamp {
         now: moment(),
         startday: moment().startOf('day')
       }
-      const timeArray = ['y', 'M', 'd', 'h', 'm']
+      const timeArray = ['y', 'M', 'd', 'h', 'm', 's']
       const splitTime = String(this.timeValue).split('-')
       const unixTime = stringToUnixMap[splitTime[0]]
       for (let i = 1; i < splitTime.length; ++i) {
