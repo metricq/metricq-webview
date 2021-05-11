@@ -101,7 +101,7 @@ export const NewMetricPopup = {
         <div class="modal-content">
           <popup-header v-bind:popupTitle="popupTitle"></popup-header>
           <div class="modal-body " >
-            <VueMultiSelect v-model="value" ref="multi" track-by="title" :options="options" :multiple="true" :searchable="true" :internal-search="false" :clear-on-select="false" :close-on-select="false" :options-limit="3000" :limit="5" :limit-text="limitText" :max-height="250" :show-no-results="false" :hide-selected="false" :custom-label="customLabel" @open="firstSearch" @search-change="changeSearch" @close="keepOpen" placeholder="Metrik suchen" >
+            <VueMultiSelect v-model="value" ref="multi" track-by="title" select-label="" deselect-label="" selectedLabel="" :options="options" :multiple="true" :searchable="true" :internal-search="false" :clear-on-select="false" :close-on-select="false" :options-limit="3000" :limit="5" :limit-text="limitText" :max-height="250" :show-no-results="false" :hide-selected="false" :custom-label="customLabel" @open="firstSearch" @search-change="changeSearch" @close="keepOpen" placeholder="Metrik suchen" >
               <template slot="option" slot-scope="props">
                 <span>{{ multiselectLabel(props.option.title,props.option.desc) }}</span>
               </template>
