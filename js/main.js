@@ -22,7 +22,7 @@ if (window.location.href.indexOf('#') > -1) {
     console.log(exc)
   }
 } else {
-  Vue.nextTick(function () { Store.togglePopup('presetSelection') })
+  Vue.nextTick(function () { Store.togglePopup('newmetric') })
 }
 
 function initNonVueButtons () {
