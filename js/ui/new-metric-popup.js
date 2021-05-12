@@ -62,7 +62,7 @@ export const NewMetricPopup = {
     addMetrics: function (evt) {
       if (this.value != null) {
         this.value.forEach(function (item, index, array) {
-          Store.setMetric(item.title, new Metric(window.MetricQWebView.instances[0], item.title, []))
+          Store.setMetric(item.title, new Metric(window.MetricQWebView.instances[0], item.title, item.desc, []))
         })
       }
       this.closePopup(evt)

@@ -9,7 +9,7 @@ const markerSymbols = ['.', 'o', 'v', '^', '<', '>', 's', 'p', '*', 'h', '+', 'x
 export { markerSymbols }
 
 export class Metric {
-  constructor (paramRenderer, paramName, paramTraces) {
+  constructor (paramRenderer, paramName, paramDescription, paramTraces) {
     this.renderer = paramRenderer
     this.updateName(paramName)
     this.marker = Metric.metricBaseToMarker(paramName)
@@ -20,6 +20,7 @@ export class Metric {
     this.errorprone = false
     this.popup = false
     this.updateColor(this.color)
+    this.updateDescription(paramDescription)
     // this.autocompleteList = new Array();
   }
 
@@ -39,6 +40,17 @@ export class Metric {
     //  htmlText += "⚠";
     // }
     this.htmlName = htmlText
+  }
+
+  updateDescription (newDescription) {
+    if (newDescription === undefined) {
+      window.MetricQWebView.instances[0].handler.metricQHistory.metadata(this.htmlName).then((metadataObj) => {
+        this.description = metadataObj.description
+        this.htmlName += ' '
+      })
+    } else {
+      this.description = newDescription
+    }
   }
 
   error () {

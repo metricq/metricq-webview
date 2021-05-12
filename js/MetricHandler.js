@@ -23,7 +23,7 @@ export class MetricHandler {
     this.store.resetAllMetrics()
     for (let i = 0; i < initialMetricNames.length; ++i) {
       const curMetricName = initialMetricNames[i]
-      this.store.setMetric(curMetricName, new Metric(this.renderer, curMetricName, []))
+      this.store.setMetric(curMetricName, new Metric(this.renderer, curMetricName, undefined, []))
     }
   }
 
@@ -316,7 +316,7 @@ export class MetricHandler {
   loadedMetric (metricBase, metricTraces, metricIndex) {
     const myMetric = this.store.state.allMetrics[metricBase]
     if (!myMetric) {
-      this.store.setMetric(metricBase, new Metric(this.renderer, metricBase, metricTraces))
+      this.store.setMetric(metricBase, new Metric(this.renderer, metricBase, undefined, metricTraces))
     } else {
       myMetric.setTraces(metricTraces)
     }

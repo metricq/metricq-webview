@@ -21,9 +21,8 @@ export const MetricLegend = {
   template: `
     <li class="btn btn-light legend_item" style="background-color: #FFFFFF; margin-top: 10px;" >
       <div v-bind:class="metric.popupKey" v-bind:style="{ backgroundColor: metric.color }">
-        &nbsp; ${/* "<img src=\"img/icons/droplet.svg\" width=\"24\" height=\"24\">" */''}
       </div>
-      <span v-html="metric.htmlName"></span>
+      <span v-html="metric.htmlName"></span> - <span v-html="metric.description"></span>
       <img src="img/icons/pencil.svg" v-on:click="metricPopup" />
       <img src="img/icons/trash.svg" v-on:click="trashcanClicked" />
     </li>`
