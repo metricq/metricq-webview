@@ -300,6 +300,11 @@ body {
     margin-right: 24px;
 }
 
+.navbar-brand {
+    align-self: flex-start;
+    margin-right: auto;
+}
+
 .fullwidth {
     width: 100%;
     box-sizing: initial;

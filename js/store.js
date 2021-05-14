@@ -9,10 +9,13 @@ export class StoreClass {
       popups: {
         export: false,
         yaxis: false,
-        xaxis: false,
         presetSelection: false,
         configuration: false,
         newmetric: false
+      },
+      timestamp: {
+        start: 0,
+        end: 0
       }
     }
   }
@@ -64,6 +67,14 @@ export class StoreClass {
 
   togglePopup (name) {
     Vue.set(this.state.popups, name, !this.state.popups[name])
+  }
+
+  setStartTime (time) {
+    Vue.set(this.state.timestamp, 'start', time)
+  }
+
+  setEndTime (time) {
+    Vue.set(this.state.timestamp, 'end', time)
   }
 }
 
