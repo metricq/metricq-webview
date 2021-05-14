@@ -25,18 +25,21 @@
         MetricQ-WebView
       </a>
       <button class="btn btn-outline-primary" id="button_configuration">
-        <img src="img/icons/tools.svg" width="20" height="20"/>
+        <img class="navimg" src="img/icons/tools.svg"/>
         Einstellungen
       </button>
       <br/>
       <button class="btn btn-outline-primary" id="button_export">
-        <img src="img/icons/file-earmark-arrow-down.svg" width="20" height="20"/>
+        <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
         Export
       </button>
       <time-button id="date_range" class="btn btn-outline-primary"
                    v-bind:starttime="timestamp.start"
                    v-bind:endtime="timestamp.end">
       </time-button>
+      <button class="btn btn-outline-primary" id="button_link">
+        <img class="navimg" src="img/icons/question-circle.svg"/>
+      </button>
     </nav>
   </div>
   <div class="wrapper_body">
@@ -52,10 +55,10 @@
       ></metric-legend>
       <new-metric-legend></new-metric-legend>
       <button class="btn btn-light legend_item" id="button_clear_all"
-        style="background-color: #FFFFFF; margin-top: 10px;">
-      Alles löschen
-      <img src="img/trashcan2.png"/>
-    </button>
+              style="background-color: #FFFFFF; margin-top: 10px;">
+        Alles löschen
+        <img src="img/trashcan2.png"/>
+      </button>
     </ul>
     <div id="wrapper_popup_legend">
       <metric-popup
@@ -91,6 +94,12 @@
         v-if="popups.export"
       ></export-popup>
     </div>
+  </div>
+  <div id="wrapper_popup_link">
+    <link-popup
+      v-model="popups.link"
+      v-if="popups.link"
+    ></link-popup>
   </div>
 </div>
 <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>

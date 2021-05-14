@@ -9,6 +9,7 @@ export class StoreClass {
         export: false,
         yaxis: false,
         configuration: false,
+        link: false,
         newmetric: false
       },
       timestamp: {

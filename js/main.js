@@ -34,6 +34,9 @@ function initNonVueButtons () {
   document.getElementById('button_configuration').addEventListener('click', function (evt) {
     Store.togglePopup('configuration')
   })
+  document.getElementById('button_link').addEventListener('click', function (evt) {
+    Store.togglePopup('link')
+  })
   document.getElementById('button_clear_all').addEventListener('click', function (evt) {
     Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
   })

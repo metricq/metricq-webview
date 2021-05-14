@@ -300,6 +300,11 @@ body {
     margin-right: 24px;
 }
 
+.navimg {
+    height: 20px;
+    width: 20px;
+}
+
 .navbar-brand {
     align-self: flex-start;
     margin-right: auto;
@@ -316,4 +321,12 @@ body {
 
 .btn-metric {
     margin-top: 230px
+}
+
+.ribbon {
+    width: 140px;
+    height: 140px;
+    position: absolute;
+    right: 0;
+    top: 0;
 }
