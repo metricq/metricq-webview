@@ -24,12 +24,12 @@
         <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
         MetricQ-WebView
       </a>
-      <button class="btn btn-outline-primary" id="button_configuration">
+      <button class="btn btn-outline-primary" id="button_configuration" v-on:click="configurationButtonClicked">
         <img class="navimg" src="img/icons/tools.svg"/>
         Einstellungen
       </button>
       <br/>
-      <button class="btn btn-outline-primary" id="button_export">
+      <button class="btn btn-outline-primary" id="button_export" v-on:click="exportButtonClicked">
         <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
         Export
       </button>
@@ -37,7 +37,7 @@
                    v-bind:starttime="timestamp.start"
                    v-bind:endtime="timestamp.end">
       </time-button>
-      <button class="btn btn-outline-primary" id="button_link">
+      <button class="btn btn-outline-primary" id="button_link" v-on:click="linkButtonClicked">
         <img class="navimg" src="img/icons/question-circle.svg"/>
       </button>
     </nav>
@@ -54,7 +54,7 @@
         v-bind:key="metric.name"
       ></metric-legend>
       <new-metric-legend></new-metric-legend>
-      <button class="btn btn-light legend_item" id="button_clear_all"
+      <button class="btn btn-light legend_item" id="button_clear_all" v-on:click="clearAllButtonClicked"
               style="background-color: #FFFFFF; margin-top: 10px;">
         Alles löschen
         <img src="img/trashcan2.png"/>
