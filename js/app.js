@@ -4,8 +4,8 @@ import { MetricLegend } from './ui/metric-legend.js'
 import { NewMetricLegend } from './ui/new-metric-legend.js'
 import { MetricPopup } from './ui/metric-popup.js'
 import { NewMetricPopup } from './ui/new-metric-popup.js'
-import { XaxisPopup } from './ui/xaxis-popup.js'
 import { YaxisPopup } from './ui/yaxis-popup.js'
+import { TimeButton } from './ui/time-button.js'
 import { Store } from './store.js'
 
 Vue.component('VueMultiSelect', window.VueMultiselect.default)
@@ -19,14 +19,15 @@ export const mainApp = new Vue({
     NewMetricLegend,
     MetricPopup,
     NewMetricPopup,
-    XaxisPopup,
-    YaxisPopup
+    YaxisPopup,
+    TimeButton
   },
   data: {
     state: Store.state,
     popups: Store.state.popups,
     configuration: Store.state.configuration,
-    metricsList: Store.state.allMetrics
+    metricsList: Store.state.allMetrics,
+    timestamp: Store.state.timestamp
   },
   computed: {},
   methods: {}

@@ -28,7 +28,6 @@ class MetricQWebView {
 
     this.ele = paramParentEle
     this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime, this.store)
-    this.postRender = undefined
     this.countTraces = 0
     this.hasPlot = false
     this.graticule = undefined
@@ -45,10 +44,6 @@ class MetricQWebView {
         bottom: 10
       },
       gears: {
-        x: {
-          left: -3,
-          top: -1
-        },
         y: {
           left: 2,
           top: 6
@@ -67,22 +62,19 @@ class MetricQWebView {
 
   reinitialize (metricsArr, startTime, stopTime) {
     this.handler.initializeMetrics(metricsArr)
-    this.handler.startTime = startTime
-    this.handler.stopTime = stopTime
+    this.handler.startTime.updateTime(startTime)
+    this.handler.stopTime.updateTime(stopTime)
     this.handler.doRequest(400)
   }
 
   renderMetrics (datapointsJSON) {
     let allTraces = []
-
     for (const metricBase in this.store.state.allMetrics) {
       const curMetric = this.store.state.allMetrics[metricBase]
       if (curMetric.traces) {
         allTraces = allTraces.concat(curMetric.traces)
       }
     }
-
-    this.updateMetricUrl()
     // console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
 
     if (!this.hasPlot) {
@@ -101,6 +93,7 @@ class MetricQWebView {
         this.margins.labels.left, this.margins.labels.bottom,
         [canvasSize[0], canvasSize[1]])
       this.hasPlot = true
+      // TODO: neue Funktion handler.refreshTimeRange?
       this.handler.setTimeRange(this.handler.startTime, this.handler.stopTime)
       // parameters two and three "true" (doDraw, doResize) are ignored here :/
       this.graticule.data.processMetricQDatapoints(datapointsJSON, true, true)
@@ -118,12 +111,10 @@ class MetricQWebView {
       }
       const BODY = document.getElementsByTagName('body')[0]
       /* TODO: abstract gear creation into separate class */
-      const gearImages = [undefined, undefined, undefined, undefined]
+      const gearImages = [undefined, undefined]
       const gearSrc = ['img/icons/gear.svg',
-        'img/icons/arrow-left-right.svg',
-        'img/icons/gear.svg',
         'img/icons/arrow-up-down.svg']
-      for (let i = 0; i < 4; ++i) {
+      for (let i = 0; i < 2; ++i) {
         gearImages[i] = document.createElement('img')
         const img = new Image()
         img.src = gearSrc[i]
@@ -134,49 +125,27 @@ class MetricQWebView {
         gearImages[i].setAttribute('width', '28')
         gearImages[i].setAttribute('height', '28')
       }
-      const gearWrapper = [undefined, undefined]
       // TODO: THIS IS NOT MULTI-INSTANCE-SAFE
       // TODO: RENAME THESE ids SO THAT THEY GET NEW INDIVIDUAL ids EACH AND EVERY TIME
-      const gearIds = ['gear_xaxis', 'gear_yaxis']
-      for (let i = 0; i < 2; ++i) {
-        gearWrapper[i] = document.createElement('div')
-        gearWrapper[i].setAttribute('id', gearIds[i])
-        gearWrapper[i].appendChild(gearImages[i * 2])
-        gearWrapper[i].appendChild(document.createElement('br'))
-        gearWrapper[i].appendChild(gearImages[i * 2 + 1])
-        gearWrapper[i] = BODY.appendChild(gearWrapper[i])
-      }
-      this.positionXAxisGear(this.ele, gearWrapper[0])
-      gearWrapper[0].addEventListener('click', () => {
-        this.store.togglePopup('xaxis')
-      })
-      this.positionYAxisGear(this.ele, gearWrapper[1])
-      gearWrapper[1].addEventListener('click', () => {
+      const gearId = 'gear_yaxis'
+
+      let gearWrapper = document.createElement('div')
+      gearWrapper.setAttribute('id', gearId)
+      gearWrapper.appendChild(gearImages[0])
+      gearWrapper.appendChild(document.createElement('br'))
+      gearWrapper.appendChild(gearImages[1])
+      gearWrapper = BODY.appendChild(gearWrapper)
+
+      this.positionYAxisGear(this.ele, gearWrapper)
+      gearWrapper.addEventListener('click', () => {
         this.store.togglePopup('yaxis')
       })
     } else {
       // Parameters: JSON, doDraw, doResize
       this.graticule.data.processMetricQDatapoints(datapointsJSON, true, false)
+      this.graticule.automaticallyDetermineRanges(false, true)
       this.graticule.draw(false)
     }
-
-    if (this.postRender) {
-      this.postRender()
-    }
-  }
-
-  positionXAxisGear (rowBodyEle, gearEle) {
-    if (!rowBodyEle || !gearEle) {
-      return
-    }
-    gearEle.style.position = 'absolute'
-    const posGear = this.getTopLeft(rowBodyEle)
-    posGear[0] += parseInt(rowBodyEle.offsetWidth) - parseInt(gearEle.offsetWidth)
-    posGear[1] += parseInt(rowBodyEle.offsetHeight) - parseInt(gearEle.offsetHeight)
-    posGear[0] += this.margins.gears.x.left
-    posGear[1] += this.margins.gears.x.top
-    gearEle.style.left = posGear[0] + 'px'
-    gearEle.style.top = posGear[1] + 'px'
   }
 
   positionYAxisGear (rowBodyEle, gearEle) {
@@ -213,7 +182,7 @@ class MetricQWebView {
     //   }
     //   encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj))
     // } else {
-    encodedStr = '.' + this.handler.startTime + '*' + this.handler.stopTime
+    encodedStr = '.' + this.handler.startTime.getValue() + '*' + this.handler.stopTime.getValue()
     for (const metricBase in this.store.state.allMetrics) {
       encodedStr += '*' + this.store.state.allMetrics[metricBase].name
     }
@@ -327,7 +296,6 @@ class MetricQWebView {
 
   windowResize (evt) {
     if (this.graticule) {
-      this.positionXAxisGear(this.ele, document.getElementById('gear_xaxis'))
       this.graticule.windowResize(evt)
     }
   }
@@ -407,13 +375,12 @@ export function importMetricUrl () {
         return false
       }
       const timeRanges = determineTimeRangeOfJsUrl(metricsObj)
-
       initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1])
       return true
     } else if (firstChar === '.') {
       const splitted = jsurlStr.split('*')
       if (splitted.length > 1) {
-        initializeMetrics(splitted.slice(2), parseInt(splitted[0].substring(1)), parseInt(splitted[1]))
+        initializeMetrics(splitted.slice(2), splitted[0].substring(1), splitted[1])
         return true
       }
     }
@@ -427,11 +394,11 @@ export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
   if (window.MetricQWebView) {
     newManager = window.MetricQWebView.instances[0]
     newManager.reinitialize(metricNamesArr, timeStart, timeStop)
-    newManager.postRender = function () {
-    }
-  } else {
+  } // else Zweig wird anscheinend nie benötigt
+  /* else {
+    console.log('2')
     newManager = new MetricQWebView(document.querySelector('.row_body'), metricNamesArr, timeStart, timeStop)
     newManager.postRender = function () {
     }
-  }
+  } */
 }

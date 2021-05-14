@@ -4,6 +4,7 @@
   <meta charset="utf8"/>
   <title>MetricQ WebView</title>
   <link rel="icon" href="img/icons/graph-up.svg"/>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
   <link rel="stylesheet" href="css/bootstrap.min.css"/>
   <link rel="stylesheet" href="css/style.css"/>
   <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
@@ -15,79 +16,81 @@
 
 </head>
 <body>
-<div class="row_head">
-  <nav class="navbar navbar-light bg-light">
-    <a class="navbar-brand" href="?">
-      <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
-      MetricQ-WebView
-    </a>
-
-    <button class="btn btn-outline-primary" id="button_configuration">
-      <img src="img/icons/tools.svg" width="20" height="20"/>
-      Einstellungen
-    </button>
-    <br/>
-    <button class="btn btn-outline-primary" id="button_export">
-      <img src="img/icons/file-earmark-arrow-down.svg" width="20" height="20"/>
-      Export
-    </button>
-  </nav>
-</div>
-<div class="wrapper_body">
-  <div id="webview_container" class="row_body">
+<div id="main_app">
+  <div class="row_head">
+    <nav class="navbar navbar-light bg-light">
+      <a class="navbar-brand" href="?">
+        <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
+        MetricQ-WebView
+      </a>
+      <button class="btn btn-outline-primary" id="button_configuration">
+        <img src="img/icons/tools.svg" width="20" height="20"/>
+        Einstellungen
+      </button>
+      <br/>
+      <button class="btn btn-outline-primary" id="button_export">
+        <img src="img/icons/file-earmark-arrow-down.svg" width="20" height="20"/>
+        Export
+      </button>
+      <time-button id="date_range" class="btn btn-outline-primary"
+                   v-bind:starttime="timestamp.start"
+                   v-bind:endtime="timestamp.end">
+      </time-button>
+    </nav>
   </div>
-</div>
-<div class="row_foot" id="main_app">
-  <ul id="legend_list">
-    <metric-legend
-      v-for="metric in metricsList"
-      v-bind:metric="metric"
-      v-bind:key="metric.name"
-    ></metric-legend>
-    <new-metric-legend></new-metric-legend>
-  </ul>
-  <div id="wrapper_popup_legend">
-    <metric-popup
-      v-for="metric in metricsList"
-      v-bind:metric="metric"
-      v-bind:key="metric.popupKey"
-      v-if="metric.popup"
-    ></metric-popup>
+  <div class="wrapper_body">
+    <div id="webview_container" class="row_body">
+    </div>
   </div>
-  <div id="wrapper_popup_newlegend">
-    <new-metric-popup
-      v-model="popups.newmetric"
-      v-if="popups.newmetric"
-    ></new-metric-popup>
-  </div>
-  <div id="wrapper_popup_configuration">
-    <configuration-popup
-      v-bind:config="configuration"
-      v-bind:key="configuration.key"
-      v-model="popups.configuration"
-      v-if="popups.configuration"
-    ></configuration-popup>
-  </div>
-  <div id="wrapper_popup_xaxis">
-    <xaxis-popup
-      v-model="popups.xaxis"
-      v-if="popups.xaxis"
-    ></xaxis-popup>
-  </div>
-  <div id="wrapper_popup_yaxis">
-    <yaxis-popup
-      v-model="popups.yaxis"
-      v-if="popups.yaxis"
-    ></yaxis-popup>
-  </div>
-  <div id="wrapper_popup_export">
-    <export-popup
-      v-model="popups.export"
-      v-if="popups.export"
-    ></export-popup>
+  <div class="row_foot">
+    <ul id="legend_list">
+      <metric-legend
+        v-for="metric in metricsList"
+        v-bind:metric="metric"
+        v-bind:key="metric.name"
+      ></metric-legend>
+      <new-metric-legend></new-metric-legend>
+    </ul>
+    <div id="wrapper_popup_legend">
+      <metric-popup
+        v-for="metric in metricsList"
+        v-bind:metric="metric"
+        v-bind:key="metric.popupKey"
+        v-if="metric.popup"
+      ></metric-popup>
+      <div id="wrapper_popup_newlegend">
+        <new-metric-popup
+          v-model="popups.newmetric"
+          v-if="popups.newmetric"
+        ></new-metric-popup>
+      </div>
+    </div>
+    <div id="wrapper_popup_configuration">
+      <configuration-popup
+        v-bind:config="configuration"
+        v-bind:key="configuration.key"
+        v-model="popups.configuration"
+        v-if="popups.configuration"
+      ></configuration-popup>
+    </div>
+    <div id="wrapper_popup_yaxis">
+      <yaxis-popup
+        v-model="popups.yaxis"
+        v-if="popups.yaxis"
+      ></yaxis-popup>
+    </div>
+    <div id="wrapper_popup_export">
+      <export-popup
+        v-model="popups.export"
+        v-if="popups.export"
+      ></export-popup>
+    </div>
   </div>
 </div>
 <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>
 <script type="module" src="js/main.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 </body>
 </html>
