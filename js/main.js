@@ -26,20 +26,3 @@ if (window.location.href.indexOf('#') > -1) {
 } else {
   Vue.nextTick(function () { Store.togglePopup('newmetric') })
 }
-
-function initNonVueButtons () {
-  document.getElementById('button_export').addEventListener('click', function (evt) {
-    Store.togglePopup('export')
-  })
-  document.getElementById('button_configuration').addEventListener('click', function (evt) {
-    Store.togglePopup('configuration')
-  })
-  document.getElementById('button_link').addEventListener('click', function (evt) {
-    Store.togglePopup('link')
-  })
-  document.getElementById('button_clear_all').addEventListener('click', function (evt) {
-    Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
-  })
-}
-
-document.addEventListener('DOMContentLoaded', initNonVueButtons)

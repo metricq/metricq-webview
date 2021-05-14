@@ -32,5 +32,18 @@ export const mainApp = new Vue({
     timestamp: Store.state.timestamp
   },
   computed: {},
-  methods: {}
+  methods: {
+    exportButtonClicked () {
+      Store.togglePopup('export')
+    },
+    configurationButtonClicked () {
+      Store.togglePopup('configuration')
+    },
+    linkButtonClicked () {
+      Store.togglePopup('link')
+    },
+    clearAllButtonClicked () {
+      Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
+    }
+  }
 })
