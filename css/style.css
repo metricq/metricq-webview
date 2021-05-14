@@ -303,6 +303,10 @@ body {
 .navimg {
     height: 20px;
     width: 20px;
+
+.navbar-brand {
+    align-self: flex-start;
+    margin-right: auto;
 }
 
 .fullwidth {

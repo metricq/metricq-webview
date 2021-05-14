@@ -2,7 +2,7 @@ const uiOptions = {
   horizontalScrolling: false,
   smoothScrollingExtraData: true,
   minimumXPixels: 0.5,
-  sortTooltip: false,
+  sortTooltip: true,
   errorArrowInterval: 2000
 }
 
@@ -24,8 +24,9 @@ function uiInteractPan (metricQInstance, evtObj) {
   if (mouseDown.previousPos[0] !== mouseDown.currentPos[0] ||
     mouseDown.previousPos[1] !== mouseDown.currentPos[1]) {
     const timeToMoveBy = (mouseDown.currentPos[0] - mouseDown.previousPos[0]) * -1 * metricQInstance.graticule.curTimePerPixel
-    metricQInstance.handler.setTimeRange(metricQInstance.handler.startTime + timeToMoveBy,
-      metricQInstance.handler.stopTime + timeToMoveBy)
+    // TODO: handler.shifttimerange
+    metricQInstance.handler.setTimeRange(metricQInstance.handler.startTime.getUnix() + timeToMoveBy,
+      metricQInstance.handler.stopTime.getUnix() + timeToMoveBy)
     metricQInstance.throttledReload()
     metricQInstance.graticule.draw(false)
   }
@@ -92,7 +93,6 @@ function uiInteractZoomIn (metricQInstance, evtObj) {
     if (!metricQInstance.handler.setTimeRange(Math.round(posStart[0]), Math.round(posEnd[0]))) {
       showUserHint('Zoom-Limit erreicht.')
     }
-    metricQInstance.graticule.automaticallyDetermineRanges(false, true)
     metricQInstance.reload() // no need to throttle reload here
     metricQInstance.graticule.draw(false)
   }
@@ -104,7 +104,7 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
   }
   evtObj.preventDefault()
   if (evtObj.deltaX && uiOptions.horizontalScrolling) { // horizontal scrolling
-    const deltaRange = metricQInstance.handler.stopTime - metricQInstance.handler.startTime// metricQInstance.graticule.curTimeRange[1] - metricQInstance.graticule.curTimeRange[0];
+    const deltaRange = metricQInstance.handler.stopTime.getUnix() - metricQInstance.handler.startTime.getUnix()// metricQInstance.graticule.curTimeRange[1] - metricQInstance.graticule.curTimeRange[0];
     // TODO: set start and stopTime of the handler
     if (evtObj.deltaX < 0) {
       if (!metricQInstance.handler.setTimeRange(metricQInstance.graticule.curTimeRange[0] - deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] - deltaRange * 0.2)) {
@@ -132,7 +132,6 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
       if (!metricQInstance.handler.zoomTimeAtPoint(curTimeValue, scrollDirection)) {
         showUserHint('Konnte nicht weiter zoomen, Limit erreicht')
       }
-      metricQInstance.graticule.automaticallyDetermineRanges(false, true)
       metricQInstance.throttledReload()
       metricQInstance.graticule.draw(false)
     }
@@ -152,23 +151,38 @@ function uiInteractLegend (metricQInstance, evtObj) {
   myCtx.font = '14px ' + metricQInstance.graticule.DEFAULT_FONT // actually it's sans-serif
   const metricsArray = []
   let maxTextWidth = 0
+  let minTextWidth = 0
   const allValuesAtTime = metricQInstance.graticule.data.getAllValuesAtTime(curPoint[0])
   for (let i = 0; i < allValuesAtTime.length; ++i) {
-    const newEntry = [
-      allValuesAtTime[i][1],
-      allValuesAtTime[i][3],
-      allValuesAtTime[i][2]
-    ]
-    const curTextLine = (Number(newEntry[0])).toFixed(3) + ' ' + allValuesAtTime[i][3] + '/' + allValuesAtTime[i][4]
-    newEntry.push(curTextLine)
-    newEntry.push(myCtx.measureText(curTextLine).width)
-    if (newEntry[4] > maxTextWidth) {
-      maxTextWidth = newEntry[4]
+    const newEntry = { metric: allValuesAtTime[i][2] }
+    let curText = ''
+    let sortValue = 0
+    if (allValuesAtTime[i][4] === 'raw') {
+      curText = (Number(allValuesAtTime[i][1])).toFixed(3)
+      sortValue = Number(allValuesAtTime[i][1])
+    } else {
+      curText = '▼' + (Number(allValuesAtTime[i][1])).toFixed(3) + ' ⌀' +
+        (Number(allValuesAtTime[i + 2][1])).toFixed(3) + ' ▲' +
+        (Number(allValuesAtTime[i + 1][1])).toFixed(3)
+      sortValue = Number(allValuesAtTime[i + 2][1])
+      i += 2
+    }
+    newEntry.curText = curText
+    newEntry.name = allValuesAtTime[i][3]
+    newEntry.curTextWidth = myCtx.measureText(curText).width
+    newEntry.nameWidth = myCtx.measureText(allValuesAtTime[i][3]).width
+    // sortValue is either avg or raw
+    newEntry.sortValue = sortValue
+    if (newEntry.curTextWidth > minTextWidth) {
+      minTextWidth = newEntry.curTextWidth
+    }
+    if (newEntry.nameWidth > maxTextWidth) {
+      maxTextWidth = newEntry.nameWidth
     }
     metricsArray.push(newEntry)
   }
   if (uiOptions.sortTooltip) {
-    metricsArray.sort(function (a, b) { return b[0] - a[0] })
+    metricsArray.sort(function (a, b) { return b.sortValue - a.sortValue })
   }
   let posDate = new Date(curPoint[0])
   let smallestDelta
@@ -183,12 +197,13 @@ function uiInteractLegend (metricQInstance, evtObj) {
   const timeString = posDate.toLocaleString()
   myCtx.fillText(timeString, curPosOnCanvas[0] + 10, 40 - 20)
   for (let i = 0; i < metricsArray.length; ++i) {
-    myCtx.fillStyle = metricsArray[i][2].styleOptions.color
+    myCtx.fillStyle = metricsArray[i].metric.styleOptions.color
     myCtx.globalAlpha = 0.4
-    myCtx.fillRect(curPosOnCanvas[0] + 10, 40 + i * 20 - 15, maxTextWidth, 20)
+    myCtx.fillRect(curPosOnCanvas[0] - minTextWidth - 10, 40 + i * 20 - 15, minTextWidth + maxTextWidth + 20, 20)
     myCtx.fillStyle = '#000000'
     myCtx.globalAlpha = 1
-    myCtx.fillText(metricsArray[i][3], curPosOnCanvas[0] + 10, 40 + i * 20)
+    myCtx.fillText(metricsArray[i].curText, curPosOnCanvas[0] - metricsArray[i].curTextWidth - 10, 40 + i * 20)
+    myCtx.fillText(metricsArray[i].name, curPosOnCanvas[0] + 10, 40 + i * 20)
   }
 }
 

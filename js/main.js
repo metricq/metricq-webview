@@ -1,3 +1,5 @@
+/* eslint-env jquery */
+
 import './../lib/vue.js'
 
 import './../lib/jsurl.js'
@@ -22,7 +24,7 @@ if (window.location.href.indexOf('#') > -1) {
     console.log(exc)
   }
 } else {
-  Vue.nextTick(function () { Store.togglePopup('presetSelection') })
+  Vue.nextTick(function () { Store.togglePopup('newmetric') })
 }
 
 function initNonVueButtons () {
@@ -34,6 +36,9 @@ function initNonVueButtons () {
   })
   document.getElementById('button_link').addEventListener('click', function (evt) {
     Store.togglePopup('link')
+  })
+  document.getElementById('button_clear_all').addEventListener('click', function (evt) {
+    Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
   })
 }
 

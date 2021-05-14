@@ -5,15 +5,16 @@ export class StoreClass {
     this.state = {
       configuration: new Configuration(5, 10),
       allMetrics: {},
-      selectedPreset: [],
       popups: {
         export: false,
         yaxis: false,
-        xaxis: false,
-        presetSelection: false,
         configuration: false,
         link: false,
         newmetric: false
+      },
+      timestamp: {
+        start: 0,
+        end: 0
       }
     }
   }
@@ -26,10 +27,14 @@ export class StoreClass {
 
   setMetric (metricKey, metric) {
     Vue.set(this.state.allMetrics, metricKey, metric)
+    document.getElementById('button_clear_all').style.display = 'inline'
   }
 
   deleteMetric (metricKey) {
     Vue.delete(this.state.allMetrics, metricKey)
+    if (this.getAllMetrics().length === 0) {
+      document.getElementById('button_clear_all').style.display = 'none'
+    }
   }
 
   setMetricPopup (metricKey, popup) {
@@ -48,12 +53,23 @@ export class StoreClass {
     return undefined
   }
 
-  setSelectedPreset (newPreset) {
-    Store.state.selectedPreset = [...newPreset]
+  getAllMetrics () {
+    const metricArray = []
+    const allMetrics = this.state.allMetrics
+    Object.keys(allMetrics).forEach(function (key) { metricArray.push(key) })
+    return metricArray
   }
 
   togglePopup (name) {
     Vue.set(this.state.popups, name, !this.state.popups[name])
+  }
+
+  setStartTime (time) {
+    Vue.set(this.state.timestamp, 'start', time)
+  }
+
+  setEndTime (time) {
+    Vue.set(this.state.timestamp, 'end', time)
   }
 }
 

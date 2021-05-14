@@ -55,12 +55,14 @@ export const NewMetricPopup = {
       return `und ${count} weitere Metriken`
     },
     keepOpen () {
-      this.$refs.multi.activate()
+      if (veil.myPopup) {
+        this.$refs.multi.activate()
+      }
     },
     addMetrics: function (evt) {
       if (this.value != null) {
         this.value.forEach(function (item, index, array) {
-          Store.setMetric(item.title, new Metric(window.MetricQWebView.instances[0], item.title, []))
+          Store.setMetric(item.title, new Metric(window.MetricQWebView.instances[0], item.title, item.desc, []))
         })
       }
       this.closePopup(evt)
@@ -99,7 +101,7 @@ export const NewMetricPopup = {
         <div class="modal-content">
           <popup-header v-bind:popupTitle="popupTitle"></popup-header>
           <div class="modal-body " >
-            <VueMultiSelect v-model="value" ref="multi" track-by="title" :options="options" :multiple="true" :searchable="true" :internal-search="false" :clear-on-select="false" :close-on-select="false" :options-limit="3000" :limit="5" :limit-text="limitText" :max-height="250" :show-no-results="false" :hide-selected="false" :custom-label="customLabel" @open="firstSearch" @search-change="changeSearch" @close="keepOpen" placeholder="Metrik suchen" >
+            <VueMultiSelect v-model="value" ref="multi" track-by="title" select-label="" deselect-label="" selectedLabel="" :options="options" :multiple="true" :searchable="true" :internal-search="false" :clear-on-select="false" :close-on-select="false" :options-limit="3000" :limit="5" :limit-text="limitText" :max-height="250" :show-no-results="false" :hide-selected="false" :custom-label="customLabel" @open="firstSearch" @search-change="changeSearch" @close="keepOpen" placeholder="Metrik suchen" >
               <template slot="option" slot-scope="props">
                 <span>{{ multiselectLabel(props.option.title,props.option.desc) }}</span>
               </template>
