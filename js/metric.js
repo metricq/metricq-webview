@@ -44,9 +44,9 @@ export class Metric {
 
   updateDescription (newDescription) {
     if (newDescription === undefined) {
+      this.description = ''
       window.MetricQWebView.instances[0].handler.metricQHistory.metadata(this.htmlName).then((metadataObj) => {
         this.description = metadataObj.description
-        this.htmlName += ' '
       })
     } else {
       this.description = newDescription
