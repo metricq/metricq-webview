@@ -5,11 +5,9 @@ export class StoreClass {
     this.state = {
       configuration: new Configuration(5, 10),
       allMetrics: {},
-      selectedPreset: [],
       popups: {
         export: false,
         yaxis: false,
-        presetSelection: false,
         configuration: false,
         newmetric: false
       },
@@ -48,10 +46,6 @@ export class StoreClass {
       }
     }
     return undefined
-  }
-
-  setSelectedPreset (newPreset) {
-    Store.state.selectedPreset = [...newPreset]
   }
 
   togglePopup (name) {
