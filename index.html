@@ -16,6 +16,7 @@
 
 </head>
 <body>
+
 <div id="main_app">
   <div class="row_head">
     <nav class="navbar navbar-light bg-light">
@@ -50,6 +51,11 @@
         v-bind:key="metric.name"
       ></metric-legend>
       <new-metric-legend></new-metric-legend>
+      <button class="btn btn-light legend_item" id="button_clear_all"
+        style="background-color: #FFFFFF; margin-top: 10px;">
+      Alles löschen
+      <img src="img/trashcan2.png"/>
+    </button>
     </ul>
     <div id="wrapper_popup_legend">
       <metric-popup

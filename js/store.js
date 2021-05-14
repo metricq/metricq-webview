@@ -26,10 +26,14 @@ export class StoreClass {
 
   setMetric (metricKey, metric) {
     Vue.set(this.state.allMetrics, metricKey, metric)
+    document.getElementById('button_clear_all').style.display = 'inline'
   }
 
   deleteMetric (metricKey) {
     Vue.delete(this.state.allMetrics, metricKey)
+    if (this.getAllMetrics().length === 0) {
+      document.getElementById('button_clear_all').style.display = 'none'
+    }
   }
 
   setMetricPopup (metricKey, popup) {
@@ -46,6 +50,13 @@ export class StoreClass {
       }
     }
     return undefined
+  }
+
+  getAllMetrics () {
+    const metricArray = []
+    const allMetrics = this.state.allMetrics
+    Object.keys(allMetrics).forEach(function (key) { metricArray.push(key) })
+    return metricArray
   }
 
   togglePopup (name) {
