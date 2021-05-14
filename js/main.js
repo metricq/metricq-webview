@@ -1,3 +1,5 @@
+/* eslint-env jquery */
+
 import './../lib/vue.js'
 
 import './../lib/jsurl.js'
