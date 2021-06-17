@@ -21,7 +21,8 @@ export const NewMetricPopup = {
     return {
       popupTitle: 'Metriken hinzufügen',
       value: null,
-      options: []
+      options: [],
+      requestCount: 0
     }
   },
   mounted () {
@@ -77,16 +78,16 @@ export const NewMetricPopup = {
     },
     changeSearch (value) {
       const instance = window.MetricQWebView.instances[0]
-      instance.handler.searchMetricsPromise(value).then(matches => {
+      const requestId = ++this.requestCount
+      instance.handler.searchMetricsPromise(value, true).then(matches => {
+        if (requestId < this.requestCount) {
+          return
+        }
         this.options.length = 0
-        for (let i = 0; i < matches.length; ++i) {
-          instance.handler.metricQHistory.metadata(matches[i]).then((metadataObj) => {
-            if (this.options.map(({ title }) => title).indexOf(matches[i]) === -1) {
-              this.options.push({
-                title: matches[i],
-                desc: metadataObj.description
-              })
-            }
+        for (let i = 0; i < Object.keys(matches).length; ++i) {
+          this.options.push({
+            title: Object.keys(matches)[i],
+            desc: Object.values(matches)[i].description
           })
         }
       })

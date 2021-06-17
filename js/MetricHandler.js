@@ -133,8 +133,8 @@ export class MetricHandler {
     return true
   }
 
-  searchMetricsPromise (inputStr) {
-    return this.metricQHistory.search(inputStr)
+  searchMetricsPromise (inputStr, metadata = false) {
+    return this.metricQHistory.search(inputStr, metadata)
   }
 
   // TODO: 'drop'/remove this function
