@@ -63,6 +63,19 @@ export const LinkPopup = {
               <li><a href="https://github.com/bmario" target="_blank">Mario Bielert</a></li>
             </ul>
           </div>
+          <div class="modal-footer">  
+            MetricQ-WebView Copyright (C) 2021 Technische Universität Dresden
+            <br>
+            This program is free software: you can redistribute it and/or modify
+            it under the terms of the GNU General Public License as published by
+            the Free Software Foundation, either version 3 of the License, or
+            (at your option) any later version.
+            <br>
+            This program is distributed in the hope that it will be useful,
+            but WITHOUT ANY WARRANTY; without even the implied warranty of
+            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+            See the <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank">GNU General Public License</a> for more details.
+          </div>
         </div>
       </div>
     </div>`
