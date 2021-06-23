@@ -33,6 +33,9 @@
         <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
         Export
       </button>
+      <button class="btn btn-outline-primary" id="button_toggle_minmax" v-on:click="toggleMinMaxButtonClicked">
+        ⌀ / ▼⌀▲
+      </button>
       <time-button id="date_range" class="btn btn-outline-primary"
                    v-bind:starttime="timestamp.start"
                    v-bind:endtime="timestamp.end">

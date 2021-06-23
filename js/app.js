@@ -44,6 +44,9 @@ export const mainApp = new Vue({
     },
     clearAllButtonClicked () {
       Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
+    },
+    toggleMinMaxButtonClicked () {
+      Store.setDrawMinMaxGlobal()
     }
   }
 })

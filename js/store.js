@@ -15,7 +15,8 @@ export class StoreClass {
       timestamp: {
         start: 0,
         end: 0
-      }
+      },
+      drawMinMaxGlobal: true
     }
   }
 
@@ -53,6 +54,14 @@ export class StoreClass {
     return undefined
   }
 
+  getMetricMinMax (metricName) {
+    for (const metricBase in this.state.allMetrics) {
+      if (this.state.allMetrics[metricBase].name === metricName) {
+        return this.state.allMetrics[metricBase].drawMinMax
+      }
+    }
+  }
+
   getAllMetrics () {
     const metricArray = []
     const allMetrics = this.state.allMetrics
@@ -70,6 +79,18 @@ export class StoreClass {
 
   setEndTime (time) {
     Vue.set(this.state.timestamp, 'end', time)
+  }
+
+  setDrawMinMaxGlobal () {
+    Vue.set(this.state, 'drawMinMaxGlobal', !this.state.drawMinMaxGlobal)
+    for (const metricBase in this.state.allMetrics) {
+      Vue.set(this.state.allMetrics[metricBase], 'drawMinMax', this.state.drawMinMaxGlobal)
+    }
+    window.MetricQWebView.instances[0].graticule.draw(false)
+  }
+
+  getDrawMinMaxGlobal () {
+    return this.state.drawMinMaxGlobal
   }
 }
 

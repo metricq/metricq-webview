@@ -21,6 +21,7 @@ export class Metric {
     this.popup = false
     this.updateColor(this.color)
     this.updateDescription(paramDescription)
+    this.drawMinMax = true
     // this.autocompleteList = new Array();
   }
 

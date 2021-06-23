@@ -1,4 +1,5 @@
 import { DataCache } from './data-handling.js'
+import { Store } from './store.js'
 
 export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize) {
   this.ele = paramEle
@@ -834,57 +835,60 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   }
   this.drawBands = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
-      const curBand = this.data.metrics[i].band
-      if (curBand) {
-        const styleOptions = this.parseStyleOptions(curBand.styleOptions)
-        if (styleOptions.skip || curBand.points.length === 0) {
-          this.resetCtx()
-          continue
-        }
+      if (Store.getMetricMinMax(this.data.metrics[i].name)) {
+        console.log(this.data.metrics[i].name)
+        const curBand = this.data.metrics[i].band
+        if (curBand) {
+          const styleOptions = this.parseStyleOptions(curBand.styleOptions)
+          if (styleOptions.skip || curBand.points.length === 0) {
+            this.resetCtx()
+            continue
+          }
 
-        const switchOverIndex = curBand.switchOverIndex
-        for (let j = 0, x, y, previousX, previousY; j < curBand.points.length; ++j) {
-          x = this.graticuleDimensions[0] + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
-          y = this.graticuleDimensions[1] + (this.graticuleDimensions[3] - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
-          if (j === 0) {
-            this.ctx.beginPath()
-            this.ctx.moveTo(x, y)
-          } else {
-            // connect direct
-            if (styleOptions.connect === 1) {
-              this.ctx.lineTo(x, y)
+          const switchOverIndex = curBand.switchOverIndex
+          for (let j = 0, x, y, previousX, previousY; j < curBand.points.length; ++j) {
+            x = this.graticuleDimensions[0] + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
+            y = this.graticuleDimensions[1] + (this.graticuleDimensions[3] - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
+            if (j === 0) {
+              this.ctx.beginPath()
+              this.ctx.moveTo(x, y)
             } else {
-              if (j < switchOverIndex) {
-                // connect last
-                if (styleOptions.connect === 2) {
-                  this.ctx.lineTo(previousX, y)
-                  this.ctx.lineTo(x, y)
-                  // connect next
-                } else if (styleOptions.connect === 3) {
-                  this.ctx.lineTo(x, previousY)
-                  this.ctx.lineTo(x, y)
-                }
-              } else if (j === switchOverIndex) {
+              // connect direct
+              if (styleOptions.connect === 1) {
                 this.ctx.lineTo(x, y)
               } else {
-                // connect last
-                if (styleOptions.connect === 2) {
-                  this.ctx.lineTo(x, previousY)
+                if (j < switchOverIndex) {
+                  // connect last
+                  if (styleOptions.connect === 2) {
+                    this.ctx.lineTo(previousX, y)
+                    this.ctx.lineTo(x, y)
+                    // connect next
+                  } else if (styleOptions.connect === 3) {
+                    this.ctx.lineTo(x, previousY)
+                    this.ctx.lineTo(x, y)
+                  }
+                } else if (j === switchOverIndex) {
                   this.ctx.lineTo(x, y)
-                  // connext next
-                } else if (styleOptions.connect === 3) {
-                  this.ctx.lineTo(previousX, y)
-                  this.ctx.lineTo(x, y)
+                } else {
+                  // connect last
+                  if (styleOptions.connect === 2) {
+                    this.ctx.lineTo(x, previousY)
+                    this.ctx.lineTo(x, y)
+                    // connext next
+                  } else if (styleOptions.connect === 3) {
+                    this.ctx.lineTo(previousX, y)
+                    this.ctx.lineTo(x, y)
+                  }
                 }
               }
             }
+            previousX = x
+            previousY = y
           }
-          previousX = x
-          previousY = y
+          this.ctx.closePath()
+          this.ctx.fill()
+          this.resetCtx()
         }
-        this.ctx.closePath()
-        this.ctx.fill()
-        this.resetCtx()
       }
     }
   }
