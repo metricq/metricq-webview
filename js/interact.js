@@ -163,16 +163,20 @@ function uiInteractLegend (metricQInstance, evtObj) {
       curText = (Number(allValuesAtTime[i][1])).toFixed(3)
       sortValue = Number(allValuesAtTime[i][1])
     } else {
-      if (Store.getMetricMinMax(allValuesAtTime[i][3])) {
-        curText = '▼' + (Number(allValuesAtTime[i][1])).toFixed(3) + ' ⌀' +
-          (Number(allValuesAtTime[i + 2][1])).toFixed(3) + ' ▲' +
-          (Number(allValuesAtTime[i + 1][1])).toFixed(3)
-      } else {
-        curText = ' ⌀' + (Number(allValuesAtTime[i + 2][1])).toFixed(3)
+      curText = ''
+      if (Store.getMetricDrawState(allValuesAtTime[i][3])[0]) {
+        curText += '▼' + (Number(allValuesAtTime[i][1])).toFixed(3)
       }
-      sortValue = Number(allValuesAtTime[i + 2][1])
-      i += 2
+      if (Store.getMetricDrawState(allValuesAtTime[i][3])[1]) {
+        curText += ' ⌀' + (Number(allValuesAtTime[i + 2][1])).toFixed(3)
+      }
+      if (Store.getMetricDrawState(allValuesAtTime[i][3])[2]) {
+        curText += ' ▲' + (Number(allValuesAtTime[i + 1][1])).toFixed(3)
+      }
     }
+    sortValue = Number(allValuesAtTime[i + 2][1])
+    i += 2
+
     newEntry.curText = curText
     newEntry.name = allValuesAtTime[i][3]
     newEntry.curTextWidth = myCtx.measureText(curText).width

@@ -835,8 +835,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   }
   this.drawBands = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
-      if (Store.getMetricMinMax(this.data.metrics[i].name)) {
-        console.log(this.data.metrics[i].name)
+      if (Store.getMetricDrawState(this.data.metrics[i].name)[0]) {
         const curBand = this.data.metrics[i].band
         if (curBand) {
           const styleOptions = this.parseStyleOptions(curBand.styleOptions)

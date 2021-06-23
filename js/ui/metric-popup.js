@@ -122,9 +122,27 @@ export const MetricPopup = {
       }
     }(affectedTraces, this.metric))
 
+    const metricDrawState = Store.getMetricDrawState(this.metric.name)
+    document.getElementById('checkbox_min').checked = metricDrawState[0]
+    document.getElementById('checkbox_avg').checked = metricDrawState[1]
+    document.getElementById('checkbox_max').checked = metricDrawState[2]
+
     document.getElementById('input_metric_name').focus()
+
   },
   methods: {
+    changeMin: function (evt) {
+      this.metric.drawMin = !this.metric.drawMin
+      Store.checkMetricDrawState()
+    },
+    changeAvg: function (evt) {
+      this.metric.drawAvg = !this.metric.drawAvg
+      Store.checkMetricDrawState()
+    },
+    changeMax: function (evt) {
+      this.metric.drawMax = !this.metric.drawMax
+      Store.checkMetricDrawState()
+    },
     changeMarker: function (evt) {
       this.metric.updateMarker(evt.target.value)
     },
@@ -194,6 +212,25 @@ export const MetricPopup = {
                 </select>
               </div>
             </div>
+            <table>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" id='checkbox_min' checked=true v-on:click='changeMin'> min anzeigen
+                  </label>
+                </td>
+                <td>
+                  <label>
+                    <input type="checkbox" id='checkbox_avg' checked=true v-on:click='changeAvg'> avg anzeigen
+                  </label>
+                </td>
+                <td>
+                  <label>
+                    <input type="checkbox" id='checkbox_max' checked=true v-on:click='changeMax'> max anzeigen
+                  </label>
+                </td>
+              </tr>
+            </table>
           </div>
           <div class="modal-footer">
             <button v-if="!isEmpty" class="btn btn-danger" v-on:click="trashcanClicked">

@@ -46,7 +46,13 @@ export const mainApp = new Vue({
       Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
     },
     toggleMinMaxButtonClicked () {
-      Store.setDrawMinMaxGlobal()
+
+      var checkbox = document.getElementById('checkbox_min_max')
+      if (checkbox.indeterminate === true) {
+        checkbox.indeterminate = false
+        checkbox.checked = true
+      }
+      Store.setDrawMinMaxGlobal(checkbox.checked)
     }
   }
 })

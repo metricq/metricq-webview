@@ -15,8 +15,7 @@ export class StoreClass {
       timestamp: {
         start: 0,
         end: 0
-      },
-      drawMinMaxGlobal: true
+      }
     }
   }
 
@@ -54,12 +53,35 @@ export class StoreClass {
     return undefined
   }
 
-  getMetricMinMax (metricName) {
+  getMetricDrawState (metricName) {
     for (const metricBase in this.state.allMetrics) {
+      const metricArray = []
       if (this.state.allMetrics[metricBase].name === metricName) {
-        return this.state.allMetrics[metricBase].drawMinMax
+        metricArray.push(this.state.allMetrics[metricBase].drawMin)
+        metricArray.push(this.state.allMetrics[metricBase].drawAvg)
+        metricArray.push(this.state.allMetrics[metricBase].drawMax)
+        return metricArray
       }
     }
+  }
+
+  checkMetricDrawState () {
+    var assume = true
+    const metricsArray = this.getAllMetrics()
+    document.getElementById('checkbox_min_max').indeterminate = false
+    metricsArray.forEach(metric => {
+      const metricDrawArray = this.getMetricDrawState(metric)
+      metricDrawArray.forEach(element => {
+        if (element !== assume) {
+          if (assume === true) {
+            assume = false
+          } else {
+            document.getElementById('checkbox_min_max').indeterminate = true
+          }
+        }
+      })
+    })
+    document.getElementById('checkbox_min_max').checked = assume
   }
 
   getAllMetrics () {
@@ -81,17 +103,15 @@ export class StoreClass {
     Vue.set(this.state.timestamp, 'end', time)
   }
 
-  setDrawMinMaxGlobal () {
-    Vue.set(this.state, 'drawMinMaxGlobal', !this.state.drawMinMaxGlobal)
+  setDrawMinMaxGlobal (newState) {
     for (const metricBase in this.state.allMetrics) {
-      Vue.set(this.state.allMetrics[metricBase], 'drawMinMax', this.state.drawMinMaxGlobal)
+      Vue.set(this.state.allMetrics[metricBase], 'drawMin', newState)
+      Vue.set(this.state.allMetrics[metricBase], 'drawAvg', true)
+      Vue.set(this.state.allMetrics[metricBase], 'drawMax', newState)
     }
     window.MetricQWebView.instances[0].graticule.draw(false)
   }
 
-  getDrawMinMaxGlobal () {
-    return this.state.drawMinMaxGlobal
-  }
 }
 
 export const Store = new StoreClass()
