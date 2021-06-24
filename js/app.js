@@ -29,9 +29,16 @@ export const mainApp = new Vue({
     popups: Store.state.popups,
     configuration: Store.state.configuration,
     metricsList: Store.state.allMetrics,
-    timestamp: Store.state.timestamp
+    timestamp: Store.state.timestamp,
+    globalminmax: Store.state.globalMinMax,
+    indeterminate: Store.state.indeterminate
   },
   computed: {},
+  watch: {
+    globalminmax: function (val) {
+      Store.setDrawMinMaxGlobal(val)
+    }
+  },
   methods: {
     exportButtonClicked () {
       Store.togglePopup('export')
@@ -44,15 +51,6 @@ export const mainApp = new Vue({
     },
     clearAllButtonClicked () {
       Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
-    },
-    toggleMinMaxButtonClicked () {
-
-      var checkbox = document.getElementById('checkbox_min_max')
-      if (checkbox.indeterminate === true) {
-        checkbox.indeterminate = false
-        checkbox.checked = true
-      }
-      Store.setDrawMinMaxGlobal(checkbox.checked)
     }
   }
 })

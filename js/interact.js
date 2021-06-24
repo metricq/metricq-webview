@@ -164,13 +164,13 @@ function uiInteractLegend (metricQInstance, evtObj) {
       sortValue = Number(allValuesAtTime[i][1])
     } else {
       curText = ''
-      if (Store.getMetricDrawState(allValuesAtTime[i][3])[0]) {
+      if (Store.getMetricDrawState(allValuesAtTime[i][3]).drawMin) {
         curText += '▼' + (Number(allValuesAtTime[i][1])).toFixed(3)
       }
-      if (Store.getMetricDrawState(allValuesAtTime[i][3])[1]) {
+      if (Store.getMetricDrawState(allValuesAtTime[i][3]).drawAvg) {
         curText += ' ⌀' + (Number(allValuesAtTime[i + 2][1])).toFixed(3)
       }
-      if (Store.getMetricDrawState(allValuesAtTime[i][3])[2]) {
+      if (Store.getMetricDrawState(allValuesAtTime[i][3]).drawMax) {
         curText += ' ▲' + (Number(allValuesAtTime[i + 1][1])).toFixed(3)
       }
     }

@@ -34,8 +34,8 @@
         Export
       </button>
       <label class="btn btn-outline-primary">
-        <input type="checkbox" id='checkbox_min_max' checked=true v-on:click="toggleMinMaxButtonClicked"> min/avg/max
-        anzeigen
+        <input type="checkbox" id='checkbox_min_max' v-model="globalminmax" :indeterminate="indeterminate">
+        min/max anzeigen
       </label>
       <time-button id="date_range" class="btn btn-outline-primary"
                    v-bind:starttime="timestamp.start"

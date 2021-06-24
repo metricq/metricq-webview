@@ -15,7 +15,9 @@ export class StoreClass {
       timestamp: {
         start: 0,
         end: 0
-      }
+      },
+      globalMinMax: true,
+      indeterminate: true
     }
   }
 
@@ -57,31 +59,35 @@ export class StoreClass {
     for (const metricBase in this.state.allMetrics) {
       const metricArray = []
       if (this.state.allMetrics[metricBase].name === metricName) {
-        metricArray.push(this.state.allMetrics[metricBase].drawMin)
-        metricArray.push(this.state.allMetrics[metricBase].drawAvg)
-        metricArray.push(this.state.allMetrics[metricBase].drawMax)
+        metricArray.drawMin = this.state.allMetrics[metricBase].drawMin
+        metricArray.drawAvg = this.state.allMetrics[metricBase].drawAvg
+        metricArray.drawMax = this.state.allMetrics[metricBase].drawMax
         return metricArray
       }
     }
   }
 
   checkMetricDrawState () {
-    var assume = true
+    const stateArray = []
     const metricsArray = this.getAllMetrics()
     document.getElementById('checkbox_min_max').indeterminate = false
     metricsArray.forEach(metric => {
       const metricDrawArray = this.getMetricDrawState(metric)
-      metricDrawArray.forEach(element => {
-        if (element !== assume) {
-          if (assume === true) {
-            assume = false
-          } else {
-            document.getElementById('checkbox_min_max').indeterminate = true
-          }
-        }
-      })
+      console.log(metricDrawArray)
+      if (!metricDrawArray.drawAvg) {
+        document.getElementById('checkbox_min_max').indeterminate = true
+      }
+      stateArray.push(metricDrawArray.drawMin)
+      stateArray.push(metricDrawArray.drawMax)
     })
-    document.getElementById('checkbox_min_max').checked = assume
+    if (stateArray.includes(true) && stateArray.includes(false)) {
+      document.getElementById('checkbox_min_max').indeterminate = true
+    } else {
+      console.log(stateArray[0])
+      Vue.set(this.state, 'globalMinMax', stateArray[0])
+      // document.getElementById('checkbox_min_max').checked = stateArray[0]
+      console.log(this.state.globalMinMax)
+    }
   }
 
   getAllMetrics () {
@@ -104,14 +110,14 @@ export class StoreClass {
   }
 
   setDrawMinMaxGlobal (newState) {
+    Vue.set(this.state, 'globalMinMax', newState)
     for (const metricBase in this.state.allMetrics) {
-      Vue.set(this.state.allMetrics[metricBase], 'drawMin', newState)
+      Vue.set(this.state.allMetrics[metricBase], 'drawMin', this.state.globalMinMax)
       Vue.set(this.state.allMetrics[metricBase], 'drawAvg', true)
-      Vue.set(this.state.allMetrics[metricBase], 'drawMax', newState)
+      Vue.set(this.state.allMetrics[metricBase], 'drawMax', this.state.globalMinMax)
     }
     window.MetricQWebView.instances[0].graticule.draw(false)
   }
-
 }
 
 export const Store = new StoreClass()

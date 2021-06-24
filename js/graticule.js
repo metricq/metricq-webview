@@ -456,8 +456,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
        * 3 = next
        */
       switch (styleOptions.connect) { // Thomas: Magische Zahlen sind nicht schön
-      //         prinzipiell sind magische Zahlen nicht schön
-      // Inkonsistenz: Einmal Strings, einmal Zahlen
+        //         prinzipiell sind magische Zahlen nicht schön
+        // Inkonsistenz: Einmal Strings, einmal Zahlen
         case 'next':
           parsedObj.connect = 3
           break
@@ -835,7 +835,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   }
   this.drawBands = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
-      if (Store.getMetricDrawState(this.data.metrics[i].name)[0]) {
+      if (Store.getMetricDrawState(this.data.metrics[i].name).drawMin && Store.getMetricDrawState(this.data.metrics[i].name).drawMax) {
         const curBand = this.data.metrics[i].band
         if (curBand) {
           const styleOptions = this.parseStyleOptions(curBand.styleOptions)
