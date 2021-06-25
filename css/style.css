@@ -330,3 +330,7 @@ body {
     right: 0;
     top: 0;
 }
+
+.btn-label {
+    margin-top: 7px
+}

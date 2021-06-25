@@ -33,8 +33,8 @@
         <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
         Export
       </button>
-      <label class="btn btn-outline-primary">
-        <input type="checkbox" id='checkbox_min_max' v-model="globalminmax" :indeterminate="indeterminate">
+      <label class="btn btn-outline-primary btn-label">
+        <input type="checkbox" id='checkbox_min_max' v-model="globalminmax" v-on:change="toggleMinMaxButton">
         min/max anzeigen
       </label>
       <time-button id="date_range" class="btn btn-outline-primary"

@@ -34,11 +34,12 @@ export const mainApp = new Vue({
     indeterminate: Store.state.indeterminate
   },
   computed: {},
-  watch: {
+  /* watch: {
     globalminmax: function (val) {
       Store.setDrawMinMaxGlobal(val)
+      console.log(val)
     }
-  },
+  }, */
   methods: {
     exportButtonClicked () {
       Store.togglePopup('export')
@@ -51,6 +52,9 @@ export const mainApp = new Vue({
     },
     clearAllButtonClicked () {
       Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
+    },
+    toggleMinMaxButton (evt) {
+      Store.setDrawMinMaxGlobal(evt.target.checked)
     }
   }
 })

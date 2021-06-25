@@ -678,9 +678,9 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
         this.ctx.lineWidth = parseFloat(styleOptions.lineWidth)
         parsedObj.oddLineWidthAddition = ((styleOptions.lineWidth % 2) === 1) ? 0.5 : 0
       }
-      if (styleKeys.includes('lineDash')) {
+      /* if (styleKeys.includes('lineDash')) {
         this.ctx.setLineDash(styleOptions.lineDash)
-      }
+      } */
     }
 
     return parsedObj
@@ -893,6 +893,15 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   }
   this.drawSeries = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
+      const metricDrawState = Store.getMetricDrawState(this.data.metrics[i].name)
+      this.data.metrics[i].series.avg.styleOptions.skip = !metricDrawState.drawAvg
+      if (!metricDrawState.drawMin || !metricDrawState.drawMax) {
+        this.data.metrics[i].series.min.styleOptions.skip = !metricDrawState.drawMin
+        this.data.metrics[i].series.max.styleOptions.skip = !metricDrawState.drawMax
+      } else {
+        this.data.metrics[i].series.min.styleOptions.skip = true
+        this.data.metrics[i].series.max.styleOptions.skip = true
+      }
       for (const curAggregate in this.data.metrics[i].series) {
         const curSeries = this.data.metrics[i].series[curAggregate]
         if (curSeries) {

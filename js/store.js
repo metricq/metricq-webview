@@ -73,7 +73,6 @@ export class StoreClass {
     document.getElementById('checkbox_min_max').indeterminate = false
     metricsArray.forEach(metric => {
       const metricDrawArray = this.getMetricDrawState(metric)
-      console.log(metricDrawArray)
       if (!metricDrawArray.drawAvg) {
         document.getElementById('checkbox_min_max').indeterminate = true
       }
@@ -83,10 +82,8 @@ export class StoreClass {
     if (stateArray.includes(true) && stateArray.includes(false)) {
       document.getElementById('checkbox_min_max').indeterminate = true
     } else {
-      console.log(stateArray[0])
-      Vue.set(this.state, 'globalMinMax', stateArray[0])
-      // document.getElementById('checkbox_min_max').checked = stateArray[0]
-      console.log(this.state.globalMinMax)
+      // Vue.set(this.state, 'globalMinMax', stateArray[0])
+      document.getElementById('checkbox_min_max').checked = stateArray[0]
     }
   }
 
