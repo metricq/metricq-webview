@@ -297,12 +297,19 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     }
     // DEBUG
     // console.log("x-axis labeling offset: " + (this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom /2));
+    this.ctx.textAlign = 'right'
     for (let i = 0; i < yAxisSteps.length; ++i) {
       if (yPositions[i] >= this.graticuleDimensions[1]) {
-        const textWidth = this.ctx.measureText(yAxisSteps[i][1]).width
-        this.ctx.fillText(yAxisSteps[i][1], this.graticuleDimensions[0] - textWidth - this.pixelsLeft, yPositions[i] + 4)
+        const numericValue = yAxisSteps[i][1]
+        if (Math.abs(numericValue) >= 10000) {
+          const displayValue = Number.parseFloat(numericValue).toExponential(2)
+          this.ctx.fillText(displayValue, this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i] + 4)
+        } else {
+          this.ctx.fillText(numericValue, this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i] + 4)
+        }
       }
     }
+    this.ctx.textAlign = 'left'
     const curUnits = this.data.distinctUnits()
     if (curUnits && curUnits.length > 0) {
       let unitString = ''
@@ -984,7 +991,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   this.windowResize = function (evt) {
     const newSize = [this.ele.parentNode.offsetWidth, this.canvasSize[1]]
     this.clearSize = newSize
-    const canvasBorders = [10, 20, 40, 40] // TOP, RIGHT, BOTTOM, LEFT;
+    const canvasBorders = [10, 20, 40, 105] // TOP, RIGHT, BOTTOM, LEFT;
     this.graticuleDimensions = [canvasBorders[3],
       canvasBorders[0],
       newSize[0] - (canvasBorders[1] + canvasBorders[3]),
