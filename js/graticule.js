@@ -302,7 +302,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
       if (yPositions[i] >= this.graticuleDimensions[1]) {
         const numericValue = yAxisSteps[i][1]
         if (Math.abs(numericValue) >= 10000) {
-          const displayValue = Number.parseFloat(numericValue).toExponential(2)
+          const displayValue = Number.parseFloat(numericValue).toExponential(3)
           this.ctx.fillText(displayValue, this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i] + 4)
         } else {
           this.ctx.fillText(numericValue, this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i] + 4)
