@@ -249,6 +249,13 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     return stepsArr
   }
 
+  this.formatAxisNumber = function (value) {
+    if (Math.abs(value) >= 10000) {
+      return Number.parseFloat(value).toExponential(3)
+    }
+    return value
+  }
+
   this.drawGrid = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     /* draw lines */
     this.ctx.fillStyle = 'rgba(192,192,192,0.5)'
@@ -300,13 +307,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     this.ctx.textAlign = 'right'
     for (let i = 0; i < yAxisSteps.length; ++i) {
       if (yPositions[i] >= this.graticuleDimensions[1]) {
-        const numericValue = yAxisSteps[i][1]
-        if (Math.abs(numericValue) >= 10000) {
-          const displayValue = Number.parseFloat(numericValue).toExponential(3)
-          this.ctx.fillText(displayValue, this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i] + 4)
-        } else {
-          this.ctx.fillText(numericValue, this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i] + 4)
-        }
+        this.ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i] + 4)
       }
     }
     this.ctx.textAlign = 'left'
