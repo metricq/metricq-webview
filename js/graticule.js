@@ -296,10 +296,14 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     this.ctx.fillStyle = 'rgba(0,0,0,1)'
     const fontSize = 14
     this.ctx.font = fontSize + 'px ' + this.DEFAULT_FONT
+    // x-axis ticks (time/date)
+    this.ctx.textAlign = 'center'
+    this.ctx.textBaseline = 'hanging'
     for (let i = 0; i < xAxisSteps.length; ++i) {
+      // supports vertically stacked elements, e.g. time, date
       for (let j = 0; j < xAxisSteps[i].label.length; ++j) {
-        const textWidth = this.ctx.measureText(xAxisSteps[i].label[j]).width
-        this.ctx.fillText(xAxisSteps[i].label[j], xPositions[i] - Math.floor(textWidth / 2), this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom + fontSize * j)
+        // unfortunately measuring line height is complicated, so we use fontSize instead
+        this.ctx.fillText(xAxisSteps[i].label[j], xPositions[i], this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom + fontSize * j)
       }
     }
     this.ctx.textAlign = 'right'
@@ -309,7 +313,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
         this.ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i])
       }
     }
-    this.ctx.textAlign = 'left'
+    this.ctx.textAlign = 'middle'
     this.ctx.textBaseline = 'alphabetic'
     const curUnits = this.data.distinctUnits()
     if (curUnits && curUnits.length > 0) {
@@ -317,8 +321,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
       curUnits.forEach((val, index, arr) => { unitString += (unitString.length > 0 ? ' / ' : '') + val })
       this.ctx.save()
       this.ctx.rotate(Math.PI / 2 * 3)
-      const textWidth = this.ctx.measureText(unitString).width
-      this.ctx.fillText(unitString, (Math.round((this.graticuleDimensions[3] + textWidth) / 2) + this.graticuleDimensions[1]) * -1, fontSize)
+      this.ctx.fillText(unitString, (Math.round(this.graticuleDimensions[3] / 2) + this.graticuleDimensions[1]) * -1, fontSize)
       this.ctx.restore()
     }
   }
