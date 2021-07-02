@@ -305,12 +305,14 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     // DEBUG
     // console.log("x-axis labeling offset: " + (this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom /2));
     this.ctx.textAlign = 'right'
+    this.ctx.textBaseline = 'middle'
     for (let i = 0; i < yAxisSteps.length; ++i) {
       if (yPositions[i] >= this.graticuleDimensions[1]) {
-        this.ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i] + 4)
+        this.ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i])
       }
     }
     this.ctx.textAlign = 'left'
+    this.ctx.textBaseline = 'alphabetic'
     const curUnits = this.data.distinctUnits()
     if (curUnits && curUnits.length > 0) {
       let unitString = ''
