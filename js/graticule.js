@@ -302,8 +302,6 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
         this.ctx.fillText(xAxisSteps[i].label[j], xPositions[i] - Math.floor(textWidth / 2), this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom + fontSize * j)
       }
     }
-    // DEBUG
-    // console.log("x-axis labeling offset: " + (this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom /2));
     this.ctx.textAlign = 'right'
     this.ctx.textBaseline = 'middle'
     for (let i = 0; i < yAxisSteps.length; ++i) {
