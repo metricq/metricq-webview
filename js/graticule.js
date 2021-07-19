@@ -259,6 +259,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   this.drawGrid = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     /* draw lines */
     this.ctx.fillStyle = 'rgba(192,192,192,0.5)'
+
+    // vertical grid
     let minDistanceBetweenGridLines = 110
     let maxStepsCount = Math.floor(this.graticuleDimensions[2] / minDistanceBetweenGridLines)
     const xAxisSteps = this.figureOutTimeSteps(maxStepsCount)
@@ -275,6 +277,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
       }
     }
 
+    // horizontal grid
     minDistanceBetweenGridLines = 30
     maxStepsCount = Math.floor(this.graticuleDimensions[3] / minDistanceBetweenGridLines)
     const yAxisSteps = this.figureOutLogarithmicSteps(valueRange[0], valueRange[1], maxStepsCount)
