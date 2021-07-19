@@ -249,9 +249,18 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     return stepsArr
   }
 
+  this.formatAxisNumber = function (value) {
+    if (Math.abs(value) >= 10000) {
+      return Number.parseFloat(value).toExponential(3)
+    }
+    return value
+  }
+
   this.drawGrid = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     /* draw lines */
     this.ctx.fillStyle = 'rgba(192,192,192,0.5)'
+
+    // vertical grid
     let minDistanceBetweenGridLines = 110
     let maxStepsCount = Math.floor(this.graticuleDimensions[2] / minDistanceBetweenGridLines)
     const xAxisSteps = this.figureOutTimeSteps(maxStepsCount)
@@ -268,6 +277,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
       }
     }
 
+    // horizontal grid
     minDistanceBetweenGridLines = 30
     maxStepsCount = Math.floor(this.graticuleDimensions[3] / minDistanceBetweenGridLines)
     const yAxisSteps = this.figureOutLogarithmicSteps(valueRange[0], valueRange[1], maxStepsCount)
@@ -289,28 +299,32 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     this.ctx.fillStyle = 'rgba(0,0,0,1)'
     const fontSize = 14
     this.ctx.font = fontSize + 'px ' + this.DEFAULT_FONT
+    // x-axis ticks (time/date)
+    this.ctx.textAlign = 'center'
+    this.ctx.textBaseline = 'hanging'
     for (let i = 0; i < xAxisSteps.length; ++i) {
+      // supports vertically stacked elements, e.g. time, date
       for (let j = 0; j < xAxisSteps[i].label.length; ++j) {
-        const textWidth = this.ctx.measureText(xAxisSteps[i].label[j]).width
-        this.ctx.fillText(xAxisSteps[i].label[j], xPositions[i] - Math.floor(textWidth / 2), this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom + fontSize * j)
+        // unfortunately measuring line height is complicated, so we use fontSize instead
+        this.ctx.fillText(xAxisSteps[i].label[j], xPositions[i], this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom + fontSize * j)
       }
     }
-    // DEBUG
-    // console.log("x-axis labeling offset: " + (this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom /2));
+    this.ctx.textAlign = 'right'
+    this.ctx.textBaseline = 'middle'
     for (let i = 0; i < yAxisSteps.length; ++i) {
       if (yPositions[i] >= this.graticuleDimensions[1]) {
-        const textWidth = this.ctx.measureText(yAxisSteps[i][1]).width
-        this.ctx.fillText(yAxisSteps[i][1], this.graticuleDimensions[0] - textWidth - this.pixelsLeft, yPositions[i] + 4)
+        this.ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i])
       }
     }
+    this.ctx.textAlign = 'middle'
+    this.ctx.textBaseline = 'alphabetic'
     const curUnits = this.data.distinctUnits()
     if (curUnits && curUnits.length > 0) {
       let unitString = ''
       curUnits.forEach((val, index, arr) => { unitString += (unitString.length > 0 ? ' / ' : '') + val })
       this.ctx.save()
       this.ctx.rotate(Math.PI / 2 * 3)
-      const textWidth = this.ctx.measureText(unitString).width
-      this.ctx.fillText(unitString, (Math.round((this.graticuleDimensions[3] + textWidth) / 2) + this.graticuleDimensions[1]) * -1, fontSize)
+      this.ctx.fillText(unitString, (Math.round(this.graticuleDimensions[3] / 2) + this.graticuleDimensions[1]) * -1, fontSize)
       this.ctx.restore()
     }
   }
@@ -984,7 +998,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   this.windowResize = function (evt) {
     const newSize = [this.ele.parentNode.offsetWidth, this.canvasSize[1]]
     this.clearSize = newSize
-    const canvasBorders = [10, 20, 40, 40] // TOP, RIGHT, BOTTOM, LEFT;
+    const canvasBorders = [10, 20, 40, 105] // TOP, RIGHT, BOTTOM, LEFT;
     this.graticuleDimensions = [canvasBorders[3],
       canvasBorders[0],
       newSize[0] - (canvasBorders[1] + canvasBorders[3]),

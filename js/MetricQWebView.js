@@ -37,7 +37,7 @@ class MetricQWebView {
         top: 10,
         right: 35,
         bottom: 40,
-        left: 55
+        left: 105
       },
       labels: {
         left: 3,
