@@ -195,15 +195,44 @@ function uiInteractLegend (metricQInstance, evtObj) {
     }
   }
   const timeString = posDate.toLocaleString()
-  myCtx.fillText(timeString, curPosOnCanvas[0] + 10, 40 - 20)
+  const offsetTop = 30
+  const verticalDiff = 20
+  const borderPadding = 10
+  const offsetMid = 10
+
+  myCtx.textBaseline = 'middle'
+  drawHoverDate(myCtx, timeString, metricQInstance, curPosOnCanvas[0], maxTextWidth, offsetTop, offsetMid, verticalDiff, borderPadding)
+  drawHoverText(myCtx, metricsArray, metricQInstance, curPosOnCanvas[0], minTextWidth, maxTextWidth, offsetTop, offsetMid, verticalDiff, borderPadding)
+}
+
+function drawHoverDate (myCtx, timeString, metricQInstance, curPosOnCanvas, maxTextWidth, offsetTop, offsetMid, verticalDiff, borderPadding) {
+  if (curPosOnCanvas + offsetMid + myCtx.measureText(timeString).width > metricQInstance.graticule.canvasSize[0] || curPosOnCanvas + offsetMid + maxTextWidth + borderPadding > metricQInstance.graticule.canvasSize[0]) {
+    myCtx.textAlign = 'right'
+    offsetMid *= -1
+  } else {
+    myCtx.textAlign = 'left'
+  }
+  myCtx.fillText(timeString, curPosOnCanvas + offsetMid, offsetTop - 0.5 * verticalDiff)
+}
+
+function drawHoverText (myCtx, metricsArray, metricQInstance, curPosOnCanvas, minTextWidth, maxTextWidth, offsetTop, offsetMid, verticalDiff, borderPadding) {
+  myCtx.textAlign = 'left'
+  let offsetRight = 0
+  if (curPosOnCanvas + maxTextWidth + offsetMid + borderPadding > metricQInstance.graticule.canvasSize[0]) {
+    offsetRight = minTextWidth + maxTextWidth + 4 * offsetMid
+  } else {
+    if (curPosOnCanvas > minTextWidth + offsetMid + borderPadding) {
+      offsetRight = (offsetMid * 2 + minTextWidth)
+    }
+  }
   for (let i = 0; i < metricsArray.length; ++i) {
     myCtx.fillStyle = metricsArray[i].metric.styleOptions.color
     myCtx.globalAlpha = 0.4
-    myCtx.fillRect(curPosOnCanvas[0] - minTextWidth - 10, 40 + i * 20 - 15, minTextWidth + maxTextWidth + 20, 20)
+    myCtx.fillRect(curPosOnCanvas + offsetMid - offsetRight - borderPadding, offsetTop + i * verticalDiff, minTextWidth + maxTextWidth + (offsetMid + borderPadding) * 2, 20)
     myCtx.fillStyle = '#000000'
     myCtx.globalAlpha = 1
-    myCtx.fillText(metricsArray[i].curText, curPosOnCanvas[0] - metricsArray[i].curTextWidth - 10, 40 + i * 20)
-    myCtx.fillText(metricsArray[i].name, curPosOnCanvas[0] + 10, 40 + i * 20)
+    myCtx.fillText(metricsArray[i].curText, curPosOnCanvas + offsetMid - offsetRight, offsetTop + (i + 0.5) * verticalDiff)
+    myCtx.fillText(metricsArray[i].name, curPosOnCanvas + (offsetMid * 3 + minTextWidth) - offsetRight, offsetTop + (i + 0.5) * verticalDiff)
   }
 }
 
