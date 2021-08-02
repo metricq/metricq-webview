@@ -8,5 +8,6 @@ export class Configuration {
     this.exportFormat = 'png'
     this.exportWidth = 640
     this.exportHeight = 480
+    this.legendDisplay = 'right'
   }
 }

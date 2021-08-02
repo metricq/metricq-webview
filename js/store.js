@@ -28,6 +28,7 @@ export class StoreClass {
   setMetric (metricKey, metric) {
     Vue.set(this.state.allMetrics, metricKey, metric)
     document.getElementById('button_clear_all').style.display = 'inline'
+    window.MetricQWebView.instances[0].setLegendListWidth()
   }
 
   deleteMetric (metricKey) {
@@ -35,6 +36,7 @@ export class StoreClass {
     if (this.getAllMetrics().length === 0) {
       document.getElementById('button_clear_all').style.display = 'none'
     }
+    window.MetricQWebView.instances[0].setLegendListWidth()
   }
 
   setMetricPopup (metricKey, popup) {
@@ -70,6 +72,11 @@ export class StoreClass {
 
   setEndTime (time) {
     Vue.set(this.state.timestamp, 'end', time)
+  }
+
+  setLegendPosition (layout) {
+    Vue.set(this.state.configuration, 'legendDisplay', layout)
+    window.MetricQWebView.instances[0].graticule.resetCanvas()
   }
 }
 

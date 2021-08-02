@@ -39,13 +39,30 @@ body {
     box-shadow: 0px 1px 2px 1px #D0D0D0;
 }
 
+.wrapper_body_right {
+    width: 100%;
+}
+
 .row_foot {
     width: 100%;
     text-align: center;
 }
 
+.row_foot_right {
+    margin-left: -40px;
+}
+
 #legend_list {
     list-style-type: none;
+}
+
+.legend_list_right {
+    display: flex;
+    flex-direction: column;
+    margin-top: -5px;
+}
+
+.legend_list_bottom {
     margin: 0px auto 0px auto;
 }
 
@@ -329,4 +346,18 @@ body {
     position: absolute;
     right: 0;
     top: 0;
+}
+
+.body_and_legend_bottom {
+
+}
+
+.body_and_legend_right {
+    display: flex;
+}
+
+.config_radio_legend {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
 }
