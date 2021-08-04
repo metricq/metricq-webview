@@ -125,8 +125,13 @@ export const MetricPopup = {
     document.getElementById('input_metric_name').focus()
   },
   methods: {
-    changeDraw: function () {
-      Store.checkMetricDrawState()
+    changeDraw: function (evt) {
+      if (this.metric.drawMin === false && this.metric.drawAvg === false && this.metric.drawMax === false) {
+        evt.target.click()
+        window.alert('Fehler! Mindestens eine Option muss ausgewählt bleiben!')
+      } else {
+        Store.checkMetricDrawState()
+      }
     },
     changeMarker: function (evt) {
       this.metric.updateMarker(evt.target.value)

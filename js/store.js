@@ -80,6 +80,7 @@ export class StoreClass {
       stateArray.push(metricDrawArray.drawMax)
     })
     if (stateArray.includes(true) && stateArray.includes(false)) {
+      document.getElementById('checkbox_min_max').checked = false
       document.getElementById('checkbox_min_max').indeterminate = true
     } else {
       // Vue.set(this.state, 'globalMinMax', stateArray[0])
