@@ -30,7 +30,6 @@ export const mainApp = new Vue({
     configuration: Store.state.configuration,
     metricsList: Store.state.allMetrics,
     timestamp: Store.state.timestamp,
-    globalminmax: Store.state.globalMinMax,
     indeterminate: Store.state.indeterminate
   },
   computed: {},

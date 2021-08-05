@@ -893,14 +893,16 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   }
   this.drawSeries = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
-      const metricDrawState = Store.getMetricDrawState(this.data.metrics[i].name)
-      this.data.metrics[i].series.avg.styleOptions.skip = !metricDrawState.drawAvg
-      if (!metricDrawState.drawMin || !metricDrawState.drawMax) {
-        this.data.metrics[i].series.min.styleOptions.skip = !metricDrawState.drawMin
-        this.data.metrics[i].series.max.styleOptions.skip = !metricDrawState.drawMax
-      } else {
-        this.data.metrics[i].series.min.styleOptions.skip = true
-        this.data.metrics[i].series.max.styleOptions.skip = true
+      if (this.data.metrics[i].series.raw === undefined) {
+        const metricDrawState = Store.getMetricDrawState(this.data.metrics[i].name)
+        this.data.metrics[i].series.avg.styleOptions.skip = !metricDrawState.drawAvg
+        if (!metricDrawState.drawMin || !metricDrawState.drawMax) {
+          this.data.metrics[i].series.min.styleOptions.skip = !metricDrawState.drawMin
+          this.data.metrics[i].series.max.styleOptions.skip = !metricDrawState.drawMax
+        } else {
+          this.data.metrics[i].series.min.styleOptions.skip = true
+          this.data.metrics[i].series.max.styleOptions.skip = true
+        }
       }
       for (const curAggregate in this.data.metrics[i].series) {
         const curSeries = this.data.metrics[i].series[curAggregate]

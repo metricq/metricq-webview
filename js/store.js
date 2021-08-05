@@ -16,7 +16,6 @@ export class StoreClass {
         start: 0,
         end: 0
       },
-      globalMinMax: true,
       indeterminate: true
     }
   }
@@ -37,6 +36,7 @@ export class StoreClass {
     if (this.getAllMetrics().length === 0) {
       document.getElementById('button_clear_all').style.display = 'none'
     }
+    this.checkMetricDrawState()
   }
 
   setMetricPopup (metricKey, popup) {
@@ -71,20 +71,25 @@ export class StoreClass {
     const stateArray = []
     const metricsArray = this.getAllMetrics()
     document.getElementById('checkbox_min_max').indeterminate = false
-    metricsArray.forEach(metric => {
-      const metricDrawArray = this.getMetricDrawState(metric)
-      if (!metricDrawArray.drawAvg) {
+    if (metricsArray.length > 0) {
+      metricsArray.forEach(metric => {
+        const metricDrawArray = this.getMetricDrawState(metric)
+        if (!metricDrawArray.drawAvg) {
+          document.getElementById('checkbox_min_max').indeterminate = true
+        }
+        stateArray.push(metricDrawArray.drawMin)
+        stateArray.push(metricDrawArray.drawMax)
+      })
+      if (stateArray.includes(true) && stateArray.includes(false)) {
+        document.getElementById('checkbox_min_max').checked = false
         document.getElementById('checkbox_min_max').indeterminate = true
+      } else {
+        // Vue.set(this.state, 'globalMinMax', stateArray[0])
+        document.getElementById('checkbox_min_max').checked = stateArray[0]
       }
-      stateArray.push(metricDrawArray.drawMin)
-      stateArray.push(metricDrawArray.drawMax)
-    })
-    if (stateArray.includes(true) && stateArray.includes(false)) {
-      document.getElementById('checkbox_min_max').checked = false
-      document.getElementById('checkbox_min_max').indeterminate = true
     } else {
-      // Vue.set(this.state, 'globalMinMax', stateArray[0])
-      document.getElementById('checkbox_min_max').checked = stateArray[0]
+      document.getElementById('checkbox_min_max').checked = false
+      document.getElementById('checkbox_min_max').indeterminate = false
     }
   }
 

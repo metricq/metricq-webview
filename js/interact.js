@@ -173,9 +173,9 @@ function uiInteractLegend (metricQInstance, evtObj) {
       if (Store.getMetricDrawState(allValuesAtTime[i][3]).drawMax) {
         curText += ' ▲' + (Number(allValuesAtTime[i + 1][1])).toFixed(3)
       }
+      sortValue = Number(allValuesAtTime[i + 2][1])
+      i += 2
     }
-    sortValue = Number(allValuesAtTime[i + 2][1])
-    i += 2
 
     newEntry.curText = curText
     newEntry.name = allValuesAtTime[i][3]
