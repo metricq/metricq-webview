@@ -27,14 +27,10 @@ export class StoreClass {
 
   setMetric (metricKey, metric) {
     Vue.set(this.state.allMetrics, metricKey, metric)
-    document.getElementById('button_clear_all').style.display = 'inline'
   }
 
   deleteMetric (metricKey) {
     Vue.delete(this.state.allMetrics, metricKey)
-    if (this.getAllMetrics().length === 0) {
-      document.getElementById('button_clear_all').style.display = 'none'
-    }
   }
 
   setMetricPopup (metricKey, popup) {

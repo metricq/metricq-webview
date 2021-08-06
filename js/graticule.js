@@ -357,7 +357,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     this.lastRangeChangeTime = (new Date()).getTime()
     return true
   }
-  this.setValueRange = function (paramRangeStart, paramRangeEnd) {
+  this.setValueRange = function (paramRangeStart = undefined, paramRangeEnd = undefined) {
     if (undefined !== paramRangeStart) this.curValueRange[0] = paramRangeStart
     if (undefined !== paramRangeEnd) this.curValueRange[1] = paramRangeEnd
     this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.graticuleDimensions[3]
@@ -995,18 +995,21 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     }
     return valueRange
   }
-  this.windowResize = function (evt) {
-    const newSize = [this.ele.parentNode.offsetWidth, this.canvasSize[1]]
+
+  this.canvasResize = function (canvasMargins, footMargin) {
+    const newSize = [document.getElementById('webview_container').offsetWidth, document.body.scrollHeight - footMargin]
     this.clearSize = newSize
-    const canvasBorders = [10, 20, 40, 105] // TOP, RIGHT, BOTTOM, LEFT;
-    this.graticuleDimensions = [canvasBorders[3],
-      canvasBorders[0],
-      newSize[0] - (canvasBorders[1] + canvasBorders[3]),
-      newSize[1] - (canvasBorders[0] + canvasBorders[2])]
-    this.canvasSize = newSize
-    this.ele.setAttribute('width', this.ele.parentNode.offsetWidth)
+    this.ctx.canvas.width = newSize[0]
+    this.ctx.canvas.height = newSize[1]
+    this.graticuleDimensions = [canvasMargins.left, canvasMargins.top, newSize[0] - canvasMargins.left - canvasMargins.right, newSize[1] - canvasMargins.top - canvasMargins.bottom]
+    this.setTimeRange(window.MetricQWebView.instances[0].handler.startTime.getUnix(), window.MetricQWebView.instances[0].handler.stopTime.getUnix())
+    this.setValueRange()
     this.draw(false)
-    // TODO: reposition the gear elements!
+  }
+
+  this.canvasReset = function () {
+    // is needed so that metriclegend can take the necessary space and canvas takes the rest
+    this.ctx.canvas.width = 0
   }
 }
 
