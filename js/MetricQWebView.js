@@ -301,7 +301,7 @@ class MetricQWebView {
 
   windowResize (evt) {
     if (this.graticule) {
-      this.graticule.canvasReset()
+      this.setLegendLayout()
     }
   }
 
