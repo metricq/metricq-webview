@@ -1007,7 +1007,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     this.draw(false)
   }
 
-  this.resetCanvas = function () {
+  this.canvasReset = function () {
+    // is needed so that metriclegend can take the necessary space and canvas takes the rest
     this.ctx.canvas.width = 0
   }
 }

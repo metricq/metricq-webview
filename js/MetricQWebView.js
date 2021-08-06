@@ -301,7 +301,7 @@ class MetricQWebView {
 
   windowResize (evt) {
     if (this.graticule) {
-      this.graticule.resetCanvas()
+      this.graticule.canvasReset()
     }
   }
 
@@ -323,7 +323,7 @@ class MetricQWebView {
 
   setLegendListWidth () {
     if (window.MetricQWebView.instances[0].store.state.configuration.legendDisplay === 'right') {
-      if (this.graticule) this.graticule.resetCanvas()
+      if (this.graticule) this.graticule.canvasReset()
       let maxWidth = 0
       const minWidth = '250px'
       const maxWidthPercent = 0.5

@@ -25,8 +25,7 @@ export const ConfigurationPopup = {
   },
   data: function () {
     return {
-      popupTitle: 'Globale-Einstellungen',
-      legendPosition: Store.state.configuration.legendDisplay
+      popupTitle: 'Globale-Einstellungen'
     }
   },
   computed: {
@@ -57,6 +56,15 @@ export const ConfigurationPopup = {
       },
       set: function (newValue) {
         setUiInteractArr(newValue)
+      }
+    },
+    uiLegendDisplay: {
+      cache: false,
+      get: function () {
+        return this.config.legendDisplay
+      },
+      set: function (newValue) {
+        Store.state.configuration.legendDisplay = newValue
       }
     }
   },
@@ -92,9 +100,6 @@ export const ConfigurationPopup = {
         newValue = parseFloat(ele.getAttribute('max'))
       }
       return newValue
-    },
-    changeLegendPosition (evt) {
-      Store.setLegendPosition(evt.target.value)
     },
     closePopup (evt) {
       veil.destroy(evt)
@@ -135,12 +140,12 @@ export const ConfigurationPopup = {
             <h5 class="modal-title">Position Legende</h5>
             <div class="config_radio_legend">
               <div>
-                <input type="radio" id="legend_bottom" name="legendDisplay" value="bottom" v-on:change="changeLegendPosition" v-model="legendPosition">
-                <label for="legend_horizontal">Unten</label>
+                <input type="radio" id="legend_bottom" name="legendDisplay" value="bottom" v-model="uiLegendDisplay">
+                <label for="legend_bottom">Unten</label>
               </div>
               <div>
-                <input type="radio" id="legend_right" name="legendDisplay" value="right" v-on:change="changeLegendPosition"v-model="legendPosition">
-                <label for="legend_vertical">Rechts</label>
+                <input type="radio" id="legend_right" name="legendDisplay" value="right" v-model="uiLegendDisplay">
+                <label for="legend_right">Rechts</label>
               </div>
             </div>
           </div>

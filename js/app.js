@@ -32,6 +32,11 @@ export const mainApp = new Vue({
     timestamp: Store.state.timestamp
   },
   computed: {},
+  watch: {
+    'configuration.legendDisplay': function () {
+      if (window.MetricQWebView.instances[0].graticule) window.MetricQWebView.instances[0].graticule.canvasReset()
+    }
+  },
   methods: {
     exportButtonClicked () {
       Store.togglePopup('export')

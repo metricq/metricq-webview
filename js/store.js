@@ -73,11 +73,6 @@ export class StoreClass {
   setEndTime (time) {
     Vue.set(this.state.timestamp, 'end', time)
   }
-
-  setLegendPosition (layout) {
-    Vue.set(this.state.configuration, 'legendDisplay', layout)
-    window.MetricQWebView.instances[0].graticule.resetCanvas()
-  }
 }
 
 export const Store = new StoreClass()
