@@ -150,8 +150,8 @@ function uiInteractLegend (metricQInstance, evtObj) {
   myCtx.fillRect(curPosOnCanvas[0] - 1, metricQInstance.graticule.graticuleDimensions[1], 2, metricQInstance.graticule.graticuleDimensions[3])
   myCtx.font = '14px ' + metricQInstance.graticule.DEFAULT_FONT // actually it's sans-serif
   const metricsArray = []
-  let maxTextWidth = 0
-  let minTextWidth = 0
+  let maxNameWidth = 0
+  let maxValueWidth = 0
   const allValuesAtTime = metricQInstance.graticule.data.getAllValuesAtTime(curPoint[0])
   for (let i = 0; i < allValuesAtTime.length; ++i) {
     const newEntry = { metric: allValuesAtTime[i][2] }
@@ -173,11 +173,11 @@ function uiInteractLegend (metricQInstance, evtObj) {
     newEntry.nameWidth = myCtx.measureText(allValuesAtTime[i][3]).width
     // sortValue is either avg or raw
     newEntry.sortValue = sortValue
-    if (newEntry.curTextWidth > minTextWidth) {
-      minTextWidth = newEntry.curTextWidth
+    if (newEntry.curTextWidth > maxValueWidth) {
+      maxValueWidth = newEntry.curTextWidth
     }
-    if (newEntry.nameWidth > maxTextWidth) {
-      maxTextWidth = newEntry.nameWidth
+    if (newEntry.nameWidth > maxNameWidth) {
+      maxNameWidth = newEntry.nameWidth
     }
     metricsArray.push(newEntry)
   }
@@ -195,44 +195,55 @@ function uiInteractLegend (metricQInstance, evtObj) {
     }
   }
   const timeString = posDate.toLocaleString()
+  // offsetMid: offset from center line
+  // offsetTop: offset from top of canvas
+  // verticalDiff: y coordinate difference between lines
+  // borderPadding: additional filled space around the left and right margins
+  const offsetMid = 10
   const offsetTop = 30
   const verticalDiff = 20
   const borderPadding = 10
-  const offsetMid = 10
 
-  myCtx.textBaseline = 'middle'
-  drawHoverDate(myCtx, timeString, metricQInstance, curPosOnCanvas[0], maxTextWidth, offsetTop, offsetMid, verticalDiff, borderPadding)
-  drawHoverText(myCtx, metricsArray, metricQInstance, curPosOnCanvas[0], minTextWidth, maxTextWidth, offsetTop, offsetMid, verticalDiff, borderPadding)
+  const distanceToRightEdge = getDistanceToRightEdge(curPosOnCanvas[0], offsetMid, borderPadding, metricQInstance.graticule.canvasSize[0])
+  drawHoverDate(myCtx, timeString, curPosOnCanvas[0], maxNameWidth, offsetTop, offsetMid, verticalDiff, distanceToRightEdge)
+  drawHoverText(myCtx, metricsArray, curPosOnCanvas[0], maxValueWidth, maxNameWidth, offsetTop, offsetMid, verticalDiff, borderPadding, distanceToRightEdge)
 }
 
-function drawHoverDate (myCtx, timeString, metricQInstance, curPosOnCanvas, maxTextWidth, offsetTop, offsetMid, verticalDiff, borderPadding) {
-  if (curPosOnCanvas + offsetMid + myCtx.measureText(timeString).width > metricQInstance.graticule.canvasSize[0] || curPosOnCanvas + offsetMid + maxTextWidth + borderPadding > metricQInstance.graticule.canvasSize[0]) {
+function getDistanceToRightEdge (curXPosOnCanvas, offsetMid, borderPadding, rightEdge) {
+  return rightEdge - curXPosOnCanvas - offsetMid - borderPadding
+}
+
+function drawHoverDate (myCtx, timeString, curXPosOnCanvas, maxNameWidth, offsetTop, offsetMid, verticalDiff, distanceToRightEdge) {
+  myCtx.textBaseline = 'middle'
+  if (myCtx.measureText(timeString).width > distanceToRightEdge || maxNameWidth > distanceToRightEdge) {
     myCtx.textAlign = 'right'
     offsetMid *= -1
   } else {
     myCtx.textAlign = 'left'
   }
-  myCtx.fillText(timeString, curPosOnCanvas + offsetMid, offsetTop - 0.5 * verticalDiff)
+  myCtx.fillText(timeString, curXPosOnCanvas + offsetMid, offsetTop - 0.5 * verticalDiff)
 }
 
-function drawHoverText (myCtx, metricsArray, metricQInstance, curPosOnCanvas, minTextWidth, maxTextWidth, offsetTop, offsetMid, verticalDiff, borderPadding) {
+function drawHoverText (myCtx, metricsArray, curXPosOnCanvas, maxValueWidth, maxNameWidth, offsetTop, offsetMid, verticalDiff, borderPadding, distanceToRightEdge) {
+  myCtx.textBaseline = 'middle'
   myCtx.textAlign = 'left'
   let offsetRight = 0
-  if (curPosOnCanvas + maxTextWidth + offsetMid + borderPadding > metricQInstance.graticule.canvasSize[0]) {
-    offsetRight = minTextWidth + maxTextWidth + 4 * offsetMid
+  if (maxNameWidth > distanceToRightEdge) {
+    offsetRight = maxValueWidth + maxNameWidth + 4 * offsetMid
   } else {
-    if (curPosOnCanvas > minTextWidth + offsetMid + borderPadding) {
-      offsetRight = (offsetMid * 2 + minTextWidth)
+    if (curXPosOnCanvas > maxValueWidth + offsetMid + borderPadding) {
+      offsetRight = (offsetMid * 2 + maxValueWidth)
     }
   }
   for (let i = 0; i < metricsArray.length; ++i) {
+    const y = offsetTop + i * verticalDiff
     myCtx.fillStyle = metricsArray[i].metric.styleOptions.color
     myCtx.globalAlpha = 0.4
-    myCtx.fillRect(curPosOnCanvas + offsetMid - offsetRight - borderPadding, offsetTop + i * verticalDiff, minTextWidth + maxTextWidth + (offsetMid + borderPadding) * 2, 20)
+    myCtx.fillRect(curXPosOnCanvas + offsetMid - offsetRight - borderPadding, y, maxValueWidth + maxNameWidth + (offsetMid + borderPadding) * 2, 20)
     myCtx.fillStyle = '#000000'
     myCtx.globalAlpha = 1
-    myCtx.fillText(metricsArray[i].curText, curPosOnCanvas + offsetMid - offsetRight, offsetTop + (i + 0.5) * verticalDiff)
-    myCtx.fillText(metricsArray[i].name, curPosOnCanvas + (offsetMid * 3 + minTextWidth) - offsetRight, offsetTop + (i + 0.5) * verticalDiff)
+    myCtx.fillText(metricsArray[i].curText, curXPosOnCanvas + offsetMid - offsetRight, y + 0.5 * verticalDiff)
+    myCtx.fillText(metricsArray[i].name, curXPosOnCanvas + (offsetMid * 3 + maxValueWidth) - offsetRight, y + 0.5 * verticalDiff)
   }
 }
 
