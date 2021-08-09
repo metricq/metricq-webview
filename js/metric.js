@@ -22,9 +22,9 @@ export class Metric {
     this.popup = false
     this.updateColor(this.color)
     this.updateDescription(paramDescription)
-    this.drawMin = document.getElementById('checkbox_min_max').checked
+    this.drawMin = Store.state.globalMinMax
     this.drawAvg = true
-    this.drawMax = document.getElementById('checkbox_min_max').checked
+    this.drawMax = Store.state.globalMinMax
     // this.autocompleteList = new Array();
   }
 

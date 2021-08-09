@@ -30,15 +30,9 @@ export const mainApp = new Vue({
     configuration: Store.state.configuration,
     metricsList: Store.state.allMetrics,
     timestamp: Store.state.timestamp,
-    indeterminate: Store.state.indeterminate
+    globalminmax: Store.state.globalMinMax
   },
   computed: {},
-  /* watch: {
-    globalminmax: function (val) {
-      Store.setDrawMinMaxGlobal(val)
-      console.log(val)
-    }
-  }, */
   methods: {
     exportButtonClicked () {
       Store.togglePopup('export')

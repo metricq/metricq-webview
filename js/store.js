@@ -16,7 +16,7 @@ export class StoreClass {
         start: 0,
         end: 0
       },
-      indeterminate: true
+      globalMinMax: true
     }
   }
 
@@ -74,21 +74,17 @@ export class StoreClass {
     if (metricsArray.length > 0) {
       metricsArray.forEach(metric => {
         const metricDrawArray = this.getMetricDrawState(metric)
-        if (!metricDrawArray.drawAvg) {
-          document.getElementById('checkbox_min_max').indeterminate = true
-        }
         stateArray.push(metricDrawArray.drawMin)
         stateArray.push(metricDrawArray.drawMax)
       })
       if (stateArray.includes(true) && stateArray.includes(false)) {
-        document.getElementById('checkbox_min_max').checked = false
+        Vue.set(this.state, 'globalMinMax', false)
         document.getElementById('checkbox_min_max').indeterminate = true
       } else {
-        // Vue.set(this.state, 'globalMinMax', stateArray[0])
-        document.getElementById('checkbox_min_max').checked = stateArray[0]
+        Vue.set(this.state, 'globalMinMax', stateArray[0])
       }
     } else {
-      document.getElementById('checkbox_min_max').checked = false
+      Vue.set(this.state, 'globalMinMax', false)
       document.getElementById('checkbox_min_max').indeterminate = false
     }
   }
@@ -113,11 +109,12 @@ export class StoreClass {
   }
 
   setDrawMinMaxGlobal (newState) {
-    Vue.set(this.state, 'globalMinMax', newState)
     for (const metricBase in this.state.allMetrics) {
-      Vue.set(this.state.allMetrics[metricBase], 'drawMin', this.state.globalMinMax)
-      Vue.set(this.state.allMetrics[metricBase], 'drawAvg', true)
-      Vue.set(this.state.allMetrics[metricBase], 'drawMax', this.state.globalMinMax)
+      Vue.set(this.state.allMetrics[metricBase], 'drawMin', newState)
+      Vue.set(this.state.allMetrics[metricBase], 'drawMax', newState)
+      if (newState === false) {
+        Vue.set(this.state.allMetrics[metricBase], 'drawAvg', true)
+      }
     }
     window.MetricQWebView.instances[0].graticule.draw(false)
   }
