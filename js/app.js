@@ -33,6 +33,19 @@ export const mainApp = new Vue({
     globalminmax: Store.state.globalMinMax
   },
   computed: {},
+  watch: {
+    'configuration.legendDisplay': function () {
+      if (window.MetricQWebView.instances[0].graticule) window.MetricQWebView.instances[0].graticule.canvasReset()
+    },
+    metricsList: function () {
+      setTimeout(function () { window.MetricQWebView.instances[0].setLegendLayout() }, 0)
+      if (Store.getAllMetrics().length === 0) {
+        document.getElementById('button_clear_all').style.display = 'none'
+      } else {
+        document.getElementById('button_clear_all').style.display = 'inline'
+      }
+    }
+  },
   methods: {
     exportButtonClicked () {
       Store.togglePopup('export')

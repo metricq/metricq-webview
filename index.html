@@ -18,7 +18,7 @@
 <body>
 
 <div id="main_app">
-  <div class="row_head">
+  <div id="row_head" class="row_head">
     <nav class="navbar navbar-light bg-light">
       <a class="navbar-brand" href="?">
         <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
@@ -49,64 +49,66 @@
       </label>
     </nav>
   </div>
-  <div class="wrapper_body">
-    <div id="webview_container" class="row_body">
-    </div>
-  </div>
-  <div class="row_foot">
-    <ul id="legend_list">
-      <metric-legend
-        v-for="metric in metricsList"
-        v-bind:metric="metric"
-        v-bind:key="metric.name"
-      ></metric-legend>
-      <new-metric-legend></new-metric-legend>
-      <button class="btn btn-light legend_item" id="button_clear_all" v-on:click="clearAllButtonClicked"
-              style="background-color: #FFFFFF; margin-top: 10px;">
-        Alles löschen
-        <img src="img/trashcan2.png"/>
-      </button>
-    </ul>
-    <div id="wrapper_popup_legend">
-      <metric-popup
-        v-for="metric in metricsList"
-        v-bind:metric="metric"
-        v-bind:key="metric.popupKey"
-        v-if="metric.popup"
-      ></metric-popup>
-      <div id="wrapper_popup_newlegend">
-        <new-metric-popup
-          v-model="popups.newmetric"
-          v-if="popups.newmetric"
-        ></new-metric-popup>
+  <div :class="'body_and_legend_' + configuration.legendDisplay">
+    <div :class="'wrapper_body wrapper_body_' + configuration.legendDisplay">
+      <div id="webview_container" class="row_body">
       </div>
     </div>
-    <div id="wrapper_popup_configuration">
-      <configuration-popup
-        v-bind:config="configuration"
-        v-bind:key="configuration.key"
-        v-model="popups.configuration"
-        v-if="popups.configuration"
-      ></configuration-popup>
+    <div id="legend_container" :class="'row_foot row_foot_' + configuration.legendDisplay">
+      <ul id="legend_list" :class="'legend_list legend_list_' + configuration.legendDisplay">
+        <metric-legend
+          v-for="metric in metricsList"
+          v-bind:metric="metric"
+          v-bind:key="metric.name"
+        ></metric-legend>
+        <new-metric-legend></new-metric-legend>
+        <button class="btn btn-light legend_item" id="button_clear_all" v-on:click="clearAllButtonClicked"
+                style="background-color: #FFFFFF; margin-top: 10px; display: none">
+          Alles löschen
+          <img src="img/trashcan2.png"/>
+        </button>
+      </ul>
+      <div id="wrapper_popup_legend">
+        <metric-popup
+          v-for="metric in metricsList"
+          v-bind:metric="metric"
+          v-bind:key="metric.popupKey"
+          v-if="metric.popup"
+        ></metric-popup>
+        <div id="wrapper_popup_newlegend">
+          <new-metric-popup
+            v-model="popups.newmetric"
+            v-if="popups.newmetric"
+          ></new-metric-popup>
+        </div>
+      </div>
+      <div id="wrapper_popup_configuration">
+        <configuration-popup
+          v-bind:config="configuration"
+          v-bind:key="configuration.key"
+          v-model="popups.configuration"
+          v-if="popups.configuration"
+        ></configuration-popup>
+      </div>
+      <div id="wrapper_popup_yaxis">
+        <yaxis-popup
+          v-model="popups.yaxis"
+          v-if="popups.yaxis"
+        ></yaxis-popup>
+      </div>
+      <div id="wrapper_popup_export">
+        <export-popup
+          v-model="popups.export"
+          v-if="popups.export"
+        ></export-popup>
+      </div>
     </div>
-    <div id="wrapper_popup_yaxis">
-      <yaxis-popup
-        v-model="popups.yaxis"
-        v-if="popups.yaxis"
-      ></yaxis-popup>
+    <div id="wrapper_popup_link">
+      <link-popup
+        v-model="popups.link"
+        v-if="popups.link"
+      ></link-popup>
     </div>
-    <div id="wrapper_popup_export">
-      <export-popup
-        v-model="popups.export"
-        v-if="popups.export"
-      ></export-popup>
-    </div>
-  </div>
-  <div id="wrapper_popup_link">
-    <link-popup
-      v-model="popups.link"
-      v-if="popups.link"
-    ></link-popup>
   </div>
 </div>
 <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>

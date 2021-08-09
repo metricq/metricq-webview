@@ -37,7 +37,7 @@ class MetricQWebView {
         top: 10,
         right: 35,
         bottom: 40,
-        left: 55
+        left: 105
       },
       labels: {
         left: 3,
@@ -50,6 +50,7 @@ class MetricQWebView {
         }
       }
     }
+    this.setFootMargin()
     this.lastThrottledReloadTime = 0
     this.RELOAD_THROTTLING_DELAY = 150
     this.reloadThrottleTimeout = undefined
@@ -58,6 +59,8 @@ class MetricQWebView {
       this.handler.doRequest(400)
     }
     window.addEventListener('resize', (function (selfReference) { return function (evt) { selfReference.windowResize(evt) } }(this)))
+    const resizeObserver = new ResizeObserver(entries => { for (const entry of entries) { this.setLegendLayout() } })
+    resizeObserver.observe(document.getElementById('webview_container'))
   }
 
   reinitialize (metricsArr, startTime, stopTime) {
@@ -78,7 +81,7 @@ class MetricQWebView {
     // console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
 
     if (!this.hasPlot) {
-      const canvasSize = [parseInt(this.ele.offsetWidth), document.body.scrollHeight - 190]
+      const canvasSize = [parseInt(this.ele.offsetWidth), document.body.scrollHeight - this.margins.row_foot]
       const myCanvas = document.createElement('canvas')
       myCanvas.setAttribute('width', canvasSize[0])
       myCanvas.setAttribute('height', canvasSize[1])
@@ -244,6 +247,8 @@ class MetricQWebView {
     this.store.deleteMetric(metricBase)
     // TODO: also clear this metric from MetricCache
     if (this.graticule) this.graticule.draw(false)
+    this.updateMetricUrl()
+    this.setPlotRanges(false, true)
   }
 
   deleteTraces (tracesArr) {
@@ -296,7 +301,48 @@ class MetricQWebView {
 
   windowResize (evt) {
     if (this.graticule) {
-      this.graticule.windowResize(evt)
+      this.setLegendLayout()
+    }
+  }
+
+  setFootMargin () {
+    const layout = this.store.state.configuration.legendDisplay
+    const heightHeader = document.getElementById('row_head').offsetHeight
+    if (layout === 'bottom') {
+      this.margins.row_foot = heightHeader + 140
+    } else if (layout === 'right') {
+      this.margins.row_foot = heightHeader + 50
+    }
+  }
+
+  setLegendLayout () {
+    this.setFootMargin()
+    this.setLegendListWidth()
+    if (this.graticule) this.graticule.canvasResize(this.margins.canvas, this.margins.row_foot)
+  }
+
+  setLegendListWidth () {
+    if (window.MetricQWebView.instances[0].store.state.configuration.legendDisplay === 'right') {
+      if (this.graticule) this.graticule.canvasReset()
+      let maxWidth = 0
+      const minWidth = '250px'
+      const maxWidthPercent = 0.5
+      const legendItems = document.getElementsByClassName('legend_item')
+      document.getElementById('legend_list').style.whiteSpace = 'nowrap'
+      document.getElementById('legend_container').style.width = minWidth
+      for (let i = 0; i < legendItems.length; i++) {
+        if (legendItems[i].scrollWidth > maxWidth) {
+          maxWidth = legendItems[i].scrollWidth
+        }
+      }
+      if (maxWidth > window.innerWidth * maxWidthPercent) {
+        document.getElementById('legend_list').style.whiteSpace = 'normal'
+        maxWidth = window.innerWidth * maxWidthPercent
+      }
+      document.getElementById('legend_container').style.width = maxWidth + 100 + 'px'
+    } else {
+      document.getElementById('legend_list').style.whiteSpace = 'normal'
+      document.getElementById('legend_container').style.width = '100%'
     }
   }
 }
