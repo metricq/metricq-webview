@@ -57,6 +57,15 @@ export const ConfigurationPopup = {
       set: function (newValue) {
         setUiInteractArr(newValue)
       }
+    },
+    uiLegendDisplay: {
+      cache: false,
+      get: function () {
+        return this.config.legendDisplay
+      },
+      set: function (newValue) {
+        Store.state.configuration.legendDisplay = newValue
+      }
     }
   },
   mounted () {
@@ -127,6 +136,17 @@ export const ConfigurationPopup = {
                 <label class="col-sm-3 col-form-label">Tasten</label>
               </div>
               <interaction-array-option v-for="(action, index) in uiInteractArr" v-bind:action="action" v-on:input="uiInteractArr[index]=$event" v-bind:key="action[2]"></interaction-array-option>
+            </div>
+            <h5 class="modal-title">Position Legende</h5>
+            <div class="config_radio_legend">
+              <div>
+                <input type="radio" id="legend_bottom" name="legendDisplay" value="bottom" v-model="uiLegendDisplay">
+                <label for="legend_bottom">Unten</label>
+              </div>
+              <div>
+                <input type="radio" id="legend_right" name="legendDisplay" value="right" v-model="uiLegendDisplay">
+                <label for="legend_right">Rechts</label>
+              </div>
             </div>
           </div>
           <div class="modal-footer">

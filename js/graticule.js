@@ -1,4 +1,5 @@
 import { DataCache } from './data-handling.js'
+import { Store } from './store.js'
 
 export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize) {
   this.ele = paramEle
@@ -357,7 +358,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     this.lastRangeChangeTime = (new Date()).getTime()
     return true
   }
-  this.setValueRange = function (paramRangeStart, paramRangeEnd) {
+  this.setValueRange = function (paramRangeStart = undefined, paramRangeEnd = undefined) {
     if (undefined !== paramRangeStart) this.curValueRange[0] = paramRangeStart
     if (undefined !== paramRangeEnd) this.curValueRange[1] = paramRangeEnd
     this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.graticuleDimensions[3]
@@ -469,8 +470,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
        * 3 = next
        */
       switch (styleOptions.connect) { // Thomas: Magische Zahlen sind nicht schön
-      //         prinzipiell sind magische Zahlen nicht schön
-      // Inkonsistenz: Einmal Strings, einmal Zahlen
+        //         prinzipiell sind magische Zahlen nicht schön
+        // Inkonsistenz: Einmal Strings, einmal Zahlen
         case 'next':
           parsedObj.connect = 3
           break
@@ -691,9 +692,9 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
         this.ctx.lineWidth = parseFloat(styleOptions.lineWidth)
         parsedObj.oddLineWidthAddition = ((styleOptions.lineWidth % 2) === 1) ? 0.5 : 0
       }
-      if (styleKeys.includes('lineDash')) {
+      /* if (styleKeys.includes('lineDash')) {
         this.ctx.setLineDash(styleOptions.lineDash)
-      }
+      } */
     }
 
     return parsedObj
@@ -848,62 +849,75 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   }
   this.drawBands = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
-      const curBand = this.data.metrics[i].band
-      if (curBand) {
-        const styleOptions = this.parseStyleOptions(curBand.styleOptions)
-        if (styleOptions.skip || curBand.points.length === 0) {
-          this.resetCtx()
-          continue
-        }
+      if (Store.getMetricDrawState(this.data.metrics[i].name).drawMin && Store.getMetricDrawState(this.data.metrics[i].name).drawMax) {
+        const curBand = this.data.metrics[i].band
+        if (curBand) {
+          const styleOptions = this.parseStyleOptions(curBand.styleOptions)
+          if (styleOptions.skip || curBand.points.length === 0) {
+            this.resetCtx()
+            continue
+          }
 
-        const switchOverIndex = curBand.switchOverIndex
-        for (let j = 0, x, y, previousX, previousY; j < curBand.points.length; ++j) {
-          x = this.graticuleDimensions[0] + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
-          y = this.graticuleDimensions[1] + (this.graticuleDimensions[3] - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
-          if (j === 0) {
-            this.ctx.beginPath()
-            this.ctx.moveTo(x, y)
-          } else {
-            // connect direct
-            if (styleOptions.connect === 1) {
-              this.ctx.lineTo(x, y)
+          const switchOverIndex = curBand.switchOverIndex
+          for (let j = 0, x, y, previousX, previousY; j < curBand.points.length; ++j) {
+            x = this.graticuleDimensions[0] + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
+            y = this.graticuleDimensions[1] + (this.graticuleDimensions[3] - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
+            if (j === 0) {
+              this.ctx.beginPath()
+              this.ctx.moveTo(x, y)
             } else {
-              if (j < switchOverIndex) {
-                // connect last
-                if (styleOptions.connect === 2) {
-                  this.ctx.lineTo(previousX, y)
-                  this.ctx.lineTo(x, y)
-                  // connect next
-                } else if (styleOptions.connect === 3) {
-                  this.ctx.lineTo(x, previousY)
-                  this.ctx.lineTo(x, y)
-                }
-              } else if (j === switchOverIndex) {
+              // connect direct
+              if (styleOptions.connect === 1) {
                 this.ctx.lineTo(x, y)
               } else {
-                // connect last
-                if (styleOptions.connect === 2) {
-                  this.ctx.lineTo(x, previousY)
+                if (j < switchOverIndex) {
+                  // connect last
+                  if (styleOptions.connect === 2) {
+                    this.ctx.lineTo(previousX, y)
+                    this.ctx.lineTo(x, y)
+                    // connect next
+                  } else if (styleOptions.connect === 3) {
+                    this.ctx.lineTo(x, previousY)
+                    this.ctx.lineTo(x, y)
+                  }
+                } else if (j === switchOverIndex) {
                   this.ctx.lineTo(x, y)
-                  // connext next
-                } else if (styleOptions.connect === 3) {
-                  this.ctx.lineTo(previousX, y)
-                  this.ctx.lineTo(x, y)
+                } else {
+                  // connect last
+                  if (styleOptions.connect === 2) {
+                    this.ctx.lineTo(x, previousY)
+                    this.ctx.lineTo(x, y)
+                    // connext next
+                  } else if (styleOptions.connect === 3) {
+                    this.ctx.lineTo(previousX, y)
+                    this.ctx.lineTo(x, y)
+                  }
                 }
               }
             }
+            previousX = x
+            previousY = y
           }
-          previousX = x
-          previousY = y
+          this.ctx.closePath()
+          this.ctx.fill()
+          this.resetCtx()
         }
-        this.ctx.closePath()
-        this.ctx.fill()
-        this.resetCtx()
       }
     }
   }
   this.drawSeries = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
+      if (this.data.metrics[i].series.raw === undefined) {
+        const metricDrawState = Store.getMetricDrawState(this.data.metrics[i].name)
+        this.data.metrics[i].series.avg.styleOptions.skip = !metricDrawState.drawAvg
+        if (!metricDrawState.drawMin || !metricDrawState.drawMax) {
+          this.data.metrics[i].series.min.styleOptions.skip = !metricDrawState.drawMin
+          this.data.metrics[i].series.max.styleOptions.skip = !metricDrawState.drawMax
+        } else {
+          this.data.metrics[i].series.min.styleOptions.skip = true
+          this.data.metrics[i].series.max.styleOptions.skip = true
+        }
+      }
       for (const curAggregate in this.data.metrics[i].series) {
         const curSeries = this.data.metrics[i].series[curAggregate]
         if (curSeries) {
@@ -995,18 +1009,21 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     }
     return valueRange
   }
-  this.windowResize = function (evt) {
-    const newSize = [this.ele.parentNode.offsetWidth, this.canvasSize[1]]
+
+  this.canvasResize = function (canvasMargins, footMargin) {
+    const newSize = [document.getElementById('webview_container').offsetWidth, document.body.scrollHeight - footMargin]
     this.clearSize = newSize
-    const canvasBorders = [10, 20, 40, 105] // TOP, RIGHT, BOTTOM, LEFT;
-    this.graticuleDimensions = [canvasBorders[3],
-      canvasBorders[0],
-      newSize[0] - (canvasBorders[1] + canvasBorders[3]),
-      newSize[1] - (canvasBorders[0] + canvasBorders[2])]
-    this.canvasSize = newSize
-    this.ele.setAttribute('width', this.ele.parentNode.offsetWidth)
+    this.ctx.canvas.width = newSize[0]
+    this.ctx.canvas.height = newSize[1]
+    this.graticuleDimensions = [canvasMargins.left, canvasMargins.top, newSize[0] - canvasMargins.left - canvasMargins.right, newSize[1] - canvasMargins.top - canvasMargins.bottom]
+    this.setTimeRange(window.MetricQWebView.instances[0].handler.startTime.getUnix(), window.MetricQWebView.instances[0].handler.stopTime.getUnix())
+    this.setValueRange()
     this.draw(false)
-    // TODO: reposition the gear elements!
+  }
+
+  this.canvasReset = function () {
+    // is needed so that metriclegend can take the necessary space and canvas takes the rest
+    this.ctx.canvas.width = 0
   }
 }
 

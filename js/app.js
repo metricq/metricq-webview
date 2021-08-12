@@ -31,9 +31,23 @@ export const mainApp = new Vue({
     popups: Store.state.popups,
     configuration: Store.state.configuration,
     metricsList: Store.state.allMetrics,
-    timestamp: Store.state.timestamp
+    timestamp: Store.state.timestamp,
+    globalminmax: Store.state.globalMinMax
   },
   computed: {},
+  watch: {
+    'configuration.legendDisplay': function () {
+      if (window.MetricQWebView.instances[0].graticule) window.MetricQWebView.instances[0].graticule.canvasReset()
+    },
+    metricsList: function () {
+      setTimeout(function () { window.MetricQWebView.instances[0].setLegendLayout() }, 0)
+      if (Store.getAllMetrics().length === 0) {
+        document.getElementById('button_clear_all').style.display = 'none'
+      } else {
+        document.getElementById('button_clear_all').style.display = 'inline'
+      }
+    }
+  },
   methods: {
     exportButtonClicked () {
       Store.togglePopup('export')
@@ -49,6 +63,9 @@ export const mainApp = new Vue({
     },
     clearAllButtonClicked () {
       Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
+    },
+    toggleMinMaxButton (evt) {
+      Store.setDrawMinMaxGlobal(evt.target.checked)
     }
   }
 })
