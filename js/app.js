@@ -7,6 +7,7 @@ import { MetricPopup } from './ui/metric-popup.js'
 import { NewMetricPopup } from './ui/new-metric-popup.js'
 import { YaxisPopup } from './ui/yaxis-popup.js'
 import { TimeButton } from './ui/time-button.js'
+import { AnalyzePopup } from './ui/analyze-popup.js'
 import { Store } from './store.js'
 
 Vue.component('VueMultiSelect', window.VueMultiselect.default)
@@ -22,7 +23,8 @@ export const mainApp = new Vue({
     MetricPopup,
     NewMetricPopup,
     YaxisPopup,
-    TimeButton
+    TimeButton,
+    AnalyzePopup
   },
   data: {
     state: Store.state,
@@ -41,6 +43,9 @@ export const mainApp = new Vue({
     },
     linkButtonClicked () {
       Store.togglePopup('link')
+    },
+    analyzeButtonClicked () {
+      Store.togglePopup('analyze')
     },
     clearAllButtonClicked () {
       Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))

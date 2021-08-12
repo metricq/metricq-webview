@@ -330,3 +330,11 @@ body {
     right: 0;
     top: 0;
 }
+
+.table_analyze {
+    border: 1px solid black;
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+}

@@ -368,6 +368,32 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     }
     return [allMin, allMax]
   }
+  this.getAvg = function (timeRangeStart, timeRangeEnd) {
+    let sum = 0
+    let count = 0
+    const points = this.series.avg.points
+    if (points.length === 0) {
+      return undefined
+    }
+    if (undefined !== timeRangeStart && undefined !== timeRangeEnd) {
+      let i = 0
+      for (i = 0; i < points.length; ++i) {
+        if (points[i].time >= timeRangeStart) {
+          break
+        }
+      }
+      for (; (i < points.length && points[i].time < timeRangeEnd); ++i) {
+        sum += points[i].value
+        count++
+      }
+    } else {
+      for (let i = 1; i < points.length; ++i) {
+        sum += points[i].value
+        count++
+      }
+    }
+    return sum / count
+  }
   this.fetchAllTimeMinMax()
   this.fetchMetadata()
 }

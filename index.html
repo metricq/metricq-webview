@@ -33,6 +33,10 @@
         <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
         Export
       </button>
+      <button class="btn btn-outline-primary" id="button_analyze" v-on:click="analyzeButtonClicked">
+        <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
+        Analyse
+      </button>
       <time-button id="date_range" class="btn btn-outline-primary"
                    v-bind:starttime="timestamp.start"
                    v-bind:endtime="timestamp.end">
@@ -94,12 +98,18 @@
         v-if="popups.export"
       ></export-popup>
     </div>
-  </div>
-  <div id="wrapper_popup_link">
-    <link-popup
-      v-model="popups.link"
-      v-if="popups.link"
-    ></link-popup>
+    <div id="wrapper_popup_link">
+      <link-popup
+        v-model="popups.link"
+        v-if="popups.link"
+      ></link-popup>
+    </div>
+    <div id="wrapper_popup_analyze">
+      <analyze-popup
+        v-model="popups.analyze"
+        v-if="popups.analyze"
+      ></analyze-popup>
+    </div>
   </div>
 </div>
 <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>

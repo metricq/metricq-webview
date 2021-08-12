@@ -10,7 +10,8 @@ export class StoreClass {
         yaxis: false,
         configuration: false,
         link: false,
-        newmetric: false
+        newmetric: false,
+        analyze: false
       },
       timestamp: {
         start: 0,
