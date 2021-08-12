@@ -15,7 +15,8 @@ export class StoreClass {
       timestamp: {
         start: 0,
         end: 0
-      }
+      },
+      globalMinMax: true
     }
   }
 
@@ -31,6 +32,7 @@ export class StoreClass {
 
   deleteMetric (metricKey) {
     Vue.delete(this.state.allMetrics, metricKey)
+    this.checkMetricDrawState()
   }
 
   setMetricPopup (metricKey, popup) {
@@ -47,6 +49,40 @@ export class StoreClass {
       }
     }
     return undefined
+  }
+
+  getMetricDrawState (metricName) {
+    for (const metricBase in this.state.allMetrics) {
+      const metricArray = []
+      if (this.state.allMetrics[metricBase].name === metricName) {
+        metricArray.drawMin = this.state.allMetrics[metricBase].drawMin
+        metricArray.drawAvg = this.state.allMetrics[metricBase].drawAvg
+        metricArray.drawMax = this.state.allMetrics[metricBase].drawMax
+        return metricArray
+      }
+    }
+  }
+
+  checkMetricDrawState () {
+    const stateArray = []
+    const metricsArray = this.getAllMetrics()
+    document.getElementById('checkbox_min_max').indeterminate = false
+    if (metricsArray.length > 0) {
+      metricsArray.forEach(metric => {
+        const metricDrawArray = this.getMetricDrawState(metric)
+        stateArray.push(metricDrawArray.drawMin)
+        stateArray.push(metricDrawArray.drawMax)
+      })
+      if (stateArray.includes(true) && stateArray.includes(false)) {
+        Vue.set(this.state, 'globalMinMax', false)
+        document.getElementById('checkbox_min_max').indeterminate = true
+      } else {
+        Vue.set(this.state, 'globalMinMax', stateArray[0])
+      }
+    } else {
+      Vue.set(this.state, 'globalMinMax', false)
+      document.getElementById('checkbox_min_max').indeterminate = false
+    }
   }
 
   getAllMetrics () {
@@ -66,6 +102,17 @@ export class StoreClass {
 
   setEndTime (time) {
     Vue.set(this.state.timestamp, 'end', time)
+  }
+
+  setDrawMinMaxGlobal (newState) {
+    for (const metricBase in this.state.allMetrics) {
+      Vue.set(this.state.allMetrics[metricBase], 'drawMin', newState)
+      Vue.set(this.state.allMetrics[metricBase], 'drawMax', newState)
+      if (newState === false) {
+        Vue.set(this.state.allMetrics[metricBase], 'drawAvg', true)
+      }
+    }
+    window.MetricQWebView.instances[0].graticule.draw(false)
   }
 }
 

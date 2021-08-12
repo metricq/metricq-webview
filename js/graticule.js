@@ -1,4 +1,5 @@
 import { DataCache } from './data-handling.js'
+import { Store } from './store.js'
 
 export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize) {
   this.ele = paramEle
@@ -469,8 +470,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
        * 3 = next
        */
       switch (styleOptions.connect) { // Thomas: Magische Zahlen sind nicht schön
-      //         prinzipiell sind magische Zahlen nicht schön
-      // Inkonsistenz: Einmal Strings, einmal Zahlen
+        //         prinzipiell sind magische Zahlen nicht schön
+        // Inkonsistenz: Einmal Strings, einmal Zahlen
         case 'next':
           parsedObj.connect = 3
           break
@@ -691,9 +692,9 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
         this.ctx.lineWidth = parseFloat(styleOptions.lineWidth)
         parsedObj.oddLineWidthAddition = ((styleOptions.lineWidth % 2) === 1) ? 0.5 : 0
       }
-      if (styleKeys.includes('lineDash')) {
+      /* if (styleKeys.includes('lineDash')) {
         this.ctx.setLineDash(styleOptions.lineDash)
-      }
+      } */
     }
 
     return parsedObj
@@ -848,62 +849,75 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   }
   this.drawBands = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
-      const curBand = this.data.metrics[i].band
-      if (curBand) {
-        const styleOptions = this.parseStyleOptions(curBand.styleOptions)
-        if (styleOptions.skip || curBand.points.length === 0) {
-          this.resetCtx()
-          continue
-        }
+      if (Store.getMetricDrawState(this.data.metrics[i].name).drawMin && Store.getMetricDrawState(this.data.metrics[i].name).drawMax) {
+        const curBand = this.data.metrics[i].band
+        if (curBand) {
+          const styleOptions = this.parseStyleOptions(curBand.styleOptions)
+          if (styleOptions.skip || curBand.points.length === 0) {
+            this.resetCtx()
+            continue
+          }
 
-        const switchOverIndex = curBand.switchOverIndex
-        for (let j = 0, x, y, previousX, previousY; j < curBand.points.length; ++j) {
-          x = this.graticuleDimensions[0] + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
-          y = this.graticuleDimensions[1] + (this.graticuleDimensions[3] - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
-          if (j === 0) {
-            this.ctx.beginPath()
-            this.ctx.moveTo(x, y)
-          } else {
-            // connect direct
-            if (styleOptions.connect === 1) {
-              this.ctx.lineTo(x, y)
+          const switchOverIndex = curBand.switchOverIndex
+          for (let j = 0, x, y, previousX, previousY; j < curBand.points.length; ++j) {
+            x = this.graticuleDimensions[0] + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
+            y = this.graticuleDimensions[1] + (this.graticuleDimensions[3] - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
+            if (j === 0) {
+              this.ctx.beginPath()
+              this.ctx.moveTo(x, y)
             } else {
-              if (j < switchOverIndex) {
-                // connect last
-                if (styleOptions.connect === 2) {
-                  this.ctx.lineTo(previousX, y)
-                  this.ctx.lineTo(x, y)
-                  // connect next
-                } else if (styleOptions.connect === 3) {
-                  this.ctx.lineTo(x, previousY)
-                  this.ctx.lineTo(x, y)
-                }
-              } else if (j === switchOverIndex) {
+              // connect direct
+              if (styleOptions.connect === 1) {
                 this.ctx.lineTo(x, y)
               } else {
-                // connect last
-                if (styleOptions.connect === 2) {
-                  this.ctx.lineTo(x, previousY)
+                if (j < switchOverIndex) {
+                  // connect last
+                  if (styleOptions.connect === 2) {
+                    this.ctx.lineTo(previousX, y)
+                    this.ctx.lineTo(x, y)
+                    // connect next
+                  } else if (styleOptions.connect === 3) {
+                    this.ctx.lineTo(x, previousY)
+                    this.ctx.lineTo(x, y)
+                  }
+                } else if (j === switchOverIndex) {
                   this.ctx.lineTo(x, y)
-                  // connext next
-                } else if (styleOptions.connect === 3) {
-                  this.ctx.lineTo(previousX, y)
-                  this.ctx.lineTo(x, y)
+                } else {
+                  // connect last
+                  if (styleOptions.connect === 2) {
+                    this.ctx.lineTo(x, previousY)
+                    this.ctx.lineTo(x, y)
+                    // connext next
+                  } else if (styleOptions.connect === 3) {
+                    this.ctx.lineTo(previousX, y)
+                    this.ctx.lineTo(x, y)
+                  }
                 }
               }
             }
+            previousX = x
+            previousY = y
           }
-          previousX = x
-          previousY = y
+          this.ctx.closePath()
+          this.ctx.fill()
+          this.resetCtx()
         }
-        this.ctx.closePath()
-        this.ctx.fill()
-        this.resetCtx()
       }
     }
   }
   this.drawSeries = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
+      if (this.data.metrics[i].series.raw === undefined) {
+        const metricDrawState = Store.getMetricDrawState(this.data.metrics[i].name)
+        this.data.metrics[i].series.avg.styleOptions.skip = !metricDrawState.drawAvg
+        if (!metricDrawState.drawMin || !metricDrawState.drawMax) {
+          this.data.metrics[i].series.min.styleOptions.skip = !metricDrawState.drawMin
+          this.data.metrics[i].series.max.styleOptions.skip = !metricDrawState.drawMax
+        } else {
+          this.data.metrics[i].series.min.styleOptions.skip = true
+          this.data.metrics[i].series.max.styleOptions.skip = true
+        }
+      }
       for (const curAggregate in this.data.metrics[i].series) {
         const curSeries = this.data.metrics[i].series[curAggregate]
         if (curSeries) {

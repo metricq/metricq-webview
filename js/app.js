@@ -29,7 +29,8 @@ export const mainApp = new Vue({
     popups: Store.state.popups,
     configuration: Store.state.configuration,
     metricsList: Store.state.allMetrics,
-    timestamp: Store.state.timestamp
+    timestamp: Store.state.timestamp,
+    globalminmax: Store.state.globalMinMax
   },
   computed: {},
   watch: {
@@ -57,6 +58,9 @@ export const mainApp = new Vue({
     },
     clearAllButtonClicked () {
       Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
+    },
+    toggleMinMaxButton (evt) {
+      Store.setDrawMinMaxGlobal(evt.target.checked)
     }
   }
 })

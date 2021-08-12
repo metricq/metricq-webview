@@ -348,8 +348,11 @@ body {
     top: 0;
 }
 
-.body_and_legend_bottom {
+.btn-navbar {
+    margin-top: 7px;
+}
 
+.body_and_legend_bottom {
 }
 
 .body_and_legend_right {

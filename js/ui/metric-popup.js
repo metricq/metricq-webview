@@ -125,6 +125,14 @@ export const MetricPopup = {
     document.getElementById('input_metric_name').focus()
   },
   methods: {
+    changeDraw: function (evt) {
+      if (this.metric.drawMin === false && this.metric.drawAvg === false && this.metric.drawMax === false) {
+        evt.target.click()
+        window.alert('Fehler! Mindestens eine Option muss ausgewählt bleiben!')
+      } else {
+        Store.checkMetricDrawState()
+      }
+    },
     changeMarker: function (evt) {
       this.metric.updateMarker(evt.target.value)
     },
@@ -194,6 +202,25 @@ export const MetricPopup = {
                 </select>
               </div>
             </div>
+            <table>
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" id='checkbox_min' v-model="metric.drawMin" v-on:change="changeDraw"> min anzeigen
+                  </label>
+                </td>
+                <td>
+                  <label>
+                    <input type="checkbox" id='checkbox_avg' v-model="metric.drawAvg" v-on:change="changeDraw"> avg anzeigen
+                  </label>
+                </td>
+                <td>
+                  <label>
+                    <input type="checkbox" id='checkbox_max' v-model="metric.drawMax" v-on:change="changeDraw"> max anzeigen
+                  </label>
+                </td>
+              </tr>
+            </table>
           </div>
           <div class="modal-footer">
             <button v-if="!isEmpty" class="btn btn-danger" v-on:click="trashcanClicked">

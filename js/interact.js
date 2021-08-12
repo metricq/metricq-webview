@@ -1,3 +1,5 @@
+import { Store } from './store.js'
+
 const uiOptions = {
   horizontalScrolling: false,
   smoothScrollingExtraData: true,
@@ -161,12 +163,20 @@ function uiInteractLegend (metricQInstance, evtObj) {
       curText = (Number(allValuesAtTime[i][1])).toFixed(3)
       sortValue = Number(allValuesAtTime[i][1])
     } else {
-      curText = '▼' + (Number(allValuesAtTime[i][1])).toFixed(3) + ' ⌀' +
-        (Number(allValuesAtTime[i + 2][1])).toFixed(3) + ' ▲' +
-        (Number(allValuesAtTime[i + 1][1])).toFixed(3)
+      curText = ''
+      if (Store.getMetricDrawState(allValuesAtTime[i][3]).drawMin) {
+        curText += '▼' + (Number(allValuesAtTime[i][1])).toFixed(3)
+      }
+      if (Store.getMetricDrawState(allValuesAtTime[i][3]).drawAvg) {
+        curText += ' ⌀' + (Number(allValuesAtTime[i + 2][1])).toFixed(3)
+      }
+      if (Store.getMetricDrawState(allValuesAtTime[i][3]).drawMax) {
+        curText += ' ▲' + (Number(allValuesAtTime[i + 1][1])).toFixed(3)
+      }
       sortValue = Number(allValuesAtTime[i + 2][1])
       i += 2
     }
+
     newEntry.curText = curText
     newEntry.name = allValuesAtTime[i][3]
     newEntry.curTextWidth = myCtx.measureText(curText).width
