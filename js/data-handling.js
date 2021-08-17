@@ -320,36 +320,6 @@ function MetricCache (paramMetricQReference, paramMetricName) {
   this.fetchMetadata = function () {
     this.metricQHistory.metadata(this.name).then((metadataObj) => { this.meta = metadataObj })
   }
-  // TODO: use Mario's metricq-js-API
-  this.fetchAllTimeMinMax = function () {
-    const reqJson = {
-      range: {
-        from: (new Date('2010-01-01')).toISOString(),
-        to: (new Date()).toISOString()
-      },
-      maxDataPoints: 1,
-      targets: [
-        {
-          metric: this.name,
-          functions: ['min', 'max']
-        }
-      ]
-    }
-    const reqAjax = new XMLHttpRequest()
-    reqAjax.open('POST', METRICQ_BACKEND + '/query', true)
-    reqAjax.processingFunction = (function (ref) { return function (json) { ref.processAllTimeQuery(ref, json) } }(this))
-    reqAjax.addEventListener('load', function (evtObj) {
-      let parsedJson
-      try {
-        parsedJson = JSON.parse(evtObj.target.responseText)
-      } catch (exc) {
-      }
-      if (parsedJson) {
-        evtObj.target.processingFunction(parsedJson)
-      }
-    })
-    reqAjax.send(JSON.stringify(reqJson))
-  }
   this.getAllMinMax = function (startTime, stopTime) {
     let allMin
     let allMax
@@ -368,7 +338,6 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     }
     return [allMin, allMax]
   }
-  this.fetchAllTimeMinMax()
   this.fetchMetadata()
 }
 
