@@ -46,6 +46,9 @@ export class MetricHandler {
     const timeMargin = (this.stopTime.getUnix() - this.startTime.getUnix()) * this.TIME_MARGIN_FACTOR
     const nonErrorProneMetrics = []
     const remainingMetrics = []
+    let startTime
+    const store = window.MetricQWebView.instances[0].store
+    store.resetQuery()
     for (const metricBase in this.store.state.allMetrics) {
       const curMetric = this.store.state.allMetrics[metricBase]
       if (curMetric.name.length > 0) {
@@ -69,8 +72,23 @@ export class MetricHandler {
 
       // execute query
       // TODO: pass parameter nonErrorProneMetrics
+      startTime = Date.now()
       const myPromise = queryObj.run().then((function (selfReference, requestedMetrics) {
         return function (dataset) {
+          store.addQueryTime(Date.now() - startTime)
+          for (const [key, value] of Object.entries(dataset)) {
+            const metricData = key.split('/')
+            if (metricData[1] === 'count') {
+              store.addQueryAggregate(value.data.length)
+              let countSum = 0
+              value.data.forEach(element => { countSum += element.value })
+              store.addQueryRaw(countSum)
+              store.setQueryMetric(metricData[0], value.data.length, countSum)
+            } else if (metricData[1] === 'raw') {
+              store.addQueryRaw(value.data.length)
+              store.setQueryMetric(metricData[0], '-', value.data.length)
+            }
+          }
           selfReference.handleResponse(selfReference, requestedMetrics, dataset)
         }
       }(this, nonErrorProneMetrics)), (function (selfReference, requestedMetrics, paramDataPoints) {
@@ -90,8 +108,17 @@ export class MetricHandler {
         this.stopTime.getUnix() + timeMargin,
         maxDataPoints)
       queryObj.target(remainingMetrics[i], defaultAggregates)
-
-      queryObj.run().then(function (selfReference, requestedMetrics) { return function (dataset) { selfReference.handleResponse(selfReference, requestedMetrics, dataset) } }(this, [remainingMetrics[i]]))
+      startTime = Date.now()
+      queryObj.run().then(function (selfReference, requestedMetrics) {
+        return function (dataset) {
+          store.addQueryTime(Date.now() - startTime)
+          for (const [key, value] of Object.entries(dataset)) {
+            if (key.slice(-3) === 'unt') store.addQueryAggregate(value.data.length)
+            else if (key.slice(-3) === 'raw') store.addQueryRaw(value.data.length)
+          }
+          selfReference.handleResponse(selfReference, requestedMetrics, dataset)
+        }
+      }(this, [remainingMetrics[i]]))
     }
   }
 

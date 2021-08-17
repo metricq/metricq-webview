@@ -38,7 +38,8 @@
         <input type="checkbox" id='checkbox_min_max' v-model="state.globalMinMax" v-on:click="toggleMinMaxButton">
         min/max anzeigen
       </label>
-      <label class="btn btn-outline-primary" id="button_analyze" v-on:click="analyzeButtonClicked">
+      <label class="btn btn-outline-primary btn-navbar" id="button_analyze" v-on:click="analyzeButtonClicked"
+             v-bind:query="query">
         <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
         Analyse
       </label>
@@ -123,6 +124,7 @@
       <analyze-popup
         v-model="popups.analyze"
         v-if="popups.analyze"
+        v-bind:query="query"
       ></analyze-popup>
     </div>
   </div>

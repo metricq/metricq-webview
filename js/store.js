@@ -17,7 +17,14 @@ export class StoreClass {
         start: 0,
         end: 0
       },
-      globalMinMax: true
+      globalMinMax: true,
+      query: {
+        time: 0,
+        aggregate: 0,
+        raw: 0,
+        aggregatePerMetric: {},
+        rawPerMetric: {}
+      }
     }
   }
 
@@ -81,7 +88,6 @@ export class StoreClass {
         Vue.set(this.state, 'globalMinMax', stateArray[0])
       }
     } else {
-      Vue.set(this.state, 'globalMinMax', false)
       document.getElementById('checkbox_min_max').indeterminate = false
     }
   }
@@ -114,6 +120,38 @@ export class StoreClass {
       }
     }
     window.MetricQWebView.instances[0].graticule.draw(false)
+  }
+
+  resetQuery () {
+    Vue.set(this.state.query, 'time', 0)
+    Vue.set(this.state.query, 'raw', 0)
+    Vue.set(this.state.query, 'aggregate', 0)
+    Vue.set(this.state.query, 'rawPerMetric', {})
+    Vue.set(this.state.query, 'aggregatePerMetric', {})
+  }
+
+  addQueryTime (time) {
+    Vue.set(this.state.query, 'time', this.state.query.time + time)
+  }
+
+  addQueryRaw (points) {
+    Vue.set(this.state.query, 'raw', this.state.query.raw + points)
+  }
+
+  addQueryAggregate (points) {
+    Vue.set(this.state.query, 'aggregate', this.state.query.aggregate + points)
+  }
+
+  setQueryMetric (metricName, aggregate, raw) {
+    Vue.set(this.state.query.aggregatePerMetric, metricName, aggregate)
+    Vue.set(this.state.query.rawPerMetric, metricName, raw)
+  }
+
+  getQueryMetric (metricName) {
+    return {
+      aggregate: this.state.query.aggregatePerMetric[metricName],
+      raw: this.state.query.rawPerMetric[metricName]
+    }
   }
 }
 

@@ -13,6 +13,10 @@ export const AnalyzePopup = {
     popupStatus: {
       type: Boolean,
       required: true
+    },
+    query: {
+      type: Object,
+      required: true
     }
   },
   data: function () {
@@ -65,29 +69,36 @@ export const AnalyzePopup = {
           <th>Max</th>
           <th>Avg</th>
           <th>Einheit</th>
+          <th>aggregate</th>
+          <th>raw</th>
         </tr>`
       table.innerHTML = newTable
     },
     fillTable (details = false) {
-      const table = document.querySelector('.export_popup_div').getElementsByClassName('table_analyze')[0]
-      window.MetricQWebView.instances[0].graticule.data.metrics.forEach(item => {
-        const name = item.name
-        const description = item.meta.description
-        const minMax = item.getAllMinMax(Store.state.timestamp.start, Store.state.timestamp.end)
-        const avg = item.getAvg(Store.state.timestamp.start, Store.state.timestamp.end)
-        const unit = item.meta.unit
-        let newRow = `
+      if (window.MetricQWebView.instances[0].graticule) {
+        const table = document.querySelector('.export_popup_div').getElementsByClassName('table_analyze')[0]
+        window.MetricQWebView.instances[0].graticule.data.metrics.forEach(item => {
+          const name = item.name
+          const description = item.meta.description
+          const minMax = item.getAllMinMax(Store.state.timestamp.start, Store.state.timestamp.end)
+          const avg = item.getAvg(Store.state.timestamp.start, Store.state.timestamp.end)
+          const unit = item.meta.unit
+          const query = Store.getQueryMetric(name)
+          let newRow = `
           <tr>
             <td>${name}</td>`
-        if (details) newRow += `<td>${description}</td>`
-        newRow += `
+          if (details) newRow += `<td>${description}</td>`
+          newRow += `
             <td>${this.round(minMax[0])}</td>
             <td>${this.round(minMax[1])}</td>
             <td>${this.round(avg)}</td>
             <td>${unit}</td>
+            <td>${query.aggregate}</td>
+            <td>${query.raw}</td>
           </tr>`
-        table.innerHTML += newRow
-      })
+          table.innerHTML += newRow
+        })
+      }
     },
     round (number) {
       return Math.round((number + Number.EPSILON) * 100) / 100
@@ -103,8 +114,11 @@ export const AnalyzePopup = {
       <div class="modal-content">
         <popup-header v-bind:popupTitle="popupTitle"></popup-header>
         <div class="modal-body">
-          Zeitraum: {{starttimeFormatted}} - {{endtimeFormatted}}
-          <input type="checkbox" checked v-on:change="changeTable">
+          Zeitraum: {{starttimeFormatted}} - {{endtimeFormatted}}<br>
+          query Time: {{query.time}} ms<br>
+          raw values: {{query.raw}}<br>
+          aggregate values: {{query.aggregate}}<br>
+          <label><input type="checkbox" checked v-on:change="changeTable"> Bescheibung anzeigen</label>
           <table class="table_analyze" id="analyze_table" style="width:750px">
           </table>
         </div>
