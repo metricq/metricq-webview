@@ -152,6 +152,9 @@ export class StoreClass {
       aggregate: this.state.query.aggregatePerMetric[metricName],
       raw: this.state.query.rawPerMetric[metricName]
     }
+
+  setGlobalMinMax (newState) {
+    Vue.set(this.state, 'globalMinMax', newState)
   }
 }
 

@@ -35,7 +35,7 @@
         Export
       </label>
       <label class="btn btn-outline-primary btn-navbar">
-        <input type="checkbox" id='checkbox_min_max' v-model="state.globalMinMax" v-on:click="toggleMinMaxButton">
+        <input type="checkbox" id='checkbox_min_max' v-model="state.globalMinMax" v-on:change="toggleMinMaxButton">
         min/max anzeigen
       </label>
       <label class="btn btn-outline-primary btn-navbar" id="button_analyze" v-on:click="analyzeButtonClicked"
