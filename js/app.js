@@ -57,7 +57,9 @@ export const mainApp = new Vue({
       Store.togglePopup('link')
     },
     clearAllButtonClicked () {
+      const globalMinMax = Store.state.globalMinMax
       Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
+      Store.setGlobalMinMax(globalMinMax)
     },
     toggleMinMaxButton (evt) {
       Store.setDrawMinMaxGlobal(evt.target.checked)

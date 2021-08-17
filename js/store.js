@@ -80,7 +80,6 @@ export class StoreClass {
         Vue.set(this.state, 'globalMinMax', stateArray[0])
       }
     } else {
-      Vue.set(this.state, 'globalMinMax', false)
       document.getElementById('checkbox_min_max').indeterminate = false
     }
   }
@@ -113,6 +112,10 @@ export class StoreClass {
       }
     }
     window.MetricQWebView.instances[0].graticule.draw(false)
+  }
+
+  setGlobalMinMax (newState) {
+    Vue.set(this.state, 'globalMinMax', newState)
   }
 }
 
