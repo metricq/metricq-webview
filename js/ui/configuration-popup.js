@@ -116,27 +116,6 @@ export const ConfigurationPopup = {
         <div class="modal-content">
           <popup-header v-bind:popupTitle="popupTitle"></popup-header>
           <div class="modal-body">
-            <div class="form-group row">
-              <label class="col-sm-6 col-form-label" for="resolution_input">Auflösung</label>
-              <div class="col-sm-6">
-                <input type="range" class="form-control" id="resolution_input" v-model="uiResolution" min="0" max="29" step="0.25"/>
-              </div>
-            </div>
-            <div class="form-group row">
-              <label class="col-sm-6 col-form-label" for="zoom_speed_input">Zoom Geschwindigkeit</label>
-              <div class="col-sm-6">
-                <input type="range" class="form-control" id="zoom_speed_input" v-model.sync="uiZoomSpeed" min="1" max="100" step="0.5"/>
-              </div>
-            </div>
-            <h5 class="modal-title">Bedienung</h5>
-            <div id="ui_configurator">
-              <div class="form-group row" >
-                <label class="col-sm-5 col-form-label">Funktion</label>
-                <label class="col-sm-4 col-form-label">Event</label>
-                <label class="col-sm-3 col-form-label">Tasten</label>
-              </div>
-              <interaction-array-option v-for="(action, index) in uiInteractArr" v-bind:action="action" v-on:input="uiInteractArr[index]=$event" v-bind:key="action[2]"></interaction-array-option>
-            </div>
             <h5 class="modal-title">Position Legende</h5>
             <div class="config_radio_legend">
               <div>
@@ -147,6 +126,32 @@ export const ConfigurationPopup = {
                 <input type="radio" id="legend_right" name="legendDisplay" value="right" v-model="uiLegendDisplay">
                 <label for="legend_right">Rechts</label>
               </div>
+            </div>
+            <br>
+            <h5 class="modal-title">Canvas Optionen</h5>
+            <div class="form-group row">
+              <label class="col-sm-5 col-form-label" for="resolution_input">Auflösung</label>
+              <div class="col-sm-5">
+                <input type="range" class="form-control" id="resolution_input" v-model="uiResolution" min="0" max="29" step="0.25"/>
+              </div>
+              <label class="col-sm-2 col-form-label" for="resolution_input">{{config.resolution}}</label>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-5 col-form-label" for="zoom_speed_input">Zoom Geschwindigkeit</label>
+              <div class="col-sm-5">
+                <input type="range" class="form-control" id="zoom_speed_input" v-model.sync="uiZoomSpeed" min="1" max="100" step="0.5"/>
+              </div>
+              <label class="col-sm-2 col-form-label" for="resolution_input">{{config.zoomSpeed}}</label>
+            </div>
+            <br>
+            <h5 class="modal-title">Bedienung</h5>
+            <div id="ui_configurator">
+              <div class="form-group row" >
+                <label class="col-sm-5 col-form-label">Funktion</label>
+                <label class="col-sm-4 col-form-label">Event</label>
+                <label class="col-sm-3 col-form-label">Tasten</label>
+              </div>
+              <interaction-array-option v-for="(action, index) in uiInteractArr" v-bind:action="action" v-on:input="uiInteractArr[index]=$event" v-bind:key="action[2]"></interaction-array-option>
             </div>
           </div>
           <div class="modal-footer">
