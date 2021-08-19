@@ -1,4 +1,5 @@
 import { Configuration } from './configuration.js'
+import Vue from 'vue'
 
 export class StoreClass {
   constructor () {

@@ -1,6 +1,7 @@
 import { Metric, markerSymbols } from './metric.js'
 import { MetricTimestamp } from './MetricTimestamp.js'
 import { showUserHint } from './interact.js'
+import MetricQHistory from 'metricq-js/metricq-history'
 
 const METRICQ_BACKEND = 'https://grafana.metricq.zih.tu-dresden.de/metricq'
 
