@@ -88,3 +88,14 @@ sw.*
 
 # Vim swap files
 *.swp
+
+# yarn files
+# not using Zero-Installs 
+# see https://next.yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
