@@ -3801,6 +3801,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"daterangepicker@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "daterangepicker@npm:3.1.0"
+  dependencies:
+    jquery: ">=1.10"
+    moment: ^2.9.0
+  checksum: 33b8817ac906fbc185f223c6c89c17a769b4506437b5383e3cea95c963b68d914a700f4f5f7e9d3d5dab7e5af10d6aeccaa75298276f8f8bfea412981604a7b2
+  languageName: node
+  linkType: hard
+
 "de-indent@npm:^1.0.2":
   version: 1.0.2
   resolution: "de-indent@npm:1.0.2"
@@ -6533,6 +6543,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"jquery@npm:>=1.10, jquery@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "jquery@npm:3.6.0"
+  checksum: 8fd5fef4aa48fd374ec716dd1c1df1af407814a228e15c1260ca140de3a697c2a77c30c54ff1d238b6a3ab4ddc445ddeef9adce6c6d28e4869d85eb9d3951c0e
+  languageName: node
+  linkType: hard
+
 "js-message@npm:1.0.7":
   version: 1.0.7
   resolution: "js-message@npm:1.0.7"
@@ -7112,6 +7129,7 @@ fsevents@^1.2.7:
     "@vue/cli-service": ~5.0.0-beta.3
     babel-eslint: ^10.1.0
     core-js: ^3.6.5
+    daterangepicker: ^3.1.0
     eslint: ^7.21.0
     eslint-config-standard: ^16.0.2
     eslint-config-standard-jsx: ^10.0.0
@@ -7120,9 +7138,12 @@ fsevents@^1.2.7:
     eslint-plugin-promise: ^4.3.1
     eslint-plugin-react: ^7.22.0
     eslint-plugin-vue: ^7.8.0
+    jquery: ^3.6.0
     metricq-js: "https://github.com/metricq/metricq-js#e433da5e3a1532a713e1e2412818c96a0a5692ea"
+    moment: ^2.29.1
     standard: ^16.0.3
     vue: ^2.6.11
+    vue-multiselect: ^2.1.6
     vue-template-compiler: ^2.6.11
   languageName: unknown
   linkType: soft
@@ -7342,7 +7363,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"moment@npm:^2.29.1":
+"moment@npm:^2.29.1, moment@npm:^2.9.0":
   version: 2.29.1
   resolution: "moment@npm:2.29.1"
   checksum: 1e14d5f422a2687996be11dd2d50c8de3bd577c4a4ca79ba5d02c397242a933e5b941655de6c8cb90ac18f01cc4127e55b4a12ae3c527a6c0a274e455979345e
@@ -10790,6 +10811,13 @@ resolve@^2.0.0-next.3:
     "@vue/compiler-sfc":
       optional: true
   checksum: 24f0e704729a933f1bc7b8c6a1a7662f27602f66f1690856f57e840127b8f7a1064c290ee5f040bb7e72de7dfcef0befb9f0773307b19c475a9213380011e592
+  languageName: node
+  linkType: hard
+
+"vue-multiselect@npm:^2.1.6":
+  version: 2.1.6
+  resolution: "vue-multiselect@npm:2.1.6"
+  checksum: 582ba3df035e6d22cb58307233917b9d1564196b397f62bd352e0431b0448f578eedd480157ba5df7d699cc6983d999e39ab5aa77335db5d0f1bb1d4213529f9
   languageName: node
   linkType: hard
 

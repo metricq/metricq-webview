@@ -9,8 +9,12 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "daterangepicker": "^3.1.0",
+    "jquery": "^3.6.0",
     "metricq-js": "https://github.com/metricq/metricq-js#e433da5e3a1532a713e1e2412818c96a0a5692ea",
-    "vue": "^2.6.11"
+    "moment": "^2.29.1",
+    "vue": "^2.6.11",
+    "vue-multiselect": "^2.1.6"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0-beta.3",

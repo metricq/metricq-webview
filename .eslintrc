@@ -8,8 +8,6 @@
     // Web API
     "Image": "readonly",
     "XMLHttpRequest": "readonly",
-    //moment.js
-    "moment": "readonly"
   },
   "ignorePatterns": ["lib/*.js"],
   "rules": {

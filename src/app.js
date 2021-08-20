@@ -11,8 +11,6 @@ import { YaxisPopup } from './ui/yaxis-popup.js'
 import { TimeButton } from './ui/time-button.js'
 import { Store } from './store.js'
 
-Vue.component('VueMultiSelect', window.VueMultiselect.default)
-
 Vue.config.productionTip = false
 
 export const mainApp = new Vue({

@@ -1,5 +1,3 @@
-/* eslint-env jquery */
-
 import './../lib/jsurl.js'
 import './../lib/key.js'
 
