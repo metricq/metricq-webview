@@ -7,6 +7,7 @@ import { MetricPopup } from './ui/metric-popup.js'
 import { NewMetricPopup } from './ui/new-metric-popup.js'
 import { YaxisPopup } from './ui/yaxis-popup.js'
 import { TimeButton } from './ui/time-button.js'
+import { AnalyzePopup } from './ui/analyze-popup.js'
 import { Store } from './store.js'
 
 Vue.component('VueMultiSelect', window.VueMultiselect.default)
@@ -22,7 +23,8 @@ export const mainApp = new Vue({
     MetricPopup,
     NewMetricPopup,
     YaxisPopup,
-    TimeButton
+    TimeButton,
+    AnalyzePopup
   },
   data: {
     state: Store.state,
@@ -30,7 +32,8 @@ export const mainApp = new Vue({
     configuration: Store.state.configuration,
     metricsList: Store.state.allMetrics,
     timestamp: Store.state.timestamp,
-    globalminmax: Store.state.globalMinMax
+    globalminmax: Store.state.globalMinMax,
+    query: Store.state.query
   },
   computed: {},
   watch: {
@@ -55,6 +58,9 @@ export const mainApp = new Vue({
     },
     linkButtonClicked () {
       Store.togglePopup('link')
+    },
+    analyzeButtonClicked () {
+      Store.togglePopup('analyze')
     },
     clearAllButtonClicked () {
       const globalMinMax = Store.state.globalMinMax

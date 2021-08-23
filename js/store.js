@@ -10,13 +10,21 @@ export class StoreClass {
         yaxis: false,
         configuration: false,
         link: false,
-        newmetric: false
+        newmetric: false,
+        analyze: false
       },
       timestamp: {
         start: 0,
         end: 0
       },
-      globalMinMax: true
+      globalMinMax: true,
+      query: {
+        time: 0,
+        aggregate: 0,
+        raw: 0,
+        aggregatePerMetric: {},
+        rawPerMetric: {}
+      }
     }
   }
 
@@ -112,6 +120,38 @@ export class StoreClass {
       }
     }
     window.MetricQWebView.instances[0].graticule.draw(false)
+  }
+
+  resetQuery () {
+    Vue.set(this.state.query, 'time', 0)
+    Vue.set(this.state.query, 'raw', 0)
+    Vue.set(this.state.query, 'aggregate', 0)
+    Vue.set(this.state.query, 'rawPerMetric', {})
+    Vue.set(this.state.query, 'aggregatePerMetric', {})
+  }
+
+  addQueryTime (time) {
+    Vue.set(this.state.query, 'time', this.state.query.time + time)
+  }
+
+  addQueryRaw (points) {
+    Vue.set(this.state.query, 'raw', this.state.query.raw + points)
+  }
+
+  addQueryAggregate (points) {
+    Vue.set(this.state.query, 'aggregate', this.state.query.aggregate + points)
+  }
+
+  setQueryMetric (metricName, aggregate, raw) {
+    Vue.set(this.state.query.aggregatePerMetric, metricName, aggregate)
+    Vue.set(this.state.query.rawPerMetric, metricName, raw)
+  }
+
+  getQueryMetric (metricName) {
+    return {
+      aggregate: this.state.query.aggregatePerMetric[metricName],
+      raw: this.state.query.rawPerMetric[metricName]
+    }
   }
 
   setGlobalMinMax (newState) {

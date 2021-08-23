@@ -38,6 +38,11 @@
         <input type="checkbox" id='checkbox_min_max' v-model="state.globalMinMax" v-on:change="toggleMinMaxButton">
         min/max anzeigen
       </label>
+      <label class="btn btn-outline-primary btn-navbar" id="button_analyze" v-on:click="analyzeButtonClicked"
+             v-bind:query="query">
+        <img class="navimg" src="img/icons/calculator.svg"/>
+        Analyse
+      </label>
       <label>
         <time-button id="date_range" class="btn btn-outline-primary btn-navbar"
                      v-bind:starttime="timestamp.start"
@@ -108,6 +113,19 @@
         v-model="popups.link"
         v-if="popups.link"
       ></link-popup>
+    </div>
+    <div id="wrapper_popup_link">
+      <link-popup
+        v-model="popups.link"
+        v-if="popups.link"
+      ></link-popup>
+    </div>
+    <div id="wrapper_popup_analyze">
+      <analyze-popup
+        v-model="popups.analyze"
+        v-if="popups.analyze"
+        v-bind:query="query"
+      ></analyze-popup>
     </div>
   </div>
 </div>
