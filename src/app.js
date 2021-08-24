@@ -1,3 +1,5 @@
+import Vue from 'vue'
+
 import { ConfigurationPopup } from './ui/configuration-popup.js'
 import { ExportPopup } from './ui/export-popup.js'
 import { LinkPopup } from './ui/link-popup.js'
@@ -9,7 +11,7 @@ import { YaxisPopup } from './ui/yaxis-popup.js'
 import { TimeButton } from './ui/time-button.js'
 import { Store } from './store.js'
 
-Vue.component('VueMultiSelect', window.VueMultiselect.default)
+Vue.config.productionTip = false
 
 export const mainApp = new Vue({
   el: '#main_app',

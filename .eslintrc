@@ -5,15 +5,19 @@
     "plugin:vue/recommended"
   ],
   "globals": {
-    "Vue": "readonly",
-    "MetricQHistory": "readonly",
     // Web API
     "Image": "readonly",
     "XMLHttpRequest": "readonly",
-    //moment.js
-    "moment": "readonly"
   },
+  "ignorePatterns": ["lib/*.js"],
   "rules": {
     "no-unused-vars": "off"
-  }
+  },
+  "root": true,
+  "env": {
+    "node": true
+  },
+  "parserOptions": {
+    "parser": "babel-eslint"
+  },
 }

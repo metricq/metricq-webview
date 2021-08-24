@@ -1,4 +1,8 @@
-/* eslint-env jquery */
+import moment from 'moment'
+import $ from 'jquery'
+import 'daterangepicker'
+import styles from 'daterangepicker/daterangepicker.css'
+
 // @vue/component
 export const TimeButton = {
   props: {

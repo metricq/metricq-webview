@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { Store } from './store.js'
 
 export class MetricTimestamp {

@@ -1,7 +1,7 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: eslint Linter
+name: node.js CI
 
 on:
   push:
@@ -10,13 +10,13 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  lint:
+    name: eslint Linter
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x, 15.x]
+        node-version: [12.x, 14.x, 16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -25,5 +25,29 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+    # checksums for git repo dependencies are broken
     - run: yarn install
+      env:
+        YARN_CHECKSUM_BEHAVIOR: update
     - run: yarn lint
+
+  build:
+    name: Build for deployment
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      # checksums for git repo dependencies are broken
+      - run: yarn install
+        env:
+          YARN_CHECKSUM_BEHAVIOR: update
+      - run: yarn build
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: webview
+          path: dist

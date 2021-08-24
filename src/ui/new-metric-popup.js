@@ -2,10 +2,13 @@ import { PopupHeader } from './popup-header.js'
 import { veil } from './veil.js'
 import { Store } from '../store.js'
 import { Metric } from '../metric.js'
+import VueMultiSelect from 'vue-multiselect'
+import style from 'vue-multiselect/dist/vue-multiselect.min.css'
 
 export const NewMetricPopup = {
   components: {
-    PopupHeader
+    PopupHeader,
+    VueMultiSelect
   },
   model: {
     prop: 'popupStatus',
