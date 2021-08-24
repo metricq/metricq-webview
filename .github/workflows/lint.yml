@@ -25,7 +25,10 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+    # checksums for git repo dependencies are broken
     - run: yarn install
+      env:
+        YARN_CHECKSUM_BEHAVIOR: update
     - run: yarn lint
 
   build:
@@ -38,7 +41,10 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
+      # checksums for git repo dependencies are broken
       - run: yarn install
+        env:
+          YARN_CHECKSUM_BEHAVIOR: update
       - run: yarn build
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2
