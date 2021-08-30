@@ -33,7 +33,7 @@
         Export
       </label>
       <label class="btn btn-outline-primary btn-navbar">
-        <input type="checkbox" id='checkbox_min_max' v-model="state.globalMinMax" v-on:change="toggleMinMaxButton">
+        <input type="checkbox" id='checkbox_min_max' v-bind:checked="globalMinMax" v-on:change="toggleMinMaxButton">
         min/max anzeigen
       </label>
       <label>
@@ -75,35 +75,29 @@
         ></metric-popup>
         <div id="wrapper_popup_newlegend">
           <new-metric-popup
-            v-model="popups.newmetric"
             v-if="popups.newmetric"
           ></new-metric-popup>
         </div>
       </div>
       <div id="wrapper_popup_configuration">
         <configuration-popup
-          v-bind:config="configuration"
           v-bind:key="configuration.key"
-          v-model="popups.configuration"
           v-if="popups.configuration"
         ></configuration-popup>
       </div>
       <div id="wrapper_popup_yaxis">
         <yaxis-popup
-          v-model="popups.yaxis"
           v-if="popups.yaxis"
         ></yaxis-popup>
       </div>
       <div id="wrapper_popup_export">
         <export-popup
-          v-model="popups.export"
           v-if="popups.export"
         ></export-popup>
       </div>
     </div>
     <div id="wrapper_popup_link">
       <link-popup
-        v-model="popups.link"
         v-if="popups.link"
       ></link-popup>
     </div>

@@ -14,11 +14,13 @@
     "metricq-js": "https://github.com/metricq/metricq-js#e433da5e3a1532a713e1e2412818c96a0a5692ea",
     "moment": "^2.29.1",
     "vue": "^2.6.11",
-    "vue-multiselect": "^2.1.6"
+    "vue-multiselect": "^2.1.6",
+    "vuex": "^3.6.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0-beta.3",
     "@vue/cli-plugin-eslint": "~5.0.0-beta.3",
+    "@vue/cli-plugin-vuex": "~5.0.0-beta.3",
     "@vue/cli-service": "~5.0.0-beta.3",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.21.0",

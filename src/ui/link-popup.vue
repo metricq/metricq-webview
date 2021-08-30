@@ -86,33 +86,22 @@
 <script>
 import { veil } from './veil.js'
 import PopupHeader from './popup-header.vue'
-import { Store } from '../store.js'
 
 export default {
   components: {
     PopupHeader
   },
-  model: {
-    prop: 'popupStatus',
-    event: 'toggle'
-  },
-  props: {
-    popupStatus: {
-      type: Boolean,
-      required: true
-    }
-  },
+  props: { },
   data: function () {
     return {
-      popupTitle: 'Information',
-      configuration: Store.state.configuration
+      popupTitle: 'Information'
     }
   },
   mounted () {
     const popupEle = document.querySelector('.link_popup_div')
     if (popupEle) {
       const disablePopupFunc = () => {
-        this.$emit('toggle', false)
+        this.$store.commit('togglePopup', 'link')
         window.MetricQWebView.instances[0].reload()
       }
       veil.create(disablePopupFunc)

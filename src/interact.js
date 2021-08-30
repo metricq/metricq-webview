@@ -1,4 +1,5 @@
 import { Store } from './store.js'
+import store from './store/'
 
 const uiOptions = {
   horizontalScrolling: false,
@@ -127,7 +128,7 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
     if (scrollDirection > 0) {
       scrollDirection = 0.2
     }
-    scrollDirection *= metricQInstance.configuration.zoomSpeed / 10
+    scrollDirection *= store.state.configuration.zoomSpeed / 10
     const curPos = calculateActualMousePos(evtObj)
     const curTimeValue = metricQInstance.graticule.getTimeValueAtPoint(curPos)
     if (curTimeValue) {

@@ -1,23 +1,11 @@
 import { Configuration } from './configuration.js'
 import Vue from 'vue'
+import newstore from './store/'
 
 export class StoreClass {
   constructor () {
     this.state = {
-      configuration: new Configuration(5, 10),
-      allMetrics: {},
-      popups: {
-        export: false,
-        yaxis: false,
-        configuration: false,
-        link: false,
-        newmetric: false
-      },
-      timestamp: {
-        start: 0,
-        end: 0
-      },
-      globalMinMax: true
+      allMetrics: {}
     }
   }
 
@@ -82,10 +70,10 @@ export class StoreClass {
         stateArray.push(metricDrawArray.drawMax)
       })
       if (stateArray.includes(true) && stateArray.includes(false)) {
-        Vue.set(this.state, 'globalMinMax', false)
+        newstore.commit('setGlobalMinMax', false)
         document.getElementById('checkbox_min_max').indeterminate = true
       } else {
-        Vue.set(this.state, 'globalMinMax', stateArray[0])
+        newstore.commit('setGlobalMinMax', stateArray[0])
       }
     } else {
       document.getElementById('checkbox_min_max').indeterminate = false
@@ -99,18 +87,6 @@ export class StoreClass {
     return metricArray
   }
 
-  togglePopup (name) {
-    Vue.set(this.state.popups, name, !this.state.popups[name])
-  }
-
-  setStartTime (time) {
-    Vue.set(this.state.timestamp, 'start', time)
-  }
-
-  setEndTime (time) {
-    Vue.set(this.state.timestamp, 'end', time)
-  }
-
   setDrawMinMaxGlobal (newState) {
     for (const metricBase in this.state.allMetrics) {
       Vue.set(this.state.allMetrics[metricBase], 'drawMin', newState)
@@ -120,10 +96,7 @@ export class StoreClass {
       }
     }
     window.MetricQWebView.instances[0].graticule.draw(false)
-  }
-
-  setGlobalMinMax (newState) {
-    Vue.set(this.state, 'globalMinMax', newState)
+    newstore.commit('setGlobalMinMax', newState)
   }
 }
 

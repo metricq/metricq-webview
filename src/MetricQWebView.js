@@ -2,6 +2,7 @@ import { MetricHandler } from './MetricHandler.js'
 import { Graticule } from './graticule.js'
 import { markerSymbols, Metric } from './metric.js'
 import { registerCallbacks } from './interact.js'
+import store from './store/'
 
 export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store) {
   const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store)
@@ -31,7 +32,6 @@ class MetricQWebView {
     this.countTraces = 0
     this.hasPlot = false
     this.graticule = undefined
-    this.configuration = this.store.state.configuration // constructor(resolutionParam, zoomSpeedParam)
     this.margins = {
       canvas: {
         top: 10,
@@ -141,7 +141,7 @@ class MetricQWebView {
 
       this.positionYAxisGear(this.ele, gearWrapper)
       gearWrapper.addEventListener('click', () => {
-        this.store.togglePopup('yaxis')
+        store.commit('togglePopup', 'yaxis')
       })
     } else {
       // Parameters: JSON, doDraw, doResize
@@ -285,8 +285,8 @@ class MetricQWebView {
 
     let filenameStr = 'MetricQ-WebView.'
     let filetypeStr = 'image/'
-    filenameStr += this.configuration.exportFormat
-    filetypeStr += this.configuration.exportFormat
+    filenameStr += store.state.configuration.exportFormat
+    filetypeStr += store.state.configuration.exportFormat
     const canvasImageData = this.graticule.ele.toDataURL(filetypeStr)
     let linkEle = document.createElement('a')
     linkEle.setAttribute('href', canvasImageData)
@@ -306,7 +306,7 @@ class MetricQWebView {
   }
 
   setFootMargin () {
-    const layout = this.store.state.configuration.legendDisplay
+    const layout = store.state.configuration.legendDisplay
     const heightHeader = document.getElementById('row_head').offsetHeight
     if (layout === 'bottom') {
       this.margins.row_foot = heightHeader + 140
@@ -322,7 +322,7 @@ class MetricQWebView {
   }
 
   setLegendListWidth () {
-    if (window.MetricQWebView.instances[0].store.state.configuration.legendDisplay === 'right') {
+    if (store.state.configuration.legendDisplay === 'right') {
       if (this.graticule) this.graticule.canvasReset()
       let maxWidth = 0
       const minWidth = '250px'

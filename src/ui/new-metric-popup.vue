@@ -76,16 +76,7 @@ export default {
     PopupHeader,
     VueMultiSelect
   },
-  model: {
-    prop: 'popupStatus',
-    event: 'toggle'
-  },
-  props: {
-    popupStatus: {
-      type: Boolean,
-      required: true
-    }
-  },
+  props: { },
   data: function () {
     return {
       popupTitle: 'Metriken hinzufügen',
@@ -99,7 +90,7 @@ export default {
     const popupEle = document.querySelector('.new_metric_popup_div')
     if (popupEle) {
       const disablePopupFunc = () => {
-        this.$emit('toggle', false)
+        this.$store.commit('togglePopup', 'newmetric')
         window.MetricQWebView.instances[0].reload()
       }
       veil.create(disablePopupFunc)

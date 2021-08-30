@@ -1,6 +1,7 @@
 import { hslToRgb } from '../lib/color-conversion.js'
 import { crc32 } from '../lib/pseudo-crc32.js'
 import { Store } from './store.js'
+import store from './store/'
 
 // adapted from https://plot.ly/python/marker-style/
 // not working:
@@ -22,9 +23,9 @@ export class Metric {
     this.popup = false
     this.updateColor(this.color)
     this.updateDescription(paramDescription)
-    this.drawMin = Store.state.globalMinMax
+    this.drawMin = store.state.globalMinMax
     this.drawAvg = true
-    this.drawMax = Store.state.globalMinMax
+    this.drawMax = store.state.globalMinMax
     // this.autocompleteList = new Array();
   }
 

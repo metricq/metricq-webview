@@ -2,6 +2,7 @@ import { Metric, markerSymbols } from './metric.js'
 import { MetricTimestamp } from './MetricTimestamp.js'
 import { showUserHint } from './interact.js'
 import MetricQHistory from 'metricq-js/metricq-history'
+import store from './store/'
 
 const METRICQ_BACKEND = process.env.VUE_APP_METRICQ_BACKEND
 const [METRICQ_BACKEND_USER, METRICQ_BACKEND_PASSWORD] = process.env.VUE_APP_METRICQ_BACKEND_AUTH === undefined ? [undefined, undefined] : process.env.VUE_APP_METRICQ_BACKEND_AUTH.split(':')
@@ -376,7 +377,7 @@ export class MetricHandler {
 
   reload () {
     const rowBodyEle = document.querySelector('.row_body')
-    const maxDataPoints = Math.round(rowBodyEle.offsetWidth / this.renderer.configuration.resolution)
+    const maxDataPoints = Math.round(rowBodyEle.offsetWidth / store.state.configuration.resolution)
     this.doRequest(maxDataPoints)
   }
 

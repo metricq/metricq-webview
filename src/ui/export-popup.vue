@@ -86,24 +86,14 @@
 <script>
 import { veil } from './veil.js'
 import PopupHeader from './popup-header.vue'
-import { Store } from '../store.js'
+import { mapState } from 'vuex'
 
 export default {
   components: { PopupHeader },
-  model: {
-    prop: 'popupStatus',
-    event: 'toggle'
-  },
-  props: {
-    popupStatus: {
-      type: Boolean,
-      required: true
-    }
-  },
+  props: { },
   data: function () {
     return {
-      popupTitle: 'Export',
-      configuration: Store.state.configuration
+      popupTitle: 'Export'
     }
   },
   computed: {
@@ -115,7 +105,7 @@ export default {
         return this.configuration.exportFormat
       },
       set: function (newValue) {
-        this.configuration.exportFormat = newValue
+        this.$store.commit('setExportFormat', newValue)
       }
     },
     exportWidth: {
@@ -123,7 +113,7 @@ export default {
         return this.configuration.exportWidth
       },
       set: function (newValue) {
-        this.configuration.exportWidth = parseInt(newValue)
+        this.$store.commit('setExportWidth', parseInt(newValue))
       }
     },
     exportHeight:
@@ -132,15 +122,16 @@ export default {
             return this.configuration.exportHeight
           },
           set: function (newValue) {
-            this.configuration.exportHeight = parseInt(newValue)
+            this.$store.commit('setExportHeight', parseInt(newValue))
           }
-        }
+        },
+    ...mapState(['configuration'])
   },
   mounted () {
     const popupEle = document.querySelector('.export_popup_div')
     if (popupEle) {
       const disablePopupFunc = () => {
-        this.$emit('toggle', false)
+        this.$store.commit('togglePopup', 'export')
         window.MetricQWebView.instances[0].reload()
       }
       veil.create(disablePopupFunc)
@@ -152,7 +143,7 @@ export default {
       const instance = window.MetricQWebView.instances[0]
       instance.doExport()
       veil.destroy()
-      this.$emit('toggle', false)
+      this.$store.commit('togglePopup', 'export')
     },
     closePopupModal: function (evt) {
       if (evt.target.getAttribute('role') === 'dialog') {

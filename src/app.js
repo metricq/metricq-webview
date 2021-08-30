@@ -9,7 +9,9 @@ import MetricPopup from './ui/metric-popup.vue'
 import NewMetricPopup from './ui/new-metric-popup.vue'
 import YaxisPopup from './ui/yaxis-popup.vue'
 import TimeButton from './ui/time-button.vue'
+import store from './store/'
 import { Store } from './store.js'
+import { mapMutations, mapState } from 'vuex'
 
 Vue.config.productionTip = false
 
@@ -28,15 +30,19 @@ export const mainApp = new Vue({
   },
   data: {
     state: Store.state,
-    popups: Store.state.popups,
-    configuration: Store.state.configuration,
-    metricsList: Store.state.allMetrics,
-    timestamp: Store.state.timestamp,
-    globalminmax: Store.state.globalMinMax
+    metricsList: Store.state.allMetrics
   },
-  computed: {},
+  computed: {
+    ...mapState([
+      'timestamp',
+      'globalMinMax',
+      'popups',
+      'configuration'
+    ])
+  },
   watch: {
     'configuration.legendDisplay': function () {
+      // TODO: check moving to store
       if (window.MetricQWebView.instances[0].graticule) window.MetricQWebView.instances[0].graticule.canvasReset()
     },
     metricsList: function () {
@@ -50,21 +56,25 @@ export const mainApp = new Vue({
   },
   methods: {
     exportButtonClicked () {
-      Store.togglePopup('export')
+      this.togglePopup('export')
     },
     configurationButtonClicked () {
-      Store.togglePopup('configuration')
+      this.togglePopup('configuration')
     },
     linkButtonClicked () {
-      Store.togglePopup('link')
+      this.togglePopup('link')
     },
     clearAllButtonClicked () {
-      const globalMinMax = Store.state.globalMinMax
+      const globalMinMax = this.globalMinMax
       Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
-      Store.setGlobalMinMax(globalMinMax)
+      this.$store.commit('setGlobalMinMax', globalMinMax)
     },
     toggleMinMaxButton (evt) {
       Store.setDrawMinMaxGlobal(evt.target.checked)
-    }
-  }
+    },
+    ...mapMutations([
+      'togglePopup'
+    ])
+  },
+  store
 })
