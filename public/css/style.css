@@ -347,13 +347,6 @@ body {
     margin-top: 60vh
 }
 
-.ribbon {
-    width: 140px;
-    height: 140px;
-    position: absolute;
-    right: 0;
-    top: 0;
-}
 
 .btn-navbar {
     margin-top: 7px;

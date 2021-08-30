@@ -2,7 +2,7 @@ import Vue from 'vue'
 
 import { ConfigurationPopup } from './ui/configuration-popup.js'
 import { ExportPopup } from './ui/export-popup.js'
-import { LinkPopup } from './ui/link-popup.js'
+import LinkPopup from './ui/link-popup.vue'
 import { MetricLegend } from './ui/metric-legend.js'
 import { NewMetricLegend } from './ui/new-metric-legend.js'
 import { MetricPopup } from './ui/metric-popup.js'
