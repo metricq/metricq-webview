@@ -1,89 +1,89 @@
 <template>
   <div
-    class="modal popup_div yaxis_popup_div"
-    tabindex="-1"
-    role="dialog"
-    @click="closePopupModal"
+      class="modal popup_div yaxis_popup_div"
+      tabindex="-1"
+      role="dialog"
+      @click="closePopupModal"
   >
     <div
-      class="modal-dialog"
-      role="document"
+        class="modal-dialog"
+        role="document"
     >
       <div class="modal-content">
-        <popup-header :popup-title="popupTitle" />
+        <popup-header :popup-title="popupTitle"/>
         <div class="modal-body">
           <div class="form-check">
             <input
-              id="yaxis_global"
-              v-model="yaxisRange"
-              class="form-check-input"
-              type="radio"
-              value="global"
-              name="yaxis"
+                id="yaxis_global"
+                v-model="yaxisRange"
+                class="form-check-input"
+                type="radio"
+                value="global"
+                name="yaxis"
             >
             <label
-              for="yaxis_global"
-              class="form-check-label form-control-plaintext"
+                for="yaxis_global"
+                class="form-check-label form-control-plaintext"
             >Globales Min/Max</label>
           </div>
           <div class="form-check">
             <input
-              id="yaxis_local"
-              v-model="yaxisRange"
-              class="form-check-input"
-              type="radio"
-              value="local"
-              name="yaxis"
+                id="yaxis_local"
+                v-model="yaxisRange"
+                class="form-check-input"
+                type="radio"
+                value="local"
+                name="yaxis"
             >
             <label
-              for="yaxis_local"
-              class="form-check-label form-control-plaintext"
+                for="yaxis_local"
+                class="form-check-label form-control-plaintext"
             >Lokales Min/Max</label>
           </div>
           <div class="form-check">
             <input
-              id="yaxis_manual"
-              v-model="yaxisRange"
-              class="form-check-input"
-              type="radio"
-              value="manual"
-              name="yaxis"
+                id="yaxis_manual"
+                v-model="yaxisRange"
+                class="form-check-input"
+                type="radio"
+                value="manual"
+                name="yaxis"
             >
             <label
-              for="yaxis_manual"
-              class="form-check-label form-control-plaintext"
+                for="yaxis_manual"
+                class="form-check-label form-control-plaintext"
             >Manuelles Min/Max</label>
           </div>
           <div class="form-group yaxis_popup_minmax">
             <div class="form-group row">
               <label
-                for="yaxis_min"
-                class="yaxis_popup_label_minmax col-sm-2 col-form-label"
+                  for="yaxis_min"
+                  class="yaxis_popup_label_minmax col-sm-2 col-form-label"
               >Min:</label>
               <div class="col-sm-10">
                 <input
-                  id="yaxis_min"
-                  v-model="allMin"
-                  class="form-control"
-                  type="number"
-                  :disabled="manualDisabled"
-                  step="0.001"
+                    id="yaxis_min"
+                    v-model="allMin"
+                    class="form-control"
+                    type="number"
+                    :disabled="manualDisabled"
+                    step="0.001"
                 >
               </div>
             </div>
             <div class="form-group row">
               <label
-                for="yaxis_ax"
-                class="yaxis_popup_label_minmax col-sm-2 col-form-label"
+                  for="yaxis_ax"
+                  class="yaxis_popup_label_minmax col-sm-2 col-form-label"
               >Max:</label>
               <div class="col-sm-10">
                 <input
-                  id="yaxis_max"
-                  v-model="allMax"
-                  class="form-control"
-                  type="number"
-                  :disabledsync="manualDisabled"
-                  step="0.001"
+                    id="yaxis_max"
+                    v-model="allMax"
+                    class="form-control"
+                    type="number"
+                    :disabledsync="manualDisabled"
+                    step="0.001"
                 >
               </div>
             </div>
@@ -91,8 +91,8 @@
         </div>
         <div class="modal-footer">
           <button
-            class="btn btn-primary popup_ok"
-            @click="closePopup"
+              class="btn btn-primary popup_ok"
+              @click="closePopup"
           >
             OK
           </button>
@@ -219,5 +219,24 @@ export default {
 </script>
 
 <style scoped>
+.yaxis_popup_div {
+  text-align: left;
+}
 
+.yaxis_popup_radio {
+  float: left;
+}
+
+.yaxis_popup_radio label {
+  user-select: none;
+}
+
+.yaxis_popup_minmax {
+  margin: 0px 0px 0px 50px;
+}
+
+.yaxis_popup_label_minmax {
+  display: inline-block;
+  width: 2.5em;
+}
 </style>

@@ -24,7 +24,7 @@
                 v-model="metricName"
                 type="text"
                 list="autocomplete_metric"
-                class="popup_input form-control"
+                class="form-control"
                 @keyup="metricNameKeyup"
               >
               <datalist id="autocomplete_metric" />
@@ -320,5 +320,19 @@ export default {
 </script>
 
 <style scoped>
+.metric_popup_div {
+}
 
+.popup_trashcan {
+  margin: 2px;
+}
+
+.popup_legend_select {
+  font-size: 12pt;
+  width: 100%;
+}
+
+.popup_legend_select option {
+  font-size: 12pt;
+}
 </style>

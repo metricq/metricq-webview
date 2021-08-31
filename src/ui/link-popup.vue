@@ -1,6 +1,6 @@
 <template>
   <div
-    class="modal popup_div new_metric_popup_div"
+    class="modal popup_div link_popup_div"
     tabindex="-1"
     role="dialog"
     @click="closePopupModal"
@@ -109,7 +109,7 @@ export default {
     }
   },
   mounted () {
-    const popupEle = document.querySelector('.new_metric_popup_div')
+    const popupEle = document.querySelector('.link_popup_div')
     if (popupEle) {
       const disablePopupFunc = () => {
         this.$emit('toggle', false)
@@ -139,5 +139,9 @@ export default {
   position: absolute;
   right: 0;
   top: 0;
+}
+
+.link_popup_div {
+  text-align: left;
 }
 </style>

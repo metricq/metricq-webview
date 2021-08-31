@@ -231,5 +231,9 @@ export default {
 </script>
 
 <style scoped>
-
+.config_radio_legend {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
 </style>

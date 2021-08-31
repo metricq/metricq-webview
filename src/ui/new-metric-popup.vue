@@ -170,5 +170,11 @@ export default {
 </script>
 
 <style scoped>
+.new_metric_popup_div {
+  text-align: left;
+}
 
+.btn-metric {
+  margin-top: 60vh
+}
 </style>
