@@ -85,7 +85,7 @@
 
 <script>
 import { veil } from './veil.js'
-import { PopupHeader } from './popup-header.js'
+import PopupHeader from './popup-header.vue'
 import { Store } from '../store.js'
 
 export default {

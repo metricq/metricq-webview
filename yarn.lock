@@ -7075,7 +7075,7 @@ fsevents@^1.2.7:
     axios: ^0.21.1
     moment: ^2.29.1
     websocket: ^1.0.33
-  checksum: 62cd7e64207a4ee8c8382a53b60d1ddeb3a37a777dfc92ddbc313a976cdc856bca01b689dc4d001eb083986a025c411ed9e192bc30a2bff839b647745bb0e2e7
+  checksum: dcc8aab41f3513674061b864265d21e785bdad5aeef5c56c1d10e7db35b7670dd0e62ee0c4541099053b5b021e0a5dd0e7e8e6069a4990c077885f7ccef8f776
   languageName: node
   linkType: hard
 

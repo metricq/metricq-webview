@@ -43,6 +43,13 @@ export class StoreClass {
     }
   }
 
+  setMetricDrawState (metricKey, state, value) {
+    const metric = this.state.allMetrics[metricKey]
+    if (metric) {
+      Vue.set(metric, state, value)
+    }
+  }
+
   getMetricBase (metricName) {
     for (const metricBase in this.state.allMetrics) {
       if (this.state.allMetrics[metricBase].name === metricName) {
