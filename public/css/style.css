@@ -188,3 +188,10 @@ body {
 .body_and_legend_right {
     display: flex;
 }
+
+/* animation doesn't work in firefox :( */
+.gear_axis:hover {
+    animation: gear_rotate 5s linear infinite !important;
+    pointer-events: none;
+    user-select: none;
+}
