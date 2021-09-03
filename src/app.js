@@ -1,14 +1,14 @@
 import Vue from 'vue'
 
-import { ConfigurationPopup } from './ui/configuration-popup.js'
-import { ExportPopup } from './ui/export-popup.js'
-import { LinkPopup } from './ui/link-popup.js'
-import { MetricLegend } from './ui/metric-legend.js'
-import { NewMetricLegend } from './ui/new-metric-legend.js'
-import { MetricPopup } from './ui/metric-popup.js'
-import { NewMetricPopup } from './ui/new-metric-popup.js'
-import { YaxisPopup } from './ui/yaxis-popup.js'
-import { TimeButton } from './ui/time-button.js'
+import ConfigurationPopup from './ui/configuration-popup.vue'
+import ExportPopup from './ui/export-popup.vue'
+import LinkPopup from './ui/link-popup.vue'
+import MetricLegend from './ui/metric-legend.vue'
+import NewMetricLegend from './ui/new-metric-legend.vue'
+import MetricPopup from './ui/metric-popup.vue'
+import NewMetricPopup from './ui/new-metric-popup.vue'
+import YaxisPopup from './ui/yaxis-popup.vue'
+import TimeButton from './ui/time-button.vue'
 import { Store } from './store.js'
 
 Vue.config.productionTip = false

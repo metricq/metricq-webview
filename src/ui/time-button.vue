@@ -1,10 +1,21 @@
+<template>
+  <li>
+    <img
+      src="img/icons/clock.svg"
+      width="20"
+      height="20"
+    >&nbsp;
+    {{ starttimeFormatted }} - {{ endtimeFormatted }}
+  </li>
+</template>
+
+<script>
 import moment from 'moment'
 import $ from 'jquery'
 import 'daterangepicker'
 import styles from 'daterangepicker/daterangepicker.css'
 
-// @vue/component
-export const TimeButton = {
+export default {
   props: {
     starttime: {
       type: Number,
@@ -75,10 +86,10 @@ export const TimeButton = {
         this.endDate = moment(window.MetricQWebView.instances[0].handler.stopTime.getUnix())
       })
     })
-  },
-  template: `
-    <li>
-      <img src="img/icons/clock.svg" width="20" height="20">&nbsp;
-      {{starttimeFormatted}} - {{endtimeFormatted}}
-    </li>`
+  }
 }
+</script>
+
+<style scoped>
+
+</style>

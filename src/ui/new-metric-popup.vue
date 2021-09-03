@@ -1,11 +1,77 @@
-import { PopupHeader } from './popup-header.js'
+<template>
+  <div
+    class="modal popup_div new_metric_popup_div"
+    tabindex="-1"
+    role="dialog"
+    @click="closePopupModal"
+  >
+    <div
+      class="modal-dialog"
+      role="document"
+    >
+      <div class="modal-content">
+        <popup-header :popup-title="popupTitle" />
+        <div class="modal-body ">
+          <VueMultiSelect
+            ref="multi"
+            v-model="value"
+            track-by="title"
+            select-label=""
+            deselect-label=""
+            selected-label=""
+            :options="options"
+            :multiple="true"
+            :searchable="true"
+            :internal-search="false"
+            :clear-on-select="false"
+            :close-on-select="false"
+            :options-limit="3000"
+            :limit="5"
+            :limit-text="limitText"
+            :max-height="searchHeight"
+            :show-no-results="false"
+            :hide-selected="false"
+            :custom-label="customLabel"
+            placeholder="Metrik suchen"
+            @open="firstSearch"
+            @search-change="changeSearch"
+            @close="keepOpen"
+          >
+            <template
+              slot="option"
+              slot-scope="props"
+            >
+              <span>{{ multiselectLabel(props.option.title, props.option.desc) }}</span>
+            </template>
+          </VueMultiSelect>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn btn-primary btn-metric"
+            @click="addMetrics"
+          >
+            <img
+              src="img/icons/plus-circle.svg"
+              width="28"
+              height="28"
+            >
+            Hinzufügen
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import PopupHeader from './popup-header.vue'
 import { veil } from './veil.js'
 import { Store } from '../store.js'
 import { Metric } from '../metric.js'
 import VueMultiSelect from 'vue-multiselect'
 import style from 'vue-multiselect/dist/vue-multiselect.min.css'
 
-export const NewMetricPopup = {
+export default {
   components: {
     PopupHeader,
     VueMultiSelect
@@ -99,26 +165,16 @@ export const NewMetricPopup = {
     firstSearch (value) {
       this.changeSearch('')
     }
-  },
-  template: `
-    <div class="modal popup_div new_metric_popup_div" tabindex="-1" role="dialog" v-on:click="closePopupModal">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <popup-header v-bind:popupTitle="popupTitle"></popup-header>
-          <div class="modal-body " >
-            <VueMultiSelect v-model="value" ref="multi" track-by="title" select-label="" deselect-label="" selectedLabel="" :options="options" :multiple="true" :searchable="true" :internal-search="false" :clear-on-select="false" :close-on-select="false" :options-limit="3000" :limit="5" :limit-text="limitText" :max-height="searchHeight" :show-no-results="false" :hide-selected="false" :custom-label="customLabel" @open="firstSearch" @search-change="changeSearch" @close="keepOpen" placeholder="Metrik suchen" >
-              <template slot="option" slot-scope="props">
-                <span>{{ multiselectLabel(props.option.title,props.option.desc) }}</span>
-              </template>
-            </VueMultiSelect>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary btn-metric" v-on:click="addMetrics">
-              <img src="img/icons/plus-circle.svg" width="28" height="28" />
-              Hinzufügen
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>`
+  }
 }
+</script>
+
+<style scoped>
+.new_metric_popup_div {
+  text-align: left;
+}
+
+.btn-metric {
+  margin-top: 60vh
+}
+</style>
