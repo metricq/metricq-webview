@@ -128,7 +128,6 @@
 <script>
 import { markerSymbols } from '../metric.js'
 import PopupHeader from './popup-header.vue'
-import { Store } from '../store.js'
 import { veil } from './veil.js'
 import { showUserHint } from '../interact.js'
 import { Colorchooser } from '../colorchooser.js'
@@ -162,7 +161,7 @@ export default {
         return this.metric.drawMin
       },
       set: function (newValue) {
-        Store.setMetricDrawState(this.metric.name, 'drawMin', newValue)
+        this.$store.dispatch('metrics/updateDrawState', { metricKey: this.metric.key, drawState: { drawMin: newValue } })
       }
     },
     metricAvg: {
@@ -170,7 +169,7 @@ export default {
         return this.metric.drawAvg
       },
       set: function (newValue) {
-        Store.setMetricDrawState(this.metric.name, 'drawAvg', newValue)
+        this.$store.dispatch('metrics/updateDrawState', { metricKey: this.metric.key, drawState: { drawAvg: newValue } })
       }
     },
     metricMax: {
@@ -178,7 +177,7 @@ export default {
         return this.metric.drawMax
       },
       set: function (newValue) {
-        Store.setMetricDrawState(this.metric.name, 'drawMax', newValue)
+        this.$store.dispatch('metrics/updateDrawState', { metricKey: this.metric.key, drawState: { drawMax: newValue } })
       }
     },
     metricName: {
@@ -197,24 +196,10 @@ export default {
       return
     }
 
-    // TODO: remove this 'affectedTraces' stuff
-    const affectedTraces = []
-    let j = 0
-    for (const metricBase in Store.state.allMetrics) {
-      if (Store.state.allMetrics[metricBase].traces) {
-        for (let k = 0; k < Store.state.allMetrics[metricBase].traces.length; ++k) {
-          if (metricBase === this.metric.name) {
-            affectedTraces.push(j)
-          }
-          ++j
-        }
-      }
-    }
-
-    const disablePopupFunc = (function (paramMyMetric, paramMyNewMetric, paramMyInstance, paramMyTraces) {
-      return function (evt) {
-        const metricBase = Store.getMetricBase(paramMyMetric.name)
-        Store.setMetricPopup(metricBase, false)
+    const disablePopupFunc = ((paramMyMetric, paramMyNewMetric, paramMyInstance) => {
+      return (evt) => {
+        const metricKey = paramMyMetric.key
+        this.$store.commit('metrics/setPopup', { metricKey, popupState: false })
         veil.destroy()
 
         const newName = paramMyNewMetric.name
@@ -237,7 +222,7 @@ export default {
             }
           }
           if (paramMyNewMetric.color !== paramMyMetric.color) {
-            paramMyMetric.updateColor(paramMyMetric.color)
+            this.$store.dispatch('metrics/updateColor', { metricKey, color: paramMyMetric.color })
             const colorEle = document.getElementsByClassName(paramMyMetric.popupKey)
             if (colorEle && colorEle[0]) {
               colorEle[0].style.color = paramMyMetric.color
@@ -248,23 +233,23 @@ export default {
             //         so the metric's color will be shown
           }
           if (paramMyNewMetric.marker !== paramMyMetric.marker) {
-            paramMyMetric.updateMarker(paramMyMetric.marker)
+            this.$store.dispatch('metrics/updateMarker', { metricKey, marker: paramMyMetric.marker })
           }
           // don't do a complete repaint
           // renderMetrics();
         }
       }
-    }(this.metric, this.newMetric, instance, affectedTraces))
+    })(this.metric, this.newMetric, instance)
     veil.create(disablePopupFunc)
     veil.attachPopup(popupEle)
 
     const colorchooserEle = popupEle.querySelector('.popup_colorchooser')
     const colorchooserObj = new Colorchooser(colorchooserEle, this.metric)
-    colorchooserObj.onchange = (function (myTraces, paramMyMetric) {
+    colorchooserObj.onchange = (function (paramMyMetric) {
       return function () {
-        paramMyMetric.renderer.graticule.draw(false)
+        window.MetricQWebView.instances[0].graticule.draw(false)
       }
-    }(affectedTraces, this.metric))
+    }(this.metric))
 
     document.getElementById('input_metric_name').focus()
   },
@@ -274,11 +259,11 @@ export default {
         evt.target.click()
         window.alert('Fehler! Mindestens eine Option muss ausgewählt bleiben!')
       } else {
-        Store.checkMetricDrawState()
+        this.$store.dispatch('metrics/checkGlobalDrawState')
       }
     },
     changeMarker: function (evt) {
-      this.metric.updateMarker(evt.target.value)
+      this.$store.dispatch('metrics/updateMarker', { metricKey: this.metric.key, marker: evt.target.value })
     },
     trashcanClicked: function (evt) {
       veil.destroy(evt)

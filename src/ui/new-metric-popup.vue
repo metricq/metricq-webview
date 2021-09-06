@@ -66,8 +66,6 @@
 <script>
 import PopupHeader from './popup-header.vue'
 import { veil } from './veil.js'
-import { Store } from '../store.js'
-import { Metric } from '../metric.js'
 import VueMultiSelect from 'vue-multiselect'
 import style from 'vue-multiselect/dist/vue-multiselect.min.css'
 
@@ -123,8 +121,8 @@ export default {
     },
     addMetrics: function (evt) {
       if (this.value != null) {
-        this.value.forEach(function (item, index, array) {
-          Store.setMetric(item.title, new Metric(window.MetricQWebView.instances[0], item.title, item.desc, []))
+        this.value.forEach((item, index, array) => {
+          this.$store.dispatch('metrics/create', { metric: { name: item.title, description: item.desc, traces: [] } })
         })
       }
       this.closePopup(evt)

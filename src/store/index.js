@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { Configuration } from '../configuration.js'
+import { Configuration } from '@/configuration'
+import metrics from '@/store/metrics'
 
 Vue.use(Vuex)
 
@@ -55,6 +56,7 @@ export default new Vuex.Store({
   actions: {
   },
   modules: {
+    metrics
   },
   strict: process.env.NODE_ENV !== 'production'
 })

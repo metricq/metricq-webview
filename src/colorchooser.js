@@ -1,4 +1,5 @@
 import { rgbToHsl, hslToRgb } from '../lib/color-conversion.js'
+import store from './store/'
 
 /* TODO: implement this as a vue-js component, maybe? */
 export class Colorchooser {
@@ -84,7 +85,7 @@ export class Colorchooser {
     }
     this.render()
     const rgbArr = hslToRgb(this.colorVal, 1, 0.46)
-    this.metric.updateColor('rgb(' + rgbArr[0] + ',' + rgbArr[1] + ',' + rgbArr[2] + ')')
+    store.dispatch('metrics/updateColor', { metricKey: this.metric.key, color: 'rgb(' + rgbArr[0] + ',' + rgbArr[1] + ',' + rgbArr[2] + ')' })
     if (this.onchange) {
       this.onchange()
     }

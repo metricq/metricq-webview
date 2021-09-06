@@ -10,7 +10,6 @@ import NewMetricPopup from './ui/new-metric-popup.vue'
 import YaxisPopup from './ui/yaxis-popup.vue'
 import TimeButton from './ui/time-button.vue'
 import store from './store/'
-import { Store } from './store.js'
 import { mapMutations, mapState } from 'vuex'
 
 Vue.config.productionTip = false
@@ -28,17 +27,19 @@ export const mainApp = new Vue({
     YaxisPopup,
     TimeButton
   },
-  data: {
-    state: Store.state,
-    metricsList: Store.state.allMetrics
-  },
+  data: { },
   computed: {
     ...mapState([
       'timestamp',
       'globalMinMax',
       'popups',
       'configuration'
-    ])
+    ]),
+    ...mapState({
+      metricsList (state) {
+        return state.metrics.metrics
+      }
+    })
   },
   watch: {
     'configuration.legendDisplay': function () {
@@ -47,7 +48,7 @@ export const mainApp = new Vue({
     },
     metricsList: function () {
       setTimeout(function () { window.MetricQWebView.instances[0].setLegendLayout() }, 0)
-      if (Store.getAllMetrics().length === 0) {
+      if (this.metricsList.length === 0) {
         document.getElementById('button_clear_all').style.display = 'none'
       } else {
         document.getElementById('button_clear_all').style.display = 'inline'
@@ -66,11 +67,11 @@ export const mainApp = new Vue({
     },
     clearAllButtonClicked () {
       const globalMinMax = this.globalMinMax
-      Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
+      this.$store.getters['metrics/getAllKeys']().forEach(metricBase => window.MetricQWebView.instances[0].deleteMetric(metricBase))
       this.$store.commit('setGlobalMinMax', globalMinMax)
     },
     toggleMinMaxButton (evt) {
-      Store.setDrawMinMaxGlobal(evt.target.checked)
+      this.$store.dispatch('metrics/updateDrawStateGlobally', evt.target.checked)
     },
     ...mapMutations([
       'togglePopup'
