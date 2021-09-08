@@ -9,7 +9,8 @@ import MetricPopup from './ui/metric-popup.vue'
 import NewMetricPopup from './ui/new-metric-popup.vue'
 import YaxisPopup from './ui/yaxis-popup.vue'
 import TimeButton from './ui/time-button.vue'
-import { Store } from './store.js'
+import store from './store/'
+import { mapMutations, mapState } from 'vuex'
 
 Vue.config.productionTip = false
 
@@ -26,22 +27,28 @@ export const mainApp = new Vue({
     YaxisPopup,
     TimeButton
   },
-  data: {
-    state: Store.state,
-    popups: Store.state.popups,
-    configuration: Store.state.configuration,
-    metricsList: Store.state.allMetrics,
-    timestamp: Store.state.timestamp,
-    globalminmax: Store.state.globalMinMax
+  data: { },
+  computed: {
+    ...mapState([
+      'timestamp',
+      'globalMinMax',
+      'popups',
+      'configuration'
+    ]),
+    ...mapState({
+      metricsList (state) {
+        return state.metrics.metrics
+      }
+    })
   },
-  computed: {},
   watch: {
     'configuration.legendDisplay': function () {
+      // TODO: check moving to store
       if (window.MetricQWebView.instances[0].graticule) window.MetricQWebView.instances[0].graticule.canvasReset()
     },
     metricsList: function () {
       setTimeout(function () { window.MetricQWebView.instances[0].setLegendLayout() }, 0)
-      if (Store.getAllMetrics().length === 0) {
+      if (this.metricsList.length === 0) {
         document.getElementById('button_clear_all').style.display = 'none'
       } else {
         document.getElementById('button_clear_all').style.display = 'inline'
@@ -50,21 +57,25 @@ export const mainApp = new Vue({
   },
   methods: {
     exportButtonClicked () {
-      Store.togglePopup('export')
+      this.togglePopup('export')
     },
     configurationButtonClicked () {
-      Store.togglePopup('configuration')
+      this.togglePopup('configuration')
     },
     linkButtonClicked () {
-      Store.togglePopup('link')
+      this.togglePopup('link')
     },
     clearAllButtonClicked () {
-      const globalMinMax = Store.state.globalMinMax
-      Store.getAllMetrics().forEach(metricName => window.MetricQWebView.instances[0].deleteMetric(Store.getMetricBase(metricName)))
-      Store.setGlobalMinMax(globalMinMax)
+      const globalMinMax = this.globalMinMax
+      this.$store.getters['metrics/getAllKeys']().forEach(metricBase => window.MetricQWebView.instances[0].deleteMetric(metricBase))
+      this.$store.commit('setGlobalMinMax', globalMinMax)
     },
     toggleMinMaxButton (evt) {
-      Store.setDrawMinMaxGlobal(evt.target.checked)
-    }
-  }
+      this.$store.dispatch('metrics/updateDrawStateGlobally', evt.target.checked)
+    },
+    ...mapMutations([
+      'togglePopup'
+    ])
+  },
+  store
 })

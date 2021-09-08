@@ -10,12 +10,11 @@
 </template>
 
 <script>
-import { Store } from '../store.js'
 
 export default {
   methods: {
     newMetricPopup: function () {
-      Store.togglePopup('newmetric')
+      this.$store.commit('togglePopup', 'newmetric')
     }
   }
 }

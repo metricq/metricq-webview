@@ -20,7 +20,6 @@
 </template>
 
 <script>
-import { Store } from '../store.js'
 
 export default {
   props: {
@@ -31,12 +30,10 @@ export default {
   },
   methods: {
     metricPopup: function () {
-      const metricBase = Store.getMetricBase(this.$props.metric.name)
-      Store.setMetricPopup(metricBase, !this.$props.metric.popup)
+      this.$store.commit('metrics/setPopup', { metricKey: this.$props.metric.name, popupState: !this.$props.metric.popup })
     },
     trashcanClicked: function () {
-      const metricBase = Store.getMetricBase(this.$props.metric.name)
-      window.MetricQWebView.instances[0].deleteMetric(metricBase)
+      window.MetricQWebView.instances[0].deleteMetric(this.$props.metric.name)
     }
   }
 }

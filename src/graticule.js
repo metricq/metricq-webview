@@ -1,5 +1,5 @@
 import { DataCache } from './data-handling.js'
-import { Store } from './store.js'
+import store from './store/'
 
 export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize) {
   this.ele = paramEle
@@ -849,7 +849,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   }
   this.drawBands = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
-      if (Store.getMetricDrawState(this.data.metrics[i].name).drawMin && Store.getMetricDrawState(this.data.metrics[i].name).drawMax) {
+      if (store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).drawMin && store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).drawMax) {
         const curBand = this.data.metrics[i].band
         if (curBand) {
           const styleOptions = this.parseStyleOptions(curBand.styleOptions)
@@ -908,7 +908,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   this.drawSeries = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
       if (this.data.metrics[i].series.raw === undefined) {
-        const metricDrawState = Store.getMetricDrawState(this.data.metrics[i].name)
+        const metricDrawState = store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name)
         this.data.metrics[i].series.avg.styleOptions.skip = !metricDrawState.drawAvg
         if (!metricDrawState.drawMin || !metricDrawState.drawMax) {
           this.data.metrics[i].series.min.styleOptions.skip = !metricDrawState.drawMin

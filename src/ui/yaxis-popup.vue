@@ -110,16 +110,7 @@ export default {
   components: {
     PopupHeader
   },
-  model: {
-    prop: 'popupStatus',
-    event: 'toggle'
-  },
-  props: {
-    popupStatus: {
-      type: Boolean,
-      required: true
-    }
-  },
+  props: { },
   data: function () {
     return {
       popupTitle: 'Y-Achsen-Einstellungen'
@@ -197,7 +188,7 @@ export default {
     const popupEle = document.querySelector('.yaxis_popup_div')
     if (popupEle) {
       const disablePopupFunc = () => {
-        this.$emit('toggle', false)
+        this.$store.commit('togglePopup', 'yaxis')
         window.MetricQWebView.instances[0].reload()
       }
       veil.create(disablePopupFunc)

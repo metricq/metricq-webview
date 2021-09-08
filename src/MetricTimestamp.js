@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { Store } from './store.js'
+import store from './store/'
 
 export class MetricTimestamp {
   constructor (paramTime, paramStartEnd) {
@@ -11,9 +11,9 @@ export class MetricTimestamp {
     // timeValue is a string for relative times or a number for absolute times
     this.timeValue = paramTime
     if (this.startEnd === 'start') {
-      Store.setStartTime(this.getUnix())
+      store.commit('setStartTime', this.getUnix())
     } else if (this.startEnd === 'end') {
-      Store.setEndTime(this.getUnix())
+      store.commit('setEndTime', this.getUnix())
     }
   }
 

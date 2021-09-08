@@ -1,4 +1,4 @@
-import { Store } from './store.js'
+import store from './store/'
 
 const uiOptions = {
   horizontalScrolling: false,
@@ -127,7 +127,7 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
     if (scrollDirection > 0) {
       scrollDirection = 0.2
     }
-    scrollDirection *= metricQInstance.configuration.zoomSpeed / 10
+    scrollDirection *= store.state.configuration.zoomSpeed / 10
     const curPos = calculateActualMousePos(evtObj)
     const curTimeValue = metricQInstance.graticule.getTimeValueAtPoint(curPos)
     if (curTimeValue) {
@@ -164,13 +164,14 @@ function uiInteractLegend (metricQInstance, evtObj) {
       sortValue = Number(allValuesAtTime[i][1])
     } else {
       curText = ''
-      if (Store.getMetricDrawState(allValuesAtTime[i][3]).drawMin) {
+      const metricDrawState = store.getters['metrics/getMetricDrawState'](allValuesAtTime[i][3])
+      if (metricDrawState.drawMin) {
         curText += '▼' + (Number(allValuesAtTime[i][1])).toFixed(3)
       }
-      if (Store.getMetricDrawState(allValuesAtTime[i][3]).drawAvg) {
+      if (metricDrawState.drawAvg) {
         curText += ' ⌀' + (Number(allValuesAtTime[i + 2][1])).toFixed(3)
       }
-      if (Store.getMetricDrawState(allValuesAtTime[i][3]).drawMax) {
+      if (metricDrawState.drawMax) {
         curText += ' ▲' + (Number(allValuesAtTime[i + 1][1])).toFixed(3)
       }
       sortValue = Number(allValuesAtTime[i + 2][1])

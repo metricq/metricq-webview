@@ -1,6 +1,6 @@
 import { MetricHandler } from './MetricHandler.js'
 import { Graticule } from './graticule.js'
-import { markerSymbols, Metric } from './metric.js'
+import { markerSymbols } from './metric.js'
 import { registerCallbacks } from './interact.js'
 
 export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store) {
@@ -31,7 +31,6 @@ class MetricQWebView {
     this.countTraces = 0
     this.hasPlot = false
     this.graticule = undefined
-    this.configuration = this.store.state.configuration // constructor(resolutionParam, zoomSpeedParam)
     this.margins = {
       canvas: {
         top: 10,
@@ -72,8 +71,7 @@ class MetricQWebView {
 
   renderMetrics (datapointsJSON) {
     let allTraces = []
-    for (const metricBase in this.store.state.allMetrics) {
-      const curMetric = this.store.state.allMetrics[metricBase]
+    for (const curMetric of this.store.getters['metrics/getAll']()) {
       if (curMetric.traces) {
         allTraces = allTraces.concat(curMetric.traces)
       }
@@ -141,7 +139,7 @@ class MetricQWebView {
 
       this.positionYAxisGear(this.ele, gearWrapper)
       gearWrapper.addEventListener('click', () => {
-        this.store.togglePopup('yaxis')
+        this.store.commit('togglePopup', 'yaxis')
       })
     } else {
       // Parameters: JSON, doDraw, doResize
@@ -186,8 +184,8 @@ class MetricQWebView {
     //   encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj))
     // } else {
     encodedStr = '.' + this.handler.startTime.getValue() + '*' + this.handler.stopTime.getValue()
-    for (const metricBase in this.store.state.allMetrics) {
-      encodedStr += '*' + this.store.state.allMetrics[metricBase].name
+    for (const metricKey of this.store.getters['metrics/getAllKeys']()) {
+      encodedStr += '*' + metricKey
     }
     encodedStr = encodeURIComponent(encodedStr)
     // }
@@ -233,18 +231,9 @@ class MetricQWebView {
     this.lastThrottledReloadTime = now
   }
 
-  getMetricBase (metricName) {
-    for (const metricBase in this.store.state.allMetrics) {
-      if (this.store.state.allMetrics[metricBase].name === metricName) {
-        return metricBase
-      }
-    }
-    return undefined
-  }
-
   deleteMetric (metricBase) {
     if (this.graticule) this.graticule.data.deleteMetric(metricBase)
-    this.store.deleteMetric(metricBase)
+    this.store.dispatch('metrics/delete', { metricKey: metricBase })
     // TODO: also clear this metric from MetricCache
     if (this.graticule) this.graticule.draw(false)
     this.updateMetricUrl()
@@ -259,12 +248,12 @@ class MetricQWebView {
 
   changeMetricName (metricReference, newName, oldName) {
     /* reject metric names that already exist */
-    if (this.store.state.allMetrics[newName]) {
+    if (this.store.getter['metrics/get'](newName)) {
       return false
     }
-    metricReference.updateName(newName)
+    const oldMetric = this.store.getter['metrics/get'](oldName)
+    this.store.dispatch('metrics/create', { metric: { ...oldMetric, name: newName, description: undefined } })
     this.deleteMetric(oldName)
-    this.store.setMetric(newName, metricReference)
     if (this.graticule) {
       let newCache = this.graticule.data.getMetricCache(newName)
       if (!newCache) {
@@ -285,8 +274,8 @@ class MetricQWebView {
 
     let filenameStr = 'MetricQ-WebView.'
     let filetypeStr = 'image/'
-    filenameStr += this.configuration.exportFormat
-    filetypeStr += this.configuration.exportFormat
+    filenameStr += this.store.state.configuration.exportFormat
+    filetypeStr += this.store.state.configuration.exportFormat
     const canvasImageData = this.graticule.ele.toDataURL(filetypeStr)
     let linkEle = document.createElement('a')
     linkEle.setAttribute('href', canvasImageData)
@@ -322,7 +311,7 @@ class MetricQWebView {
   }
 
   setLegendListWidth () {
-    if (window.MetricQWebView.instances[0].store.state.configuration.legendDisplay === 'right') {
+    if (this.store.state.configuration.legendDisplay === 'right') {
       if (this.graticule) this.graticule.canvasReset()
       let maxWidth = 0
       const minWidth = '250px'

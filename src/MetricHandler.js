@@ -1,4 +1,4 @@
-import { Metric, markerSymbols } from './metric.js'
+import { markerSymbols } from './metric.js'
 import { MetricTimestamp } from './MetricTimestamp.js'
 import { showUserHint } from './interact.js'
 import MetricQHistory from 'metricq-js/metricq-history'
@@ -37,10 +37,10 @@ export class MetricHandler {
   }
 
   initializeMetrics (initialMetricNames) {
-    this.store.resetAllMetrics()
+    this.store.commit('metrics/resetAll')
     for (let i = 0; i < initialMetricNames.length; ++i) {
       const curMetricName = initialMetricNames[i]
-      this.store.setMetric(curMetricName, new Metric(this.renderer, curMetricName, undefined, []))
+      this.store.dispatch('metrics/create', { metric: { name: curMetricName, traces: [] } })
     }
   }
 
@@ -48,8 +48,7 @@ export class MetricHandler {
     const timeMargin = (this.stopTime.getUnix() - this.startTime.getUnix()) * this.TIME_MARGIN_FACTOR
     const nonErrorProneMetrics = []
     const remainingMetrics = []
-    for (const metricBase in this.store.state.allMetrics) {
-      const curMetric = this.store.state.allMetrics[metricBase]
+    for (const curMetric of this.store.getters['metrics/getAll']()) {
       if (curMetric.name.length > 0) {
         if (curMetric.errorprone) {
           remainingMetrics.push(curMetric.name)
@@ -171,9 +170,8 @@ export class MetricHandler {
     }
     let allMinMax = [undefined, undefined]
     const timeFrame = this.renderer.graticule.curTimeRange
-    for (const metricBase in this.store.state.allMetrics) {
-      const curMetric = this.store.state.allMetrics[metricBase]
-      const curCache = this.renderer.graticule.data.getMetricCache(metricBase)
+    for (const curMetric of this.store.getters['metrics/getAll']()) {
+      const curCache = this.renderer.graticule.data.getMetricCache(curMetric.key)
       if (curCache) {
         let curMinMax
         if (this.renderer.graticule.yRangeOverride.type === 'global') {
@@ -296,11 +294,11 @@ export class MetricHandler {
   }
 
   loadedMetric (metricBase, metricTraces, metricIndex) {
-    const myMetric = this.store.state.allMetrics[metricBase]
+    const myMetric = this.store.getter['metrics/get'](metricBase)
     if (!myMetric) {
-      this.store.setMetric(metricBase, new Metric(this.renderer, metricBase, undefined, metricTraces))
+      this.store.dispatch('metrics/create', { name: metricBase, traces: metricTraces })
     } else {
-      myMetric.setTraces(metricTraces)
+      this.store.dispatch('metrics/updateTraces', { metricKey: metricBase, traces: metricTraces })
     }
   }
 
@@ -369,14 +367,14 @@ export class MetricHandler {
 
   receivedError (errorCode, metricBase) {
     // mark a metric so it is being excluded in bulk-requests
-    if (this.store.state.allMetrics[metricBase]) {
-      this.store.state.allMetrics[metricBase].error()
+    if (this.store.getter['metrics/get'](metricBase)) {
+      this.store.dispatch('metrics/setError', { metricKey: metricBase })
     }
   }
 
   reload () {
     const rowBodyEle = document.querySelector('.row_body')
-    const maxDataPoints = Math.round(rowBodyEle.offsetWidth / this.renderer.configuration.resolution)
+    const maxDataPoints = Math.round(rowBodyEle.offsetWidth / this.store.state.configuration.resolution)
     this.doRequest(maxDataPoints)
   }
 

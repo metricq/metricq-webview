@@ -60,7 +60,7 @@
             <label
               class="col-sm-2 col-form-label"
               for="resolution_input"
-            >{{ config.resolution }}</label>
+            >{{ configuration.resolution }}</label>
           </div>
           <div class="form-group row">
             <label
@@ -81,7 +81,7 @@
             <label
               class="col-sm-2 col-form-label"
               for="resolution_input"
-            >{{ config.zoomSpeed }}</label>
+            >{{ configuration.zoomSpeed }}</label>
           </div>
           <br>
           <h5 class="modal-title">
@@ -118,27 +118,15 @@
 import { setUiInteractArr, uiInteractArr } from '../interact.js'
 import PopupHeader from './popup-header.vue'
 import InteractionArrayOption from './interaction-array-option.vue'
-import { Store } from '../store.js'
 import { veil } from './veil.js'
+import { mapState } from 'vuex'
 
 export default {
   components: {
     InteractionArrayOption,
     PopupHeader
   },
-  model: {
-    prop: 'popupStatus',
-    event: 'toggle'
-  },
-  props: {
-    config: {
-      type: Object, required: true
-    },
-    popupStatus: {
-      type: Boolean,
-      required: true
-    }
-  },
+  props: { },
   data: function () {
     return {
       popupTitle: 'Globale-Einstellungen'
@@ -148,21 +136,19 @@ export default {
     uiResolution: {
       cache: false,
       get: function () {
-        return 30 - this.config.resolution
+        return 30 - this.configuration.resolution
       },
       set: function (newValue) {
-        Store.state.configuration.resolution = 30 - newValue
-        this.$emit('update:uiResolution', newValue)
+        this.$store.commit('setResolution', 30 - newValue)
       }
     },
     uiZoomSpeed: {
       cache: false,
       get: function () {
-        return this.config.zoomSpeed
+        return this.configuration.zoomSpeed
       },
       set: function (newValue) {
-        Store.state.configuration.zoomSpeed = newValue
-        this.$emit('update:uiZoomSpeed', newValue)
+        this.$store.commit('setZoomSpeed', 1 * newValue)
       }
     },
     uiInteractArr: {
@@ -177,18 +163,21 @@ export default {
     uiLegendDisplay: {
       cache: false,
       get: function () {
-        return this.config.legendDisplay
+        return this.configuration.legendDisplay
       },
       set: function (newValue) {
-        Store.state.configuration.legendDisplay = newValue
+        this.$store.commit('setLegendDisplay', newValue)
       }
-    }
+    },
+    ...mapState([
+      'configuration'
+    ])
   },
   mounted () {
     const popupEle = document.querySelector('.config_popup_div')
     if (popupEle) {
       const disablePopupFunc = () => {
-        this.$emit('toggle', false)
+        this.$store.commit('togglePopup', 'configuration')
         window.MetricQWebView.instances[0].reload()
       }
       veil.create(disablePopupFunc)
