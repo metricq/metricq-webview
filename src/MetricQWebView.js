@@ -269,21 +269,28 @@ class MetricQWebView {
   }
 
   doExport () {
-    // TODO: heed width and height parameters!
-    // this.configuration.exportWidth;
-
     let filenameStr = 'MetricQ-WebView.'
     let filetypeStr = 'image/'
     filenameStr += this.store.state.configuration.exportFormat
     filetypeStr += this.store.state.configuration.exportFormat
-    const canvasImageData = this.graticule.ele.toDataURL(filetypeStr)
+    const exportCanvas = document.createElement('canvas')
+    const exportCanvasContext = exportCanvas.getContext('2d')
+    const canvasSize = [this.store.state.configuration.exportWidth, this.store.state.configuration.exportHeight]
+
+    exportCanvas.setAttribute('width', canvasSize[0])
+    exportCanvas.setAttribute('height', canvasSize[1])
+    const size = [canvasSize[0], canvasSize[1], this.margins.canvas.left,
+      this.margins.canvas.top,
+      canvasSize[0] - (this.margins.canvas.right + this.margins.canvas.left),
+      canvasSize[1] - (this.margins.canvas.top + this.margins.canvas.bottom)]
+    this.graticule.draw(false, exportCanvasContext, size)
+    const exportCanvasImageData = exportCanvas.toDataURL(filetypeStr)
+
     let linkEle = document.createElement('a')
-    linkEle.setAttribute('href', canvasImageData)
+    linkEle.setAttribute('href', exportCanvasImageData)
     linkEle.setAttribute('download', filenameStr)
-    // linkEle.setAttribute("onclick", "this.parentNode.removeChild(this);");
     linkEle.appendChild(document.createTextNode('Export'))
     linkEle = document.body.appendChild(linkEle)
-
     linkEle.click()
     document.body.removeChild(linkEle)
   }
