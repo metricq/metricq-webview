@@ -257,7 +257,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     return value
   }
 
-  this.drawGrid = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
+  this.drawGrid = function (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions = this.graticuleDimensions) {
     /* draw lines */
     this.ctx.fillStyle = 'rgba(192,192,192,0.5)'
 
@@ -267,11 +267,11 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     const xAxisSteps = this.figureOutTimeSteps(maxStepsCount)
     const xPositions = []
     for (let i = 0; i < xAxisSteps.length; ++i) {
-      const x = Math.round(this.graticuleDimensions[0] + ((xAxisSteps[i].timestamp - timeRange[0]) / timePerPixel))
-      if (x >= this.graticuleDimensions[0] &&
-        x <= (this.graticuleDimensions[0] + this.graticuleDimensions[2])) {
+      const x = Math.round(graticuleDimensions[0] + ((xAxisSteps[i].timestamp - timeRange[0]) / timePerPixel))
+      if (x >= graticuleDimensions[0] &&
+        x <= (graticuleDimensions[0] + graticuleDimensions[2])) {
         xPositions.push(x)
-        this.ctx.fillRect(x, this.graticuleDimensions[1], 2, this.graticuleDimensions[3])
+        ctx.fillRect(x, graticuleDimensions[1], 2, graticuleDimensions[3])
       } else {
         xPositions.push(undefined)
         console.log('Grid algorithm is broken, invalid x-axis grid line at ' + xAxisSteps[i].label.join(','))
@@ -280,16 +280,16 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
 
     // horizontal grid
     minDistanceBetweenGridLines = 30
-    maxStepsCount = Math.floor(this.graticuleDimensions[3] / minDistanceBetweenGridLines)
+    maxStepsCount = Math.floor(graticuleDimensions[3] / minDistanceBetweenGridLines)
     const yAxisSteps = this.figureOutLogarithmicSteps(valueRange[0], valueRange[1], maxStepsCount)
     const yPositions = []
     for (let i = 0; i < yAxisSteps.length; ++i) {
-      const y = Math.round(this.graticuleDimensions[3] - ((yAxisSteps[i][0] - valueRange[0]) / valuesPerPixel) + this.graticuleDimensions[1])
-      if (y >= this.graticuleDimensions[1] &&
-        y <= (this.graticuleDimensions[1] + this.graticuleDimensions[3])) {
+      const y = Math.round(graticuleDimensions[3] - ((yAxisSteps[i][0] - valueRange[0]) / valuesPerPixel) + graticuleDimensions[1])
+      if (y >= graticuleDimensions[1] &&
+        y <= (graticuleDimensions[1] + graticuleDimensions[3])) {
         yPositions.push(y)
-        if (y >= this.graticuleDimensions[1]) {
-          this.ctx.fillRect(this.graticuleDimensions[0], y, this.graticuleDimensions[2], 2)
+        if (y >= graticuleDimensions[1]) {
+          ctx.fillRect(graticuleDimensions[0], y, graticuleDimensions[2], 2)
         }
       } else {
         yPositions.push(undefined)
@@ -297,36 +297,36 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
       }
     }
     /* draw text */
-    this.ctx.fillStyle = 'rgba(0,0,0,1)'
+    ctx.fillStyle = 'rgba(0,0,0,1)'
     const fontSize = 14
     this.ctx.font = fontSize + 'px ' + this.DEFAULT_FONT
     // x-axis ticks (time/date)
-    this.ctx.textAlign = 'center'
-    this.ctx.textBaseline = 'hanging'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'hanging'
     for (let i = 0; i < xAxisSteps.length; ++i) {
       // supports vertically stacked elements, e.g. time, date
       for (let j = 0; j < xAxisSteps[i].label.length; ++j) {
         // unfortunately measuring line height is complicated, so we use fontSize instead
-        this.ctx.fillText(xAxisSteps[i].label[j], xPositions[i], this.graticuleDimensions[1] + this.graticuleDimensions[3] + this.pixelsBottom + fontSize * j)
+        ctx.fillText(xAxisSteps[i].label[j], xPositions[i], graticuleDimensions[1] + graticuleDimensions[3] + this.pixelsBottom + fontSize * j)
       }
     }
-    this.ctx.textAlign = 'right'
-    this.ctx.textBaseline = 'middle'
+    ctx.textAlign = 'right'
+    ctx.textBaseline = 'middle'
     for (let i = 0; i < yAxisSteps.length; ++i) {
-      if (yPositions[i] >= this.graticuleDimensions[1]) {
-        this.ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), this.graticuleDimensions[0] - this.pixelsLeft, yPositions[i])
+      if (yPositions[i] >= graticuleDimensions[1]) {
+        ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), graticuleDimensions[0] - this.pixelsLeft, yPositions[i])
       }
     }
-    this.ctx.textAlign = 'middle'
-    this.ctx.textBaseline = 'alphabetic'
+    ctx.textAlign = 'middle'
+    ctx.textBaseline = 'alphabetic'
     const curUnits = this.data.distinctUnits()
     if (curUnits && curUnits.length > 0) {
       let unitString = ''
       curUnits.forEach((val, index, arr) => { unitString += (unitString.length > 0 ? ' / ' : '') + val })
-      this.ctx.save()
-      this.ctx.rotate(Math.PI / 2 * 3)
-      this.ctx.fillText(unitString, (Math.round(this.graticuleDimensions[3] / 2) + this.graticuleDimensions[1]) * -1, fontSize)
-      this.ctx.restore()
+      ctx.save()
+      ctx.rotate(Math.PI / 2 * 3)
+      ctx.fillText(unitString, (Math.round(graticuleDimensions[3] / 2) + graticuleDimensions[1]) * -1, fontSize)
+      ctx.restore()
     }
   }
   this.getTimeValueAtPoint = function (positionArr) {
@@ -363,6 +363,12 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     if (undefined !== paramRangeEnd) this.curValueRange[1] = paramRangeEnd
     this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.graticuleDimensions[3]
     this.lastRangeChangeTime = (new Date()).getTime()
+  }
+  this.setTimeRangeExport = function (timeSpace = this.graticuleDimensions[2]) {
+    return (this.curTimeRange[1] - this.curTimeRange[0]) / timeSpace
+  }
+  this.setValueRangeExport = function (valueSpace = this.graticuleDimensions[3]) {
+    return (this.curValueRange[1] - this.curValueRange[0]) / valueSpace
   }
   this.setYRangeOverride = function (paramTypeStr, paramValueStart, paramValueEnd) {
     if (paramTypeStr !== 'local' &&
@@ -419,36 +425,49 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   }
   // since automaticallyDetermineRanges is not suitable anymore,
   //  parameter 'adjustRanges' should never be true!
-  this.draw = function (adjustRanges) {
+  this.draw = function (adjustRanges, ctx = this.ctx, exportValues = undefined) {
     // timers.drawing = {
     //   start: (new Date()).getTime(),
     //   end: 0
     // }
+    let curTimePerPixel, curValuesPerPixel, clearSize, graticuleDimensions
     if (adjustRanges === true) {
       throw new Error('Tried to automatically determine time ranges. That makes handler out of sync, disallowed!')
       // this.automaticallyDetermineRanges(true, true)
     } else if (undefined === this.curTimeRange) {
       console.log('Cowardly refusing to do draw() when I am not allowed to determine Time and Value Ranges')
     }
-    this.ctx.clearRect(0, 0, this.clearSize[0], this.clearSize[1])
-    this.drawGrid(this.curTimeRange, this.curValueRange, this.curTimePerPixel, this.curValuesPerPixel)
-    this.ctx.save()
-    this.ctx.beginPath()
-    this.ctx.rect(this.graticuleDimensions[0], this.graticuleDimensions[1],
-      this.graticuleDimensions[2], this.graticuleDimensions[3])
-    this.ctx.clip()
+    if (exportValues === undefined) {
+      curTimePerPixel = this.curTimePerPixel
+      curValuesPerPixel = this.curValuesPerPixel
+      clearSize = [this.clearSize[0], this.clearSize[1]]
+      graticuleDimensions = [this.graticuleDimensions[0], this.graticuleDimensions[1],
+        this.graticuleDimensions[2], this.graticuleDimensions[3]]
+    } else {
+      clearSize = [exportValues[0], exportValues[1]]
+      graticuleDimensions = [exportValues[2], exportValues[3], exportValues[4], exportValues[5]]
+      curTimePerPixel = this.setTimeRangeExport(exportValues[4])
+      curValuesPerPixel = this.setValueRangeExport(exportValues[5])
+    }
+    ctx.clearRect(0, 0, clearSize[0], clearSize[1])
+    this.drawGrid(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
+    ctx.save()
+    ctx.beginPath()
+    ctx.rect(graticuleDimensions[0], graticuleDimensions[1],
+      graticuleDimensions[2], graticuleDimensions[3])
+    ctx.clip()
     if (!this.data.hasSeriesToPlot() && !this.data.hasBandToPlot()) {
       console.log('No series to plot')
     } else {
-      this.drawBands(this.curTimeRange, this.curValueRange, this.curTimePerPixel, this.curValuesPerPixel)
-      this.drawSeries(this.curTimeRange, this.curValueRange, this.curTimePerPixel, this.curValuesPerPixel)
-      this.ctx.restore()
+      this.drawBands(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
+      this.drawSeries(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
+      ctx.restore()
     }
     // timers.drawing.end = (new Date()).getTime()
     // TODO: Make timings accessible
     // showTimers();
   }
-  this.parseStyleOptions = function (styleOptions) {
+  this.parseStyleOptions = function (styleOptions, ctx) {
     const parsedObj = {
       skip: false,
       connect: 3,
@@ -673,33 +692,33 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
 
       // second parse Options to be applied to ctx immediatly
       if (styleOptions.color) {
-        this.ctx.fillStyle = styleOptions.color
-        this.ctx.strokeStyle = styleOptions.color
+        ctx.fillStyle = styleOptions.color
+        ctx.strokeStyle = styleOptions.color
         parsedObj.color = styleOptions.color
       }
       if (styleOptions.fillPattern) {
         const img = new Image()
         img.src = styleOptions.fillPattern
-        this.ctx.fillStyle = this.ctx.createPattern(img, 'repeat')
+        ctx.fillStyle = ctx.createPattern(img, 'repeat')
       }
       if (styleOptions.gradient) {
-        this.parseGradient(styleOptions.gradient)
+        this.parseGradient(styleOptions.gradient, ctx)
       }
       if (styleKeys.includes('alpha')) {
-        this.ctx.globalAlpha = parseFloat(styleOptions.alpha)
+        ctx.globalAlpha = parseFloat(styleOptions.alpha)
       }
       if (styleKeys.includes('lineWidth')) {
-        this.ctx.lineWidth = parseFloat(styleOptions.lineWidth)
+        ctx.lineWidth = parseFloat(styleOptions.lineWidth)
         parsedObj.oddLineWidthAddition = ((styleOptions.lineWidth % 2) === 1) ? 0.5 : 0
       }
       /* if (styleKeys.includes('lineDash')) {
-        this.ctx.setLineDash(styleOptions.lineDash)
+        ctx.setLineDash(styleOptions.lineDash)
       } */
     }
 
     return parsedObj
   }
-  this.parseGradient = function (gradientStr) {
+  this.parseGradient = function (gradientStr, ctx) {
     if (gradientStr.match(/^\s*linear-gradient/)) {
       let innerPart = gradientStr.replace(/^\s*linear-gradient\s*\(/, '')
       innerPart = innerPart.replace(/\s*\)\s*$/, '')
@@ -717,7 +736,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
       const deltaPos = [endPos[0] - startPos[0],
         endPos[1] - startPos[1]]
       const distance = Math.sqrt(Math.pow(deltaPos[0], 2) + Math.pow(deltaPos[1], 2))
-      const myGradient = this.ctx.createLinearGradient(startPos[0], startPos[1], endPos[0], endPos[1])
+      const myGradient = ctx.createLinearGradient(startPos[0], startPos[1], endPos[0], endPos[1])
       let lastRelativePosition = 0
       let relativePosition
       for (let i = 0; i < gradientData.colorStops.length; ++i) {
@@ -744,8 +763,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
         myGradient.addColorStop(relativePosition, gradientData.colorStops[i][0])
         lastRelativePosition = relativePosition
       }
-      this.ctx.fillStyle = myGradient
-      this.ctx.strokeStyle = myGradient
+      ctx.fillStyle = myGradient
+      ctx.strokeStyle = myGradient
     } else if (gradientStr.match(/^\s*radial-gradient/)) {
       // TODO: code me
     }
@@ -847,50 +866,50 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     }
     return tokenArr
   }
-  this.drawBands = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
+  this.drawBands = function (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
       if (store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).drawMin && store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).drawMax) {
         const curBand = this.data.metrics[i].band
         if (curBand) {
-          const styleOptions = this.parseStyleOptions(curBand.styleOptions)
+          const styleOptions = this.parseStyleOptions(curBand.styleOptions, ctx)
           if (styleOptions.skip || curBand.points.length === 0) {
-            this.resetCtx()
+            this.resetCtx(ctx)
             continue
           }
 
           const switchOverIndex = curBand.switchOverIndex
           for (let j = 0, x, y, previousX, previousY; j < curBand.points.length; ++j) {
-            x = this.graticuleDimensions[0] + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
-            y = this.graticuleDimensions[1] + (this.graticuleDimensions[3] - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
+            x = graticuleDimensions[0] + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
+            y = graticuleDimensions[1] + (graticuleDimensions[3] - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
             if (j === 0) {
-              this.ctx.beginPath()
-              this.ctx.moveTo(x, y)
+              ctx.beginPath()
+              ctx.moveTo(x, y)
             } else {
               // connect direct
               if (styleOptions.connect === 1) {
-                this.ctx.lineTo(x, y)
+                ctx.lineTo(x, y)
               } else {
                 if (j < switchOverIndex) {
                   // connect last
                   if (styleOptions.connect === 2) {
-                    this.ctx.lineTo(previousX, y)
-                    this.ctx.lineTo(x, y)
+                    ctx.lineTo(previousX, y)
+                    ctx.lineTo(x, y)
                     // connect next
                   } else if (styleOptions.connect === 3) {
-                    this.ctx.lineTo(x, previousY)
-                    this.ctx.lineTo(x, y)
+                    ctx.lineTo(x, previousY)
+                    ctx.lineTo(x, y)
                   }
                 } else if (j === switchOverIndex) {
-                  this.ctx.lineTo(x, y)
+                  ctx.lineTo(x, y)
                 } else {
                   // connect last
                   if (styleOptions.connect === 2) {
-                    this.ctx.lineTo(x, previousY)
-                    this.ctx.lineTo(x, y)
+                    ctx.lineTo(x, previousY)
+                    ctx.lineTo(x, y)
                     // connext next
                   } else if (styleOptions.connect === 3) {
-                    this.ctx.lineTo(previousX, y)
-                    this.ctx.lineTo(x, y)
+                    ctx.lineTo(previousX, y)
+                    ctx.lineTo(x, y)
                   }
                 }
               }
@@ -898,14 +917,14 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
             previousX = x
             previousY = y
           }
-          this.ctx.closePath()
-          this.ctx.fill()
-          this.resetCtx()
+          ctx.closePath()
+          ctx.fill()
+          this.resetCtx(ctx)
         }
       }
     }
   }
-  this.drawSeries = function (timeRange, valueRange, timePerPixel, valuesPerPixel) {
+  this.drawSeries = function (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
       if (this.data.metrics[i].series.raw === undefined) {
         const metricDrawState = store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name)
@@ -921,48 +940,48 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
       for (const curAggregate in this.data.metrics[i].series) {
         const curSeries = this.data.metrics[i].series[curAggregate]
         if (curSeries) {
-          const styleOptions = this.parseStyleOptions(curSeries.styleOptions)
+          const styleOptions = this.parseStyleOptions(curSeries.styleOptions, ctx)
           if (styleOptions.skip || curSeries.points.length === 0) {
-            this.resetCtx()
+            this.resetCtx(ctx)
             continue
           }
           const offsiteCanvas = this.generateOffsiteDot(styleOptions)
 
           for (let j = 0, x, y, previousX, previousY; j < curSeries.points.length; ++j) {
-            x = this.graticuleDimensions[0] + Math.round((curSeries.points[j].time - timeRange[0]) / timePerPixel) + styleOptions.oddLineWidthAddition
-            y = this.graticuleDimensions[1] + (this.graticuleDimensions[3] - Math.round((curSeries.points[j].value - valueRange[0]) / valuesPerPixel)) + styleOptions.oddLineWidthAddition
+            x = graticuleDimensions[0] + Math.round((curSeries.points[j].time - timeRange[0]) / timePerPixel) + styleOptions.oddLineWidthAddition
+            y = graticuleDimensions[1] + (graticuleDimensions[3] - Math.round((curSeries.points[j].value - valueRange[0]) / valuesPerPixel)) + styleOptions.oddLineWidthAddition
             if (styleOptions.connect > 0) {
               if (j === 0) {
-                this.ctx.beginPath()
-                this.ctx.moveTo(x, y)
+                ctx.beginPath()
+                ctx.moveTo(x, y)
               } else {
                 // connect direct
                 if (styleOptions.connect === 1) {
-                  this.ctx.lineTo(x, y)
+                  ctx.lineTo(x, y)
                   // connect last
                 } else if (styleOptions.connect === 2) {
-                  this.ctx.lineTo(previousX, y)
-                  this.ctx.lineTo(x, y)
+                  ctx.lineTo(previousX, y)
+                  ctx.lineTo(x, y)
                   // connect next
                 } else if (styleOptions.connect === 3) {
-                  this.ctx.lineTo(x, previousY)
-                  this.ctx.lineTo(x, y)
+                  ctx.lineTo(x, previousY)
+                  ctx.lineTo(x, y)
                 }
               }
             }
             if (curSeries.points[j].count === 1 || (styleOptions.drawDots && curSeries.points[j].count !== 0)) {
               // this.ctx.fillRect(x - styleOptions.halfPointWidth, y - styleOptions.halfPointWidth, styleOptions.pointWidth, styleOptions.pointWidth);
-              this.ctx.drawImage(offsiteCanvas.ele, x + offsiteCanvas.offsetX, y + offsiteCanvas.offsetY)
+              ctx.drawImage(offsiteCanvas.ele, x + offsiteCanvas.offsetX, y + offsiteCanvas.offsetY)
             }
             previousX = x
             previousY = y
           }
           if (styleOptions.connect > 0) {
-            this.ctx.stroke()
-            this.ctx.closePath()
+            ctx.stroke()
+            ctx.closePath()
           }
           // reset ctx style options
-          this.resetCtx()
+          this.resetCtx(ctx)
           offsiteCanvas.ele.parentNode.removeChild(offsiteCanvas.ele)
         }
       }
@@ -993,9 +1012,9 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
       offsetY: (ctxDimensions[1] / 2) * -1
     }
   }
-  this.resetCtx = function () {
-    this.ctx.setLineDash([])
-    this.ctx.globalAlpha = 1
+  this.resetCtx = function (ctx) {
+    ctx.setLineDash([])
+    ctx.globalAlpha = 1
   }
   this.figureOutTimeRange = function () {
     return this.data.getTimeRange()
