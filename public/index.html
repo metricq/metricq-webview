@@ -62,7 +62,7 @@
         ></metric-legend>
         <new-metric-legend
           v-bind:position="configuration.legendDisplay"></new-metric-legend>
-        <li :class="'clickable legend_end legend_item legend_item_' + configuration.legendDisplay" v-on:click="clearAllButtonClicked">
+        <li :class="'clickable legend_end legend_item legend_item_' + configuration.legendDisplay" v-on:click="clearAllButtonClicked" v-if="metricsList.length !== 0">
           <span id="button_clear_all">
             <span>Alles löschen</span>
             <img src="img/trashcan2.png"/>
