@@ -58,13 +58,16 @@
           v-for="metric in metricsList"
           v-bind:metric="metric"
           v-bind:key="metric.name"
+          v-bind:position="configuration.legendDisplay"
         ></metric-legend>
-        <new-metric-legend></new-metric-legend>
-        <button class="btn btn-light legend_item" id="button_clear_all" v-on:click="clearAllButtonClicked"
-                style="background-color: #FFFFFF; margin-top: 10px; display: none">
-          Alles löschen
-          <img src="img/trashcan2.png"/>
-        </button>
+        <new-metric-legend
+          v-bind:position="configuration.legendDisplay"></new-metric-legend>
+        <li :class="'clickable legend_end legend_item legend_item_' + configuration.legendDisplay" v-on:click="clearAllButtonClicked">
+          <span id="button_clear_all">
+            <span>Alles löschen</span>
+            <img src="img/trashcan2.png"/>
+          </span>
+        </li>
       </ul>
       <div id="wrapper_popup_legend">
         <metric-popup
