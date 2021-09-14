@@ -61,26 +61,28 @@ body {
     list-style-type: none;
 }
 
+.legend_list_bottom {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 .legend_list_right {
     display: flex;
     flex-direction: column;
     margin-top: -5px;
 }
 
-.legend_list_bottom {
-    margin: 0px auto 0px auto;
+.legend_item {
+    padding: 0px 1px 0px 10px;
+    display: inline-flex;
+    background-color: #FFFFFF;
+    margin-top: 10px
 }
 
-.legend_item {
-    display: inline-block;
-    margin: 0px 4px 0px 0px;
-    padding: 1px 1px 0px 1px;
-    /*
-    padding: 1px 4px 3px 2px;
-    border: 1px solid #808080;
-    border-radius: 3px;
-    box-shadow: 2px 2px 3px 0px #a0a0a0;
-    */
+.legend_item_bottom {
+    flex-wrap: wrap;
+    margin-left: 10px;
 }
 
 .legend_item:hover {
@@ -96,6 +98,7 @@ body {
     position: relative;
     top: 0.5px;
     left: 2px;
+    margin-top: 1px;
 }
 
 .legend_item img {
@@ -104,6 +107,10 @@ body {
     position: relative;
     right: 2px;
     bottom: 1px;
+}
+
+.legend_end {
+    justify-content: center;
 }
 
 #popup_veil {
@@ -194,4 +201,13 @@ body {
     animation: gear_rotate 5s linear infinite !important;
     pointer-events: none;
     user-select: none;
+}
+
+.clickable {
+    cursor:pointer;
+}
+
+span {
+    margin-bottom: -1px;
+
 }
