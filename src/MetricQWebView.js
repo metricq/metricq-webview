@@ -236,7 +236,6 @@ class MetricQWebView {
     this.store.dispatch('metrics/delete', { metricKey: metricBase })
     // TODO: also clear this metric from MetricCache
     if (this.graticule) this.graticule.draw(false)
-    this.updateMetricUrl()
     this.setPlotRanges(false, true)
   }
 

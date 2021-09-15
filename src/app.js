@@ -47,6 +47,7 @@ export const mainApp = new Vue({
       if (window.MetricQWebView.instances[0].graticule) window.MetricQWebView.instances[0].graticule.canvasReset()
     },
     metricsList: function () {
+      window.MetricQWebView.instances[0].updateMetricUrl()
       setTimeout(function () { window.MetricQWebView.instances[0].setLegendLayout() }, 0)
     }
   },
