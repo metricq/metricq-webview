@@ -37,7 +37,7 @@ export const mainApp = new Vue({
     ]),
     ...mapState({
       metricsList (state) {
-        return state.metrics.metrics
+        return Object.values(state.metrics.metrics)
       }
     })
   },
@@ -48,11 +48,6 @@ export const mainApp = new Vue({
     },
     metricsList: function () {
       setTimeout(function () { window.MetricQWebView.instances[0].setLegendLayout() }, 0)
-      if (Object.keys(this.metricsList).length === 0) {
-        document.getElementById('button_clear_all').style.display = 'none'
-      } else {
-        document.getElementById('button_clear_all').style.display = 'inline'
-      }
     }
   },
   methods: {
