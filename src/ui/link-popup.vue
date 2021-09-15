@@ -15,6 +15,7 @@
           class="modal-body"
           align="left"
         >
+          Version: {{ version }}
           <a
             href="https://github.com/metricq/metricq-webview"
             target="_blank"
@@ -95,6 +96,11 @@ export default {
   data: function () {
     return {
       popupTitle: 'Information'
+    }
+  },
+  computed: {
+    version () {
+      return process.env.VUE_APP_VERSION + '+' + process.env.VUE_APP_VERSION_BUILD
     }
   },
   mounted () {

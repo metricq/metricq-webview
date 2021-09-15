@@ -37,6 +37,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Set short git hash for PR
+        if: github.event_name == 'pull_request'
+        id: vars-pr
+        run: echo "::set-output name=sha_short::$(git rev-parse --short ${{ github.event.pull_request.head.sha }})"
+      - name: Set short git hash for push
+        if: github.event_name == 'push'
+        id: vars-push
+        run: echo "::set-output name=sha_short::$(git rev-parse --short ${{ github.sha }})"
       - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
@@ -46,6 +54,8 @@ jobs:
         env:
           YARN_CHECKSUM_BEHAVIOR: update
       - run: yarn build
+        env:
+          VUE_APP_VERSION_BUILD: ${{ steps.vars-pr.outputs.sha_short || steps.vars-push.outputs.sha_short }}
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2
         with:
