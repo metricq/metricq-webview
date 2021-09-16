@@ -15,7 +15,8 @@
           class="modal-body"
           align="left"
         >
-          Version: {{ version }}
+          Version: {{ version }}<br>
+          <small>Build date: {{ buildDate }}</small><br>
           <a
             href="https://github.com/metricq/metricq-webview"
             target="_blank"
@@ -101,6 +102,9 @@ export default {
   computed: {
     version () {
       return process.env.VUE_APP_VERSION + '+' + process.env.VUE_APP_VERSION_BUILD
+    },
+    buildDate () {
+      return process.env.VUE_APP_BUILD_DATE
     }
   },
   mounted () {
