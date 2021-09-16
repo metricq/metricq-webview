@@ -28,7 +28,6 @@ export default {
   },
   mutations: {
     resetAll (state) {
-      console.log('Reset allMetrics')
       Object.keys(state.metrics).forEach(function (key) { if (!key.startsWith('_')) { Vue.delete(state.metrics, key) } })
     },
     privateRemoveEntry (state, { metricKey }) {
@@ -36,7 +35,6 @@ export default {
     },
 
     privateSet (state, { metricKey, metric: { name, description, color, traces, marker, errorprone, drawMin, drawMax, drawAvg } }) {
-      console.log(metricKey)
       if (name !== undefined && metricKey !== name) {
         throw new Error('metricKey and metric.name must be equal!')
       }
