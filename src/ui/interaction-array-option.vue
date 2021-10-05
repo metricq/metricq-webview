@@ -26,6 +26,8 @@
 </template>
 
 <script>
+import KeyJS from 'key-js'
+
 export default {
   props: {
     action: {
@@ -62,8 +64,8 @@ export default {
               curKeyCode = curKeyCode.substring(1)
             }
             curKeyCode = parseInt(curKeyCode)
-            for (const curKeyName in window.KeyJS) {
-              if (curKeyCode === window.KeyJS[curKeyName]) {
+            for (const curKeyName in KeyJS) {
+              if (curKeyCode === KeyJS[curKeyName]) {
                 if (keyStr.length > 0) {
                   keyStr += ' '
                 }
@@ -95,8 +97,8 @@ export default {
             if (curEntry.match(/^[0-9]+$/)) {
               newEntry += curEntry
             } else {
-              if (undefined !== window.KeyJS[curEntry.toUpperCase()]) {
-                newEntry += '' + window.KeyJS[curEntry.toUpperCase()]
+              if (undefined !== KeyJS[curEntry.toUpperCase()]) {
+                newEntry += '' + KeyJS[curEntry.toUpperCase()]
               }
             }
             actionKeyArray.push(newEntry)
