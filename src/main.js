@@ -1,5 +1,3 @@
-import './../lib/key.js'
-
 import Vue from 'vue'
 
 import { createGlobalMetricQWebview, importMetricUrl } from './MetricQWebView.js'
