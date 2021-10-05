@@ -6,7 +6,7 @@
     @click="closePopupModal"
   >
     <div
-      class="modal-dialog"
+      class="modal-dialog modal-xl"
       role="document"
     >
       <div class="modal-content">
@@ -102,11 +102,7 @@ export default {
     },
     multiselectLabel (title, desc) {
       if (desc) {
-        if (title.length + desc.length >= 50) {
-          return `${title} – ${desc.substring(0, 50 - title.length)} ...`
-        } else {
-          return `${title} – ${desc}`
-        }
+        return `${title} – ${desc}`
       } else {
         return `${title} – no description`
       }
