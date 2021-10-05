@@ -1,4 +1,3 @@
-import './../lib/jsurl.js'
 import './../lib/key.js'
 
 import Vue from 'vue'

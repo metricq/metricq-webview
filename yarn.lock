@@ -6639,6 +6639,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"jsurl@npm:^0.1.5":
+  version: 0.1.5
+  resolution: "jsurl@npm:0.1.5"
+  checksum: 50b614908d6bdf7800a257d0ecbaf2b8129fbb538db44dc991518034e48b594eca5d7593bdd887a59e48baaa258279aae89f80ac5af200a6c789eb23d45b186f
+  languageName: node
+  linkType: hard
+
 "jsx-ast-utils@npm:^2.4.1 || ^3.0.0":
   version: 3.2.0
   resolution: "jsx-ast-utils@npm:3.2.0"
@@ -7099,6 +7106,7 @@ fsevents@^1.2.7:
     eslint-plugin-react: ^7.22.0
     eslint-plugin-vue: ^7.8.0
     jquery: ^3.6.0
+    jsurl: ^0.1.5
     metricq-js: "https://github.com/metricq/metricq-js#e433da5e3a1532a713e1e2412818c96a0a5692ea"
     moment: ^2.29.1
     standard: ^16.0.3

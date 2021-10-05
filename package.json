@@ -11,6 +11,7 @@
     "core-js": "^3.6.5",
     "daterangepicker": "^3.1.0",
     "jquery": "^3.6.0",
+    "jsurl": "^0.1.5",
     "metricq-js": "https://github.com/metricq/metricq-js#e433da5e3a1532a713e1e2412818c96a0a5692ea",
     "moment": "^2.29.1",
     "vue": "^2.6.11",

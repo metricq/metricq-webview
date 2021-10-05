@@ -2,6 +2,7 @@ import { MetricHandler } from './MetricHandler.js'
 import { Graticule } from './graticule.js'
 import { markerSymbols } from './metric.js'
 import { registerCallbacks } from './interact.js'
+import JSURL from 'jsurl'
 
 export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store) {
   const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store)
@@ -406,9 +407,9 @@ export function importMetricUrl () {
       let metricsObj
       try {
         if (firstTwoChars === '/~') {
-          metricsObj = window.JSURL.parse(jsurlStr.substring(1))
+          metricsObj = JSURL.parse(jsurlStr.substring(1))
         } else {
-          metricsObj = window.JSURL.parse(jsurlStr)
+          metricsObj = JSURL.parse(jsurlStr)
         }
       } catch (exc) {
         console.log('Could not interpret URL')
