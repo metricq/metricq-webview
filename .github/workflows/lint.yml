@@ -56,6 +56,7 @@ jobs:
       - run: yarn build
         env:
           VUE_APP_VERSION_BUILD: ${{ steps.vars-pr.outputs.sha_short || steps.vars-push.outputs.sha_short }}
+          VUE_APP_METRICQ_BACKEND: ${{ secrets.DEPLOYED_METRICQ_BACKEND }}
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2
         with:
