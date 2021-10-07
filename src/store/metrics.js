@@ -152,6 +152,7 @@ export default {
       if (renderer && renderer.graticule && renderer.graticule.data) {
         const metricCache = renderer.graticule.data.getMetricCache(name)
         if (metricCache) {
+          metricCache.color = color
           metricCache.band.styleOptions.color = color
           for (const curSeries in metricCache.series) {
             if (metricCache.series[curSeries]) {

@@ -41,7 +41,7 @@ export function DataCache (paramMetricQHistoryReference) {
       relatedMetric.series[metricAggregate].clear()
       return relatedMetric.series[metricAggregate]
     } else {
-      const newSeries = new Series(metricAggregate, defaultSeriesStyling(metricName, metricAggregate))
+      const newSeries = new Series(metricAggregate, relatedMetric.defaultSeriesStyling(metricName, metricAggregate))
       relatedMetric.series[metricAggregate] = newSeries
       return newSeries
     }
@@ -153,10 +153,10 @@ export function DataCache (paramMetricQHistoryReference) {
     for (let i = 0; i < this.metrics.length; ++i) {
       for (const curAggregate in this.metrics[i].series) {
         if (this.metrics[i].series[curAggregate]) {
-          this.metrics[i].series[curAggregate].styleOptions = defaultSeriesStyling(this.metrics[i].name, curAggregate)
+          this.metrics[i].series[curAggregate].styleOptions = this.defaultSeriesStyling(this.metrics[i].name, curAggregate)
         }
       }
-      this.metrics[i].band.styleOptions = defaultBandStyling(this.metrics[i].name)
+      this.metrics[i].band.styleOptions = this.defaultBandStyling(this.metrics[i].name)
     }
   }
   this.getAllValuesAtTime = function (timeAt) {
@@ -219,6 +219,7 @@ export function DataCache (paramMetricQHistoryReference) {
 
 function MetricCache (paramMetricQReference, paramMetricName) {
   this.name = paramMetricName
+  this.color = determineColorForMetric(paramMetricName)
   this.series = {
     min: undefined,
     max: undefined,
@@ -254,7 +255,7 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     if (this.band) {
       this.band.clear()
     } else {
-      this.band = new Band(defaultBandStyling(this.name))
+      this.band = new Band(this.defaultBandStyling(this.name))
     }
     if (this.series.min && this.series.max) {
       const minSeries = this.series.min
@@ -368,6 +369,23 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     }
     return [allMin, allMax]
   }
+
+  this.defaultBandStyling = function (metricBaseName) {
+    const options = matchStylingOptions('band:' + metricBaseName)
+    if (options.color === 'default') {
+      options.color = this.color
+    }
+    return options
+  }
+
+  this.defaultSeriesStyling = function (metricBaseName, aggregateName) {
+    const options = matchStylingOptions('series:' + metricBaseName + '/' + aggregateName)
+    if (options.color === 'default') {
+      options.color = this.color
+    }
+    return options
+  }
+
   this.fetchAllTimeMinMax()
   this.fetchMetadata()
 }
@@ -628,22 +646,6 @@ const stylingOptions = {
       alpha: 0.3
     }
   ]
-}
-
-function defaultBandStyling (metricBaseName) {
-  const options = matchStylingOptions('band:' + metricBaseName)
-  if (options.color === 'default') {
-    options.color = determineColorForMetric(metricBaseName)
-  }
-  return options
-}
-
-function defaultSeriesStyling (metricBaseName, aggregateName) {
-  const options = matchStylingOptions('series:' + metricBaseName + '/' + aggregateName)
-  if (options.color === 'default') {
-    options.color = determineColorForMetric(metricBaseName)
-  }
-  return options
 }
 
 function matchStylingOptions (fullMetricName) {
