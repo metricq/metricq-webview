@@ -11,6 +11,7 @@ import YaxisPopup from './ui/yaxis-popup.vue'
 import TimeButton from './ui/time-button.vue'
 import store from './store/'
 import { mapMutations, mapState } from 'vuex'
+import distinctColors from 'distinct-colors'
 
 Vue.config.productionTip = false
 
@@ -52,6 +53,25 @@ export const mainApp = new Vue({
     }
   },
   methods: {
+    colorPaletteClicked () {
+      const palette = distinctColors({ count: this.metricsList.length, lightMin: 25, lightMax: 75 })
+      function * colorGenerator (palette) {
+        for (const color of palette) {
+          yield color
+        }
+      }
+
+      const colors = colorGenerator(palette)
+
+      this.metricsList.forEach(metric => {
+        const color = colors.next().value.css()
+        this.$store.dispatch('metrics/updateColor', { metricKey: metric.key, color: color })
+      })
+
+      if (window.MetricQWebView.instances[0].graticule) {
+        window.MetricQWebView.instances[0].graticule.draw(false)
+      }
+    },
     exportButtonClicked () {
       this.togglePopup('export')
     },
