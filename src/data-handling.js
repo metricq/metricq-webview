@@ -386,6 +386,16 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     return options
   }
 
+  this.updateColor = (color) => {
+    this.color = color
+    this.band.styleOptions.color = color
+    for (const key in this.series) {
+      if (this.series[key]) {
+        this.series[key].styleOptions.color = color
+      }
+    }
+  }
+
   this.fetchAllTimeMinMax()
   this.fetchMetadata()
 }

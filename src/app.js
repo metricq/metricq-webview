@@ -54,23 +54,11 @@ export const mainApp = new Vue({
   },
   methods: {
     colorPaletteClicked () {
-      const palette = distinctColors({ count: this.metricsList.length, lightMin: 25, lightMax: 75 })
-      function * colorGenerator (palette) {
-        for (const color of palette) {
-          yield color
-        }
-      }
-
-      const colors = colorGenerator(palette)
-
+      const palette = distinctColors({ count: this.metricsList.length, lightMin: 25, lightMax: 75 }).values()
       this.metricsList.forEach(metric => {
-        const color = colors.next().value.css()
+        const color = palette.next().value.css()
         this.$store.dispatch('metrics/updateColor', { metricKey: metric.key, color: color })
       })
-
-      if (window.MetricQWebView.instances[0].graticule) {
-        window.MetricQWebView.instances[0].graticule.draw(false)
-      }
     },
     exportButtonClicked () {
       this.togglePopup('export')
