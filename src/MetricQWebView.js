@@ -212,24 +212,10 @@ class MetricQWebView {
   }
 
   throttledReload () {
-    // TODO: implement feature to throttle requests
-    // (i.e. 150 ms without new call to this function)
-    const now = (new Date()).getTime()
-    if (this.reloadThrottleTimeout &&
-      (now - this.lastThrottledReloadTime) >= this.RELOAD_THROTTLING_DELAY) {
+    clearTimeout(this.reloadThrottleTimeout)
+    this.reloadThrottleTimeout = setTimeout(() => {
       this.reload()
-    } else {
-      if (this.reloadThrottleTimeout) {
-        clearTimeout(this.reloadThrottleTimeout)
-      }
-      this.reloadThrottleTimeout = setTimeout((function (selfReference) {
-        return function () {
-          selfReference.throttledReload()
-          selfReference.reloadThrottleTimeout = undefined
-        }
-      }(this)), this.RELOAD_THROTTLING_DELAY + 5)
-    }
-    this.lastThrottledReloadTime = now
+    }, this.RELOAD_THROTTLING_DELAY)
   }
 
   deleteMetric (metricBase) {
