@@ -36,6 +36,10 @@
         <input type="checkbox" id='checkbox_min_max' v-bind:checked="globalMinMax" v-on:change="toggleMinMaxButton">
         min/max anzeigen
       </label>
+      <label class="btn btn-outline-primary btn-navbar" id="button_palette" v-on:click="colorPaletteClicked"
+        alt="Nutze eindeutige Farben">
+        <img class="navimg" src="img/icons/color-palette.svg" />
+      </label>
       <label>
         <time-button id="date_range" class="btn btn-outline-primary btn-navbar"
                      v-bind:starttime="timestamp.start"

@@ -245,11 +245,6 @@ export default {
 
     const colorchooserEle = popupEle.querySelector('.popup_colorchooser')
     const colorchooserObj = new Colorchooser(colorchooserEle, this.metric)
-    colorchooserObj.onchange = (function (paramMyMetric) {
-      return function () {
-        window.MetricQWebView.instances[0].graticule.draw(false)
-      }
-    }(this.metric))
 
     document.getElementById('input_metric_name').focus()
   },

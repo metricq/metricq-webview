@@ -152,13 +152,9 @@ export default {
       if (renderer && renderer.graticule && renderer.graticule.data) {
         const metricCache = renderer.graticule.data.getMetricCache(name)
         if (metricCache) {
-          metricCache.band.styleOptions.color = color
-          for (const curSeries in metricCache.series) {
-            if (metricCache.series[curSeries]) {
-              metricCache.series[curSeries].styleOptions.color = color
-            }
-          }
+          metricCache.updateColor(color)
         }
+        renderer.graticule.draw(false)
       }
     },
     updateMarker ({ commit, state }, { metricKey, marker }) {

@@ -1446,6 +1446,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/chroma-js@npm:^2.0.0":
+  version: 2.1.3
+  resolution: "@types/chroma-js@npm:2.1.3"
+  checksum: 8c94c421b9613c534471b18912b11cdbb267ab8da380ce6d484115f48fb08583e7ab1f7e26fa0e7811a0d42ac531fe9a9b8475afe7b7b91d86cd08b758ca3add
+  languageName: node
+  linkType: hard
+
 "@types/connect-history-api-fallback@npm:*":
   version: 1.3.5
   resolution: "@types/connect-history-api-fallback@npm:1.3.5"
@@ -3188,6 +3195,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chroma-js@npm:^2.1.0":
+  version: 2.1.2
+  resolution: "chroma-js@npm:2.1.2"
+  dependencies:
+    cross-env: ^6.0.3
+  checksum: abbd70377446e3cc401ac58c40cdac6c70c41a349e6aca08881d0deb775051ba69c93099f4d47ef83c41b4562b0480b5dfd56d77e2e6f3a81ebb6667ce8d4627
+  languageName: node
+  linkType: hard
+
 "chrome-trace-event@npm:^1.0.2":
   version: 1.0.3
   resolution: "chrome-trace-event@npm:1.0.3"
@@ -3586,6 +3602,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cross-env@npm:^6.0.3":
+  version: 6.0.3
+  resolution: "cross-env@npm:6.0.3"
+  dependencies:
+    cross-spawn: ^7.0.0
+  bin:
+    cross-env: src/bin/cross-env.js
+    cross-env-shell: src/bin/cross-env-shell.js
+  checksum: 1b2d532ad7beff8017db7c28fbee8f902377969b8090cd2b8716ec93bef958bb2838cd061c89c30e904d72f3ff7d3a4e80f0d762b14e60e8191a576be1376578
+  languageName: node
+  linkType: hard
+
 "cross-spawn@npm:^5.0.1":
   version: 5.1.0
   resolution: "cross-spawn@npm:5.1.0"
@@ -3610,7 +3638,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3":
+"cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3":
   version: 7.0.3
   resolution: "cross-spawn@npm:7.0.3"
   dependencies:
@@ -4011,6 +4039,17 @@ __metadata:
   dependencies:
     path-type: ^4.0.0
   checksum: fa05e18324510d7283f55862f3161c6759a3f2f8dbce491a2fc14c8324c498286c54282c1f0e933cb930da8419b30679389499b919122952a4f8592362ef4615
+  languageName: node
+  linkType: hard
+
+"distinct-colors@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "distinct-colors@npm:3.0.0"
+  dependencies:
+    "@types/chroma-js": ^2.0.0
+    chroma-js: ^2.1.0
+    mout: ^1.2.2
+  checksum: 7a80581ede546c11823add0d9d60901fc0e4374665d1318baac580e6c39c50a780c148d14b43050b1e61566e3b15f3afbd21c1d0f15558ed6f8f8ea8921753ec
   languageName: node
   linkType: hard
 
@@ -7104,6 +7143,7 @@ fsevents@^1.2.7:
     babel-eslint: ^10.1.0
     core-js: ^3.6.5
     daterangepicker: ^3.1.0
+    distinct-colors: ^3.0.0
     eslint: ^7.21.0
     eslint-config-standard: ^16.0.2
     eslint-config-standard-jsx: ^10.0.0
@@ -7344,6 +7384,13 @@ fsevents@^1.2.7:
   version: 2.29.1
   resolution: "moment@npm:2.29.1"
   checksum: 1e14d5f422a2687996be11dd2d50c8de3bd577c4a4ca79ba5d02c397242a933e5b941655de6c8cb90ac18f01cc4127e55b4a12ae3c527a6c0a274e455979345e
+  languageName: node
+  linkType: hard
+
+"mout@npm:^1.2.2":
+  version: 1.2.3
+  resolution: "mout@npm:1.2.3"
+  checksum: 96137cd66ca740e5f3360d9ed94776bda568e1cc5568ea00b4d721a42a3df42e9f419bc80dbff5d781ac32a59e3fd0688c2e6a73279c9b72f768028056d97ad3
   languageName: node
   linkType: hard
 
