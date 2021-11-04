@@ -1,4 +1,4 @@
-FROM node:latest as build-stage
+FROM node:lts as build-stage
 WORKDIR /app
 COPY ./ .
 RUN yarn install
