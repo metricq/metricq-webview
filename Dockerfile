@@ -1,7 +1,7 @@
 FROM node:lts as build-stage
 WORKDIR /app
 COPY ./ .
-RUN yarn install
+RUN YARN_CHECKSUM_BEHAVIOR=ignore yarn install
 
 ARG METRICQ_BACKEND=http://metricq-grafana/
 ARG METRICQ_BACKEND_AUTH=user:pass
