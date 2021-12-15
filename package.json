@@ -14,7 +14,7 @@
     "jquery": "^3.6.0",
     "jsurl": "^0.1.5",
     "key-js": "^0.1.1",
-    "metricq-js": "https://github.com/metricq/metricq-js#e433da5e3a1532a713e1e2412818c96a0a5692ea",
+    "metricq-js": "https://github.com/metricq/metricq-js#commit=e5d92c93fb34b4f811b939bc6f024126970fb158",
     "moment": "^2.29.1",
     "vue": "^2.6.11",
     "vue-multiselect": "^2.1.6",
