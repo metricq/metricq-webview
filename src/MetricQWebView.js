@@ -234,10 +234,10 @@ class MetricQWebView {
 
   changeMetricName (metricReference, newName, oldName) {
     /* reject metric names that already exist */
-    if (this.store.getter['metrics/get'](newName)) {
+    if (this.store.getters['metrics/get'](newName)) {
       return false
     }
-    const oldMetric = this.store.getter['metrics/get'](oldName)
+    const oldMetric = this.store.getters['metrics/get'](oldName)
     this.store.dispatch('metrics/create', { metric: { ...oldMetric, name: newName, description: undefined } })
     this.deleteMetric(oldName)
     if (this.graticule) {
