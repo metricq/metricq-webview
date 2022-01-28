@@ -49,10 +49,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
-      # checksums for git repo dependencies are broken
       - run: yarn install
-        env:
-          YARN_CHECKSUM_BEHAVIOR: update
       - run: yarn build
         env:
           VUE_APP_VERSION_BUILD: ${{ steps.vars-pr.outputs.sha_short || steps.vars-push.outputs.sha_short }}

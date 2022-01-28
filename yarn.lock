@@ -1334,6 +1334,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@metricq/history@npm:3.0.0":
+  version: 3.0.0
+  resolution: "@metricq/history@npm:3.0.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40metricq%2Fhistory%2F3.0.0%2F726fceec853aad5e4378d4cde37c76052fa23b7e21115a86c87ae935efb1b714"
+  dependencies:
+    axios: ^0.21.2
+    moment: ^2.29.1
+  checksum: 4fccf3fcaf21b232898ace5c5e19561e2133fd0c7e85597881c92c2e91fb5a96a3e2f1cb0521d98eeb2054b3d5fc6a7a76e2d936c0179b6b8261139d488d18a5
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -2704,12 +2714,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^0.21.1":
-  version: 0.21.1
-  resolution: "axios@npm:0.21.1"
+"axios@npm:^0.21.2":
+  version: 0.21.4
+  resolution: "axios@npm:0.21.4"
   dependencies:
-    follow-redirects: ^1.10.0
-  checksum: c87915fa0b18c15c63350112b6b3563a3e2ae524d7707de0a73d2e065e0d30c5d3da8563037bc29d4cc1b7424b5a350cb7274fa52525c6c04a615fe561c6ab11
+    follow-redirects: ^1.14.0
+  checksum: 44245f24ac971e7458f3120c92f9d66d1fc695e8b97019139de5b0cc65d9b8104647db01e5f46917728edfc0cfd88eb30fc4c55e6053eef4ace76768ce95ff3c
   languageName: node
   linkType: hard
 
@@ -2985,16 +2995,6 @@ __metadata:
     base64-js: ^1.3.1
     ieee754: ^1.1.13
   checksum: e2cf8429e1c4c7b8cbd30834ac09bd61da46ce35f5c22a78e6c2f04497d6d25541b16881e30a019c6fd3154150650ccee27a308eff3e26229d788bbdeb08ab84
-  languageName: node
-  linkType: hard
-
-"bufferutil@npm:^4.0.1":
-  version: 4.0.3
-  resolution: "bufferutil@npm:4.0.3"
-  dependencies:
-    node-gyp: latest
-    node-gyp-build: ^4.2.0
-  checksum: 88f9f9277f02dd94b52003fe33135e9609a8ee5156163df21e6ea222f825ac3eaeaacae7ee8f28dca0b69dc85e705587b58df6d01615f2b66138dd0fea110d32
   languageName: node
   linkType: hard
 
@@ -3819,16 +3819,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"d@npm:1, d@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "d@npm:1.0.1"
-  dependencies:
-    es5-ext: ^0.10.50
-    type: ^1.0.1
-  checksum: 49ca0639c7b822db670de93d4fbce44b4aa072cd848c76292c9978a8cd0fff1028763020ff4b0f147bd77bfe29b4c7f82e0f71ade76b2a06100543cdfd948d19
-  languageName: node
-  linkType: hard
-
 "daterangepicker@npm:^3.1.0":
   version: 3.1.0
   resolution: "daterangepicker@npm:3.1.0"
@@ -4361,38 +4351,6 @@ __metadata:
     is-date-object: ^1.0.1
     is-symbol: ^1.0.2
   checksum: 4ead6671a2c1402619bdd77f3503991232ca15e17e46222b0a41a5d81aebc8740a77822f5b3c965008e631153e9ef0580540007744521e72de8e33599fca2eed
-  languageName: node
-  linkType: hard
-
-"es5-ext@npm:^0.10.35, es5-ext@npm:^0.10.50":
-  version: 0.10.53
-  resolution: "es5-ext@npm:0.10.53"
-  dependencies:
-    es6-iterator: ~2.0.3
-    es6-symbol: ~3.1.3
-    next-tick: ~1.0.0
-  checksum: 24ec22369260cf98605cb2f51eae9d7df5dc621bc5d3b311f6f5c3d0fcdb7bafae888270f3083ee6e9af27350a5ea49f1fe2dd6406a9017247ca40f091f529b2
-  languageName: node
-  linkType: hard
-
-"es6-iterator@npm:~2.0.3":
-  version: 2.0.3
-  resolution: "es6-iterator@npm:2.0.3"
-  dependencies:
-    d: 1
-    es5-ext: ^0.10.35
-    es6-symbol: ^3.1.1
-  checksum: 6e48b1c2d962c21dee604b3d9f0bc3889f11ed5a8b33689155a2065d20e3107e2a69cc63a71bd125aeee3a589182f8bbcb5c8a05b6a8f38fa4205671b6d09697
-  languageName: node
-  linkType: hard
-
-"es6-symbol@npm:^3.1.1, es6-symbol@npm:~3.1.3":
-  version: 3.1.3
-  resolution: "es6-symbol@npm:3.1.3"
-  dependencies:
-    d: ^1.0.1
-    ext: ^1.1.2
-  checksum: cd49722c2a70f011eb02143ef1c8c70658d2660dead6641e160b94619f408b9cf66425515787ffe338affdf0285ad54f4eae30ea5bd510e33f8659ec53bcaa70
   languageName: node
   linkType: hard
 
@@ -4979,15 +4937,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ext@npm:^1.1.2":
-  version: 1.5.0
-  resolution: "ext@npm:1.5.0"
-  dependencies:
-    type: ^2.5.0
-  checksum: 71f3e25218be97ce2095d843eba93f52607f6b98f162aed748d0cfee6bbd3cc4713b3636b48e45165b6791f0cbf88ae09e1c5c560711ff958c8d5de47dc15417
-  languageName: node
-  linkType: hard
-
 "extend-shallow@npm:^2.0.1":
   version: 2.0.1
   resolution: "extend-shallow@npm:2.0.1"
@@ -5242,13 +5191,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.10.0":
+"follow-redirects@npm:^1.0.0":
   version: 1.14.2
   resolution: "follow-redirects@npm:1.14.2"
   peerDependenciesMeta:
     debug:
       optional: true
   checksum: 53195df4a2f36202177f40a2d59d497d630f3b20e2e51e2b697ee5f9c0a5261985f164b23d3744a574e117618af668d07c0d000c2c5cb0c1546851671585ac4e
+  languageName: node
+  linkType: hard
+
+"follow-redirects@npm:^1.14.0":
+  version: 1.14.7
+  resolution: "follow-redirects@npm:1.14.7"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: f6d03e5e30877431065bca0d1b2e3db93949eb799d368a5c07ea8a4b71205f0349a3f8f0191bf13a07c93885522834dca1dc8e527dc99a772c6911fba24edc5f
   languageName: node
   linkType: hard
 
@@ -6433,13 +6392,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"is-typedarray@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "is-typedarray@npm:1.0.0"
-  checksum: 3508c6cd0a9ee2e0df2fa2e9baabcdc89e911c7bd5cf64604586697212feec525aa21050e48affb5ffc3df20f0f5d2e2cf79b08caa64e1ccc9578e251763aef7
-  languageName: node
-  linkType: hard
-
 "is-unicode-supported@npm:^0.1.0":
   version: 0.1.0
   resolution: "is-unicode-supported@npm:0.1.0"
@@ -7122,21 +7074,11 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"metricq-js@https://github.com/metricq/metricq-js#e433da5e3a1532a713e1e2412818c96a0a5692ea":
-  version: 2.1.0
-  resolution: "metricq-js@https://github.com/metricq/metricq-js.git#commit=e433da5e3a1532a713e1e2412818c96a0a5692ea"
-  dependencies:
-    axios: ^0.21.1
-    moment: ^2.29.1
-    websocket: ^1.0.33
-  checksum: 62cd7e64207a4ee8c8382a53b60d1ddeb3a37a777dfc92ddbc313a976cdc856bca01b689dc4d001eb083986a025c411ed9e192bc30a2bff839b647745bb0e2e7
-  languageName: node
-  linkType: hard
-
 "metricq-webview@workspace:.":
   version: 0.0.0-use.local
   resolution: "metricq-webview@workspace:."
   dependencies:
+    "@metricq/history": 3.0.0
     "@vue/cli-plugin-babel": ~5.0.0-beta.3
     "@vue/cli-plugin-eslint": ~5.0.0-beta.3
     "@vue/cli-plugin-vuex": ~5.0.0-beta.3
@@ -7156,7 +7098,6 @@ fsevents@^1.2.7:
     jquery: ^3.6.0
     jsurl: ^0.1.5
     key-js: ^0.1.1
-    metricq-js: "https://github.com/metricq/metricq-js#e433da5e3a1532a713e1e2412818c96a0a5692ea"
     moment: ^2.29.1
     standard: ^16.0.3
     vue: ^2.6.11
@@ -7518,13 +7459,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"next-tick@npm:~1.0.0":
-  version: 1.0.0
-  resolution: "next-tick@npm:1.0.0"
-  checksum: 83fcb3d4f8d9380210b1c2b8a610463602d80283f0c0c8571c1688e1ad6cbf3a16b345f5bb7212617d4898bedcfa10dff327dc09ec20a112a5bf43a0271375fb
-  languageName: node
-  linkType: hard
-
 "nice-try@npm:^1.0.4":
   version: 1.0.5
   resolution: "nice-try@npm:1.0.5"
@@ -7553,17 +7487,6 @@ fsevents@^1.2.7:
   version: 0.10.0
   resolution: "node-forge@npm:0.10.0"
   checksum: 5aa6dc9922e424a20ef101d2f517418e2bc9cfc0255dd22e0701c0fad1568445f510ee67f6f3fcdf085812c4ca1b847b8ba45683b34776828e41f5c1794e42e1
-  languageName: node
-  linkType: hard
-
-"node-gyp-build@npm:^4.2.0":
-  version: 4.2.3
-  resolution: "node-gyp-build@npm:4.2.3"
-  bin:
-    node-gyp-build: bin.js
-    node-gyp-build-optional: optional.js
-    node-gyp-build-test: build-test.js
-  checksum: 450d7b2016290d269343f8a33d13f4d7ccd0a38057af0d71a4d714fe06e6051da50b677a411ea9e240706253c4b53eb41e1b050df72d75d796b2e4d91b2757ae
   languageName: node
   linkType: hard
 
@@ -10502,29 +10425,6 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"type@npm:^1.0.1":
-  version: 1.2.0
-  resolution: "type@npm:1.2.0"
-  checksum: dae8c64f82c648b985caf321e9dd6e8b7f4f2e2d4f846fc6fd2c8e9dc7769382d8a52369ddbaccd59aeeceb0df7f52fb339c465be5f2e543e81e810e413451ee
-  languageName: node
-  linkType: hard
-
-"type@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "type@npm:2.5.0"
-  checksum: 0fe1bb4e8ba298b2b245fdc6bca6178887e29e2134d231e468366615b3adffd651d464eb51d8b15f8cfd168577c282a17e19bf80f036a60d4df16308a83a93c4
-  languageName: node
-  linkType: hard
-
-"typedarray-to-buffer@npm:^3.1.5":
-  version: 3.1.5
-  resolution: "typedarray-to-buffer@npm:3.1.5"
-  dependencies:
-    is-typedarray: ^1.0.0
-  checksum: 99c11aaa8f45189fcfba6b8a4825fd684a321caa9bd7a76a27cf0c7732c174d198b99f449c52c3818107430b5f41c0ccbbfb75cb2ee3ca4a9451710986d61a60
-  languageName: node
-  linkType: hard
-
 "unbox-primitive@npm:^1.0.1":
   version: 1.0.1
   resolution: "unbox-primitive@npm:1.0.1"
@@ -10693,16 +10593,6 @@ resolve@^2.0.0-next.3:
   version: 3.1.1
   resolution: "use@npm:3.1.1"
   checksum: 08a130289f5238fcbf8f59a18951286a6e660d17acccc9d58d9b69dfa0ee19aa038e8f95721b00b432c36d1629a9e32a464bf2e7e0ae6a244c42ddb30bdd8b33
-  languageName: node
-  linkType: hard
-
-"utf-8-validate@npm:^5.0.2":
-  version: 5.0.5
-  resolution: "utf-8-validate@npm:5.0.5"
-  dependencies:
-    node-gyp: latest
-    node-gyp-build: ^4.2.0
-  checksum: 6ac17f5c583e2965a0df7be94ce0672052a8e11f4b54af7c0addffc7fb57548b63ea1709508359a64ab4d7a1c03f768ed344f035f446985eda6dcbd591a5ae5a
   languageName: node
   linkType: hard
 
@@ -11077,20 +10967,6 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"websocket@npm:^1.0.33":
-  version: 1.0.34
-  resolution: "websocket@npm:1.0.34"
-  dependencies:
-    bufferutil: ^4.0.1
-    debug: ^2.2.0
-    es5-ext: ^0.10.50
-    typedarray-to-buffer: ^3.1.5
-    utf-8-validate: ^5.0.2
-    yaeti: ^0.0.6
-  checksum: 8a0ce6d79cc1334bb6ea0d607f0092f3d32700b4dd19e4d5540f2a85f3b50e1f8110da0e4716737056584dde70bbebcb40bbd94bbb437d7468c71abfbfa077d8
-  languageName: node
-  linkType: hard
-
 "which-boxed-primitive@npm:^1.0.2":
   version: 1.0.2
   resolution: "which-boxed-primitive@npm:1.0.2"
@@ -11236,13 +11112,6 @@ resolve@^2.0.0-next.3:
   version: 5.0.8
   resolution: "y18n@npm:5.0.8"
   checksum: 54f0fb95621ee60898a38c572c515659e51cc9d9f787fb109cef6fde4befbe1c4602dc999d30110feee37456ad0f1660fa2edcfde6a9a740f86a290999550d30
-  languageName: node
-  linkType: hard
-
-"yaeti@npm:^0.0.6":
-  version: 0.0.6
-  resolution: "yaeti@npm:0.0.6"
-  checksum: 6db12c152f7c363b80071086a3ebf5032e03332604eeda988872be50d6c8469e1f13316175544fa320f72edad696c2d83843ad0ff370659045c1a68bcecfcfea
   languageName: node
   linkType: hard
 
