@@ -28,7 +28,7 @@ jobs:
     # checksums for git repo dependencies are broken
     - run: yarn install
       env:
-        YARN_CHECKSUM_BEHAVIOR: update
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - run: yarn lint --no-fix --max-warnings 0 --max-errors 0
 
   build:
