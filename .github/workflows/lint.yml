@@ -50,6 +50,8 @@ jobs:
         with:
           node-version: 16.x
       - run: yarn install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn build
         env:
           VUE_APP_VERSION_BUILD: ${{ steps.vars-pr.outputs.sha_short || steps.vars-push.outputs.sha_short }}
