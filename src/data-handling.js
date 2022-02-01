@@ -1,6 +1,7 @@
 import { crc32 } from '../lib/pseudo-crc32.js'
 import { hslToRgb } from '../lib/color-conversion.js'
 import { METRICQ_BACKEND } from './MetricHandler.js'
+import moment from 'moment'
 
 export function DataCache (paramMetricQHistoryReference) {
   this.metricQHistory = paramMetricQHistoryReference
@@ -227,7 +228,7 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     raw: undefined
   }
   this.band = undefined
-  this.allTime = undefined
+  this.allTime = {}
   this.meta = undefined
   this.metricQHistory = paramMetricQReference
   this.resetData = function () {
@@ -292,64 +293,14 @@ function MetricCache (paramMetricQReference, paramMetricName) {
       }
     }
   }
-  this.processAllTimeQuery = function (selfReference, jsonResponse) {
-    let allTimeMin
-    let allTimeMax
-    for (let i = 0; i < jsonResponse.length; ++i) {
-      const metricParts = jsonResponse[i].target.split('/')
-      if (metricParts[1] === 'min') {
-        for (let j = 0; j < jsonResponse[i].datapoints.length; ++j) {
-          if (undefined === allTimeMin || allTimeMin > jsonResponse[i].datapoints[j][0]) {
-            allTimeMin = jsonResponse[i].datapoints[j][0]
-          }
-        }
-      } else if (metricParts[1] === 'max') {
-        for (let j = 0; j < jsonResponse[i].datapoints.length; ++j) {
-          if (undefined === allTimeMax || allTimeMax < jsonResponse[i].datapoints[j][0]) {
-            allTimeMax = jsonResponse[i].datapoints[j][0]
-          }
-        }
-      }
-    }
-    if (undefined !== allTimeMin || undefined !== allTimeMax) {
-      selfReference.allTime = {
-        min: allTimeMin,
-        max: allTimeMax
-      }
-    }
-  }
   this.fetchMetadata = function () {
     this.metricQHistory.metadata(this.name).then((metadataObj) => { this.meta = metadataObj })
   }
-  // TODO: use Mario's metricq-js-API
   this.fetchAllTimeMinMax = function () {
-    const reqJson = {
-      range: {
-        from: (new Date('2010-01-01')).toISOString(),
-        to: (new Date()).toISOString()
-      },
-      maxDataPoints: 1,
-      targets: [
-        {
-          metric: this.name,
-          functions: ['min', 'max']
-        }
-      ]
-    }
-    const reqAjax = new XMLHttpRequest()
-    reqAjax.open('POST', METRICQ_BACKEND + '/query', true)
-    reqAjax.processingFunction = (function (ref) { return function (json) { ref.processAllTimeQuery(ref, json) } }(this))
-    reqAjax.addEventListener('load', function (evtObj) {
-      let parsedJson
-      try {
-        parsedJson = JSON.parse(evtObj.target.responseText)
-      } catch (exc) {
-      }
-      if (parsedJson) {
-        evtObj.target.processingFunction(parsedJson)
-      }
+    this.metricQHistory.analyze(moment(0), moment()).target(this.name).run().then(data => {
+      this.allTime.min = Object.values(data)[0].minimum
+      this.allTime.max = Object.values(data)[0].maximum
     })
-    reqAjax.send(JSON.stringify(reqJson))
   }
   this.getAllMinMax = function (startTime, stopTime) {
     let allMin
