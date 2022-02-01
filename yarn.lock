@@ -7101,6 +7101,7 @@ fsevents@^1.2.7:
     moment: ^2.29.1
     standard: ^16.0.3
     vue: ^2.6.11
+    vue-async-computed: ^3.9.0
     vue-multiselect: ^2.1.6
     vue-template-compiler: ^2.6.11
     vuex: ^3.6.2
@@ -10654,6 +10655,15 @@ resolve@^2.0.0-next.3:
   version: 1.0.4
   resolution: "vendors@npm:1.0.4"
   checksum: 4b16e0bc18dbdd7ac8dd745c776c08f6c73e9a7f620ffd9faf94a3d86a35feaf4c6cb1bbdb304d2381548a30d0abe69b83eeb1b7b1bf5bb33935e64b28812681
+  languageName: node
+  linkType: hard
+
+"vue-async-computed@npm:^3.9.0":
+  version: 3.9.0
+  resolution: "vue-async-computed@npm:3.9.0"
+  peerDependencies:
+    vue: ~2
+  checksum: f2acd2941713e8b2a128b7577857d5904f0404ec768baba0c8e8e4abb386d8c1569bed6c97019bd2d6b0cfc724b64c2f8fba6783dfed63be51c3c75ade807f79
   languageName: node
   linkType: hard
 
