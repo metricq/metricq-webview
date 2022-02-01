@@ -1,7 +1,7 @@
 import { markerSymbols } from './metric.js'
 import { MetricTimestamp } from './MetricTimestamp.js'
 import { showUserHint } from './interact.js'
-import MetricQHistory from 'metricq-js/metricq-history'
+import MetricQHistory from '@metricq/history'
 
 const METRICQ_BACKEND = process.env.VUE_APP_METRICQ_BACKEND
 const [METRICQ_BACKEND_USER, METRICQ_BACKEND_PASSWORD] = process.env.VUE_APP_METRICQ_BACKEND_AUTH === undefined ? [undefined, undefined] : process.env.VUE_APP_METRICQ_BACKEND_AUTH.split(':')
