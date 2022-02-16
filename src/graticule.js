@@ -259,7 +259,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
 
   this.drawGrid = function (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions = this.graticuleDimensions) {
     /* draw lines */
-    this.ctx.fillStyle = 'rgba(192,192,192,0.5)'
+    ctx.fillStyle = 'rgba(192,192,192,0.5)'
 
     // vertical grid
     let minDistanceBetweenGridLines = 110
@@ -299,7 +299,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     /* draw text */
     ctx.fillStyle = 'rgba(0,0,0,1)'
     const fontSize = 14
-    this.ctx.font = fontSize + 'px ' + this.DEFAULT_FONT
+    ctx.font = fontSize + 'px ' + this.DEFAULT_FONT
     // x-axis ticks (time/date)
     ctx.textAlign = 'center'
     ctx.textBaseline = 'hanging'
