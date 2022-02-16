@@ -68,17 +68,47 @@
         <div class="modal-footer">
           <button
             class="btn btn-primary"
+            :disabled="!pdfReady && selectedFileformat === 'pdf'"
             @click="doExport"
           >
-            <img
-              src="img/icons/image.svg"
-              width="28"
-              height="28"
+            <span
+              v-if="pdfReady || selectedFileformat !== 'pdf'"
             >
-            Export
+              Export
+            </span>
+            <span v-else>Export lädt</span>
           </button>
         </div>
       </div>
+    </div>
+    <div>
+      <VueHtml2pdf
+        ref="html2Pdf"
+        :show-layout="false"
+        :float-layout="true"
+        :enable-download="true"
+        :preview-modal="true"
+        :paginate-elements-by-height="5000"
+        filename="MetricQWebview"
+        :pdf-quality="2"
+        :manual-pagination="false"
+        pdf-format="a4"
+        pdf-orientation="landscape"
+        pdf-content-width="100%"
+      >
+        <section slot="pdf-content">
+          <img
+            :src="image"
+            style="height: 100%; width: 100%"
+          >
+          <div
+            id="anaTable"
+            class="anaTable"
+          >
+            <analyzeTable @finished="pdfLoaded" />
+          </div>
+        </section>
+      </VueHtml2pdf>
     </div>
   </div>
 </template>
@@ -87,18 +117,21 @@
 import { veil } from './veil.js'
 import PopupHeader from './popup-header.vue'
 import { mapState } from 'vuex'
+import AnalyzeTable from '.././components/analyzeTable.vue'
 
 export default {
-  components: { PopupHeader },
-  props: { },
+  components: { PopupHeader, AnalyzeTable },
+  props: {},
   data: function () {
     return {
-      popupTitle: 'Export'
+      popupTitle: 'Export',
+      image: '',
+      pdfReady: false
     }
   },
   computed: {
     fileformats () {
-      return ['png', 'jpeg']
+      return ['png', 'jpeg', 'pdf']
     },
     selectedFileformat: {
       get: function () {
@@ -139,21 +172,75 @@ export default {
     }
   },
   methods: {
-    doExport: function () {
-      const instance = window.MetricQWebView.instances[0]
-      instance.doExport()
+    doExport: async function () {
+      if (this.selectedFileformat === 'pdf') {
+        const canvas = this.createNewCanvas(document.getElementById('anaTable').offsetHeight)
+        this.addData(canvas)
+        this.image = canvas.toDataURL('image/png')
+        const result = await this.waitNewCanvas()
+        this.$refs.html2Pdf.generatePdf()
+      } else {
+        const instance = window.MetricQWebView.instances[0]
+        instance.doExport()
+      }
       veil.destroy()
       this.$store.commit('togglePopup', 'export')
+    },
+    waitNewCanvas: function () {
+      return new Promise(resolve => {
+        resolve('resolved')
+      })
     },
     closePopupModal: function (evt) {
       if (evt.target.getAttribute('role') === 'dialog') {
         veil.destroy(evt)
       }
+    },
+    createNewCanvas (tableHeight) {
+      const exportCanvas = document.createElement('canvas')
+      exportCanvas.setAttribute('width', 1100)
+      exportCanvas.setAttribute('height', 770 - tableHeight)
+      return exportCanvas
+    },
+    addData (canvas) {
+      const instance = window.MetricQWebView.instances[0]
+      const exportCanvasContext = canvas.getContext('2d')
+      const scale = 2
+      canvas.width *= scale
+      canvas.height *= scale
+      exportCanvasContext.scale(scale, scale)
+      const margins = {
+        top: instance.margins.canvas.top,
+        bottom: instance.margins.canvas.bottom,
+        left: instance.margins.canvas.left,
+        right: instance.margins.canvas.right
+      }
+      const size = [canvas.width / scale, canvas.height / scale, margins.left,
+        margins.top,
+        canvas.width / scale - (margins.right + margins.left),
+        canvas.height / scale - (margins.top + margins.bottom)]
+      instance.graticule.draw(false, exportCanvasContext, size)
+    },
+    pdfLoaded () {
+      this.pdfReady = true
     }
   }
 }
 </script>
 
 <style scoped>
+
+.anaTable >>> * {
+  font-size: 12px;
+  border: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.anaTable >>> .box {
+  width: 12px;
+  height: 12px;
+  margin-top: 5px;
+}
 
 </style>

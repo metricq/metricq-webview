@@ -14,6 +14,9 @@ import { mapMutations, mapState } from 'vuex'
 import distinctColors from 'distinct-colors'
 import AnalyzePopup from './ui/analyze-popup.vue'
 
+import { importPlugins } from './plugins'
+importPlugins()
+
 Vue.config.productionTip = false
 
 export const mainApp = new Vue({

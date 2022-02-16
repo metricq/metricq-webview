@@ -2,12 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { Configuration, ToastConfig } from '@/configuration'
 import metrics from '@/store/metrics'
-import Toasted from 'vue-toasted'
-import AsyncComputed from 'vue-async-computed'
 
 Vue.use(Vuex)
-Vue.use(Toasted)
-Vue.use(AsyncComputed)
 
 export default new Vuex.Store({
   state: {
