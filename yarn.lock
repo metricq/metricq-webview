@@ -7104,6 +7104,7 @@ fsevents@^1.2.7:
     vue-async-computed: ^3.9.0
     vue-multiselect: ^2.1.6
     vue-template-compiler: ^2.6.11
+    vue-toasted: ^1.1.28
     vuex: ^3.6.2
   languageName: unknown
   linkType: soft
@@ -10739,6 +10740,13 @@ resolve@^2.0.0-next.3:
   version: 1.9.1
   resolution: "vue-template-es2015-compiler@npm:1.9.1"
   checksum: ad1e85662783be3ee262c323b05d12e6a5036fca24f16dc0f7ab92736b675919cb4fa4b79b28753eac73119b709d1b36789bf60e8ae423f50c4db35de9370e8b
+  languageName: node
+  linkType: hard
+
+"vue-toasted@npm:^1.1.28":
+  version: 1.1.28
+  resolution: "vue-toasted@npm:1.1.28"
+  checksum: 551c6bb986f72ee68b1d41e15413468cc631ebc341bf8960b54855f7797499dddddc7f43b6090931481b599e3cb8de62f4cc7297ed625f29090c10a60f25b32f
   languageName: node
   linkType: hard
 

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import store from '@/store/index'
 import { MetricHelper } from '@/metric'
+import { DuplicateMetricError } from '@/errors'
 
 export default {
   namespaced: true,
@@ -141,7 +142,7 @@ export default {
       }
     }) {
       if (state.metrics[name] !== undefined) {
-        throw new Error('Metric already exists!')
+        throw new DuplicateMetricError(name)
       }
 
       commit('privateSet', {
