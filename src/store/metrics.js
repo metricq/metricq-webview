@@ -34,7 +34,10 @@ export default {
       Vue.delete(state.metrics, metricKey)
     },
 
-    privateSet (state, { metricKey, metric: { name, description, color, traces, marker, errorprone, drawMin, drawMax, drawAvg } }) {
+    privateSet (state, {
+      metricKey,
+      metric: { name, description, unit, color, traces, marker, errorprone, drawMin, drawMax, drawAvg }
+    }) {
       if (name !== undefined && metricKey !== name) {
         throw new Error('metricKey and metric.name must be equal!')
       }
@@ -43,6 +46,7 @@ export default {
           key: metricKey,
           name: metricKey,
           description: description || '',
+          unit: unit || '',
           marker: marker || MetricHelper.metricBaseToMarker(metricKey),
           color: color || MetricHelper.metricBaseToRgb(metricKey),
           traces: traces || [],
@@ -62,6 +66,9 @@ export default {
         }
         if (description !== undefined) {
           Vue.set(state.metrics[metricKey], 'description', description)
+        }
+        if (unit !== undefined) {
+          Vue.set(state.metrics[metricKey], 'unit', unit)
         }
         if (color !== undefined) {
           Vue.set(state.metrics[metricKey], 'color', color)
@@ -119,12 +126,28 @@ export default {
       dispatch('checkGlobalDrawState')
     },
 
-    create ({ commit, state, dispatch, getters }, { metric: { name, description, color, traces, marker, errorprone, drawMin, drawMax, drawAvg } }) {
+    create ({ commit, state, dispatch, getters }, {
+      metric: {
+        name,
+        description,
+        unit,
+        color,
+        traces,
+        marker,
+        errorprone,
+        drawMin,
+        drawMax,
+        drawAvg
+      }
+    }) {
       if (state.metrics[name] !== undefined) {
         throw new Error('Metric already exists!')
       }
 
-      commit('privateSet', { metricKey: name, metric: { name, description, color, traces, marker, errorprone, drawMin, drawMax, drawAvg } })
+      commit('privateSet', {
+        metricKey: name,
+        metric: { name, description, unit, color, traces, marker, errorprone, drawMin, drawMax, drawAvg }
+      })
       const metric = state.metrics[name]
       // marker and color are stored here and deep inside MetricQWebView/MetricHandler/Graticule and the traces
       dispatch('updateColor', { metricKey: name, color: metric.color })
@@ -133,6 +156,7 @@ export default {
       dispatch('updateDescription', { metricKey: name, description })
       // maybe we changed the globale draw state?
       dispatch('checkGlobalDrawState')
+      dispatch('updateUnit', { metricKey: name, unit })
     },
     updateDescription ({ commit, state }, { metricKey, description }) {
       const metric = state.metrics[metricKey]
@@ -143,6 +167,17 @@ export default {
         })
       } else {
         commit('privateSet', { metricKey, metric: { description: description } })
+      }
+    },
+    updateUnit ({ commit, state }, { metricKey, unit }) {
+      const metric = state.metrics[metricKey]
+      if (unit === undefined) {
+        commit('privateSet', { metricKey, metric: { unit: '' } })
+        window.MetricQWebView.instances[0].handler.metricQHistory.metadata(metric.name).then((metadataObj) => {
+          commit('privateSet', { metricKey, metric: { unit: metadataObj.unit } })
+        })
+      } else {
+        commit('privateSet', { metricKey, metric: { unit: unit } })
       }
     },
     updateColor ({ commit, state }, { metricKey, color }) {
@@ -212,6 +247,5 @@ export default {
       dispatch('checkGlobalDrawState')
     }
   },
-  modules: {
-  }
+  modules: {}
 }

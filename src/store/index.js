@@ -2,8 +2,10 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { Configuration } from '@/configuration'
 import metrics from '@/store/metrics'
+import AsyncComputed from 'vue-async-computed'
 
 Vue.use(Vuex)
+Vue.use(AsyncComputed)
 
 export default new Vuex.Store({
   state: {
@@ -14,7 +16,8 @@ export default new Vuex.Store({
       yaxis: false,
       configuration: false,
       link: false,
-      newmetric: false
+      newmetric: false,
+      analyze: false
     },
     timestamp: {
       start: 0,
@@ -53,8 +56,7 @@ export default new Vuex.Store({
       state.configuration.exportFormat = newValue
     }
   },
-  actions: {
-  },
+  actions: {},
   modules: {
     metrics
   },

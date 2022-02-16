@@ -32,13 +32,17 @@
         <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
         Export
       </label>
+      <label class="btn btn-outline-primary btn-navbar" id="button_analyze" v-on:click="analyzeButtonClicked">
+        <img class="navimg" src="img/icons/search.svg"/>
+        Analyse
+      </label>
       <label class="btn btn-outline-primary btn-navbar">
         <input type="checkbox" id='checkbox_min_max' v-bind:checked="globalMinMax" v-on:change="toggleMinMaxButton">
         min/max anzeigen
       </label>
       <label class="btn btn-outline-primary btn-navbar" id="button_palette" v-on:click="colorPaletteClicked"
-        alt="Nutze eindeutige Farben">
-        <img class="navimg" src="img/icons/color-palette.svg" />
+             alt="Nutze eindeutige Farben">
+        <img class="navimg" src="img/icons/color-palette.svg"/>
       </label>
       <label>
         <time-button id="date_range" class="btn btn-outline-primary btn-navbar"
@@ -66,7 +70,8 @@
         ></metric-legend>
         <new-metric-legend
           v-bind:position="configuration.legendDisplay"></new-metric-legend>
-        <li :class="'clickable legend_end legend_item legend_item_' + configuration.legendDisplay" v-on:click="clearAllButtonClicked" v-if="metricsList.length !== 0">
+        <li :class="'clickable legend_end legend_item legend_item_' + configuration.legendDisplay"
+            v-on:click="clearAllButtonClicked" v-if="metricsList.length !== 0">
           <span id="button_clear_all">
             <span>Alles löschen</span>
             <img src="img/trashcan2.png"/>
@@ -91,6 +96,11 @@
           v-bind:key="configuration.key"
           v-if="popups.configuration"
         ></configuration-popup>
+      </div>
+      <div id="wrapper_popup_analyze">
+        <analyze-popup
+          v-if="popups.analyze"
+        ></analyze-popup>
       </div>
       <div id="wrapper_popup_yaxis">
         <yaxis-popup

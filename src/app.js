@@ -12,6 +12,7 @@ import TimeButton from './ui/time-button.vue'
 import store from './store/'
 import { mapMutations, mapState } from 'vuex'
 import distinctColors from 'distinct-colors'
+import AnalyzePopup from './ui/analyze-popup.vue'
 
 Vue.config.productionTip = false
 
@@ -26,7 +27,8 @@ export const mainApp = new Vue({
     MetricPopup,
     NewMetricPopup,
     YaxisPopup,
-    TimeButton
+    TimeButton,
+    AnalyzePopup
   },
   data: { },
   computed: {
@@ -68,6 +70,9 @@ export const mainApp = new Vue({
     },
     linkButtonClicked () {
       this.togglePopup('link')
+    },
+    analyzeButtonClicked () {
+      this.togglePopup('analyze')
     },
     clearAllButtonClicked () {
       const globalMinMax = this.globalMinMax
