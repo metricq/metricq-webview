@@ -1,10 +1,12 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { Configuration } from '@/configuration'
+import { Configuration, ToastConfig } from '@/configuration'
 import metrics from '@/store/metrics'
+import Toasted from 'vue-toasted'
 import AsyncComputed from 'vue-async-computed'
 
 Vue.use(Vuex)
+Vue.use(Toasted)
 Vue.use(AsyncComputed)
 
 export default new Vuex.Store({
@@ -22,7 +24,8 @@ export default new Vuex.Store({
     timestamp: {
       start: 0,
       end: 0
-    }
+    },
+    toastConfiguration: new ToastConfig()
   },
   mutations: {
     setStartTime (state, time) {

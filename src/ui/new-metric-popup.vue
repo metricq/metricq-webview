@@ -66,7 +66,9 @@
 <script>
 import PopupHeader from './popup-header.vue'
 import { veil } from './veil.js'
+import Vue from 'vue'
 import VueMultiSelect from 'vue-multiselect'
+import { DuplicateMetricError } from '@/errors'
 import style from 'vue-multiselect/dist/vue-multiselect.min.css'
 
 export default {
@@ -74,7 +76,7 @@ export default {
     PopupHeader,
     VueMultiSelect
   },
-  props: { },
+  props: {},
   data: function () {
     return {
       popupTitle: 'Metriken hinzufügen',
@@ -117,8 +119,18 @@ export default {
     },
     addMetrics: function (evt) {
       if (this.value != null) {
-        this.value.forEach((item, index, array) => {
-          this.$store.dispatch('metrics/create', { metric: { name: item.title, description: item.desc, traces: [] } })
+        this.value.forEach((item) => {
+          try {
+            this.$store.dispatch('metrics/create', { metric: { name: item.title, description: item.desc, traces: [] } })
+          } catch (error) {
+            if (error instanceof DuplicateMetricError) {
+              Vue.toasted.error(`Metrik ${error.metricName} ist bereits vorhanden!`, {
+                theme: this.$store.state.toastConfiguration.theme,
+                position: this.$store.state.toastConfiguration.position,
+                duration: this.$store.state.toastConfiguration.duration
+              })
+            }
+          }
         })
       }
       this.closePopup(evt)

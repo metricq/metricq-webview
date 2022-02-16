@@ -11,3 +11,11 @@ export class Configuration {
     this.legendDisplay = 'right'
   }
 }
+
+export class ToastConfig {
+  constructor () {
+    this.theme = 'outline'
+    this.position = 'top-center'
+    this.duration = 5000
+  }
+}
