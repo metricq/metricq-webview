@@ -294,7 +294,7 @@ export class MetricHandler {
   }
 
   loadedMetric (metricBase, metricTraces, metricIndex) {
-    const myMetric = this.store.getter['metrics/get'](metricBase)
+    const myMetric = this.store.getters['metrics/get'](metricBase)
     if (!myMetric) {
       this.store.dispatch('metrics/create', { name: metricBase, traces: metricTraces })
     } else {
@@ -367,7 +367,7 @@ export class MetricHandler {
 
   receivedError (errorCode, metricBase) {
     // mark a metric so it is being excluded in bulk-requests
-    if (this.store.getter['metrics/get'](metricBase)) {
+    if (this.store.getters['metrics/get'](metricBase)) {
       this.store.dispatch('metrics/setError', { metricKey: metricBase })
     }
   }
