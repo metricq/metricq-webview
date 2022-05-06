@@ -29,7 +29,6 @@ class MetricQWebView {
 
     this.ele = paramParentEle
     this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime, this.store)
-    this.countTraces = 0
     this.hasPlot = false
     this.graticule = undefined
     this.margins = {
@@ -71,14 +70,6 @@ class MetricQWebView {
   }
 
   renderMetrics (datapointsJSON) {
-    let allTraces = []
-    for (const curMetric of this.store.getters['metrics/getAll']()) {
-      if (curMetric.traces) {
-        allTraces = allTraces.concat(curMetric.traces)
-      }
-    }
-    // console.log("Render " + Math.round((globalEnd - globalStart)/1000) + " seconds delta");
-
     if (!this.hasPlot) {
       const canvasSize = [parseInt(this.ele.offsetWidth), document.body.scrollHeight - this.margins.row_foot]
       const myCanvas = document.createElement('canvas')
@@ -224,12 +215,6 @@ class MetricQWebView {
     // TODO: also clear this metric from MetricCache
     if (this.graticule) this.graticule.draw(false)
     this.setPlotRanges(false, true)
-  }
-
-  deleteTraces (tracesArr) {
-    // TODO: REFACTOR
-    // Plotly.deleteTraces(this.ele, tracesArr);
-    this.countTraces -= tracesArr.length
   }
 
   changeMetricName (metricReference, newName, oldName) {

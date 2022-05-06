@@ -37,7 +37,7 @@ export default {
 
     privateSet (state, {
       metricKey,
-      metric: { name, description, unit, color, traces, marker, errorprone, drawMin, drawMax, drawAvg }
+      metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg }
     }) {
       if (name !== undefined && metricKey !== name) {
         throw new Error('metricKey and metric.name must be equal!')
@@ -50,7 +50,6 @@ export default {
           unit: unit || '',
           marker: marker || MetricHelper.metricBaseToMarker(metricKey),
           color: color || MetricHelper.metricBaseToRgb(metricKey),
-          traces: traces || [],
           errorprone: errorprone === undefined ? false : errorprone,
           popup: false,
           drawMin: drawMin === undefined ? store.state.globalMinMax : drawMin,
@@ -73,9 +72,6 @@ export default {
         }
         if (color !== undefined) {
           Vue.set(state.metrics[metricKey], 'color', color)
-        }
-        if (traces !== undefined) {
-          Vue.set(state.metrics[metricKey], 'traces', traces)
         }
         if (marker !== undefined) {
           Vue.set(state.metrics[metricKey], 'marker', marker)
@@ -133,7 +129,6 @@ export default {
         description,
         unit,
         color,
-        traces,
         marker,
         errorprone,
         drawMin,
@@ -147,10 +142,10 @@ export default {
 
       commit('privateSet', {
         metricKey: name,
-        metric: { name, description, unit, color, traces, marker, errorprone, drawMin, drawMax, drawAvg }
+        metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg }
       })
       const metric = state.metrics[name]
-      // marker and color are stored here and deep inside MetricQWebView/MetricHandler/Graticule and the traces
+      // marker and color are stored here and deep inside MetricQWebView/MetricHandler/Graticule
       dispatch('updateColor', { metricKey: name, color: metric.color })
       dispatch('updateMarker', { metricKey: name, color: metric.marker })
       // fetch description from the backend, if necessary
@@ -197,13 +192,6 @@ export default {
       commit('privateSet', { metricKey, metric: { marker } })
       const metric = state.metrics[metricKey]
       const renderer = window.MetricQWebView.instances[0]
-      const newTraces = metric.traces.map(function (paramValue) {
-        if (paramValue.marker) {
-          paramValue.marker.symbol = marker
-        }
-        return paramValue
-      })
-      commit('privateSet', { metricKey, metric: { traces: newTraces } })
       if (renderer && renderer.graticule && renderer.graticule.data) {
         const metricCache = renderer.graticule.data.getMetricCache(metric.name)
         if (metricCache) {
@@ -216,14 +204,6 @@ export default {
           }
         }
       }
-    },
-    updateTraces ({ commit, state, dispatch }, { metricKey, traces }) {
-      commit('privateSet', { metricKey, metric: { traces: traces } })
-
-      const metric = state.metrics[metricKey]
-      // marker and color are stored here and deep inside MetricQWebView/MetricHandler/Graticule and the traces
-      dispatch('updateColor', { metricKey, color: metric.color })
-      dispatch('updateMarker', { metricKey, marker: metric.marker })
     },
     setError ({ commit, state }, { metricKey }) {
       const metric = state.metrics[metricKey]
