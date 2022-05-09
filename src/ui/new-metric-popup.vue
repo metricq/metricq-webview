@@ -121,7 +121,7 @@ export default {
       if (this.value != null) {
         this.value.forEach((item) => {
           try {
-            this.$store.dispatch('metrics/create', { metric: { name: item.title, description: item.desc, traces: [] } })
+            this.$store.dispatch('metrics/create', { metric: { name: item.title, description: item.desc } })
           } catch (error) {
             if (error instanceof DuplicateMetricError) {
               Vue.toasted.error(`Metrik ${error.metricName} ist bereits vorhanden!`, {

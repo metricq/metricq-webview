@@ -40,7 +40,7 @@ export class MetricHandler {
     this.store.commit('metrics/resetAll')
     for (let i = 0; i < initialMetricNames.length; ++i) {
       const curMetricName = initialMetricNames[i]
-      this.store.dispatch('metrics/create', { metric: { name: curMetricName, traces: [] } })
+      this.store.dispatch('metrics/create', { metric: { name: curMetricName } })
     }
   }
 
@@ -146,7 +146,6 @@ export class MetricHandler {
         let parsedObj
         try {
           parsedObj = JSON.parse(evt.target.responseText)
-          // selfReference.parseResponse(parsedObj, metricArr);
           // console.log("old Data format:");
           // console.log(parsedObj);
           console.log('Dropping data...')
@@ -199,107 +198,6 @@ export class MetricHandler {
     allMinMax[0] -= delta * this.WIGGLEROOM_PERCENTAGE
     allMinMax[1] += delta * this.WIGGLEROOM_PERCENTAGE
     return allMinMax
-  }
-
-  parseTrace (metricBase, metricAggregate, datapointsArr) {
-    const curTrace = {
-      x: [],
-      y: [],
-      name: metricBase + '/' + metricAggregate,
-      type: 'scatter',
-      hoverinfo: 'skip'
-    }
-    switch (metricAggregate) {
-      case 'min':
-      case 'max': /* fall-through */
-      case 'avg': /* fall-through */
-      case 'raw': /* fall-through */
-        for (let j = 0; j < datapointsArr.length; ++j) {
-          curTrace.x.push(datapointsArr[j][1])
-          curTrace.y.push(datapointsArr[j][0])
-        }
-        return curTrace
-    }
-    return undefined
-  }
-
-  processTracesArr (tracesAll) {
-    // parse multiple metrics/traces
-    let i = 0
-    for (const curMetric in tracesAll) {
-      const curTraces = tracesAll[curMetric]
-      if (curTraces.min && curTraces.max) {
-        const storeTraces = [curTraces.min, curTraces.max]
-        storeTraces[1].fill = 'tonexty'
-        if (curTraces.avg) {
-          storeTraces.push(curTraces.avg)
-        }
-        storeTraces.forEach(function (paramValue, paramIndex, paramArray) {
-          paramValue.mode = 'lines'
-          paramValue.line = {
-            width: 0,
-            color: undefined,
-            shape: 'vh'
-          } // connect "next"
-          // "shape": "hv" // connect "last"
-          // "shape": "linear" // connect "direct"
-        })
-        if (curTraces.avg) {
-          storeTraces[2].line.dash = 'dash'
-          storeTraces[2].line.width = 2
-        }
-        // add traces to metricList, create an object of metric class in before
-        this.loadedMetric(curMetric, storeTraces, i)
-      } else if (curTraces.raw) {
-        const rawTrace = [curTraces.raw]
-        rawTrace[0].mode = 'markers'
-        rawTrace[0].marker = {
-          size: 10,
-          color: undefined,
-          symbol: undefined
-        }
-        this.loadedMetric(curMetric, rawTrace, i)
-      }
-      ++i
-    }
-    if (i > 0) {
-      this.renderer.renderMetrics()
-    }
-  }
-
-  parseResponse (parsedJson, paramMetricsArr) {
-    // TODO: track metrics thate were requested but got no response,
-    //        mark these as errorpone=true
-    const tracesAll = {}
-    let metricBase
-    let metricAggregate
-    for (let i = 0; i < parsedJson.length; ++i) {
-      const fullMetric = parsedJson[i].target
-      if (fullMetric.indexOf('/') > -1 &&
-        parsedJson[i].datapoints &&
-        parsedJson[i].datapoints[0]) {
-        metricBase = fullMetric.substring(0, fullMetric.indexOf('/'))
-        metricAggregate = fullMetric.substring(fullMetric.indexOf('/') + 1)
-
-        const parsedTrace = this.parseTrace(metricBase, metricAggregate, parsedJson[i].datapoints)
-        if (parsedTrace) {
-          if (!tracesAll[metricBase]) {
-            tracesAll[metricBase] = {}
-          }
-          tracesAll[metricBase][metricAggregate] = parsedTrace
-        }
-      }
-    }
-    this.processTracesArr(tracesAll)
-  }
-
-  loadedMetric (metricBase, metricTraces, metricIndex) {
-    const myMetric = this.store.getters['metrics/get'](metricBase)
-    if (!myMetric) {
-      this.store.dispatch('metrics/create', { name: metricBase, traces: metricTraces })
-    } else {
-      this.store.dispatch('metrics/updateTraces', { metricKey: metricBase, traces: metricTraces })
-    }
   }
 
   setTimeRange (paramStartTime, paramStopTime) {
