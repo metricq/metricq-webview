@@ -57,6 +57,10 @@ body {
     margin-left: -40px;
 }
 
+.row_foot_bottom {
+    overflow: auto;
+}
+
 #legend_list {
     list-style-type: none;
 }
@@ -190,6 +194,9 @@ body {
 }
 
 .body_and_legend_bottom {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 75px);
 }
 
 .body_and_legend_right {
