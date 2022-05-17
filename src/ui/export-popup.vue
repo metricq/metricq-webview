@@ -82,11 +82,11 @@
         <div class="modal-footer">
           <button
             class="btn btn-primary"
-            :disabled="!pdfReady && selectedFileformat === 'pdf' && exportAnalyze"
+            :disabled="!analyzeTableReady && selectedFileformat === 'pdf' && exportAnalyze"
             @click="doExport"
           >
             <span
-              v-if="pdfReady || selectedFileformat !== 'pdf' || !exportAnalyze"
+              v-if="analyzeTableReady || selectedFileformat !== 'pdf' || !exportAnalyze"
             >
               Export
             </span>
@@ -120,7 +120,7 @@
             id="anaTable"
             class="anaTable"
           >
-            <analyzeTable @finished="pdfLoaded" />
+            <analyzeTable @finished="analyzeTableLoaded" />
           </div>
         </section>
       </VueHtml2pdf>
@@ -141,7 +141,7 @@ export default {
     return {
       popupTitle: 'Export',
       image: '',
-      pdfReady: false,
+      analyzeTableReady: false,
       exportAnalyze: false
     }
   },
@@ -241,8 +241,8 @@ export default {
         canvas.height / scale - (margins.top + margins.bottom)]
       instance.graticule.draw(false, exportCanvasContext, size)
     },
-    pdfLoaded () {
-      this.pdfReady = true
+    analyzeTableLoaded () {
+      this.analyzeTableReady = true
     }
   }
 }
