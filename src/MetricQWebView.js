@@ -210,6 +210,7 @@ class MetricQWebView {
   async addMetric (metricBase, description = undefined, oldMetric = undefined) {
     try {
       await this.store.dispatch('metrics/create', { metric: { ...oldMetric, name: metricBase, description: description, traces: [] } })
+      return true
     } catch (error) {
       if (error instanceof Error.DuplicateMetricError) {
         Vue.toasted.error(`Metrik ${error.metricName} ist bereits vorhanden!`, {
@@ -224,6 +225,7 @@ class MetricQWebView {
           duration: this.store.state.toastConfiguration.duration
         })
       }
+      return false
     }
   }
 
