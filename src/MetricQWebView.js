@@ -3,6 +3,8 @@ import { Graticule } from './graticule.js'
 import { markerSymbols } from './metric.js'
 import { registerCallbacks } from './interact.js'
 import JSURL from 'jsurl'
+import Vue from 'vue'
+import * as Error from '@/errors'
 
 export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store) {
   const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store)
@@ -54,9 +56,6 @@ class MetricQWebView {
     this.RELOAD_THROTTLING_DELAY = 150
     this.reloadThrottleTimeout = undefined
 
-    if (paramMetricNamesArr.length > 0) {
-      this.handler.doRequest(400)
-    }
     window.addEventListener('resize', (function (selfReference) { return function (evt) { selfReference.windowResize(evt) } }(this)))
     const resizeObserver = new ResizeObserver(entries => { for (const entry of entries) { this.setLegendLayout() } })
     resizeObserver.observe(document.getElementById('webview_container'))
@@ -66,7 +65,6 @@ class MetricQWebView {
     this.handler.initializeMetrics(metricsArr)
     this.handler.startTime.updateTime(startTime)
     this.handler.stopTime.updateTime(stopTime)
-    this.handler.doRequest(400)
   }
 
   renderMetrics (datapointsJSON) {
@@ -209,6 +207,26 @@ class MetricQWebView {
     }, this.RELOAD_THROTTLING_DELAY)
   }
 
+  async addMetric (metricBase, description = undefined, oldMetric = undefined) {
+    try {
+      await this.store.dispatch('metrics/create', { metric: { ...oldMetric, name: metricBase, description: description, traces: [] } })
+    } catch (error) {
+      if (error instanceof Error.DuplicateMetricError) {
+        Vue.toasted.error(`Metrik ${error.metricName} ist bereits vorhanden!`, {
+          theme: this.store.state.toastConfiguration.theme,
+          position: this.store.state.toastConfiguration.position,
+          duration: this.store.state.toastConfiguration.duration
+        })
+      } else if (error instanceof Error.InvalidMetricError) {
+        Vue.toasted.error(`Metrik ${error.metricName} ist nicht korrekt!`, {
+          theme: this.store.state.toastConfiguration.theme,
+          position: this.store.state.toastConfiguration.position,
+          duration: this.store.state.toastConfiguration.duration
+        })
+      }
+    }
+  }
+
   deleteMetric (metricBase) {
     if (this.graticule) this.graticule.data.deleteMetric(metricBase)
     this.store.dispatch('metrics/delete', { metricKey: metricBase })
@@ -217,26 +235,16 @@ class MetricQWebView {
     this.setPlotRanges(false, true)
   }
 
-  changeMetricName (metricReference, newName, oldName) {
-    /* reject metric names that already exist */
-    if (this.store.getters['metrics/get'](newName)) {
-      return false
-    }
-    const oldMetric = this.store.getters['metrics/get'](oldName)
-    this.store.dispatch('metrics/create', { metric: { ...oldMetric, name: newName, description: undefined } })
-    this.deleteMetric(oldName)
-    if (this.graticule) {
-      let newCache = this.graticule.data.getMetricCache(newName)
-      if (!newCache) {
-        newCache = this.graticule.data.getMetricCache(newName)
-        // TODO: call this.graticule.data.initializeCacheWithColor()
-        this.graticule.data.initializeCacheWithColor(newName, metricReference.color)
-        // WHAT SHALL WE DO WITH THE LEGEND'S COLOR?
-        // WHAT SHALL WE DO WITH A DRUNKEN SAILOR IN THE MORNING?
+  async changeMetricName (oldMetric, newName) {
+    if (await this.addMetric(newName, undefined, oldMetric)) {
+      this.deleteMetric(oldMetric.name)
+      if (this.graticule) {
+        const newCache = this.graticule.data.getMetricCache(newName)
+        if (!newCache) {
+          this.graticule.data.initializeCacheWithColor(newName, oldMetric.color)
+        }
       }
     }
-    this.reload()
-    return true
   }
 
   doExport () {

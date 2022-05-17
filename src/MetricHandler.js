@@ -40,7 +40,7 @@ export class MetricHandler {
     this.store.commit('metrics/resetAll')
     for (let i = 0; i < initialMetricNames.length; ++i) {
       const curMetricName = initialMetricNames[i]
-      this.store.dispatch('metrics/create', { metric: { name: curMetricName } })
+      window.MetricQWebView.instances[0].addMetric(curMetricName)
     }
   }
 

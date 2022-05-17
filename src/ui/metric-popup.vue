@@ -209,16 +209,11 @@ export default {
             paramMyInstance.deleteMetric(newName)
           }
         } else {
-          let nameChanged = false
           if (paramMyMetric.name !== newName) {
             if (paramMyMetric.name === '' && !newName) {
               // do nothing
             } else {
-              if (paramMyInstance.changeMetricName(paramMyMetric, newName, paramMyMetric.name)) {
-                nameChanged = true
-              } else {
-                showUserHint('Konnte Metrik-Namen nicht ändern. Metrik evtl. schon vorhanden?')
-              }
+              paramMyInstance.changeMetricName(paramMyMetric, newName)
             }
           }
           if (paramMyNewMetric.color !== paramMyMetric.color) {
@@ -227,10 +222,6 @@ export default {
             if (colorEle && colorEle[0]) {
               colorEle[0].style.color = paramMyMetric.color
             }
-          }
-          if (nameChanged) {
-            // TODO: do something, in this case, do forceUpdate the legendApp
-            //         so the metric's color will be shown
           }
           if (paramMyNewMetric.marker !== paramMyMetric.marker) {
             this.$store.dispatch('metrics/updateMarker', { metricKey, marker: paramMyMetric.marker })
