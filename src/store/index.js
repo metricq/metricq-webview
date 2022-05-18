@@ -21,6 +21,12 @@ export default new Vuex.Store({
       start: 0,
       end: 0
     },
+    performance: {
+      querytime: 0,
+      rendertime: 0,
+      agg: 0,
+      raw: 0
+    },
     toastConfiguration: new ToastConfig()
   },
   mutations: {
@@ -29,6 +35,18 @@ export default new Vuex.Store({
     },
     setEndTime (state, time) {
       state.timestamp.end = time
+    },
+    setQueryTime (state, time) {
+      state.performance.querytime = time
+    },
+    setRenderTime (state, time) {
+      state.performance.rendertime = time
+    },
+    setAggregatePoints (state, agg) {
+      state.performance.agg = agg
+    },
+    setRawPoints (state, raw) {
+      state.performance.raw = raw
     },
     setGlobalMinMax (state, newState) {
       state.globalMinMax = newState
