@@ -51,14 +51,22 @@ class MetricQWebView {
         }
       }
     }
-    this.setFootMargin()
     this.lastThrottledReloadTime = 0
     this.RELOAD_THROTTLING_DELAY = 150
     this.reloadThrottleTimeout = undefined
 
-    window.addEventListener('resize', (function (selfReference) { return function (evt) { selfReference.windowResize(evt) } }(this)))
-    const resizeObserver = new ResizeObserver(entries => { for (const entry of entries) { this.setLegendLayout() } })
+    if (paramMetricNamesArr.length > 0) {
+      this.handler.doRequest(400)
+    }
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (this.graticule) {
+          this.graticule.canvasResize(this.margins.canvas)
+        }
+      }
+    })
     resizeObserver.observe(document.getElementById('webview_container'))
+    resizeObserver.observe(document.body)
   }
 
   reinitialize (metricsArr, startTime, stopTime) {
@@ -69,20 +77,12 @@ class MetricQWebView {
 
   renderMetrics (datapointsJSON) {
     if (!this.hasPlot) {
-      const canvasSize = [parseInt(this.ele.offsetWidth), document.body.scrollHeight - this.margins.row_foot]
       const myCanvas = document.createElement('canvas')
-      myCanvas.setAttribute('width', canvasSize[0])
-      myCanvas.setAttribute('height', canvasSize[1])
       this.ele = this.ele.appendChild(myCanvas)
       const myContext = myCanvas.getContext('2d')
       // Params: (ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
       this.graticule = new Graticule(this.handler.metricQHistory,
-        myCanvas, myContext, [this.margins.canvas.left,
-          this.margins.canvas.top,
-          canvasSize[0] - (this.margins.canvas.right + this.margins.canvas.left),
-          canvasSize[1] - (this.margins.canvas.top + this.margins.canvas.bottom)],
-        this.margins.labels.left, this.margins.labels.bottom,
-        [canvasSize[0], canvasSize[1]])
+        myCanvas, myContext)
       this.hasPlot = true
       // TODO: neue Funktion handler.refreshTimeRange?
       this.handler.setTimeRange(this.handler.startTime, this.handler.stopTime)
@@ -274,53 +274,6 @@ class MetricQWebView {
     linkEle = document.body.appendChild(linkEle)
     linkEle.click()
     document.body.removeChild(linkEle)
-  }
-
-  windowResize (evt) {
-    if (this.graticule) {
-      this.setLegendLayout()
-    }
-  }
-
-  setFootMargin () {
-    const layout = this.store.state.configuration.legendDisplay
-    const heightHeader = document.getElementById('row_head').offsetHeight
-    if (layout === 'bottom') {
-      this.margins.row_foot = heightHeader + 140
-    } else if (layout === 'right') {
-      this.margins.row_foot = heightHeader + 50
-    }
-  }
-
-  setLegendLayout () {
-    this.setFootMargin()
-    this.setLegendListWidth()
-    if (this.graticule) this.graticule.canvasResize(this.margins.canvas, this.margins.row_foot)
-  }
-
-  setLegendListWidth () {
-    if (this.store.state.configuration.legendDisplay === 'right') {
-      if (this.graticule) this.graticule.canvasReset()
-      let maxWidth = 0
-      const minWidth = '250px'
-      const maxWidthPercent = 0.5
-      const legendItems = document.getElementsByClassName('legend_item')
-      document.getElementById('legend_list').style.whiteSpace = 'nowrap'
-      document.getElementById('legend_container').style.width = minWidth
-      for (let i = 0; i < legendItems.length; i++) {
-        if (legendItems[i].scrollWidth > maxWidth) {
-          maxWidth = legendItems[i].scrollWidth
-        }
-      }
-      if (maxWidth > window.innerWidth * maxWidthPercent) {
-        document.getElementById('legend_list').style.whiteSpace = 'normal'
-        maxWidth = window.innerWidth * maxWidthPercent
-      }
-      document.getElementById('legend_container').style.width = maxWidth + 100 + 'px'
-    } else {
-      document.getElementById('legend_list').style.whiteSpace = 'normal'
-      document.getElementById('legend_container').style.width = '100%'
-    }
   }
 }
 

@@ -2,27 +2,56 @@
   <li
     :class="'legend_item legend_item_' + position"
   >
-    <div
-      :class="metric.popupKey"
-      :style="{ backgroundColor: metric.color }"
-    />
-    <span class="metricText">&nbsp;{{ metric.htmlName }}</span>
-    <span
-      v-if="metric.description"
-      class="metricText"
-    >&nbsp;-
-      {{ metric.description }}</span>
-    &nbsp;
-    <img
-      class="metricImg metricImgLeft clickable"
-      src="img/icons/pencil.svg"
-      @click="metricPopup"
-    >
-    <img
-      class="metricImg clickable"
-      src="img/icons/trash.svg"
-      @click="trashcanClicked"
-    >
+    <table>
+      <tr>
+        <td>
+          <div
+            :class="metric.popupKey"
+            :style="{ backgroundColor: metric.color }"
+          />
+        </td>
+        <td>
+          <span
+            ref="metricName"
+            class="metricText"
+          >&nbsp;{{ metric.htmlName }}</span>
+        </td>
+        <td v-if="!multiline || position==='bottom'">
+          <span
+            v-if="metric.description"
+            class="metricText"
+          >&nbsp;-&nbsp;</span>
+          <span
+            v-if="metric.description"
+            ref="metricDesc"
+            class="metricText"
+          >{{ metric.description }}</span>
+        </td>
+        <td>
+          <span class="clickables">
+            <img
+              class="metricImg clickable"
+              src="img/icons/pencil.svg"
+              @click="metricPopup"
+            >
+            <img
+              class="metricImg clickable"
+              src="img/icons/trash.svg"
+              @click="trashcanClicked"
+            >
+          </span>
+        </td>
+      </tr>
+      <tr v-if="multiline && position === 'right'">
+        <td colspan="3">
+          <span
+            v-if="metric.description"
+            ref="metricDesc"
+            class="metricText"
+          >{{ metric.description }}</span>
+        </td>
+      </tr>
+    </table>
   </li>
 </template>
 
@@ -39,6 +68,22 @@ export default {
       required: true
     }
   },
+  data: function () {
+    return {
+      multiline: false,
+      maxwidth: 0
+    }
+  },
+  updated () {
+    this.maxwidth = this.$refs.metricName.clientWidth + this.$refs.metricDesc.clientWidth + 100
+    this.onResize()
+  },
+  mounted () {
+    this.ro = new ResizeObserver(this.onResize).observe(document.body)
+    try {
+      this.maxwidth = this.$refs.metricName.clientWidth + this.$refs.metricDesc.clientWidth + 100
+    } catch (ignore) {}
+  },
   methods: {
     metricPopup: function () {
       this.$store.commit('metrics/setPopup', {
@@ -48,6 +93,11 @@ export default {
     },
     trashcanClicked: function () {
       window.MetricQWebView.instances[0].deleteMetric(this.$props.metric.name)
+    },
+    onResize () {
+      const style = getComputedStyle(document.body)
+      const docMaxWidth = style.getPropertyValue('--legend_right_max_width').slice(0, -2) * document.body.clientWidth / 100
+      this.multiline = this.maxwidth > docMaxWidth
     }
   }
 }
@@ -57,17 +107,24 @@ export default {
 .metricText {
   margin-top: 1px;
   margin-bottom: -2px;
+  display: inline-block;
+  text-align: left;
 }
 
 .metricImg {
-  margin-top: 3px;
-}
-
-.metricImgLeft {
-  margin-left: auto
+  float: right;
 }
 
 span {
   cursor: default;
+}
+
+table {
+  width: 100%;
+}
+
+.clickables {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
