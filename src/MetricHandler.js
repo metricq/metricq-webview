@@ -70,33 +70,29 @@ export class MetricHandler {
 
       // execute query
       // TODO: pass parameter nonErrorProneMetrics
-      const myPromise = queryObj.run().then((function (selfReference, requestedMetrics) {
-        return function (dataset) {
-          selfReference.handleResponse(selfReference, requestedMetrics, dataset)
-        }
-      }(this, nonErrorProneMetrics)), (function (selfReference, requestedMetrics, paramDataPoints) {
-        return function (errorObject) {
-          console.log('Request failed: ' + requestedMetrics.join(','))
-          requestedMetrics.forEach((curVal) => {
-            console.log('Marking as faulty: ' + curVal)
-            selfReference.receivedError(0, curVal)
-          })
-          selfReference.doRequest(paramDataPoints)
-        }
-      }(this, nonErrorProneMetrics, maxDataPoints)))
-      // queryObj.run().then((dataset) => { this.handleResponse(dataset); });
+      queryObj.run().then((dataset) => {
+        this.handleResponse(nonErrorProneMetrics, dataset)
+      }).catch(() => {
+        console.log('Request failed: ' + nonErrorProneMetrics.join(','))
+        nonErrorProneMetrics.forEach((curVal) => {
+          console.log('Marking as faulty: ' + curVal)
+          this.receivedError(0, curVal)
+        })
+        this.doRequest(maxDataPoints)
+      })
     }
     for (let i = 0; i < remainingMetrics.length; ++i) {
       const queryObj = this.metricQHistory.query(this.startTime.getUnix() - timeMargin,
         this.stopTime.getUnix() + timeMargin,
         maxDataPoints)
       queryObj.target(remainingMetrics[i], defaultAggregates)
-
-      queryObj.run().then(function (selfReference, requestedMetrics) { return function (dataset) { selfReference.handleResponse(selfReference, requestedMetrics, dataset) } }(this, [remainingMetrics[i]]))
+      queryObj.run().then((dataset) => {
+        this.handleResponse(remainingMetrics[i], dataset)
+      })
     }
   }
 
-  handleResponse (selfReference, requestedMetrics, myData) {
+  handleResponse (requestedMetrics, myData) {
     const listOfFaultyMetrics = []
     for (let i = 0; i < requestedMetrics.length; ++i) {
       const metricName = requestedMetrics[i]
@@ -109,16 +105,16 @@ export class MetricHandler {
           matchingAggregatesCount += 1
         }
       }
-      if (!selfReference.checkIfMetricIsOk(metricName, matchingAggregatesCount, matchingAggregatesObj)) {
+      if (!this.checkIfMetricIsOk(metricName, matchingAggregatesCount, matchingAggregatesObj)) {
         listOfFaultyMetrics.push(metricName)
         console.log('Metric not ok:' + metricName)
-        selfReference.receivedError(0, metricName)
+        this.receivedError(0, metricName)
       }
     }
     if (listOfFaultyMetrics > 0) {
       showUserHint('Error with metrics: ' + listOfFaultyMetrics.join(', '))
     }
-    selfReference.renderer.renderMetrics(myData)
+    this.renderer.renderMetrics(myData)
   }
 
   checkIfMetricIsOk (metricName, aggregateCount, aggregateObj) {
@@ -136,29 +132,6 @@ export class MetricHandler {
 
   searchMetricsPromise (inputStr, metadata = false) {
     return this.metricQHistory.search(inputStr, metadata)
-  }
-
-  // TODO: 'drop'/remove this function
-  handleMetricResponse (selfReference, metricArr, evt) {
-    if (evt.target.readyState === 4) {
-      if (evt.target.status >= 200 &&
-        evt.target.status < 300) {
-        let parsedObj
-        try {
-          parsedObj = JSON.parse(evt.target.responseText)
-          // console.log("old Data format:");
-          // console.log(parsedObj);
-          console.log('Dropping data...')
-          // selfReference.renderer.renderMetrics(parsedObj);
-        } catch (exc) {
-          console.log('Couldn\'t parse')
-          console.log(exc)
-        }
-      } else {
-        console.log(evt.target)
-        selfReference.receivedError(evt.target.status, metricArr)
-      }
-    }
   }
 
   // TODO: move this function to DataCache, maybe?
