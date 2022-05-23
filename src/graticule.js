@@ -966,6 +966,9 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
                 } else if (styleOptions.connect === 3) {
                   ctx.lineTo(x, previousY)
                   ctx.lineTo(x, y)
+                  if (j === curSeries.points.length - 1) {
+                    ctx.lineTo(x + x - previousX, y)
+                  }
                 }
               }
             }
@@ -978,7 +981,6 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
           }
           if (styleOptions.connect > 0) {
             ctx.stroke()
-            ctx.closePath()
           }
           // reset ctx style options
           this.resetCtx(ctx)

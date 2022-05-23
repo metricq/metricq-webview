@@ -263,8 +263,15 @@ function MetricCache (paramMetricQReference, paramMetricName) {
       for (let i = 0; i < minSeries.points.length; ++i) {
         this.band.addPoint(minSeries.points[i].clone())
       }
+      const lastMinPoint = minSeries.points[minSeries.points.length - 1].clone()
+      const interval = lastMinPoint.time - minSeries.points[minSeries.points.length - 2].time
+      lastMinPoint.time += interval
+      this.band.addPoint(lastMinPoint)
       this.band.setSwitchOverIndex()
       const maxSeries = this.series.max
+      const lastMaxPoint = maxSeries.points[maxSeries.points.length - 1].clone()
+      lastMaxPoint.time += interval
+      this.band.addPoint(lastMaxPoint)
       for (let i = maxSeries.points.length - 1; i >= 0; --i) {
         this.band.addPoint(maxSeries.points[i].clone())
       }
