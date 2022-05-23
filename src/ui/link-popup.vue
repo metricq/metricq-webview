@@ -27,7 +27,7 @@
             alt="Fork me on GitHub"
             data-recalc-dims="1"
           > </a>
-          <br>MetricQWebview dient der Visualisierung von MetricQ-Daten
+          <br>MetricQ-Webview dient der Visualisierung von MetricQ-Daten
           <br>unter Ausnutzung der  Vorteile des HTA DB Backends
           <br><br>
           Autoren:

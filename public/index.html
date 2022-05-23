@@ -25,24 +25,25 @@
       <label class="btn btn-outline-primary btn-navbar" id="button_configuration"
              v-on:click="configurationButtonClicked">
         <img class="navimg" src="img/icons/tools.svg"/>
-        Einstellungen
+        <span>Einstellungen</span>
       </label>
       <br/>
       <label class="btn btn-outline-primary btn-navbar" id="button_export" v-on:click="exportButtonClicked">
         <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
-        Export
+        <span>Export</span>
       </label>
       <label class="btn btn-outline-primary btn-navbar" id="button_analyze" v-on:click="analyzeButtonClicked">
         <img class="navimg" src="img/icons/search.svg"/>
-        Analyse
+        <span>Analyse</span>
       </label>
       <label class="btn btn-outline-primary btn-navbar">
         <input type="checkbox" id='checkbox_min_max' v-bind:checked="globalMinMax" v-on:change="toggleMinMaxButton">
-        min/max anzeigen
+        <span>min/max anzeigen</span>
       </label>
       <label class="btn btn-outline-primary btn-navbar" id="button_palette" v-on:click="colorPaletteClicked"
              alt="Nutze eindeutige Farben">
         <img class="navimg" src="img/icons/color-palette.svg"/>
+        <span>Eindeutige Farben</span>
       </label>
       <label>
         <time-button id="date_range" class="btn btn-outline-primary btn-navbar"
@@ -52,6 +53,7 @@
       </label>
       <label class="btn btn-outline-primary btn-navbar" id="button_link" v-on:click="linkButtonClicked">
         <img class="navimg" src="img/icons/question-circle.svg"/>
+        <span>Information</span>
       </label>
     </nav>
   </div>

@@ -5,7 +5,7 @@
       width="20"
       height="20"
     >&nbsp;
-    {{ starttimeFormatted }} - {{ endtimeFormatted }}
+    <span>{{ starttimeFormatted }} - {{ endtimeFormatted }}</span>
   </li>
 </template>
 
