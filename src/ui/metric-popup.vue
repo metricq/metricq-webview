@@ -129,8 +129,8 @@
 import { markerSymbols } from '../metric.js'
 import PopupHeader from './popup-header.vue'
 import { veil } from './veil.js'
-import { showUserHint } from '../interact.js'
 import { Colorchooser } from '../colorchooser.js'
+import Vue from 'vue'
 
 export default {
   components: { PopupHeader },
@@ -243,7 +243,7 @@ export default {
     changeDraw: function (evt) {
       if (this.metric.drawMin === false && this.metric.drawAvg === false && this.metric.drawMax === false) {
         evt.target.click()
-        window.alert('Fehler! Mindestens eine Option muss ausgewählt bleiben!')
+        Vue.toasted.error('Fehler! Mindestens eine Anzeigeoption muss ausgewählt bleiben!', this.$store.state.toastConfiguration)
       } else {
         this.$store.dispatch('metrics/checkGlobalDrawState')
       }
@@ -261,10 +261,10 @@ export default {
       }
       // TODO: implement throttling?
       instance.handler.searchMetricsPromise(evt.target.value).then(
-        function (searchSuggestions) {
+        (searchSuggestions) => {
           const datalistEle = document.getElementById('autocomplete_metric')
           if (!datalistEle) {
-            showUserHint('Auto-Vervollständigung nicht verfügbar, konnte Element #autocomplete_metric nicht finden.')
+            Vue.toasted.error('Auto-Vervollständigung nicht verfügbar, konnte Element #autocomplete_metric nicht finden.', this.$store.state.toastConfiguration)
           } else {
             for (let i = datalistEle.childNodes.length - 1; i >= 0; --i) {
               datalistEle.removeChild(datalistEle.childNodes[i])

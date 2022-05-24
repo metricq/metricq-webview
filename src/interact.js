@@ -1,4 +1,5 @@
 import store from './store/'
+import Vue from 'vue'
 
 const uiOptions = {
   horizontalScrolling: false,
@@ -93,7 +94,7 @@ function uiInteractZoomIn (metricQInstance, evtObj) {
       posStart = swap
     }
     if (!metricQInstance.handler.setTimeRange(Math.round(posStart[0]), Math.round(posEnd[0]))) {
-      showUserHint('Zoom-Limit erreicht.')
+      Vue.toasted.error('Zoom-Limit erreicht.', store.state.toastConfiguration)
     }
     metricQInstance.reload() // no need to throttle reload here
     metricQInstance.graticule.draw(false)
@@ -110,11 +111,11 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
     // TODO: set start and stopTime of the handler
     if (evtObj.deltaX < 0) {
       if (!metricQInstance.handler.setTimeRange(metricQInstance.graticule.curTimeRange[0] - deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] - deltaRange * 0.2)) {
-        showUserHint('Zoom-Limit erreicht.')
+        Vue.toasted.error('Zoom-Limit erreicht.', store.state.toastConfiguration)
       }
     } else if (evtObj.deltaX > 0) {
       if (!metricQInstance.handler.setTimeRange(metricQInstance.graticule.curTimeRange[0] + deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] + deltaRange * 0.2)) {
-        showUserHint('Zoom-Limit erreicht.')
+        Vue.toasted.error('Zoom-Limit erreicht.', store.state.toastConfiguration)
       }
     }
     metricQInstance.throttledReload()
@@ -132,7 +133,7 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
     const curTimeValue = metricQInstance.graticule.getTimeValueAtPoint(curPos)
     if (curTimeValue) {
       if (!metricQInstance.handler.zoomTimeAtPoint(curTimeValue, scrollDirection)) {
-        showUserHint('Konnte nicht weiter zoomen, Limit erreicht')
+        Vue.toasted.error('Konnte nicht weiter zoomen, Limit erreicht', store.state.toastConfiguration)
       }
       metricQInstance.throttledReload()
       metricQInstance.graticule.draw(false)
@@ -431,49 +432,6 @@ const keyDown = {
     }
     return false
   }
-}
-
-let userHintWindow
-
-export function showUserHint (messageText, showDuration) {
-  if (undefined === showDuration) {
-    showDuration = 2000 + messageText.length * 50
-  }
-  if (userHintWindow && userHintWindow.parentNode) {
-    userHintWindow.parentNode.removeChild(userHintWindow)
-    userHintWindow = undefined
-  }
-  let windowWidth = 10 + Math.min(messageText.length, 80) * 7
-  if (windowWidth > window.innerWidth) {
-    windowWidth = window.innerWidth
-  }
-  const windowHeight = Math.ceil(messageText.length / 80) * 27
-
-  let windowEle = document.createElement('div')
-  windowEle.style.position = 'fixed'
-  windowEle.style.left = Math.floor(window.innerWidth / 2 - windowWidth / 2)
-  windowEle.style.top = Math.floor(window.innerHeight / 2 - windowHeight / 2)
-  windowEle.style.fontSize = '10pt'
-  windowEle.style.border = '1px solid #000000'
-  windowEle.style.borderRadius = '18px'
-  windowEle.style.padding = '3px 6px 3px 6px'
-  windowEle.style.width = windowWidth
-  windowEle.style.height = windowHeight
-  windowEle.style.backgroundColor = '#fdfddb'
-  windowEle.appendChild(document.createTextNode(messageText))
-  userHintWindow = windowEle = document.getElementsByTagName('body')[0].appendChild(windowEle)
-  setTimeout((function (hintEle) {
-    return function () {
-      if (hintEle) {
-        hintEle.animate([{ opacity: 1 }, { opacity: 0.01 }],
-          {
-            duration: 1200,
-            iterations: 1
-          })
-      }
-    }
-  }(windowEle)), showDuration - 1200)
-  setTimeout((function (hintEle) { return function () { if (hintEle && hintEle.parentNode) { hintEle.parentNode.removeChild(hintEle) } } }(windowEle)), showDuration)
 }
 
 /* figure out scroll offset */

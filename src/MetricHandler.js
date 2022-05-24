@@ -1,7 +1,7 @@
 import { markerSymbols } from './metric.js'
 import { MetricTimestamp } from './MetricTimestamp.js'
-import { showUserHint } from './interact.js'
 import MetricQHistory from '@metricq/history'
+import Vue from 'vue'
 
 const METRICQ_BACKEND = process.env.VUE_APP_METRICQ_BACKEND
 const [METRICQ_BACKEND_USER, METRICQ_BACKEND_PASSWORD] = process.env.VUE_APP_METRICQ_BACKEND_AUTH === undefined ? [undefined, undefined] : process.env.VUE_APP_METRICQ_BACKEND_AUTH.split(':')
@@ -111,8 +111,8 @@ export class MetricHandler {
         this.receivedError(0, metricName)
       }
     }
-    if (listOfFaultyMetrics > 0) {
-      showUserHint('Error with metrics: ' + listOfFaultyMetrics.join(', '))
+    if (listOfFaultyMetrics.length > 0) {
+      Vue.toasted.error('Fehler mit Metriken: ' + listOfFaultyMetrics.join(', '), this.store.state.toastConfiguration)
     }
     this.renderer.renderMetrics(myData)
   }

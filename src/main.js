@@ -1,7 +1,6 @@
 import Vue from 'vue'
 
 import { createGlobalMetricQWebview, importMetricUrl } from './MetricQWebView.js'
-import { showUserHint } from './interact.js'
 import store from './store/'
 
 import './app.js'
@@ -13,7 +12,7 @@ if (window.location.href.indexOf('#') > -1) {
   try {
     importMetricUrl()
   } catch (exc) {
-    showUserHint('Could not import metrics.')
+    Vue.toasted.error('Ungültige URL: Metriken konnten nicht hinzugefügt werden.', store.state.toastConfiguration)
     console.log('Could not import metrics.')
     console.log(exc)
   }
