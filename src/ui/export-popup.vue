@@ -64,15 +64,29 @@
               </select>
             </div>
           </div>
+          <div class="form-group row">
+            <label
+              class="col-sm-3 col-form-label"
+              for="export_format"
+            >mit Analyse</label>
+            <div class="col-sm-7">
+              <input
+                id="exportAnalyzeCheck"
+                v-model="exportAnalyze"
+                type="checkbox"
+                class="form-control-sm"
+              >
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button
             class="btn btn-primary"
-            :disabled="!pdfReady && selectedFileformat === 'pdf'"
+            :disabled="!analyzeTableReady && selectedFileformat === 'pdf' && exportAnalyze"
             @click="doExport"
           >
             <span
-              v-if="pdfReady || selectedFileformat !== 'pdf'"
+              v-if="analyzeTableReady || selectedFileformat !== 'pdf' || !exportAnalyze"
             >
               Export
             </span>
@@ -102,10 +116,11 @@
             style="height: 100%; width: 100%"
           >
           <div
+            v-if="exportAnalyze"
             id="anaTable"
             class="anaTable"
           >
-            <analyzeTable @finished="pdfLoaded" />
+            <analyzeTable @finished="analyzeTableLoaded" />
           </div>
         </section>
       </VueHtml2pdf>
@@ -126,7 +141,8 @@ export default {
     return {
       popupTitle: 'Export',
       image: '',
-      pdfReady: false
+      analyzeTableReady: false,
+      exportAnalyze: false
     }
   },
   computed: {
@@ -174,7 +190,11 @@ export default {
   methods: {
     doExport: async function () {
       if (this.selectedFileformat === 'pdf') {
-        const canvas = this.createNewCanvas(document.getElementById('anaTable').offsetHeight)
+        let marginBottom = 0
+        if (this.exportAnalyze) {
+          marginBottom = document.getElementById('anaTable').offsetHeight
+        }
+        const canvas = this.createNewCanvas(marginBottom)
         this.addData(canvas)
         this.image = canvas.toDataURL('image/png')
         const result = await this.waitNewCanvas()
@@ -221,8 +241,8 @@ export default {
         canvas.height / scale - (margins.top + margins.bottom)]
       instance.graticule.draw(false, exportCanvasContext, size)
     },
-    pdfLoaded () {
-      this.pdfReady = true
+    analyzeTableLoaded () {
+      this.analyzeTableReady = true
     }
   }
 }
