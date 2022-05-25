@@ -258,27 +258,33 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     } else {
       this.band = new Band(this.defaultBandStyling(this.name))
     }
-    if (this.series.min && this.series.max) {
-      const minSeries = this.series.min
-      for (let i = 0; i < minSeries.points.length; ++i) {
-        this.band.addPoint(minSeries.points[i].clone())
-      }
-      const lastMinPoint = minSeries.points[minSeries.points.length - 1].clone()
-      const interval = lastMinPoint.time - minSeries.points[minSeries.points.length - 2].time
-      lastMinPoint.time += interval
-      this.band.addPoint(lastMinPoint)
-      this.band.setSwitchOverIndex()
-      const maxSeries = this.series.max
-      const lastMaxPoint = maxSeries.points[maxSeries.points.length - 1].clone()
-      lastMaxPoint.time += interval
-      this.band.addPoint(lastMaxPoint)
-      for (let i = maxSeries.points.length - 1; i >= 0; --i) {
-        this.band.addPoint(maxSeries.points[i].clone())
-      }
-      return this.band
-    } else {
+    if (!this.series.min || !this.series.max) {
       return undefined
     }
+    const minSeries = this.series.min
+    const maxSeries = this.series.max
+    const seriesLength = minSeries.points.length
+    if (minSeries.length !== maxSeries.length) {
+      throw new Error('Serienlängen nicht identisch!')
+    }
+    if (seriesLength < 2) {
+      return this.band
+    }
+    for (let i = 0; i < seriesLength; ++i) {
+      this.band.addPoint(minSeries.points[i].clone())
+    }
+    const lastMinPoint = minSeries.points[seriesLength - 1].clone()
+    const interval = lastMinPoint.time - minSeries.points[seriesLength - 2].time
+    lastMinPoint.time += interval
+    this.band.addPoint(lastMinPoint)
+    this.band.setSwitchOverIndex()
+    const lastMaxPoint = maxSeries.points[seriesLength - 1].clone()
+    lastMaxPoint.time += interval
+    this.band.addPoint(lastMaxPoint)
+    for (let i = seriesLength - 1; i >= 0; --i) {
+      this.band.addPoint(maxSeries.points[i].clone())
+    }
+    return this.band
   }
   this.clearSeries = function (seriesSpecifier) {
     const curSeries = this.getSeries(seriesSpecifier)
