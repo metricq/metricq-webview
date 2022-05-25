@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import store from '@/store/index'
 import { MetricHelper } from '@/metric'
-import { DuplicateMetricError } from '@/errors'
+import * as Error from '@/errors'
 
 export default {
   namespaced: true,
@@ -123,7 +123,7 @@ export default {
       dispatch('checkGlobalDrawState')
     },
 
-    create ({ commit, state, dispatch, getters }, {
+    async create ({ commit, state, dispatch, getters }, {
       metric: {
         name,
         description,
@@ -137,44 +137,40 @@ export default {
       }
     }) {
       if (state.metrics[name] !== undefined) {
-        throw new DuplicateMetricError(name)
+        throw new Error.DuplicateMetricError(name)
+      } else {
+        let metadataObj
+        try {
+          metadataObj = await window.MetricQWebView.instances[0].handler.metricQHistory.metadata(name)
+        } catch (error) {
+          throw new Error.InvalidMetricError(name)
+        }
+        commit('privateSet', {
+          metricKey: name,
+          metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg }
+        })
+        const metric = state.metrics[name]
+        // marker and color are stored here and deep inside MetricQWebView/MetricHandler/Graticule
+        dispatch('updateColor', { metricKey: name, color: metric.color })
+        dispatch('updateMarker', { metricKey: name, color: metric.marker })
+        // fetch description from the backend, if necessary
+        dispatch('updateDescription', { metricKey: name, description, metadataObj })
+        // maybe we changed the globale draw state?
+        dispatch('checkGlobalDrawState')
+        dispatch('updateUnit', { metricKey: name, unit, metadataObj })
       }
-
-      commit('privateSet', {
-        metricKey: name,
-        metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg }
-      })
-      const metric = state.metrics[name]
-      // marker and color are stored here and deep inside MetricQWebView/MetricHandler/Graticule
-      dispatch('updateColor', { metricKey: name, color: metric.color })
-      dispatch('updateMarker', { metricKey: name, color: metric.marker })
-      // fetch description from the backend, if necessary
-      dispatch('updateDescription', { metricKey: name, description })
-      // maybe we changed the globale draw state?
-      dispatch('checkGlobalDrawState')
-      dispatch('updateUnit', { metricKey: name, unit })
     },
-    updateDescription ({ commit, state }, { metricKey, description }) {
-      const metric = state.metrics[metricKey]
+    updateDescription ({ commit, state }, { metricKey, description, metadataObj }) {
       if (description === undefined) {
-        commit('privateSet', { metricKey, metric: { description: '' } })
-        window.MetricQWebView.instances[0].handler.metricQHistory.metadata(metric.name).then((metadataObj) => {
-          commit('privateSet', { metricKey, metric: { description: metadataObj.description } })
-        })
-      } else {
-        commit('privateSet', { metricKey, metric: { description: description } })
+        description = metadataObj.description
       }
+      commit('privateSet', { metricKey, metric: { description: description } })
     },
-    updateUnit ({ commit, state }, { metricKey, unit }) {
-      const metric = state.metrics[metricKey]
+    updateUnit ({ commit, state }, { metricKey, unit, metadataObj }) {
       if (unit === undefined) {
-        commit('privateSet', { metricKey, metric: { unit: '' } })
-        window.MetricQWebView.instances[0].handler.metricQHistory.metadata(metric.name).then((metadataObj) => {
-          commit('privateSet', { metricKey, metric: { unit: metadataObj.unit } })
-        })
-      } else {
-        commit('privateSet', { metricKey, metric: { unit: unit } })
+        unit = metadataObj.unit
       }
+      commit('privateSet', { metricKey, metric: { unit: unit } })
     },
     updateColor ({ commit, state }, { metricKey, color }) {
       commit('privateSet', { metricKey, metric: { color } })

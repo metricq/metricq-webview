@@ -54,6 +54,7 @@ export const mainApp = new Vue({
     },
     metricsList: function () {
       window.MetricQWebView.instances[0].updateMetricUrl()
+      setTimeout(function () { window.MetricQWebView.instances[0].reload() }, 0)
       setTimeout(function () { window.MetricQWebView.instances[0].setLegendLayout() }, 0)
     }
   },

@@ -119,19 +119,9 @@ export default {
     },
     addMetrics: function (evt) {
       if (this.value != null) {
-        this.value.forEach((item) => {
-          try {
-            this.$store.dispatch('metrics/create', { metric: { name: item.title, description: item.desc } })
-          } catch (error) {
-            if (error instanceof DuplicateMetricError) {
-              Vue.toasted.error(`Metrik ${error.metricName} ist bereits vorhanden!`, {
-                theme: this.$store.state.toastConfiguration.theme,
-                position: this.$store.state.toastConfiguration.position,
-                duration: this.$store.state.toastConfiguration.duration
-              })
-            }
-          }
-        })
+        for (const item of this.value) {
+          window.MetricQWebView.instances[0].addMetric(item.title, item.desc)
+        }
       }
       this.closePopup(evt)
     },
