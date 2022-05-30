@@ -1,13 +1,11 @@
 import { crc32 } from '../lib/pseudo-crc32.js'
 import { hslToRgb } from '../lib/color-conversion.js'
-import { METRICQ_BACKEND } from './MetricHandler.js'
 import moment from 'moment'
 
 export function DataCache (paramMetricQHistoryReference) {
   this.metricQHistory = paramMetricQHistoryReference
   this.metrics = []
-  this.processMetricQDatapoints = function (datapointsJSON, doDraw, doResize) {
-    // console.log(datapointsJSON);
+  this.processMetricQDatapoints = function (datapointsJSON) {
     const distinctMetrics = {}
     const indexesOfCountData = []
     for (const targetName in datapointsJSON) {
@@ -150,16 +148,6 @@ export function DataCache (paramMetricQHistoryReference) {
     }
     return false
   }
-  this.updateStyling = function () {
-    for (let i = 0; i < this.metrics.length; ++i) {
-      for (const curAggregate in this.metrics[i].series) {
-        if (this.metrics[i].series[curAggregate]) {
-          this.metrics[i].series[curAggregate].styleOptions = this.defaultSeriesStyling(this.metrics[i].name, curAggregate)
-        }
-      }
-      this.metrics[i].band.styleOptions = this.defaultBandStyling(this.metrics[i].name)
-    }
-  }
   this.getAllValuesAtTime = function (timeAt) {
     const valueArr = []
     for (let i = 0; i < this.metrics.length; ++i) {
@@ -231,12 +219,6 @@ function MetricCache (paramMetricQReference, paramMetricName) {
   this.allTime = {}
   this.meta = undefined
   this.metricQHistory = paramMetricQReference
-  this.resetData = function () {
-    delete this.series
-    delete this.bands
-    this.series = []
-    this.bands = []
-  }
   this.clearNonRawAggregates = function () {
     for (const curAggregate in this.series) {
       if (curAggregate !== 'raw' && this.series[curAggregate]) {
@@ -285,14 +267,6 @@ function MetricCache (paramMetricQReference, paramMetricName) {
       this.band.addPoint(maxSeries.points[i].clone())
     }
     return this.band
-  }
-  this.clearSeries = function (seriesSpecifier) {
-    const curSeries = this.getSeries(seriesSpecifier)
-    if (curSeries) {
-      curSeries.clear()
-      return curSeries
-    }
-    return undefined
   }
   this.parseCountDatapoints = function (countDatapoints) {
     for (const curAggregate in this.series) {
@@ -564,8 +538,6 @@ function Point (paramTime, paramValue) {
     return new Point(this.time, this.value)
   }
 }
-
-const timers = {}
 
 const stylingOptions = {
   list: [

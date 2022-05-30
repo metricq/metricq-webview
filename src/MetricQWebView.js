@@ -1,6 +1,5 @@
 import { MetricHandler } from './MetricHandler.js'
 import { Graticule } from './graticule.js'
-import { markerSymbols } from './metric.js'
 import { registerCallbacks } from './interact.js'
 import JSURL from 'jsurl'
 import Vue from 'vue'
@@ -86,8 +85,7 @@ class MetricQWebView {
       this.hasPlot = true
       // TODO: neue Funktion handler.refreshTimeRange?
       this.handler.setTimeRange(this.handler.startTime, this.handler.stopTime)
-      // parameters two and three "true" (doDraw, doResize) are ignored here :/
-      this.graticule.data.processMetricQDatapoints(datapointsJSON, true, true)
+      this.graticule.data.processMetricQDatapoints(datapointsJSON)
       // URL import problem here: the response's start and end time are taken here :/
       this.graticule.automaticallyDetermineRanges(false, true)
       this.graticule.draw(false)
@@ -132,8 +130,7 @@ class MetricQWebView {
         this.store.commit('togglePopup', 'yaxis')
       })
     } else {
-      // Parameters: JSON, doDraw, doResize
-      this.graticule.data.processMetricQDatapoints(datapointsJSON, true, false)
+      this.graticule.data.processMetricQDatapoints(datapointsJSON)
       this.graticule.automaticallyDetermineRanges(false, true)
       this.graticule.draw(false)
     }
@@ -241,10 +238,7 @@ class MetricQWebView {
     if (await this.addMetric(newName, undefined, oldMetric)) {
       this.deleteMetric(oldMetric.name)
       if (this.graticule) {
-        const newCache = this.graticule.data.getMetricCache(newName)
-        if (!newCache) {
-          this.graticule.data.initializeCacheWithColor(newName, oldMetric.color)
-        }
+        this.graticule.data.initializeCacheWithColor(newName, oldMetric.color)
       }
     }
   }
@@ -417,11 +411,5 @@ export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
   if (window.MetricQWebView) {
     newManager = window.MetricQWebView.instances[0]
     newManager.reinitialize(metricNamesArr, timeStart, timeStop)
-  } // else Zweig wird anscheinend nie benötigt
-  /* else {
-    console.log('2')
-    newManager = new MetricQWebView(document.querySelector('.row_body'), metricNamesArr, timeStart, timeStop)
-    newManager.postRender = function () {
-    }
-  } */
+  }
 }
