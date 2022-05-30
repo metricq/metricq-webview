@@ -1,31 +1,34 @@
 import { DataCache } from './data-handling.js'
 import store from './store/'
 
-export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
-  this.ele = paramEle
-  this.ctx = ctx
-  this.canvasSize = [0, 0]
-  this.graticuleDimensions = [0, 0, 0, 0]
-  this.curTimeRange = undefined
-  this.curValueRange = undefined
-  this.curTimePerPixel = undefined
-  this.curValuesPerPixel = undefined
-  this.pixelsLeft = 0
-  this.pixelsBottom = 0
-  this.clearSize = [0, 0]
-  this.lastRangeChangeTime = 0
-  this.yRangeOverride = {
-    type: 'local',
-    min: 0,
-    max: 0
+export class Graticule {
+  constructor (paramMetricQHistoryReference, paramEle, ctx) {
+    this.ele = paramEle
+    this.ctx = ctx
+    this.canvasSize = [0, 0]
+    this.graticuleDimensions = [0, 0, 0, 0]
+    this.curTimeRange = undefined
+    this.curValueRange = undefined
+    this.curTimePerPixel = undefined
+    this.curValuesPerPixel = undefined
+    this.pixelsLeft = 0
+    this.pixelsBottom = 0
+    this.clearSize = [0, 0]
+    this.lastRangeChangeTime = 0
+    this.yRangeOverride = {
+      type: 'local',
+      min: 0,
+      max: 0
+    }
+    this.data = new DataCache(paramMetricQHistoryReference)
+    // TODO: take these non-changing parameters
+    //      as parameters to initialisation
+    this.MAX_ZOOM_TIME = 20 * 365 * 24 * 3600 * 1000
+    this.MIN_ZOOM_TIME = 10
+    this.DEFAULT_FONT = 'sans-serif'
   }
-  this.data = new DataCache(paramMetricQHistoryReference)
-  // TODO: take these non-changing parameters
-  //      as parameters to initialisation
-  this.MAX_ZOOM_TIME = 20 * 365 * 24 * 3600 * 1000
-  this.MIN_ZOOM_TIME = 10
-  this.DEFAULT_FONT = 'sans-serif'
-  this.figureOutTimeSteps = function (maxStepsAllowed) {
+
+  figureOutTimeSteps (maxStepsAllowed) {
     const startTime = new Date(this.curTimeRange[0])
     const deltaTime = this.curTimeRange[1] - this.curTimeRange[0]
     const timeStretches = [
@@ -210,7 +213,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
     }
     return outArr
   }
-  this.figureOutLogarithmicSteps = function (rangeStart, rangeEnd, maxStepsAllowed) {
+
+  figureOutLogarithmicSteps (rangeStart, rangeEnd, maxStepsAllowed) {
     const deltaRange = rangeEnd - rangeStart
     // due to floating point errors we have to increment deltaRange slightly
     // so as to arrive at the correct logarithmic value
@@ -246,14 +250,14 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
     return stepsArr
   }
 
-  this.formatAxisNumber = function (value) {
+  formatAxisNumber (value) {
     if (Math.abs(value) >= 10000) {
       return Number.parseFloat(value).toExponential(3)
     }
     return value
   }
 
-  this.drawGrid = function (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions = this.graticuleDimensions) {
+  drawGrid (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions = this.graticuleDimensions) {
     /* draw lines */
     ctx.fillStyle = 'rgba(192,192,192,0.5)'
 
@@ -325,7 +329,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
       ctx.restore()
     }
   }
-  this.getTimeValueAtPoint = function (positionArr) {
+
+  getTimeValueAtPoint (positionArr) {
     const relationalPos = [positionArr[0] - this.graticuleDimensions[0],
       positionArr[1] - this.graticuleDimensions[1]]
     if (undefined !== this.curTimeRange &&
@@ -341,32 +346,38 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
       return undefined
     }
   }
-  this.moveTimeAndValueRanges = function (moveTimeBy, moveValueBy) {
+
+  moveTimeAndValueRanges (moveTimeBy, moveValueBy) {
     this.curTimeRange[0] += moveTimeBy
     this.curTimeRange[1] += moveTimeBy
     this.curValueRange[0] += moveValueBy
     this.curValueRange[1] += moveValueBy
     this.lastRangeChangeTime = (new Date()).getTime()
   }
-  this.setTimeRange = function (paramStartTime, paramStopTime) {
+
+  setTimeRange (paramStartTime, paramStopTime) {
     this.curTimeRange = [paramStartTime, paramStopTime]
     this.curTimePerPixel = (this.curTimeRange[1] - this.curTimeRange[0]) / this.graticuleDimensions[2]
     this.lastRangeChangeTime = (new Date()).getTime()
     return true
   }
-  this.setValueRange = function (paramRangeStart = undefined, paramRangeEnd = undefined) {
+
+  setValueRange (paramRangeStart = undefined, paramRangeEnd = undefined) {
     if (undefined !== paramRangeStart) this.curValueRange[0] = paramRangeStart
     if (undefined !== paramRangeEnd) this.curValueRange[1] = paramRangeEnd
     this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.graticuleDimensions[3]
     this.lastRangeChangeTime = (new Date()).getTime()
   }
-  this.setTimeRangeExport = function (timeSpace = this.graticuleDimensions[2]) {
+
+  setTimeRangeExport (timeSpace = this.graticuleDimensions[2]) {
     return (this.curTimeRange[1] - this.curTimeRange[0]) / timeSpace
   }
-  this.setValueRangeExport = function (valueSpace = this.graticuleDimensions[3]) {
+
+  setValueRangeExport (valueSpace = this.graticuleDimensions[3]) {
     return (this.curValueRange[1] - this.curValueRange[0]) / valueSpace
   }
-  this.setYRangeOverride = function (paramTypeStr, paramValueStart, paramValueEnd) {
+
+  setYRangeOverride (paramTypeStr, paramValueStart, paramValueEnd) {
     if (paramTypeStr !== 'local' &&
       paramTypeStr !== 'global' &&
       paramTypeStr !== 'manual' &&
@@ -381,7 +392,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
       this.curValueRange[1] = paramValueEnd
     }
   }
-  this.automaticallyDetermineRanges = function (determineTimeRange, determineValueRange) {
+
+  automaticallyDetermineRanges (determineTimeRange, determineValueRange) {
     // uh oh, this case is troublesome, when we wrap
     //   the time in a handler, like we do
     if (determineTimeRange) {
@@ -396,9 +408,10 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
       this.lastRangeChangeTime = (new Date()).getTime()
     }
   }
+
   // since automaticallyDetermineRanges is not suitable anymore,
   //  parameter 'adjustRanges' should never be true!
-  this.draw = function (adjustRanges, ctx = this.ctx, exportValues = undefined) {
+  draw (adjustRanges, ctx = this.ctx, exportValues = undefined) {
     // timers.drawing = {
     //   start: (new Date()).getTime(),
     //   end: 0
@@ -440,7 +453,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
     // TODO: Make timings accessible
     // showTimers();
   }
-  this.parseStyleOptions = function (styleOptions, ctx) {
+
+  parseStyleOptions (styleOptions, ctx) {
     if (styleOptions !== undefined) {
       if (styleOptions.width !== undefined) {
         styleOptions.pointWidth = parseFloat(styleOptions.width)
@@ -636,7 +650,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
     }
     return styleOptions
   }
-  this.drawBands = function (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
+
+  drawBands (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
       if (store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).drawMin && store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).drawMax) {
         const curBand = this.data.metrics[i].band
@@ -694,7 +709,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
       }
     }
   }
-  this.drawSeries = function (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
+
+  drawSeries (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
       if (this.data.metrics[i].series.raw === undefined) {
         const metricDrawState = store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name)
@@ -758,7 +774,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
       }
     }
   }
-  this.generateOffsiteDot = function (styleOptions) {
+
+  generateOffsiteDot (styleOptions) {
     const BODY = document.getElementsByTagName('body')[0]
     const canvas = document.createElement('canvas')
     const ctxDimensions = [styleOptions.pointWidth,
@@ -783,14 +800,17 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
       offsetY: (ctxDimensions[1] / 2) * -1
     }
   }
-  this.resetCtx = function (ctx) {
+
+  resetCtx (ctx) {
     ctx.setLineDash([])
     ctx.globalAlpha = 1
   }
-  this.figureOutTimeRange = function () {
+
+  figureOutTimeRange () {
     return this.data.getTimeRange()
   }
-  this.figureOutValueRange = function (allTimeValueRanges) {
+
+  figureOutValueRange (allTimeValueRanges) {
     const valueRange = this.data.getValueRange(allTimeValueRanges, this.curTimeRange[0], this.curTimeRange[1])
     if (undefined !== valueRange[0]) {
       // add wiggle room
@@ -800,7 +820,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
     return valueRange
   }
 
-  this.canvasResize = function (canvasMargins) {
+  canvasResize (canvasMargins) {
     this.canvasReset()
     const newSize = [document.getElementById('webview_container').offsetWidth, document.getElementById('wrapper_body').clientHeight]
     this.clearSize = newSize
@@ -812,7 +832,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
     this.draw(false)
   }
 
-  this.canvasReset = function () {
+  canvasReset () {
     // is needed so that metriclegend can take the necessary space and canvas takes the rest
     this.ctx.canvas.width = 0
     this.ctx.canvas.height = 0

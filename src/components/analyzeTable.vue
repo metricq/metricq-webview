@@ -60,16 +60,16 @@ import moment from 'moment'
 
 export default {
   name: 'AnalyzeTable',
-  data: function () {
+  data () {
     return {
       loaded: false
     }
   },
   computed: {
-    startTimeFormatted: function () {
+    startTimeFormatted () {
       return moment(this.timestamp.start).format()
     },
-    endTimeFormatted: function () {
+    endTimeFormatted () {
       return moment(this.timestamp.end).format()
     },
     ...mapState([

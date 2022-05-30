@@ -23,7 +23,7 @@ export default {
     }
   },
   methods: {
-    newMetricPopup: function () {
+    newMetricPopup () {
       this.$store.commit('togglePopup', 'newmetric')
     }
   }

@@ -2,10 +2,13 @@ import { crc32 } from '../lib/pseudo-crc32.js'
 import { hslToRgb } from '../lib/color-conversion.js'
 import moment from 'moment'
 
-export function DataCache (paramMetricQHistoryReference) {
-  this.metricQHistory = paramMetricQHistoryReference
-  this.metrics = []
-  this.processMetricQDatapoints = function (datapointsJSON) {
+export class DataCache {
+  constructor (paramMetricQHistoryReference) {
+    this.metricQHistory = paramMetricQHistoryReference
+    this.metrics = []
+  }
+
+  processMetricQDatapoints (datapointsJSON) {
     const distinctMetrics = {}
     const indexesOfCountData = []
     for (const targetName in datapointsJSON) {
@@ -34,7 +37,8 @@ export function DataCache (paramMetricQHistoryReference) {
       distinctMetrics[metricParts[0]].parseCountDatapoints(datapointsJSON[indexesOfCountData[i]].data)
     }
   }
-  this.newSeries = function (metricName, metricAggregate) {
+
+  newSeries (metricName, metricAggregate) {
     const relatedMetric = this.assureMetricExists(metricName)
     if (relatedMetric.series[metricAggregate]) {
       relatedMetric.series[metricAggregate].clear()
@@ -45,7 +49,8 @@ export function DataCache (paramMetricQHistoryReference) {
       return newSeries
     }
   }
-  this.newBand = function (metricName) {
+
+  newBand (metricName) {
     const foundMetric = this.getMetricCache(metricName)
     if (foundMetric) {
       foundMetric.generateBand()
@@ -54,7 +59,8 @@ export function DataCache (paramMetricQHistoryReference) {
       return undefined
     }
   }
-  this.assureMetricExists = function (metricName) {
+
+  assureMetricExists (metricName) {
     const foundMetric = this.getMetricCache(metricName)
     if (foundMetric) {
       return foundMetric
@@ -64,7 +70,8 @@ export function DataCache (paramMetricQHistoryReference) {
       return newMetric
     }
   }
-  this.getMetricCache = function (metricName) {
+
+  getMetricCache (metricName) {
     for (let i = 0; i < this.metrics.length; ++i) {
       if (metricName === this.metrics[i].name) {
         return this.metrics[i]
@@ -72,7 +79,8 @@ export function DataCache (paramMetricQHistoryReference) {
     }
     return undefined
   }
-  this.getTimeRange = function () {
+
+  getTimeRange () {
     let min
     let max
     for (let i = 0; i < this.metrics.length; ++i) {
@@ -95,7 +103,8 @@ export function DataCache (paramMetricQHistoryReference) {
     }
     return [min, max]
   }
-  this.getValueRange = function (doGetAllTime, timeRangeStart, timeRangeEnd) {
+
+  getValueRange (doGetAllTime, timeRangeStart, timeRangeEnd) {
     let min
     let max
     for (let i = 0; i < this.metrics.length; ++i) {
@@ -130,7 +139,8 @@ export function DataCache (paramMetricQHistoryReference) {
     }
     return [min, max]
   }
-  this.hasSeriesToPlot = function () {
+
+  hasSeriesToPlot () {
     for (let i = 0; i < this.metrics.length; ++i) {
       for (const curAggregate in this.metrics[i].series) {
         if (this.metrics[i].series[curAggregate] && this.metrics[i].series[curAggregate].points.length > 0) {
@@ -140,7 +150,8 @@ export function DataCache (paramMetricQHistoryReference) {
     }
     return false
   }
-  this.hasBandToPlot = function () {
+
+  hasBandToPlot () {
     for (let i = 0; i < this.metrics.length; ++i) {
       if (this.metrics[i].band && this.metrics[i].band.points.length > 0) {
         return true
@@ -148,7 +159,8 @@ export function DataCache (paramMetricQHistoryReference) {
     }
     return false
   }
-  this.getAllValuesAtTime = function (timeAt) {
+
+  getAllValuesAtTime (timeAt) {
     const valueArr = []
     for (let i = 0; i < this.metrics.length; ++i) {
       for (const curAggregate in this.metrics[i].series) {
@@ -168,7 +180,8 @@ export function DataCache (paramMetricQHistoryReference) {
     }
     return valueArr
   }
-  this.deleteMetric = function (metricName) {
+
+  deleteMetric (metricName) {
     for (let i = 0; i < this.metrics.length; ++i) {
       if (metricName === this.metrics[i].name) {
         this.metrics.splice(i, 1)
@@ -177,7 +190,8 @@ export function DataCache (paramMetricQHistoryReference) {
     }
     return false
   }
-  this.distinctUnits = function () {
+
+  distinctUnits () {
     const units = []
     for (let i = 0; i < this.metrics.length; ++i) {
       if (this.metrics[i].meta && this.metrics[i].meta.unit) {
@@ -189,16 +203,16 @@ export function DataCache (paramMetricQHistoryReference) {
     return units
   }
 
-  this.initializeCacheWithColor = function (metricName, newColor) {
+  initializeCacheWithColor (metricName, newColor) {
     const newCache = this.assureMetricExists(metricName)
-    Object.keys(newCache.series).forEach(aggregate => { this.newSeries(metricName, aggregate) })
+    Object.keys(newCache.series).forEach((aggregate) => { this.newSeries(metricName, aggregate) })
     if (!newCache.band) {
       this.newBand(metricName)
     }
     const toUpdate = [newCache.band]
-    Object.keys(newCache.series).forEach(aggregate => { toUpdate.push(newCache.series[aggregate]) })
+    Object.keys(newCache.series).forEach((aggregate) => { toUpdate.push(newCache.series[aggregate]) })
 
-    toUpdate.forEach(val => {
+    toUpdate.forEach((val) => {
       val.styleOptions.color = newColor
     })
 
@@ -206,20 +220,25 @@ export function DataCache (paramMetricQHistoryReference) {
   }
 }
 
-function MetricCache (paramMetricQReference, paramMetricName) {
-  this.name = paramMetricName
-  this.color = determineColorForMetric(paramMetricName)
-  this.series = {
-    min: undefined,
-    max: undefined,
-    avg: undefined,
-    raw: undefined
+class MetricCache {
+  constructor (paramMetricQReference, paramMetricName) {
+    this.name = paramMetricName
+    this.color = determineColorForMetric(paramMetricName)
+    this.series = {
+      min: undefined,
+      max: undefined,
+      avg: undefined,
+      raw: undefined
+    }
+    this.band = undefined
+    this.allTime = {}
+    this.meta = undefined
+    this.metricQHistory = paramMetricQReference
+    this.fetchAllTimeMinMax()
+    this.fetchMetadata()
   }
-  this.band = undefined
-  this.allTime = {}
-  this.meta = undefined
-  this.metricQHistory = paramMetricQReference
-  this.clearNonRawAggregates = function () {
+
+  clearNonRawAggregates () {
     for (const curAggregate in this.series) {
       if (curAggregate !== 'raw' && this.series[curAggregate]) {
         this.series[curAggregate].clear()
@@ -229,12 +248,14 @@ function MetricCache (paramMetricQReference, paramMetricName) {
       this.band.clear()
     }
   }
-  this.clearRawAggregate = function () {
+
+  clearRawAggregate () {
     if (this.series.raw) {
       this.series.raw.clear()
     }
   }
-  this.generateBand = function () {
+
+  generateBand () {
     if (this.band) {
       this.band.clear()
     } else {
@@ -268,7 +289,8 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     }
     return this.band
   }
-  this.parseCountDatapoints = function (countDatapoints) {
+
+  parseCountDatapoints (countDatapoints) {
     for (const curAggregate in this.series) {
       const curSeries = this.series[curAggregate]
       if (curSeries && curSeries.points.length > 0) {
@@ -280,16 +302,19 @@ function MetricCache (paramMetricQReference, paramMetricName) {
       }
     }
   }
-  this.fetchMetadata = function () {
+
+  fetchMetadata () {
     this.metricQHistory.metadata(this.name).then((metadataObj) => { this.meta = metadataObj })
   }
-  this.fetchAllTimeMinMax = function () {
-    this.metricQHistory.analyze(moment(0), moment()).target(this.name).run().then(data => {
+
+  fetchAllTimeMinMax () {
+    this.metricQHistory.analyze(moment(0), moment()).target(this.name).run().then((data) => {
       this.allTime.min = Object.values(data)[0].minimum
       this.allTime.max = Object.values(data)[0].maximum
     })
   }
-  this.getAllMinMax = function (startTime, stopTime) {
+
+  getAllMinMax (startTime, stopTime) {
     let allMin
     let allMax
     for (const curAggregate in this.series) {
@@ -308,7 +333,7 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     return [allMin, allMax]
   }
 
-  this.defaultBandStyling = function () {
+  defaultBandStyling () {
     const options = matchStylingOptions('band')
     if (options.color === 'default') {
       options.color = this.color
@@ -316,7 +341,7 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     return options
   }
 
-  this.defaultSeriesStyling = function (aggregateName) {
+  defaultSeriesStyling (aggregateName) {
     const options = matchStylingOptions(aggregateName)
     if (options.color === 'default') {
       options.color = this.color
@@ -324,7 +349,7 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     return options
   }
 
-  this.updateColor = (color) => {
+  updateColor (color) {
     this.color = color
     this.band.styleOptions.color = color
     for (const key in this.series) {
@@ -333,30 +358,33 @@ function MetricCache (paramMetricQReference, paramMetricName) {
       }
     }
   }
-
-  this.fetchAllTimeMinMax()
-  this.fetchMetadata()
 }
 
-function Band (paramStyleOptions) {
-  this.points = []
-  this.styleOptions = paramStyleOptions
-  this.switchOverIndex = 0
-  this.addPoint = function (newPoint) {
+class Band {
+  constructor (paramStyleOptions) {
+    this.points = []
+    this.styleOptions = paramStyleOptions
+    this.switchOverIndex = 0
+  }
+
+  addPoint (newPoint) {
     this.points.push(newPoint)
     return newPoint
   }
-  this.setSwitchOverIndex = function () {
+
+  setSwitchOverIndex () {
     this.switchOverIndex = this.points.length
   }
-  this.getTimeRange = function () {
+
+  getTimeRange () {
     if (this.points.length === 0) {
       return [0, 0]
     } else {
       return [this.points[0].time, this.points[this.points.length - 1].time]
     }
   }
-  this.getValueRange = function () {
+
+  getValueRange () {
     if (this.points.length === 0) {
       return [0, 0]
     }
@@ -371,22 +399,27 @@ function Band (paramStyleOptions) {
     }
     return [min, max]
   }
-  this.clear = function () {
+
+  clear () {
     delete this.points
     this.points = []
   }
 }
 
-function Series (paramAggregate, paramStyleOptions) {
-  this.points = []
-  this.aggregate = paramAggregate
-  this.styleOptions = paramStyleOptions
-  this.allTime = undefined
-  this.clear = function () {
+class Series {
+  constructor (paramAggregate, paramStyleOptions) {
+    this.points = []
+    this.aggregate = paramAggregate
+    this.styleOptions = paramStyleOptions
+    this.allTime = undefined
+  }
+
+  clear () {
     delete this.points
     this.points = []
   }
-  this.getValueAtTimeAndIndex = function (timeAt) {
+
+  getValueAtTimeAndIndex (timeAt) {
     if (typeof timeAt !== 'number' || this.points.length === 0) {
       return undefined
     }
@@ -448,7 +481,8 @@ function Series (paramAggregate, paramStyleOptions) {
       return [this.points[closestPointIndex].time, this.points[closestPointIndex].value, closestPointIndex]
     }
   }
-  this.addPoint = function (newPoint, isBigger) {
+
+  addPoint (newPoint, isBigger) {
     if (isBigger || this.points.length === 0) {
       this.points.push(newPoint)
       return newPoint
@@ -480,20 +514,23 @@ function Series (paramAggregate, paramStyleOptions) {
     }
     return newPoint
   }
-  this.parseDatapoints = function (metricDatapoints) {
+
+  parseDatapoints (metricDatapoints) {
     for (let i = 0; i < metricDatapoints.length; ++i) {
       const ms = metricDatapoints[i].time.unix() * 1000 + metricDatapoints[i].time.millisecond()
       this.addPoint(new Point(ms, metricDatapoints[i].value), true)
     }
   }
-  this.getTimeRange = function () {
+
+  getTimeRange () {
     if (this.points.length === 0) {
       return [0, 0]
     } else {
       return [this.points[0].time, this.points[this.points.length - 1].time]
     }
   }
-  this.getValueRange = function (timeRangeStart, timeRangeEnd) {
+
+  getValueRange (timeRangeStart, timeRangeEnd) {
     if (this.points.length === 0) {
       return undefined
     }
@@ -530,11 +567,14 @@ function Series (paramAggregate, paramStyleOptions) {
   }
 }
 
-function Point (paramTime, paramValue) {
-  this.time = paramTime
-  this.value = paramValue
-  this.count = undefined
-  this.clone = function () {
+class Point {
+  constructor (paramTime, paramValue) {
+    this.time = paramTime
+    this.value = paramValue
+    this.count = undefined
+  }
+
+  clone () {
     return new Point(this.time, this.value)
   }
 }

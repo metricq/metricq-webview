@@ -1,7 +1,7 @@
 export const veil = {
   myPopup: undefined,
   inDestroymentPhase: false,
-  create: function (destroyCallback, solidVeil) {
+  create (destroyCallback, solidVeil) {
     const oldVeil = document.getElementById('popup_veil')
     if (oldVeil !== null) {
       oldVeil.destroy()
@@ -16,12 +16,12 @@ export const veil = {
       veilEle.style.opacity = 1
     }
     veilEle = document.getElementsByTagName('body')[0].appendChild(veilEle)
-    veilEle.addEventListener('click', function (evt) { veil.destroy(evt) })
+    veilEle.addEventListener('click', veil.destroy)
     veil.ondestroy = destroyCallback
     return veilEle
   },
   ondestroy: undefined,
-  destroy: function (evt) {
+  destroy (evt) {
     if (veil.inDestroymentPhase) {
       return undefined
     }
@@ -39,7 +39,7 @@ export const veil = {
     veil.ondestroy = undefined
     veil.inDestroymentPhase = false
   },
-  attachPopup: function (popupEle) {
+  attachPopup (popupEle) {
     popupEle.style.top = Math.round(window.innerHeight / 2 - popupEle.offsetHeight / 2) + 'px'
     popupEle.style.left = Math.round(window.innerWidth / 2 - popupEle.offsetWidth / 2) + 'px'
     popupEle.style.zIndex = 500

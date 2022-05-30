@@ -17,7 +17,7 @@ class MetricQWebView {
     if (!window.MetricQWebView) {
       window.MetricQWebView = {
         instances: [],
-        getInstance: function (htmlEle) {
+        getInstance (htmlEle) {
           for (let i = 0; i < window.MetricQWebView.instances.length; ++i) {
             if (window.MetricQWebView.instances[i].ele.isSameNode(htmlEle)) {
               return window.MetricQWebView.instances[i]

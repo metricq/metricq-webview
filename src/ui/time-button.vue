@@ -44,7 +44,7 @@ export default {
     }
   },
   mounted () {
-    $(function () {
+    $(() => {
       const daterange = $('#date_range')
 
       daterange.daterangepicker({
@@ -87,7 +87,7 @@ export default {
           ]
         },
         ranges: labelMap
-      }, function (start, end, label) {
+      }, (start, end, label) => {
         if (label) {
           window.MetricQWebView.instances[0].handler.setRelativeTimes(labelMap[label][0], labelMap[label][1])
         } else {

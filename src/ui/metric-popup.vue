@@ -133,7 +133,7 @@ export default {
       required: true
     }
   },
-  data: function () {
+  data () {
     return {
       markerSymbols: markerSymbols,
       popupTitle: 'Metrik-Eigenschaften',
@@ -142,42 +142,42 @@ export default {
   },
   computed: {
     isEmpty: {
-      get: function () {
+      get () {
         return this.metric.name === ''
       },
-      set: function (newValue) {
+      set (newValue) {
         // do nothing
       }
     },
     metricMin: {
-      get: function () {
+      get () {
         return this.metric.drawMin
       },
-      set: function (newValue) {
+      set (newValue) {
         this.$store.dispatch('metrics/updateDrawState', { metricKey: this.metric.key, drawState: { drawMin: newValue } })
       }
     },
     metricAvg: {
-      get: function () {
+      get () {
         return this.metric.drawAvg
       },
-      set: function (newValue) {
+      set (newValue) {
         this.$store.dispatch('metrics/updateDrawState', { metricKey: this.metric.key, drawState: { drawAvg: newValue } })
       }
     },
     metricMax: {
-      get: function () {
+      get () {
         return this.metric.drawMax
       },
-      set: function (newValue) {
+      set (newValue) {
         this.$store.dispatch('metrics/updateDrawState', { metricKey: this.metric.key, drawState: { drawMax: newValue } })
       }
     },
     metricName: {
-      get: function () {
+      get () {
         return this.metric.name
       },
-      set: function (newValue) {
+      set (newValue) {
         this.newMetric.name = newValue
       }
     }
@@ -233,7 +233,7 @@ export default {
     document.getElementById('input_metric_name').focus()
   },
   methods: {
-    changeDraw: function (evt) {
+    changeDraw (evt) {
       if (this.metric.drawMin === false && this.metric.drawAvg === false && this.metric.drawMax === false) {
         evt.target.click()
         Vue.toasted.error('Fehler! Mindestens eine Anzeigeoption muss ausgewählt bleiben!', this.$store.state.toastConfiguration)
@@ -241,40 +241,38 @@ export default {
         this.$store.dispatch('metrics/checkGlobalDrawState')
       }
     },
-    changeMarker: function (evt) {
+    changeMarker (evt) {
       this.$store.dispatch('metrics/updateMarker', { metricKey: this.metric.key, marker: evt.target.value })
     },
-    trashcanClicked: function (evt) {
+    trashcanClicked (evt) {
       veil.destroy(evt)
     },
-    metricNameKeyup: function (evt) {
+    metricNameKeyup (evt) {
       const instance = window.MetricQWebView.instances[0]
       if (evt.key.toLowerCase() === 'enter') {
         veil.destroy(evt)
       }
       // TODO: implement throttling?
-      instance.handler.searchMetricsPromise(evt.target.value).then(
-        (searchSuggestions) => {
-          const datalistEle = document.getElementById('autocomplete_metric')
-          if (!datalistEle) {
-            Vue.toasted.error('Auto-Vervollständigung nicht verfügbar, konnte Element #autocomplete_metric nicht finden.', this.$store.state.toastConfiguration)
-          } else {
-            for (let i = datalistEle.childNodes.length - 1; i >= 0; --i) {
-              datalistEle.removeChild(datalistEle.childNodes[i])
-            }
-            for (let i = 0; i < searchSuggestions.length; ++i) {
-              const optionEle = document.createElement('option')
-              optionEle.setAttribute('value', searchSuggestions[i])
-              datalistEle.appendChild(optionEle)
-            }
+      instance.handler.searchMetricsPromise(evt.target.value).then((searchSuggestions) => {
+        const datalistEle = document.getElementById('autocomplete_metric')
+        if (!datalistEle) {
+          Vue.toasted.error('Auto-Vervollständigung nicht verfügbar, konnte Element #autocomplete_metric nicht finden.', this.$store.state.toastConfiguration)
+        } else {
+          for (let i = datalistEle.childNodes.length - 1; i >= 0; --i) {
+            datalistEle.removeChild(datalistEle.childNodes[i])
+          }
+          for (let i = 0; i < searchSuggestions.length; ++i) {
+            const optionEle = document.createElement('option')
+            optionEle.setAttribute('value', searchSuggestions[i])
+            datalistEle.appendChild(optionEle)
           }
         }
-      )
+      })
     },
-    closePopup: function (evt) {
+    closePopup (evt) {
       veil.destroy(evt)
     },
-    closePopupModal: function (evt) {
+    closePopupModal (evt) {
       if (evt.target.getAttribute('role') === 'dialog') {
         veil.destroy(evt)
       }

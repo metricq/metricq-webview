@@ -57,19 +57,19 @@ export const mainApp = new Vue({
     })
   },
   watch: {
-    'configuration.legendDisplay': function () {
+    'configuration.legendDisplay' () {
       // TODO: check moving to store
       if (window.MetricQWebView.instances[0].graticule) window.MetricQWebView.instances[0].graticule.canvasReset()
     },
-    metricsList: function () {
+    metricsList () {
       window.MetricQWebView.instances[0].updateMetricUrl()
-      setTimeout(function () { window.MetricQWebView.instances[0].reload() }, 0)
+      setTimeout(() => { window.MetricQWebView.instances[0].reload() }, 0)
     }
   },
   methods: {
     colorPaletteClicked () {
       const palette = distinctColors({ count: this.metricsList.length, lightMin: 25, lightMax: 75 }).values()
-      this.metricsList.forEach(metric => {
+      this.metricsList.forEach((metric) => {
         const color = palette.next().value.css()
         this.$store.dispatch('metrics/updateColor', { metricKey: metric.key, color: color })
       })
