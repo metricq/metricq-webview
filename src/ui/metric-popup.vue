@@ -62,43 +62,41 @@
               </select>
             </div>
           </div>
-          <table>
-            <tr>
-              <td>
-                <label>
-                  <input
-                    id="checkbox_min"
-                    v-model="metricMin"
-                    type="checkbox"
-                    @change="changeDraw"
-                  > min
-                  anzeigen
-                </label>
-              </td>
-              <td>
-                <label>
-                  <input
-                    id="checkbox_avg"
-                    v-model="metricAvg"
-                    type="checkbox"
-                    @change="changeDraw"
-                  > avg
-                  anzeigen
-                </label>
-              </td>
-              <td>
-                <label>
-                  <input
-                    id="checkbox_max"
-                    v-model="metricMax"
-                    type="checkbox"
-                    @change="changeDraw"
-                  > max
-                  anzeigen
-                </label>
-              </td>
-            </tr>
-          </table>
+          <div class="form-group row">
+            <label
+              class="col-sm-2"
+            >Anzeige</label>
+            <div class="col-sm-3">
+              <label>
+                <input
+                  id="checkbox_min"
+                  v-model="metricMin"
+                  type="checkbox"
+                  @change="changeDraw"
+                > Minimum
+              </label>
+            </div>
+            <div class="col-sm-4">
+              <label>
+                <input
+                  id="checkbox_avg"
+                  v-model="metricAvg"
+                  type="checkbox"
+                  @change="changeDraw"
+                > Durchschnitt
+              </label>
+            </div>
+            <div class="col-sm-3">
+              <label>
+                <input
+                  id="checkbox_max"
+                  v-model="metricMax"
+                  type="checkbox"
+                  @change="changeDraw"
+                > Maximum
+              </label>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button
