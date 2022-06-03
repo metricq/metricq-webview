@@ -6,7 +6,7 @@
     @click="closePopupModal"
   >
     <div
-      class="modal-dialog modal-xl"
+      class="modal-dialog modal-dialog-scrollable modal-xl"
       role="document"
     >
       <div class="modal-content">
@@ -68,5 +68,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>
