@@ -15,7 +15,7 @@
 </head>
 <body>
 
-<div id="main_app">
+<div id="main_app" class="main_app">
   <div id="row_head" class="row_head">
     <nav class="navbar navbar-light bg-light">
       <a class="navbar-brand" href="?">
@@ -58,7 +58,7 @@
     </nav>
   </div>
   <div :class="'body_and_legend_' + configuration.legendDisplay">
-    <div :class="'wrapper_body wrapper_body_' + configuration.legendDisplay">
+    <div id="wrapper_body" class="wrapper_body">
       <div id="webview_container" class="row_body">
       </div>
     </div>

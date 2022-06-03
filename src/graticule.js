@@ -1,18 +1,18 @@
 import { DataCache } from './data-handling.js'
 import store from './store/'
 
-export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize) {
+export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
   this.ele = paramEle
   this.ctx = ctx
-  this.canvasSize = [paramEle.offsetWidth, paramEle.offsetHeight]
-  this.graticuleDimensions = offsetDimension
+  this.canvasSize = [0, 0]
+  this.graticuleDimensions = [0, 0, 0, 0]
   this.curTimeRange = undefined
   this.curValueRange = undefined
   this.curTimePerPixel = undefined
   this.curValuesPerPixel = undefined
-  this.pixelsLeft = paramPixelsLeft
-  this.pixelsBottom = paramPixelsBottom
-  this.clearSize = paramClearSize
+  this.pixelsLeft = 0
+  this.pixelsBottom = 0
+  this.clearSize = [0, 0]
   this.lastRangeChangeTime = 0
   this.yRangeOverride = {
     type: 'local',
@@ -1031,11 +1031,12 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
     return valueRange
   }
 
-  this.canvasResize = function (canvasMargins, footMargin) {
-    const newSize = [document.getElementById('webview_container').offsetWidth, document.body.scrollHeight - footMargin]
+  this.canvasResize = function (canvasMargins) {
+    this.canvasReset()
+    const newSize = [document.getElementById('webview_container').offsetWidth, document.getElementById('wrapper_body').clientHeight]
     this.clearSize = newSize
     this.ctx.canvas.width = newSize[0]
-    this.ctx.canvas.height = newSize[1]
+    this.ctx.canvas.height = newSize[1] - canvasMargins.top
     this.graticuleDimensions = [canvasMargins.left, canvasMargins.top, newSize[0] - canvasMargins.left - canvasMargins.right, newSize[1] - canvasMargins.top - canvasMargins.bottom]
     this.setTimeRange(window.MetricQWebView.instances[0].handler.startTime.getUnix(), window.MetricQWebView.instances[0].handler.stopTime.getUnix())
     this.setValueRange()
@@ -1045,6 +1046,7 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx, offsetDi
   this.canvasReset = function () {
     // is needed so that metriclegend can take the necessary space and canvas takes the rest
     this.ctx.canvas.width = 0
+    this.ctx.canvas.height = 0
   }
 }
 
