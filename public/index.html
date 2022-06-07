@@ -27,7 +27,6 @@
         <img class="navimg" src="img/icons/tools.svg"/>
         <span>Einstellungen</span>
       </label>
-      <br/>
       <label class="btn btn-outline-primary btn-navbar" id="button_export" v-on:click="exportButtonClicked">
         <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
         <span>Export</span>
@@ -72,13 +71,8 @@
         ></metric-legend>
         <new-metric-legend
           v-bind:position="configuration.legendDisplay"></new-metric-legend>
-        <li :class="'clickable legend_end legend_item legend_item_' + configuration.legendDisplay"
-            v-on:click="clearAllButtonClicked" v-if="metricsList.length !== 0">
-          <span id="button_clear_all">
-            <span>Alles löschen</span>
-            <img src="img/trashcan2.png"/>
-          </span>
-        </li>
+        <clear-metrics-button
+          v-bind:position="configuration.legendDisplay"></clear-metrics-button>
       </ul>
       <div id="wrapper_popup_legend">
         <metric-popup

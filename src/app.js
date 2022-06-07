@@ -5,6 +5,7 @@ import ExportPopup from './ui/export-popup.vue'
 import LinkPopup from './ui/link-popup.vue'
 import MetricLegend from './ui/metric-legend.vue'
 import NewMetricLegend from './ui/new-metric-legend.vue'
+import ClearMetricsButton from './ui/clear-metrics-button.vue'
 import MetricPopup from './ui/metric-popup.vue'
 import NewMetricPopup from './ui/new-metric-popup.vue'
 import YaxisPopup from './ui/yaxis-popup.vue'
@@ -27,6 +28,7 @@ export const mainApp = new Vue({
     LinkPopup,
     MetricLegend,
     NewMetricLegend,
+    ClearMetricsButton,
     MetricPopup,
     NewMetricPopup,
     YaxisPopup,
@@ -76,11 +78,6 @@ export const mainApp = new Vue({
     },
     analyzeButtonClicked () {
       this.togglePopup('analyze')
-    },
-    clearAllButtonClicked () {
-      const globalMinMax = this.globalMinMax
-      this.$store.getters['metrics/getAllKeys']().forEach(metricBase => window.MetricQWebView.instances[0].deleteMetric(metricBase))
-      this.$store.commit('setGlobalMinMax', globalMinMax)
     },
     toggleMinMaxButton (evt) {
       this.$store.dispatch('metrics/updateDrawStateGlobally', evt.target.checked)
