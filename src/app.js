@@ -16,6 +16,13 @@ import distinctColors from 'distinct-colors'
 import AnalyzePopup from './ui/analyze-popup.vue'
 
 import { importPlugins } from './plugins'
+
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+
+// because we do ugly evil hacky things, we need to load our css after bootstrap :(
+import '../public/css/style.css'
+
 importPlugins()
 
 Vue.config.productionTip = false

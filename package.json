@@ -9,6 +9,9 @@
   },
   "dependencies": {
     "@metricq/history": "3.0.0",
+    "@popperjs/core": "^2.11.5",
+    "bootstrap": "^4.6.1",
+    "bootstrap-vue": "^2.22.0",
     "core-js": "^3.6.5",
     "daterangepicker": "^3.1.0",
     "distinct-colors": "^3.0.0",

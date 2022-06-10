@@ -4,8 +4,6 @@
   <meta charset="utf8"/>
   <title>MetricQ WebView</title>
   <link rel="icon" href="<%= BASE_URL %>img/icons/graph-up.svg"/>
-  <link rel="stylesheet" href="<%= BASE_URL %>css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="<%= BASE_URL %>css/style.css"/>
 
 
   <!-- need to prevent safari users to do fancy two-finger-zooming on the webpage -->
@@ -23,36 +21,37 @@
         MetricQ-WebView
       </a>
       <label class="btn btn-outline-primary btn-navbar" id="button_configuration"
-             v-on:click="configurationButtonClicked">
+             v-on:click="configurationButtonClicked"
+             v-b-tooltip.hover title="Einstellungen">
         <img class="navimg" src="img/icons/tools.svg"/>
-        <span>Einstellungen</span>
       </label>
-      <label class="btn btn-outline-primary btn-navbar" id="button_export" v-on:click="exportButtonClicked">
+      <label class="btn btn-outline-primary btn-navbar" id="button_export" v-on:click="exportButtonClicked"
+             v-b-tooltip.hover title="Export">
         <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
-        <span>Export</span>
       </label>
-      <label class="btn btn-outline-primary btn-navbar" id="button_analyze" v-on:click="analyzeButtonClicked">
+      <label class="btn btn-outline-primary btn-navbar" id="button_analyze" v-on:click="analyzeButtonClicked"
+             v-b-tooltip.hover title="Analyse">
         <img class="navimg" src="img/icons/search.svg"/>
-        <span>Analyse</span>
       </label>
-      <label class="btn btn-outline-primary btn-navbar">
+      <label class="btn btn-outline-primary btn-navbar"
+             v-b-tooltip title="Deaktiviert werden nur Durchschnittswerte angezeigt">
         <input type="checkbox" id='checkbox_min_max' v-bind:checked="globalMinMax" v-on:change="toggleMinMaxButton">
-        <span>min/max anzeigen</span>
+        <span>Werteumfang zeichnen</span>
       </label>
       <label class="btn btn-outline-primary btn-navbar" id="button_palette" v-on:click="colorPaletteClicked"
-             alt="Nutze eindeutige Farben">
+             v-b-tooltip.hover title="Metriken eindeutig färben">
         <img class="navimg" src="img/icons/color-palette.svg"/>
-        <span>Eindeutige Farben</span>
       </label>
       <label>
         <time-button id="date_range" class="btn btn-outline-primary btn-navbar"
                      v-bind:starttime="timestamp.start"
-                     v-bind:endtime="timestamp.end">
+                     v-bind:endtime="timestamp.end"
+                     v-b-tooltip title="Angezeigten Zeitraum einstellen">
         </time-button>
       </label>
-      <label class="btn btn-outline-primary btn-navbar" id="button_link" v-on:click="linkButtonClicked">
+      <label class="btn btn-outline-primary btn-navbar" id="button_link" v-on:click="linkButtonClicked"
+             v-b-tooltip.hover title="Informationen anzeigen">
         <img class="navimg" src="img/icons/info-circle.svg"/>
-        <span>Information</span>
       </label>
     </nav>
   </div>
