@@ -122,6 +122,8 @@ class MetricQWebView {
 
       let gearWrapper = document.createElement('div')
       gearWrapper.setAttribute('id', gearId)
+      gearWrapper.classList.add('btn')
+      gearWrapper.classList.add('btn-outline-secondary')
       gearWrapper.appendChild(gearImages[0])
       gearWrapper.appendChild(document.createElement('br'))
       gearWrapper.appendChild(gearImages[1])
