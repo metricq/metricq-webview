@@ -4,6 +4,7 @@
   <meta charset="utf8"/>
   <title>MetricQ WebView</title>
   <link rel="icon" href="<%= BASE_URL %>img/icons/graph-up.svg"/>
+  <link rel="stylesheet" type="text/css" href="css/base.css" />
 
 
   <!-- need to prevent safari users to do fancy two-finger-zooming on the webpage -->
@@ -13,7 +14,10 @@
 </head>
 <body>
 
-<div id="main_app" class="main_app">
+<div id="loading_app" class="spin">
+</div>
+
+<div id="main_app" class="main_app" style="display: none">
   <div id="row_head" class="row_head">
     <nav class="navbar navbar-light bg-light">
       <a class="navbar-brand" href="?">
