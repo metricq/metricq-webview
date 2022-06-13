@@ -1,0 +1,4 @@
+/* we can hide the loading message if the browser has no Javascript */
+#loading_app {
+    display: none;
+}
