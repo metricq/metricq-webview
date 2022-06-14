@@ -41,7 +41,7 @@ body {
     border-radius: 4px;
     background-color: white;
     box-shadow: 0px 1px 2px 1px #D0D0D0;
-    flex:1;
+    flex: 1;
 }
 
 .row_foot_right {
@@ -131,7 +131,8 @@ body {
     display: block;
 }
 
-.button_resolution, .button_zoom_speed {
+.button_resolution,
+.button_zoom_speed {
     border: none;
     margin: 0px;
     padding: 0px 2px 0px 2px;
@@ -143,6 +144,7 @@ body {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
@@ -154,7 +156,8 @@ body {
     margin-top: 16px;
 }
 
-.col-form-label, .leftalign {
+.col-form-label,
+.leftalign {
     text-align: left;
 }
 
@@ -222,14 +225,14 @@ body {
 }
 
 .clickable {
-    cursor:pointer;
+    cursor: pointer;
 }
 
 @media (min-width: 768px) {
-  .modal-xl {
-    width: 90%;
-    max-width: 1200px;
-  }
+    .modal-xl {
+        width: 90%;
+        max-width: 1200px;
+    }
 }
 
 .main_app {

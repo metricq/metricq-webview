@@ -4,18 +4,25 @@
   <meta charset="utf8"/>
   <title>MetricQ WebView</title>
   <link rel="icon" href="<%= BASE_URL %>img/icons/graph-up.svg"/>
-  <link rel="stylesheet" href="<%= BASE_URL %>css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="<%= BASE_URL %>css/style.css"/>
+  <link rel="stylesheet" type="text/css" href="css/base.css" />
 
 
   <!-- need to prevent safari users to do fancy two-finger-zooming on the webpage -->
   <meta name="viewport"
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 
+  <noscript>
+    <link rel="stylesheet" type="text/css" href="css/noscript.css" />
+    <h2>MetricQ Webview erfordert Javascript, aber es ist deaktiviert oder wird nicht unterstützt.</h2>
+    Bitte aktivieren Sie JavaScript oder benutzen einen Webbrowser mit Unterstützung für JavaScript.
+  </noscript>
 </head>
 <body>
 
-<div id="main_app" class="main_app">
+<div id="loading_app" class="spin">
+</div>
+
+<div id="main_app" class="main_app" style="display: none">
   <div id="row_head" class="row_head">
     <nav class="navbar navbar-light bg-light">
       <a class="navbar-brand" href="?">
@@ -23,37 +30,37 @@
         MetricQ-WebView
       </a>
       <label class="btn btn-outline-primary btn-navbar" id="button_configuration"
-             v-on:click="configurationButtonClicked">
+             v-on:click="configurationButtonClicked"
+             v-b-tooltip.hover title="Einstellungen">
         <img class="navimg" src="img/icons/tools.svg"/>
-        <span>Einstellungen</span>
       </label>
-      <br/>
-      <label class="btn btn-outline-primary btn-navbar" id="button_export" v-on:click="exportButtonClicked">
+      <label class="btn btn-outline-primary btn-navbar" id="button_export" v-on:click="exportButtonClicked"
+             v-b-tooltip.hover title="Export">
         <img class="navimg" src="img/icons/file-earmark-arrow-down.svg"/>
-        <span>Export</span>
       </label>
-      <label class="btn btn-outline-primary btn-navbar" id="button_analyze" v-on:click="analyzeButtonClicked">
+      <label class="btn btn-outline-primary btn-navbar" id="button_analyze" v-on:click="analyzeButtonClicked"
+             v-b-tooltip.hover title="Analyse">
         <img class="navimg" src="img/icons/search.svg"/>
-        <span>Analyse</span>
       </label>
-      <label class="btn btn-outline-primary btn-navbar">
+      <label class="btn btn-outline-primary btn-navbar"
+             v-b-tooltip title="Deaktiviert werden nur Durchschnittswerte angezeigt">
         <input type="checkbox" id='checkbox_min_max' v-bind:checked="globalMinMax" v-on:change="toggleMinMaxButton">
-        <span>min/max anzeigen</span>
+        <span>Werteumfang zeichnen</span>
       </label>
       <label class="btn btn-outline-primary btn-navbar" id="button_palette" v-on:click="colorPaletteClicked"
-             alt="Nutze eindeutige Farben">
+             v-b-tooltip.hover title="Metriken eindeutig färben">
         <img class="navimg" src="img/icons/color-palette.svg"/>
-        <span>Eindeutige Farben</span>
       </label>
       <label>
         <time-button id="date_range" class="btn btn-outline-primary btn-navbar"
                      v-bind:starttime="timestamp.start"
-                     v-bind:endtime="timestamp.end">
+                     v-bind:endtime="timestamp.end"
+                     v-b-tooltip title="Angezeigten Zeitraum einstellen">
         </time-button>
       </label>
-      <label class="btn btn-outline-primary btn-navbar" id="button_link" v-on:click="linkButtonClicked">
+      <label class="btn btn-outline-primary btn-navbar" id="button_link" v-on:click="linkButtonClicked"
+             v-b-tooltip.hover title="Informationen anzeigen">
         <img class="navimg" src="img/icons/info-circle.svg"/>
-        <span>Information</span>
       </label>
     </nav>
   </div>
@@ -72,13 +79,8 @@
         ></metric-legend>
         <new-metric-legend
           v-bind:position="configuration.legendDisplay"></new-metric-legend>
-        <li :class="'clickable legend_end legend_item legend_item_' + configuration.legendDisplay"
-            v-on:click="clearAllButtonClicked" v-if="metricsList.length !== 0">
-          <span id="button_clear_all">
-            <span>Alles löschen</span>
-            <img src="img/trashcan2.png"/>
-          </span>
-        </li>
+        <clear-metrics-button
+          v-bind:position="configuration.legendDisplay"></clear-metrics-button>
       </ul>
       <div id="wrapper_popup_legend">
         <metric-popup

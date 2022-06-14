@@ -4,10 +4,11 @@
     @click="newMetricPopup"
   >
     <span>
+      <img src="img/icons/plus-circle.svg">
       <span
         v-once
-      >Neu&nbsp;</span>
-      <img src="img/icons/plus-circle.svg">
+        class="m-2"
+      >Metriken hinzufügen</span>
     </span>
   </li>
 </template>
@@ -30,5 +31,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

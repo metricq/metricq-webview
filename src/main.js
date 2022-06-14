@@ -20,3 +20,7 @@ if (window.location.href.indexOf('#') > -1) {
 } else {
   Vue.nextTick(function () { store.commit('togglePopup', 'newmetric') })
 }
+
+// as the CSS loading is pretty lazy (read slow), we hide main_app until it is loaded.
+document.getElementById('main_app').style.display = 'flex'
+document.getElementById('loading_app').remove()

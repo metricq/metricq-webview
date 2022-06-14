@@ -1381,10 +1381,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nuxt/opencollective@npm:^0.3.2":
+  version: 0.3.3
+  resolution: "@nuxt/opencollective@npm:0.3.3"
+  dependencies:
+    chalk: ^4.1.0
+    consola: ^2.15.0
+    node-fetch: ^2.6.7
+  bin:
+    opencollective: bin/opencollective.js
+  checksum: 24ccbc8d1c05ed5b424651819d59c5a9ad37a8f7139b0351970bdeba08ac87e56e48cb94a6d307be741319f0952fa997f433f223af0c9d551a4b23b0fb0aa21d
+  languageName: node
+  linkType: hard
+
 "@polka/url@npm:^1.0.0-next.17":
   version: 1.0.0-next.17
   resolution: "@polka/url@npm:1.0.0-next.17"
   checksum: 6a24aa7a04b3b50fa42e9c7c2f3ca46a762773850b663c4e5ed67939ff94c66d5361d1a1866cc82a0c171c3dd043b62b30881a04f51fc77dc9efc3716b77d563
+  languageName: node
+  linkType: hard
+
+"@popperjs/core@npm:^2.11.5":
+  version: 2.11.5
+  resolution: "@popperjs/core@npm:2.11.5"
+  checksum: fd7f9dca3fb716d7426332b6ee283f88d2724c0ab342fb678865a640bad403dfb9eeebd8204a406986162f7e2b33394f104320008b74d0e9066d7322f70ea35d
   languageName: node
   linkType: hard
 
@@ -3000,6 +3020,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bootstrap-vue@npm:^2.22.0":
+  version: 2.22.0
+  resolution: "bootstrap-vue@npm:2.22.0"
+  dependencies:
+    "@nuxt/opencollective": ^0.3.2
+    bootstrap: ^4.6.1
+    popper.js: ^1.16.1
+    portal-vue: ^2.1.7
+    vue-functional-data-merge: ^3.1.0
+  checksum: 801f148de895b4e390d2d79629f0da5c2fd8fd6d002230f4572ff0354e64f70236363bb69496451009bcd582d9b4eea2c31055649c7c99b8971bce5b418a4f01
+  languageName: node
+  linkType: hard
+
+"bootstrap@npm:^4.6.1":
+  version: 4.6.1
+  resolution: "bootstrap@npm:4.6.1"
+  peerDependencies:
+    jquery: 1.9.1 - 3
+    popper.js: ^1.16.1
+  checksum: ff44e13787aafe1e2b8ac77802eae0f19bf957ea53a40ce3d9d4af9b67eab8adc585dc5a62cb6be82a3bc33e7ae67b0efd75f02282c0ddca09272d5c18a0b379
+  languageName: node
+  linkType: hard
+
 "brace-expansion@npm:^1.1.7":
   version: 1.1.11
   resolution: "brace-expansion@npm:1.1.11"
@@ -3596,6 +3639,13 @@ __metadata:
   version: 1.6.0
   resolution: "connect-history-api-fallback@npm:1.6.0"
   checksum: 804ca2be28c999032ecd37a9f71405e5d7b7a4b3defcebbe41077bb8c5a0a150d7b59f51dcc33b2de30bc7e217a31d10f8cfad27e8e74c2fc7655eeba82d6e7e
+  languageName: node
+  linkType: hard
+
+"consola@npm:^2.15.0":
+  version: 2.15.3
+  resolution: "consola@npm:2.15.3"
+  checksum: 8ef7a09b703ec67ac5c389a372a33b6dc97eda6c9876443a60d76a3076eea0259e7f67a4e54fd5a52f97df73690822d090cf8b7e102b5761348afef7c6d03e28
   languageName: node
   linkType: hard
 
@@ -7482,11 +7532,14 @@ fsevents@^1.2.7:
   resolution: "metricq-webview@workspace:."
   dependencies:
     "@metricq/history": 3.0.0
+    "@popperjs/core": ^2.11.5
     "@vue/cli-plugin-babel": ~5.0.0-beta.3
     "@vue/cli-plugin-eslint": ~5.0.0-beta.3
     "@vue/cli-plugin-vuex": ~5.0.0-beta.3
     "@vue/cli-service": ~5.0.0-beta.3
     babel-eslint: ^10.1.0
+    bootstrap: ^4.6.1
+    bootstrap-vue: ^2.22.0
     core-js: ^3.6.5
     daterangepicker: ^3.1.0
     distinct-colors: ^3.0.0
@@ -7902,6 +7955,20 @@ fsevents@^1.2.7:
   version: 2.6.1
   resolution: "node-fetch@npm:2.6.1"
   checksum: 91075bedd57879117e310fbcc36983ad5d699e522edb1ebcdc4ee5294c982843982652925c3532729fdc86b2d64a8a827797a745f332040d91823c8752ee4d7c
+  languageName: node
+  linkType: hard
+
+"node-fetch@npm:^2.6.7":
+  version: 2.6.7
+  resolution: "node-fetch@npm:2.6.7"
+  dependencies:
+    whatwg-url: ^5.0.0
+  peerDependencies:
+    encoding: ^0.1.0
+  peerDependenciesMeta:
+    encoding:
+      optional: true
+  checksum: 8d816ffd1ee22cab8301c7756ef04f3437f18dace86a1dae22cf81db8ef29c0bf6655f3215cb0cdb22b420b6fe141e64b26905e7f33f9377a7fa59135ea3e10b
   languageName: node
   linkType: hard
 
@@ -8700,6 +8767,22 @@ fsevents@^1.2.7:
   dependencies:
     find-up: ^2.1.0
   checksum: de4b418175281a082e366ce1a919f032520ee53cf421578b35173f03816f6ec4c19e1552066840bb0988c3e1215859653948efd6ca3507a23f4f44229269500d
+  languageName: node
+  linkType: hard
+
+"popper.js@npm:^1.16.1":
+  version: 1.16.1
+  resolution: "popper.js@npm:1.16.1"
+  checksum: c56ae5001ec50a77ee297a8061a0221d99d25c7348d2e6bcd3e45a0d0f32a1fd81bca29d46cb0d4bdf13efb77685bd6a0ce93f9eb3c608311a461f945fffedbe
+  languageName: node
+  linkType: hard
+
+"portal-vue@npm:^2.1.7":
+  version: 2.1.7
+  resolution: "portal-vue@npm:2.1.7"
+  peerDependencies:
+    vue: ^2.5.18
+  checksum: 1615c38469e11e2a2c01501fbb1cd52b07a6fa2252f90a39be67b6332d3cd215f05cabb1f7d9fbdc28c67124adf299abe36f645619dbe6ff57f6f7e1b9aba0c5
   languageName: node
   linkType: hard
 
@@ -11330,6 +11413,13 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
+"vue-functional-data-merge@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "vue-functional-data-merge@npm:3.1.0"
+  checksum: 6f1db64050b364e3c80b8cbd83e1eac69804fa9ca84a324b05fa437f451ad5176955731e946ec8dda5e50d224d03b6f2bc7c7254c62967ecc711d1453bb99a93
+  languageName: node
+  linkType: hard
+
 "vue-hot-reload-api@npm:^2.3.0":
   version: 2.3.4
   resolution: "vue-hot-reload-api@npm:2.3.4"
@@ -11653,6 +11743,16 @@ resolve@^2.0.0-next.3:
     tr46: ~0.0.3
     webidl-conversions: ^3.0.0
   checksum: feed4c535a54e746e97146fe17d48779f8978bee1694f80d6752df8ed4270c16ae4bc41da188aa9a6512070005008bcf81e9461d1c00b93bd72d4bd0a832ae55
+  languageName: node
+  linkType: hard
+
+"whatwg-url@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "whatwg-url@npm:5.0.0"
+  dependencies:
+    tr46: ~0.0.3
+    webidl-conversions: ^3.0.0
+  checksum: b8daed4ad3356cc4899048a15b2c143a9aed0dfae1f611ebd55073310c7b910f522ad75d727346ad64203d7e6c79ef25eafd465f4d12775ca44b90fa82ed9e2c
   languageName: node
   linkType: hard
 

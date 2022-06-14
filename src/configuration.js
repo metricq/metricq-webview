@@ -14,7 +14,7 @@ export class Configuration {
 
 export class ToastConfig {
   constructor () {
-    this.theme = 'outline'
+    this.theme = 'toasted-primary'
     this.position = 'top-center'
     this.duration = 5000
   }
