@@ -40,7 +40,7 @@ export function DataCache (paramMetricQHistoryReference) {
       relatedMetric.series[metricAggregate].clear()
       return relatedMetric.series[metricAggregate]
     } else {
-      const newSeries = new Series(metricAggregate, relatedMetric.defaultSeriesStyling(metricName, metricAggregate))
+      const newSeries = new Series(metricAggregate, relatedMetric.defaultSeriesStyling(metricAggregate))
       relatedMetric.series[metricAggregate] = newSeries
       return newSeries
     }
@@ -238,7 +238,7 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     if (this.band) {
       this.band.clear()
     } else {
-      this.band = new Band(this.defaultBandStyling(this.name))
+      this.band = new Band(this.defaultBandStyling())
     }
     if (!this.series.min || !this.series.max) {
       return undefined
@@ -308,16 +308,16 @@ function MetricCache (paramMetricQReference, paramMetricName) {
     return [allMin, allMax]
   }
 
-  this.defaultBandStyling = function (metricBaseName) {
-    const options = matchStylingOptions('band:' + metricBaseName)
+  this.defaultBandStyling = function () {
+    const options = matchStylingOptions('band')
     if (options.color === 'default') {
       options.color = this.color
     }
     return options
   }
 
-  this.defaultSeriesStyling = function (metricBaseName, aggregateName) {
-    const options = matchStylingOptions('series:' + metricBaseName + '/' + aggregateName)
+  this.defaultSeriesStyling = function (aggregateName) {
+    const options = matchStylingOptions(aggregateName)
     if (options.color === 'default') {
       options.color = this.color
     }
@@ -540,72 +540,58 @@ function Point (paramTime, paramValue) {
 }
 
 const stylingOptions = {
-  list: [
-    {
-      nameRegex: 'series:[^/]+/avg',
-      title: 'AVG Series',
-      skip: false,
-      color: 'default',
-      connect: 'next',
-      width: 8,
-      lineWidth: 2,
-      lineDash: [5, 4],
-      dots: false,
-      alpha: 0.8
-    },
-    {
-      nameRegex: 'series:[^/]+/min',
-      title: 'Min Series',
-      skip: true,
-      color: 'default',
-      connect: 'next',
-      width: 2,
-      lineWidth: 2,
-      dots: false,
-      alpha: 1
-    },
-    {
-      nameRegex: 'series:[^/]+/max',
-      title: 'Max Series',
-      skip: true,
-      color: 'default',
-      connect: 'next',
-      width: 2,
-      lineWidth: 2,
-      dots: false,
-      alpha: 1
-    },
-    {
-      nameRegex: 'series:[^/]+/(raw)',
-      title: 'Raw Series',
-      skip: false,
-      color: 'default',
-      connect: 'none',
-      width: 8,
-      dots: true
-    },
-    {
-      nameRegex: 'band:.*',
-      title: 'All Bands',
-      connect: 'next',
-      color: 'default',
-      alpha: 0.3
-    }
-  ]
+  avg: {
+    title: 'AVG Series',
+    skip: false,
+    color: 'default',
+    connect: 'next',
+    width: 8,
+    lineWidth: 2,
+    dots: false,
+    alpha: 0.8
+  },
+  min: {
+    title: 'Min Series',
+    skip: true,
+    color: 'default',
+    connect: 'next',
+    width: 2,
+    lineWidth: 2,
+    dots: false,
+    alpha: 1
+  },
+  max: {
+    title: 'Max Series',
+    skip: true,
+    color: 'default',
+    connect: 'next',
+    width: 2,
+    lineWidth: 2,
+    dots: false,
+    alpha: 1
+  },
+  raw: {
+    title: 'Raw Series',
+    skip: false,
+    color: 'default',
+    connect: 'none',
+    width: 8,
+    dots: true
+  },
+  band: {
+    title: 'All Bands',
+    skip: false,
+    connect: 'next',
+    color: 'default',
+    alpha: 0.3
+  }
 }
 
-function matchStylingOptions (fullMetricName) {
-  if (typeof fullMetricName !== 'string') {
+function matchStylingOptions (styleType) {
+  if (typeof styleType !== 'string') {
     return undefined
   }
-  for (let i = 0; i < stylingOptions.list.length; ++i) {
-    if (stylingOptions.list[i].nameMatch === fullMetricName ||
-      fullMetricName.match(new RegExp(stylingOptions.list[i].nameRegex))) {
-      // clone the options
-      return JSON.parse(JSON.stringify(stylingOptions.list[i]))
-    }
-  }
-  return undefined
+  return JSON.parse(JSON.stringify(stylingOptions[styleType]))
 }
 
 function determineColorForMetric (metricBaseName) {
