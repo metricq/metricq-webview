@@ -13,33 +13,46 @@
         <popup-header :popup-title="popupTitle" />
         <div class="modal-body">
           <h5 class="modal-title">
-            Position Legende
+            Legende
           </h5>
-          <div class="config_radio_legend">
-            <div>
-              <input
-                id="legend_bottom"
-                v-model="uiLegendDisplay"
-                type="radio"
-                name="legendDisplay"
-                value="bottom"
-              >
-              <label for="legend_bottom">Unten</label>
-            </div>
-            <div>
-              <input
-                id="legend_right"
-                v-model="uiLegendDisplay"
-                type="radio"
-                name="legendDisplay"
-                value="right"
-              >
-              <label for="legend_right">Rechts</label>
+          <div class="form-group row">
+            <label class="col-sm-5 col-form-label">
+              Position
+            </label>
+            <div class="form-check form-check-inline">
+              <div class="form-check form-check-inline">
+                <input
+                  id="legend_bottom"
+                  v-model="uiLegendDisplay"
+                  class="form-check-input"
+                  type="radio"
+                  name="legendDisplay"
+                  value="bottom"
+                >
+                <label
+                  class="form-check-label"
+                  for="legend_bottom"
+                >Unten</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input
+                  id="legend_right"
+                  v-model="uiLegendDisplay"
+                  class="form-check-input"
+                  type="radio"
+                  name="legendDisplay"
+                  value="right"
+                >
+                <label
+                  class="form-check-label"
+                  for="legend_right"
+                >Rechts</label>
+              </div>
             </div>
           </div>
           <br>
           <h5 class="modal-title">
-            Canvas Optionen
+            Canvas
           </h5>
           <div class="form-group row">
             <label
@@ -83,23 +96,6 @@
               for="resolution_input"
             >{{ configuration.zoomSpeed }}</label>
           </div>
-          <br>
-          <h5 class="modal-title">
-            Bedienung
-          </h5>
-          <div id="ui_configurator">
-            <div class="form-group row">
-              <label class="col-sm-5 col-form-label">Funktion</label>
-              <label class="col-sm-4 col-form-label">Event</label>
-              <label class="col-sm-3 col-form-label">Tasten</label>
-            </div>
-            <interaction-array-option
-              v-for="(action, index) in uiInteractArr"
-              :key="action[2]"
-              :action="action"
-              @input="uiInteractArr[index]=$event"
-            />
-          </div>
         </div>
       </div>
     </div>
@@ -107,21 +103,18 @@
 </template>
 
 <script>
-import { setUiInteractArr, uiInteractArr } from '../interact.js'
 import PopupHeader from './popup-header.vue'
-import InteractionArrayOption from './interaction-array-option.vue'
 import { veil } from './veil.js'
 import { mapState } from 'vuex'
 
 export default {
   components: {
-    InteractionArrayOption,
     PopupHeader
   },
   props: { },
   data: function () {
     return {
-      popupTitle: 'Globale-Einstellungen'
+      popupTitle: 'Einstellungen'
     }
   },
   computed: {
@@ -141,15 +134,6 @@ export default {
       },
       set: function (newValue) {
         this.$store.commit('setZoomSpeed', 1 * newValue)
-      }
-    },
-    uiInteractArr: {
-      cache: false,
-      get: function () {
-        return uiInteractArr
-      },
-      set: function (newValue) {
-        setUiInteractArr(newValue)
       }
     },
     uiLegendDisplay: {
@@ -176,28 +160,7 @@ export default {
       veil.attachPopup(popupEle)
     }
   },
-  /* TODO: remove the following functions as they are no longer needed */
   methods: {
-    manipulateResolution: function (increment) {
-      let newValue = parseFloat(this.uiResolution) + increment
-      newValue = this.withinRange(document.getElementById('resolution_input'), newValue)
-      this.uiResolution = newValue
-    },
-    manipulateZoomSpeed: function (increment) {
-      let newValue = parseFloat(this.uiZoomSpeed) + increment
-      newValue = this.withinRange(document.getElementById('zoom_speed_input'), newValue)
-      this.uiZoomSpeed = newValue
-      // make vue js update using force
-    },
-    withinRange: function (ele, newValue) {
-      if (newValue < parseFloat(ele.getAttribute('min'))) {
-        newValue = parseFloat(ele.getAttribute('min'))
-      }
-      if (newValue > parseFloat(ele.getAttribute('max'))) {
-        newValue = parseFloat(ele.getAttribute('max'))
-      }
-      return newValue
-    },
     closePopup (evt) {
       veil.destroy(evt)
     },
