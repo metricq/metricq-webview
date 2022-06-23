@@ -14,14 +14,6 @@
         <div class="modal-body">
           <analyzeTable />
         </div>
-        <div class="modal-footer">
-          <button
-            class="btn btn-primary popup_ok"
-            @click="closePopup"
-          >
-            Schließen
-          </button>
-        </div>
       </div>
     </div>
   </div>

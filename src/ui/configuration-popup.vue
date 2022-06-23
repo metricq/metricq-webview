@@ -101,14 +101,6 @@
             />
           </div>
         </div>
-        <div class="modal-footer">
-          <button
-            class="btn btn-primary popup_ok"
-            @click="closePopup"
-          >
-            OK
-          </button>
-        </div>
       </div>
     </div>
   </div>
