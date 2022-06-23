@@ -150,17 +150,6 @@ body {
     }
 }
 
-.form-check-input {
-    display: inline-block;
-    height: 15px;
-    margin-top: 16px;
-}
-
-.col-form-label,
-.leftalign {
-    text-align: left;
-}
-
 .modebar-btn .icon {
     width: 28px;
     height: 28px;
