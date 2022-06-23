@@ -2,6 +2,11 @@ export const veil = {
   myPopup: undefined,
   inDestroymentPhase: false,
   create: function (destroyCallback, solidVeil) {
+    const oldVeil = document.getElementById('popup_veil')
+    if (oldVeil !== null) {
+      oldVeil.destroy()
+    }
+
     let veilEle = document.createElement('div')
     veilEle.setAttribute('id', 'popup_veil')
     veilEle.style.width = window.innerWidth
