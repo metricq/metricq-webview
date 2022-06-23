@@ -12,7 +12,7 @@
       <div class="modal-content">
         <popup-header :popup-title="popupTitle" />
         <div class="modal-body">
-          <div class="form-check">
+          <div class="form-check form-group">
             <input
               id="yaxis_global"
               v-model="yaxisRange"
@@ -23,10 +23,10 @@
             >
             <label
               for="yaxis_global"
-              class="form-check-label form-control-plaintext"
+              class="form-check-label"
             >Globales Min/Max</label>
           </div>
-          <div class="form-check">
+          <div class="form-check form-group">
             <input
               id="yaxis_local"
               v-model="yaxisRange"
@@ -37,10 +37,10 @@
             >
             <label
               for="yaxis_local"
-              class="form-check-label form-control-plaintext"
+              class="form-check-label"
             >Lokales Min/Max</label>
           </div>
-          <div class="form-check">
+          <div class="form-check form-group">
             <input
               id="yaxis_manual"
               v-model="yaxisRange"
@@ -51,7 +51,7 @@
             >
             <label
               for="yaxis_manual"
-              class="form-check-label form-control-plaintext"
+              class="form-check-label"
             >Manuelles Min/Max</label>
           </div>
           <div class="form-group yaxis_popup_minmax">
@@ -82,7 +82,7 @@
                   v-model="allMax"
                   class="form-control"
                   type="number"
-                  :disabledsync="manualDisabled"
+                  :disabled="manualDisabled"
                   step="0.001"
                 >
               </div>
@@ -105,7 +105,7 @@ export default {
   props: { },
   data: function () {
     return {
-      popupTitle: 'Y-Achsen-Einstellungen'
+      popupTitle: 'Wertebereich der Y-Achse'
     }
   },
   computed: {
