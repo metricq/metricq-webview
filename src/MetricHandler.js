@@ -20,20 +20,6 @@ export class MetricHandler {
     this.TIME_MARGIN_FACTOR = 1.00 / 3
 
     this.initializeMetrics(paramMetricsArr)
-    this.labelMap = {
-      'Letzte 15 Minuten': ['now-15m', 'now'],
-      'Letzte Stunde': ['now-1h', 'now'],
-      'Letzte 6 Stunden': ['now-6h', 'now'],
-      'Letzte 24 Stunden': ['now-24h', 'now'],
-      'Letzte 3 Tage': ['now-3d', 'now'],
-      'Letzte 7 Tage': ['now-7d', 'now'],
-      'Letzte 30 Tage': ['now-30d', 'now'],
-      'Letzte 3 Monate': ['now-3M', 'now'],
-      'Letzte 6 Monate': ['now-6M', 'now'],
-      'Letztes Jahr': ['now-1y', 'now'],
-      'Letzte 3 Jahre': ['now-3y', 'now'],
-      Heute: ['startday', 'now']
-    }
   }
 
   initializeMetrics (initialMetricNames) {
@@ -249,9 +235,9 @@ export class MetricHandler {
     this.doRequest(maxDataPoints)
   }
 
-  setRelativeTimes (paramLabel) {
-    this.startTime.updateTime(this.labelMap[paramLabel][0])
-    this.stopTime.updateTime(this.labelMap[paramLabel][1])
+  setRelativeTimes (start, end) {
+    this.startTime.updateTime(start)
+    this.stopTime.updateTime(end)
     this.setTimeRange(this.startTime, this.stopTime)
   }
 }
