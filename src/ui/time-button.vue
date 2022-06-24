@@ -1,12 +1,9 @@
 <template>
-  <li>
-    <img
-      src="img/icons/clock.svg"
-      width="20"
-      height="20"
-    >&nbsp;
-    <span>{{ starttimeFormatted }} - {{ endtimeFormatted }}</span>
-  </li>
+  <div>
+    <b-icon-clock-history />
+    &nbsp;
+    <span>{{ starttime | formatDate }} - {{ endtime | formatDate }}</span>
+  </div>
 </template>
 
 <script>
@@ -31,6 +28,11 @@ const labelMap = {
 }
 
 export default {
+  filters: {
+    formatDate: function (date) {
+      return moment(date).format('DD.MM.YYYY, HH:mm')
+    }
+  },
   props: {
     starttime: {
       type: Number,
@@ -41,14 +43,6 @@ export default {
       required: true
     }
   },
-  computed: {
-    starttimeFormatted: function () {
-      return moment(this.starttime).format('DD/MM/YYYY HH:mm')
-    },
-    endtimeFormatted: function () {
-      return moment(this.endtime).format('DD/MM/YYYY HH:mm')
-    }
-  },
   mounted () {
     $(function () {
       const daterange = $('#date_range')
@@ -57,13 +51,14 @@ export default {
         startDate: moment(window.MetricQWebView.instances[0].handler.startTime.getUnix()),
         endDate: moment(window.MetricQWebView.instances[0].handler.stopTime.getUnix()),
         opens: 'left',
+        cancelButtonClasses: 'btn btn-danger',
         timePicker: true,
         timePicker24Hour: true,
+        timePickerSeconds: true,
         showCustomRangeLabel: false,
         alwaysShowCalendars: true,
-        timePickerSeconds: true,
         locale: {
-          format: 'DD/MM/YYYY HH:mm:ss',
+          format: 'DD.MM.YYYY, HH:mm:ss',
           firstDay: 1,
           daysOfWeek: [
             'So',
@@ -74,6 +69,8 @@ export default {
             'Fr',
             'Sa'
           ],
+          applyLabel: 'Anwenden',
+          cancelLabel: 'Abbrechen',
           monthNames: [
             'Januar',
             'Februar',
