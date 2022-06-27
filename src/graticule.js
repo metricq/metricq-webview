@@ -441,77 +441,38 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
     // showTimers();
   }
   this.parseStyleOptions = function (styleOptions, ctx) {
-    const parsedObj = {
-      skip: false,
-      connect: 3,
-      color: '#000000',
-      pointWidth: 2,
-      halfPointWidth: 1,
-      drawDots: false,
-      lineDash: [],
-      oddLineWidthAddition: 0
-    }
-    if (styleOptions) {
-      const styleKeys = Object.keys(styleOptions)
-      // first parse Options for parsedObj
-      parsedObj.skip = !!styleOptions.skip
-      /* connect is responsible for the way the
-       * data points will be connected
-       * 1 = direct
-       * 2 = last
-       * 3 = next
-       */
-      switch (styleOptions.connect) { // Thomas: Magische Zahlen sind nicht schön
-        //         prinzipiell sind magische Zahlen nicht schön
-        // Inkonsistenz: Einmal Strings, einmal Zahlen
-        case 'next':
-          parsedObj.connect = 3
-          break
-        case 'last':
-          parsedObj.connect = 2
-          break
-        case 'direct':
-          parsedObj.connect = 1
-          break
-        case 'none':
-        default:
-          parsedObj.connect = 0
-          break
+    if (styleOptions !== undefined) {
+      if (styleOptions.width !== undefined) {
+        styleOptions.pointWidth = parseFloat(styleOptions.width)
       }
-      if (styleKeys.includes('width')) {
-        parsedObj.pointWidth = parseFloat(styleOptions.width)
-        parsedObj.halfPointWidth = Math.floor(styleOptions.width / 2.00)
-      }
-      if (styleKeys.includes('dots')) {
-        parsedObj.drawDots = {
-          func: function (ctx, width, height) {
+      if (styleOptions.dots !== false) {
+        styleOptions.drawDots = {
+          func: (ctx, width, height) => {
             ctx.fillRect(0, 0, width, height)
           }
         }
         if ((typeof styleOptions.dots) === 'string') {
           const dotMarker = styleOptions.dots.charAt(0)
           switch (dotMarker) {
-            case '.': { /* point marker */
-              let referencedLineWidth = parsedObj.pointWidth
-              if (styleKeys.includes('lineWidth')) {
+            case '.': { // point marker
+              let referencedLineWidth = styleOptions.pointWidth
+              if (styleOptions.lineWidth !== undefined) {
                 referencedLineWidth = parseFloat(styleOptions.lineWidth)
               }
-              parsedObj.drawDots.func = (function (lineWidth) {
-                return function (ctx, width, height) {
-                  ctx.beginPath()
-                  ctx.arc(width / 2,
-                    height / 2,
-                    lineWidth / 2,
-                    0,
-                    Math.PI * 2,
-                    true)
-                  ctx.fill()
-                }
-              }(referencedLineWidth))
+              styleOptions.drawDots.func = (ctx, width, height) => {
+                ctx.beginPath()
+                ctx.arc(width / 2,
+                  height / 2,
+                  referencedLineWidth / 2,
+                  0,
+                  Math.PI * 2,
+                  true)
+                ctx.fill()
+              }
               break
             }
-            case 'o': /* circle marker */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case 'o': // circle marker
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.beginPath()
                 ctx.arc(width / 2,
                   height / 2,
@@ -522,9 +483,9 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.stroke()
               }
               break
-            case 'v': /* triangle down marker */
-            case '1': /* fall-through */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case 'v': // triangle down marker
+            case '1': // fall-through
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.beginPath()
                 ctx.moveTo(0, 0)
                 ctx.lineTo(width / 2, height)
@@ -533,9 +494,9 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.fill()
               }
               break
-            case '^': /* triangle up marker */
-            case '2': /* fall-through */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case '^': // triangle up marker
+            case '2': // fall-through
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.beginPath()
                 ctx.moveTo(0, height)
                 ctx.lineTo(width, height)
@@ -544,9 +505,9 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.fill()
               }
               break
-            case '<': /* triangle left marker */
-            case '3': /* fall-through */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case '<': // triangle left marker
+            case '3': // fall-through
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.beginPath()
                 ctx.moveTo(0, height / 2)
                 ctx.lineTo(width, height)
@@ -555,9 +516,9 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.fill()
               }
               break
-            case '>': /* triangle right marker */
-            case '4': /* fall-through */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case '>': // triangle right marker
+            case '4': // fall-through
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.beginPath()
                 ctx.moveTo(0, 0)
                 ctx.lineTo(width, height / 2)
@@ -566,12 +527,12 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.fill()
               }
               break
-            case 's': /* square marker */
+            case 's': // square marker
               // Don't need to do anything here
               // it is already defined as default
               break
-            case 'p': /* pentagon marker */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case 'p': // pentagon marker
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.beginPath()
                 ctx.moveTo(width / 2, 0)
                 ctx.lineTo(width, height * 2 / 5)
@@ -582,8 +543,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.fill()
               }
               break
-            case '*': /* star marker */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case '*': // star marker
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.moveTo(width / 2, 0)
                 ctx.lineTo(width / 2, height)
                 ctx.stroke()
@@ -598,8 +559,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.stroke()
               }
               break
-            case 'h': /* hexagon marker */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case 'h': // hexagon marker
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.beginPath()
                 ctx.moveTo(0, height / 2)
                 ctx.lineTo(width * 1 / 4, 0)
@@ -611,8 +572,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.fill()
               }
               break
-            case '+': /* plus marker */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case '+': // plus marker
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.moveTo(width / 2, 0)
                 ctx.lineTo(width / 2, height)
                 ctx.stroke()
@@ -621,8 +582,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.stroke()
               }
               break
-            case 'x': /* x marker */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case 'x': // x marker
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.moveTo(width * 1 / 7, height * 1 / 7)
                 ctx.lineTo(width * 6 / 7, height * 6 / 7)
                 ctx.stroke()
@@ -631,8 +592,8 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.stroke()
               }
               break
-            case 'd': /* diamond marker */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case 'd': // diamond marker
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.beginPath()
                 ctx.moveTo(0, height / 2)
                 ctx.lineTo(width / 2, 0)
@@ -642,202 +603,38 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                 ctx.fill()
               }
               break
-            case '|': /* vline marker */
-              parsedObj.drawDots.func = function (ctx, width, height) {
+            case '|': // vline marker
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.moveTo(width / 2, 0)
                 ctx.lineTo(width / 2, height)
                 ctx.stroke()
               }
               break
-            case '_': /* hline marker */
+            case '_': // hline marker
             case '-':
-              parsedObj.drawDots.func = function (ctx, width, height) {
+              styleOptions.drawDots.func = (ctx, width, height) => {
                 ctx.moveTo(0, height / 2)
                 ctx.lineTo(width, height / 2)
                 ctx.stroke()
               }
               break
           }
-        } else if (!styleOptions.dots) {
-          parsedObj.drawDots = false
         }
       }
 
       // second parse Options to be applied to ctx immediatly
-      if (styleOptions.color) {
+      if (styleOptions.color !== undefined) {
         ctx.fillStyle = styleOptions.color
         ctx.strokeStyle = styleOptions.color
-        parsedObj.color = styleOptions.color
       }
-      if (styleOptions.fillPattern) {
-        const img = new Image()
-        img.src = styleOptions.fillPattern
-        ctx.fillStyle = ctx.createPattern(img, 'repeat')
-      }
-      if (styleOptions.gradient) {
-        this.parseGradient(styleOptions.gradient, ctx)
-      }
-      if (styleKeys.includes('alpha')) {
+      if (styleOptions.alpha !== undefined) {
         ctx.globalAlpha = parseFloat(styleOptions.alpha)
       }
-      if (styleKeys.includes('lineWidth')) {
+      if (styleOptions.lineWidth !== undefined) {
         ctx.lineWidth = parseFloat(styleOptions.lineWidth)
-        parsedObj.oddLineWidthAddition = ((styleOptions.lineWidth % 2) === 1) ? 0.5 : 0
-      }
-      /* if (styleKeys.includes('lineDash')) {
-        ctx.setLineDash(styleOptions.lineDash)
-      } */
-    }
-
-    return parsedObj
-  }
-  this.parseGradient = function (gradientStr, ctx) {
-    if (gradientStr.match(/^\s*linear-gradient/)) {
-      let innerPart = gradientStr.replace(/^\s*linear-gradient\s*\(/, '')
-      innerPart = innerPart.replace(/\s*\)\s*$/, '')
-      const gradientData = this.parseInnerGradientStr(innerPart)
-      if (!gradientData) {
-        console.log('Could not parse gradient.')
-        return
-      }
-      const centerPos = [this.graticuleDimensions[0] + this.graticuleDimensions[2] / 2,
-        this.graticuleDimensions[1] + this.graticuleDimensions[3] / 2]
-      const startPos = [centerPos[0] + Math.cos((270 - gradientData.direction) * Math.PI * 2 / 360) * this.graticuleDimensions[2] / 2,
-        centerPos[1] + Math.sin((270 - gradientData.direction) * Math.PI * 2 / 360) * this.graticuleDimensions[3] / 2]
-      const endPos = [centerPos[0] + Math.cos((gradientData.direction * -1 + 90) * Math.PI * 2 / 360) * this.graticuleDimensions[2] / 2,
-        centerPos[1] + Math.sin((gradientData.direction * -1 + 90) * Math.PI * 2 / 360) * this.graticuleDimensions[3] / 2]
-      const deltaPos = [endPos[0] - startPos[0],
-        endPos[1] - startPos[1]]
-      const distance = Math.sqrt(Math.pow(deltaPos[0], 2) + Math.pow(deltaPos[1], 2))
-      const myGradient = ctx.createLinearGradient(startPos[0], startPos[1], endPos[0], endPos[1])
-      let lastRelativePosition = 0
-      let relativePosition
-      for (let i = 0; i < gradientData.colorStops.length; ++i) {
-        if (gradientData.colorStops[i][2] === 'none') {
-          let remainingNonePositions = 0
-          let j = i
-          for (; j < gradientData.colorStops.length; ++j) {
-            if (gradientData.colorStops[j][2] === 'none') {
-              remainingNonePositions++
-            } else {
-              break
-            }
-          }
-          let nextRelativePosition = lastRelativePosition
-          if (j >= gradientData.colorStops.length) {
-            nextRelativePosition = 1
-          } else {
-            nextRelativePosition = this.calculateGradientRelativePosition(gradientData.colorStops[j][2], gradientData.colorStops[j][1], distance)
-          }
-          relativePosition = lastRelativePosition + ((nextRelativePosition - lastRelativePosition) / (remainingNonePositions + 1))
-        } else {
-          relativePosition = this.calculateGradientRelativePosition(gradientData.colorStops[i][2], gradientData.colorStops[i][1], distance)
-        }
-        myGradient.addColorStop(relativePosition, gradientData.colorStops[i][0])
-        lastRelativePosition = relativePosition
-      }
-      ctx.fillStyle = myGradient
-      ctx.strokeStyle = myGradient
-    } else if (gradientStr.match(/^\s*radial-gradient/)) {
-      // TODO: code me
-    }
-    return false
-  }
-  this.calculateGradientRelativePosition = function (stopType, stopData, distance) {
-    if (stopType === 'percent') {
-      return stopData / 100
-    } else if (stopType === 'pixel') {
-      if (stopData > distance) {
-        return 1
-      } else {
-        return stopData / distance
       }
     }
-    return undefined
-  }
-  this.parseInnerGradientStr = function (innerPart) {
-    const tokenizedArr = this.tokenizeHeedingParantheses(innerPart)
-    let directionAngle
-    if (tokenizedArr.length > 1) {
-      if (tokenizedArr[0].match(/^\s*to [a-z ]+/)) {
-        const possibleStrings = [
-          ['to bottom right', 135],
-          ['to bottom left', 225],
-          ['to top right', 45],
-          ['to top left', 315],
-          ['to left', 270],
-          ['to right', 90],
-          ['to bottom', 180],
-          ['to top', 0]
-        ]
-        for (let i = 0; i < possibleStrings.length; ++i) {
-          if (tokenizedArr[0].indexOf(possibleStrings[i][0]) > -1) {
-            directionAngle = possibleStrings[i][1]
-            break
-          }
-        }
-      }
-      if (tokenizedArr[0].match(/-?[0-9]+(\.[0-9]+)?\s*deg\s*$/)) {
-        directionAngle = parseFloat(tokenizedArr[0].match(/(-?[0-9]+(\.[0-9]+)?)\s*deg\s*$/)[1])
-      }
-      if (undefined === directionAngle) {
-        directionAngle = 180 // default Angle
-      }
-      const gradientData = {
-        direction: directionAngle,
-        colorStops: []
-      }
-      for (let i = 1; i < tokenizedArr.length; ++i) {
-        const curElement = ['white', 0, 'none']
-        let remainder = tokenizedArr[i]
-        if (remainder.match(/%\s*$/)) {
-          curElement[2] = 'percent'
-        } else if (remainder.match(/px\s*$/)) {
-          curElement[2] = 'pixel'
-        }
-        remainder = remainder.replace(/(px|%)\s*$/, '')
-        if (remainder.match(/\d+(\.\d+)?\s*$/)) {
-          if (!remainder.match(/[#a-fA-F]\d+(\.\d+)?\s*$/)) {
-            curElement[1] = parseFloat(remainder.match(/\d+(\.\d+)?\s*$/)[0])
-            remainder = remainder.replace(/\d+(\.\d+)?\s*$/, '')
-          }
-        }
-        curElement[0] = remainder.replace(/\s*$/, '').replace(/^\s*/, '')
-
-        gradientData.colorStops.push(curElement)
-      }
-      return gradientData
-    } else {
-      return undefined
-    }
-  }
-  this.tokenizeHeedingParantheses = function (originStr) {
-    const tokenArr = []
-    let curToken = ''
-    let inParantheses = 0
-    for (let i = 0; i < originStr.length; ++i) {
-      const c = originStr.charAt(i)
-      if (inParantheses > 0) {
-        if (c === ')') {
-          inParantheses--
-        } else if (c === '(') {
-          inParantheses++
-        }
-        curToken += c
-      } else if (c === ',') {
-        tokenArr.push(curToken)
-        curToken = ''
-      } else {
-        if (c === '(') {
-          inParantheses = 1
-        }
-        curToken += c
-      }
-    }
-    if (curToken.length > 0) {
-      tokenArr.push(curToken)
-    }
-    return tokenArr
+    return styleOptions
   }
   this.drawBands = function (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
@@ -859,16 +656,16 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
               ctx.moveTo(x, y)
             } else {
               // connect direct
-              if (styleOptions.connect === 1) {
+              if (styleOptions.connect === 'direct') {
                 ctx.lineTo(x, y)
               } else {
                 if (j < switchOverIndex) {
                   // connect last
-                  if (styleOptions.connect === 2) {
+                  if (styleOptions.connect === 'last') {
                     ctx.lineTo(previousX, y)
                     ctx.lineTo(x, y)
                     // connect next
-                  } else if (styleOptions.connect === 3) {
+                  } else if (styleOptions.connect === 'next') {
                     ctx.lineTo(x, previousY)
                     ctx.lineTo(x, y)
                   }
@@ -876,11 +673,11 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
                   ctx.lineTo(x, y)
                 } else {
                   // connect last
-                  if (styleOptions.connect === 2) {
+                  if (styleOptions.connect === 'last') {
                     ctx.lineTo(x, previousY)
                     ctx.lineTo(x, y)
                     // connext next
-                  } else if (styleOptions.connect === 3) {
+                  } else if (styleOptions.connect === 'next') {
                     ctx.lineTo(previousX, y)
                     ctx.lineTo(x, y)
                   }
@@ -921,22 +718,22 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
           const offsiteCanvas = this.generateOffsiteDot(styleOptions)
 
           for (let j = 0, x, y, previousX, previousY; j < curSeries.points.length; ++j) {
-            x = graticuleDimensions[0] + Math.round((curSeries.points[j].time - timeRange[0]) / timePerPixel) + styleOptions.oddLineWidthAddition
-            y = graticuleDimensions[1] + (graticuleDimensions[3] - Math.round((curSeries.points[j].value - valueRange[0]) / valuesPerPixel)) + styleOptions.oddLineWidthAddition
-            if (styleOptions.connect > 0) {
+            x = graticuleDimensions[0] + Math.round((curSeries.points[j].time - timeRange[0]) / timePerPixel)
+            y = graticuleDimensions[1] + (graticuleDimensions[3] - Math.round((curSeries.points[j].value - valueRange[0]) / valuesPerPixel))
+            if (styleOptions.connect !== 'none') {
               if (j === 0) {
                 ctx.beginPath()
                 ctx.moveTo(x, y)
               } else {
                 // connect direct
-                if (styleOptions.connect === 1) {
+                if (styleOptions.connect === 'direct') {
                   ctx.lineTo(x, y)
                   // connect last
-                } else if (styleOptions.connect === 2) {
+                } else if (styleOptions.connect === 'last') {
                   ctx.lineTo(previousX, y)
                   ctx.lineTo(x, y)
                   // connect next
-                } else if (styleOptions.connect === 3) {
+                } else if (styleOptions.connect === 'next') {
                   ctx.lineTo(x, previousY)
                   ctx.lineTo(x, y)
                   if (j === curSeries.points.length - 1) {
@@ -952,12 +749,11 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
             previousX = x
             previousY = y
           }
-          if (styleOptions.connect > 0) {
+          if (styleOptions.connect !== 'none') {
             ctx.stroke()
           }
           // reset ctx style options
           this.resetCtx(ctx)
-          offsiteCanvas.ele.parentNode.removeChild(offsiteCanvas.ele)
         }
       }
     }
