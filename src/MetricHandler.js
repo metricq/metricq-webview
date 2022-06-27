@@ -80,7 +80,7 @@ export class MetricHandler {
   handleResponse (requestedMetrics, myData, startTime) {
     this.store.commit('setQueryTime', window.performance.now() - startTime)
     const listOfFaultyMetrics = []
-    let pointCountAgg = 0
+    let pointCountAgg = null
     let pointCountRaw = 0
     for (let i = 0; i < requestedMetrics.length; ++i) {
       const metricName = requestedMetrics[i]
@@ -101,7 +101,7 @@ export class MetricHandler {
               pointCountAgg += myData[curMetricName].data.length
             } else {
               pointsRaw = myData[curMetricName].data.length
-              this.store.dispatch('metrics/updateDataPoints', { metricKey: splitted[0], pointsAgg: 0, pointsRaw: pointsRaw })
+              this.store.dispatch('metrics/updateDataPoints', { metricKey: splitted[0], pointsAgg: null, pointsRaw: pointsRaw })
             }
             pointCountRaw += pointsRaw
           }

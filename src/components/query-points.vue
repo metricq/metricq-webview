@@ -2,7 +2,7 @@
   <li>
     <span>
       <span>Genutzte Punkte:</span>
-      <span v-if="agg !== 0"> Aggregate: {{ agg | withDecimalPlaces(0) }}</span>
+      <span v-if="agg !== null"> Aggregate: {{ agg | withDecimalPlaces(0) }}</span>
       <span> Raw: {{ raw | withDecimalPlaces(0) }}</span>
     </span>
   </li>
@@ -13,7 +13,7 @@ export default {
   props: {
     agg: {
       type: Number,
-      required: true
+      default: null
     },
     raw: {
       type: Number,

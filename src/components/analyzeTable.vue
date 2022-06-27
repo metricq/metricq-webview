@@ -51,7 +51,9 @@
             {{ entry.unit }}
           </td>
           <td class="number">
-            {{ entry.agg | withDecimalPlaces(0) }}
+            <template v-if="entry.agg !== null">
+              {{ entry.agg | withDecimalPlaces(0) }}
+            </template>
           </td>
           <td class="number">
             {{ entry.raw | withDecimalPlaces(0) }}
