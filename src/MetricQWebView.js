@@ -212,17 +212,9 @@ class MetricQWebView {
       return true
     } catch (error) {
       if (error instanceof Error.DuplicateMetricError) {
-        Vue.toasted.error(`Metrik ${error.metricName} ist bereits vorhanden!`, {
-          theme: this.store.state.toastConfiguration.theme,
-          position: this.store.state.toastConfiguration.position,
-          duration: this.store.state.toastConfiguration.duration
-        })
+        Vue.toasted.error(`Metrik ${error.metricName} ist bereits vorhanden!`, this.store.state.toastConfiguration)
       } else if (error instanceof Error.InvalidMetricError) {
-        Vue.toasted.error(`Metrik ${error.metricName} ist nicht korrekt!`, {
-          theme: this.store.state.toastConfiguration.theme,
-          position: this.store.state.toastConfiguration.position,
-          duration: this.store.state.toastConfiguration.duration
-        })
+        Vue.toasted.error(`Metrik ${error.metricName} existiert nicht!`, this.store.state.toastConfiguration)
       }
       return false
     }
