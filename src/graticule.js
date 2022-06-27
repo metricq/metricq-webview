@@ -25,10 +25,6 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
   this.MAX_ZOOM_TIME = 20 * 365 * 24 * 3600 * 1000
   this.MIN_ZOOM_TIME = 10
   this.DEFAULT_FONT = 'sans-serif'
-  this.resetData = function () {
-    delete this.data
-    this.data = new DataCache()
-  }
   this.figureOutTimeSteps = function (maxStepsAllowed) {
     const startTime = new Date(this.curTimeRange[0])
     const deltaTime = this.curTimeRange[1] - this.curTimeRange[0]
@@ -384,29 +380,6 @@ export function Graticule (paramMetricQHistoryReference, paramEle, ctx) {
       this.curValueRange[0] = paramValueStart
       this.curValueRange[1] = paramValueEnd
     }
-  }
-  // is never called, why not remove this??
-  this.zoomTimeAndValueAtPoint = function (pointAt, zoomDirection, zoomTime, zoomValue) {
-    const zoomFactor = 1 + zoomDirection
-    const newTimeDelta = (this.curTimeRange[1] - this.curTimeRange[0]) * zoomFactor
-    const newValueDelta = (this.curValueRange[1] - this.curValueRange[0]) * zoomFactor
-    let couldZoom = false
-    if (zoomTime && newTimeDelta > this.MIN_ZOOM_TIME) {
-      const relationalPositionOfPoint = (pointAt[0] - this.curTimeRange[0]) / (this.curTimeRange[1] - this.curTimeRange[0])
-      // TODO: fix this, setTimeRange no longer checks validity
-      if (this.setTimeRange(pointAt[0] - (newTimeDelta * relationalPositionOfPoint),
-        pointAt[0] + (newTimeDelta * (1 - relationalPositionOfPoint)))) {
-        couldZoom = true
-      }
-    }
-    if (zoomValue) {
-      const relationalPositionOfPoint = (pointAt[1] - this.curValueRange[0]) / (this.curValueRange[1] - this.curValueRange[0])
-      this.curValueRange = [pointAt[1] - (newValueDelta * relationalPositionOfPoint),
-        pointAt[1] + (newValueDelta * (1 - relationalPositionOfPoint))]
-      this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.graticuleDimensions[3]
-    }
-    this.lastRangeChangeTime = (new Date()).getTime()
-    return couldZoom
   }
   this.automaticallyDetermineRanges = function (determineTimeRange, determineValueRange) {
     // uh oh, this case is troublesome, when we wrap

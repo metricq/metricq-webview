@@ -1,4 +1,3 @@
-import { markerSymbols } from './metric.js'
 import { MetricTimestamp } from './MetricTimestamp.js'
 import { showUserHint } from './interact.js'
 import MetricQHistory from '@metricq/history'
