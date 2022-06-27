@@ -4,7 +4,7 @@
     @click="clearAllButtonClicked"
   >
     <span id="button_clear_all">
-      <img src="img/trashcan2.png">
+      <b-icon-trash />
       <span class="m-1">Alle Metriken entfernen</span>
     </span>
   </li>

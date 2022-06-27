@@ -50,11 +50,7 @@
             class="btn btn-primary btn-metric"
             @click="addMetrics"
           >
-            <img
-              src="img/icons/plus-circle.svg"
-              width="28"
-              height="28"
-            >
+            <b-icon-plus-circle />
             Hinzufügen
           </button>
         </div>

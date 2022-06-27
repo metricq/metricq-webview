@@ -29,16 +29,16 @@
         </td>
         <td>
           <span class="clickables">
-            <img
-              class="metricImg clickable"
-              src="img/icons/pencil.svg"
+            <b-icon-pencil
+              class="clickable"
+              variant="primary"
               @click="metricPopup"
-            >
-            <img
-              class="metricImg clickable"
-              src="img/icons/trash.svg"
+            />&nbsp;
+            <b-icon-trash
+              class="clickable"
+              variant="danger"
               @click="trashcanClicked"
-            >
+            />
           </span>
         </td>
       </tr>
@@ -126,5 +126,7 @@ table {
 .clickables {
   display: flex;
   justify-content: flex-end;
+  position: relative;
+  top: 3px;
 }
 </style>

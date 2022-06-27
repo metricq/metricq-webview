@@ -104,15 +104,10 @@
             class="btn btn-danger"
             @click="trashcanClicked"
           >
-            <img
-              src="img/icons/trash.svg"
-              class="popup_trashcan"
-              width="18"
-              height="18"
-            >
+            <b-icon-trash variant="danger-outline" />
           </button>
           <button
-            class="btn btn-primary popup_ok"
+            class="btn btn-success popup_ok"
             @click="closePopup"
           >
             OK

@@ -4,7 +4,7 @@
     @click="newMetricPopup"
   >
     <span>
-      <img src="img/icons/plus-circle.svg">
+      <b-icon-plus-circle />
       <span
         v-once
         class="m-2"
