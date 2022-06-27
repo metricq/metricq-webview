@@ -76,6 +76,8 @@ body {
     padding: 0px 1px 0px 10px;
     display: inline-flex;
     background-color: #FFFFFF;
+    border-radius: 4px;
+    box-shadow: 0px 1px 2px 1px #D0D0D0;
 }
 
 .legend_item_bottom {
