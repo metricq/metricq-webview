@@ -23,7 +23,7 @@ export default new Vuex.Store({
     },
     performance: {
       querytime: 0,
-      rendertime: 0,
+      totaltime: 0,
       agg: 0,
       raw: 0
     },
@@ -39,8 +39,8 @@ export default new Vuex.Store({
     setQueryTime (state, time) {
       state.performance.querytime = time
     },
-    setRenderTime (state, time) {
-      state.performance.rendertime = time
+    setTotalTime (state, time) {
+      state.performance.totaltime = time
     },
     setAggregatePoints (state, agg) {
       state.performance.agg = agg

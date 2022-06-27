@@ -112,11 +112,16 @@ body {
 .legend_list_right {
     display: flex;
     flex-direction: column;
+    height: 100%;
     width: max-content;
 }
 
 .legend_list_right_bottom {
     margin-top: auto;
+}
+
+.legend_list_right_last {
+    margin-bottom: 0px;
 }
 
 .legend_end {

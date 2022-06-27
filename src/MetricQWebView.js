@@ -85,7 +85,7 @@ class MetricQWebView {
       this.graticule.automaticallyDetermineRanges(false, true)
       this.graticule.draw(false)
     }
-    this.store.commit('setRenderTime', window.performance.now() - startTime)
+    this.store.commit('setTotalTime', window.performance.now() - startTime)
   }
 
   updateMetricUrl () {

@@ -1,9 +1,8 @@
 <template>
   <li>
     <span>
-      Zeiten:
-      Query: {{ querytime | withDecimalPlaces(0) }} ms;
-      Render: {{ rendertime | withDecimalPlaces(0) }} ms
+      Anfragezeit: {{ querytime | withDecimalPlaces(0) }} ms;
+      Gesamtzeit: {{ totaltime | withDecimalPlaces(0) }} ms
     </span>
   </li>
 </template>
@@ -15,7 +14,7 @@ export default {
       type: Number,
       required: true
     },
-    rendertime: {
+    totaltime: {
       type: Number,
       required: true
     }

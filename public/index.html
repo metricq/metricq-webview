@@ -81,9 +81,9 @@
         <li :class="'legend_end legend_item legend_item_' + configuration.legendDisplay + ' legend_list_' + configuration.legendDisplay + '_bottom'">
           <query-times
             v-bind:querytime="performance.querytime"
-            v-bind:rendertime="performance.rendertime"></query-times>
+            v-bind:totaltime="performance.totaltime"></query-times>
         </li>
-        <li :class="'legend_end legend_item legend_item_' + configuration.legendDisplay">
+        <li :class="'legend_end legend_item legend_item_' + configuration.legendDisplay + ' legend_list_' + configuration.legendDisplay + '_last'">
           <query-points
             v-bind:agg="performance.agg"
             v-bind:raw="performance.raw"></query-points>
