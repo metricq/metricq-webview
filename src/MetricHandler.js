@@ -72,7 +72,7 @@ export class MetricHandler {
         maxDataPoints)
       queryObj.target(remainingMetrics[i], defaultAggregates)
       queryObj.run().then((dataset) => {
-        this.handleResponse(remainingMetrics[i], dataset)
+        this.handleResponse([remainingMetrics[i]], dataset)
       })
     }
   }
