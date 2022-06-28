@@ -85,13 +85,13 @@ export default {
     } catch (ignore) {}
   },
   methods: {
-    metricPopup: function () {
+    metricPopup () {
       this.$store.commit('metrics/setPopup', {
         metricKey: this.$props.metric.name,
         popupState: !this.$props.metric.popup
       })
     },
-    trashcanClicked: function () {
+    trashcanClicked () {
       window.MetricQWebView.instances[0].deleteMetric(this.$props.metric.name)
     },
     onResize () {

@@ -112,7 +112,7 @@ export default {
     PopupHeader
   },
   props: { },
-  data: function () {
+  data () {
     return {
       popupTitle: 'Einstellungen'
     }
@@ -120,28 +120,28 @@ export default {
   computed: {
     uiResolution: {
       cache: false,
-      get: function () {
+      get () {
         return 30 - this.configuration.resolution
       },
-      set: function (newValue) {
+      set (newValue) {
         this.$store.commit('setResolution', 30 - newValue)
       }
     },
     uiZoomSpeed: {
       cache: false,
-      get: function () {
+      get () {
         return this.configuration.zoomSpeed
       },
-      set: function (newValue) {
+      set (newValue) {
         this.$store.commit('setZoomSpeed', 1 * newValue)
       }
     },
     uiLegendDisplay: {
       cache: false,
-      get: function () {
+      get () {
         return this.configuration.legendDisplay
       },
-      set: function (newValue) {
+      set (newValue) {
         this.$store.commit('setLegendDisplay', newValue)
       }
     },
@@ -164,7 +164,7 @@ export default {
     closePopup (evt) {
       veil.destroy(evt)
     },
-    closePopupModal: function (evt) {
+    closePopupModal (evt) {
       if (evt.target.getAttribute('role') === 'dialog') {
         veil.destroy(evt)
       }

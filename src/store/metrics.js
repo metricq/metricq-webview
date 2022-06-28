@@ -29,7 +29,7 @@ export default {
   },
   mutations: {
     resetAll (state) {
-      Object.keys(state.metrics).forEach(function (key) { if (!key.startsWith('_')) { Vue.delete(state.metrics, key) } })
+      Object.keys(state.metrics).forEach((key) => { if (!key.startsWith('_')) { Vue.delete(state.metrics, key) } })
     },
     privateRemoveEntry (state, { metricKey }) {
       Vue.delete(state.metrics, metricKey)
@@ -105,7 +105,7 @@ export default {
       const metricsArray = getters.getAll()
       document.getElementById('checkbox_min_max').indeterminate = false
       if (metricsArray.length > 0) {
-        metricsArray.forEach(metric => {
+        metricsArray.forEach((metric) => {
           stateArray.push(metric.drawMin)
           stateArray.push(metric.drawMax)
         })

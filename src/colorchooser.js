@@ -61,11 +61,11 @@ export class Colorchooser {
     this.ctx.stroke()
   }
 
-  onmousedown (evt) {
+  onmousedown () {
     this.mouseDown = true
   }
 
-  onmouseup (evt) {
+  onmouseup () {
     this.mouseDown = false
   }
 
@@ -92,9 +92,9 @@ export class Colorchooser {
   }
 
   registerCallbacks () {
-    this.canvas.addEventListener('mousedown', (function (selfPtr) { return function (evt) { selfPtr.onmousedown(evt) } }(this)))
-    this.canvas.addEventListener('mouseup', (function (selfPtr) { return function (evt) { selfPtr.onmouseup(evt) } }(this)))
-    this.canvas.addEventListener('mousemove', (function (selfPtr) { return function (evt) { selfPtr.onmousemove(evt) } }(this)))
-    this.canvas.addEventListener('click', (function (selfPtr) { return function (evt) { selfPtr.onclick(evt) } }(this)))
+    this.canvas.addEventListener('mousedown', () => this.onmousedown())
+    this.canvas.addEventListener('mouseup', () => this.onmouseup())
+    this.canvas.addEventListener('mousemove', (evt) => this.onmousemove(evt))
+    this.canvas.addEventListener('click', (evt) => this.onclick(evt))
   }
 }

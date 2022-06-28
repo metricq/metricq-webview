@@ -73,7 +73,7 @@ export default {
     VueMultiSelect
   },
   props: {},
-  data: function () {
+  data () {
     return {
       popupTitle: 'Metriken hinzufügen',
       value: null,
@@ -113,7 +113,7 @@ export default {
         this.$refs.multi.activate()
       }
     },
-    addMetrics: function (evt) {
+    addMetrics (evt) {
       if (this.value != null) {
         for (const item of this.value) {
           window.MetricQWebView.instances[0].addMetric(item.title, item.desc)
@@ -124,7 +124,7 @@ export default {
     closePopup (evt) {
       veil.destroy(evt)
     },
-    closePopupModal: function (evt) {
+    closePopupModal (evt) {
       if (evt.target.getAttribute('role') === 'dialog') {
         veil.destroy(evt)
       }
@@ -132,7 +132,7 @@ export default {
     changeSearch (value) {
       const instance = window.MetricQWebView.instances[0]
       const requestId = ++this.requestCount
-      instance.handler.searchMetricsPromise(value, true).then(matches => {
+      instance.handler.searchMetricsPromise(value, true).then((matches) => {
         if (requestId < this.requestCount) {
           return
         }

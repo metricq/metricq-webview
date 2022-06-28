@@ -194,7 +194,7 @@ function uiInteractLegend (metricQInstance, evtObj) {
     metricsArray.push(newEntry)
   }
   if (uiOptions.sortTooltip) {
-    metricsArray.sort(function (a, b) { return b.sortValue - a.sortValue })
+    metricsArray.sort((a, b) => { return b.sortValue - a.sortValue })
   }
   let posDate = new Date(curPoint[0])
   let smallestDelta
@@ -290,40 +290,30 @@ function uiInteractCheck (eventType, pertainingElement, evtObj) {
 }
 
 export function registerCallbacks (anchoringObject) {
-  mouseDown.registerDragCallback(function (myElement) {
-    return function (evtObj) {
-      if (myElement && mouseDown.startTarget && mouseDown.startTarget.isSameNode(myElement)) {
-        evtObj.preventDefault()
-        uiInteractCheck('drag', myElement, evtObj)
-      }
+  mouseDown.registerDragCallback((evtObj) => {
+    if (anchoringObject && mouseDown.startTarget && mouseDown.startTarget.isSameNode(anchoringObject)) {
+      evtObj.preventDefault()
+      uiInteractCheck('drag', anchoringObject, evtObj)
     }
-  }(anchoringObject))
-  mouseDown.registerDropCallback(function (myElement) {
-    return function (evtObj) {
-      if (myElement && mouseDown.startTarget && mouseDown.startTarget.isSameNode(myElement)) {
-        uiInteractCheck('drop', myElement, evtObj)
-      }
+  })
+  mouseDown.registerDropCallback((evtObj) => {
+    if (anchoringObject && mouseDown.startTarget && mouseDown.startTarget.isSameNode(anchoringObject)) {
+      uiInteractCheck('drop', anchoringObject, evtObj)
     }
-  }(anchoringObject))
-  mouseDown.registerMoveCallback(function (myElement) {
-    return function (evtObj) {
-      if (myElement && myElement.isSameNode(evtObj.target)) {
-        uiInteractCheck('move', myElement, evtObj)
-      }
+  })
+  mouseDown.registerMoveCallback((evtObj) => {
+    if (anchoringObject && anchoringObject.isSameNode(evtObj.target)) {
+      uiInteractCheck('move', anchoringObject, evtObj)
     }
-  }(anchoringObject))
-  anchoringObject.addEventListener('mouseout', (function (myElement) {
-    return function (evtObj) {
-      if (myElement) {
-        window.MetricQWebView.getInstance(myElement).graticule.draw(false)
-      }
+  })
+  anchoringObject.addEventListener('mouseout', () => {
+    if (anchoringObject) {
+      window.MetricQWebView.getInstance(anchoringObject).graticule.draw(false)
     }
-  }(anchoringObject)))
-  anchoringObject.addEventListener('wheel', (function (myElement) {
-    return function (evtObj) {
-      uiInteractCheck('wheel', myElement, evtObj)
-    }
-  }(anchoringObject)))
+  })
+  anchoringObject.addEventListener('wheel', (evtObj) => {
+    uiInteractCheck('wheel', anchoringObject, evtObj)
+  })
 }
 
 function calculateActualMousePos (evtObj) {
@@ -350,7 +340,7 @@ const mouseDown = {
   dragCallbacks: [],
   dropCallbacks: [],
   moveCallbacks: [],
-  calcRelativePos: function (evtObj) {
+  calcRelativePos (evtObj) {
     const curPos = [
       evtObj.x,
       evtObj.y
@@ -365,7 +355,7 @@ const mouseDown = {
     }
     return curPos
   },
-  startClick: function (evtObj) {
+  startClick (evtObj) {
     mouseDown.startTarget = evtObj.target
     mouseDown.endTarget = undefined
     mouseDown.endTime = 0
@@ -378,7 +368,7 @@ const mouseDown = {
     mouseDown.relativeStartPos = calculateActualMousePos(evtObj)
     mouseDown.isDown = true
   },
-  moving: function (evtObj) {
+  moving (evtObj) {
     if (mouseDown.isDown === true) {
       mouseDown.previousPos = mouseDown.currentPos
       mouseDown.currentPos = mouseDown.calcRelativePos(evtObj)
@@ -391,7 +381,7 @@ const mouseDown = {
       }
     }
   },
-  endClick: function (evtObj) {
+  endClick (evtObj) {
     mouseDown.endPos = mouseDown.calcRelativePos(evtObj)
     mouseDown.endTime = evtObj.timestamp
     mouseDown.duration = mouseDown.endTime - mouseDown.startTime
@@ -401,22 +391,22 @@ const mouseDown = {
       mouseDown.dropCallbacks[i](evtObj)
     }
   },
-  registerDragCallback: function (callbackFunc) {
+  registerDragCallback (callbackFunc) {
     mouseDown.dragCallbacks.push(callbackFunc)
   },
-  registerDropCallback: function (callbackFunc) {
+  registerDropCallback (callbackFunc) {
     mouseDown.dropCallbacks.push(callbackFunc)
   },
-  registerMoveCallback: function (callbackFunc) {
+  registerMoveCallback (callbackFunc) {
     mouseDown.moveCallbacks.push(callbackFunc)
   }
 }
 const keyDown = {
   keys: [],
-  keyDown: function (evtObj) {
+  keyDown (evtObj) {
     keyDown.keys.push(evtObj.keyCode)
   },
-  keyUp: function (evtObj) {
+  keyUp (evtObj) {
     for (let i = 0; i < keyDown.keys.length; ++i) {
       if (evtObj.keyCode === keyDown.keys[i]) {
         keyDown.keys.splice(i, 1)
@@ -424,7 +414,7 @@ const keyDown = {
       }
     }
   },
-  is: function (keyCode) {
+  is (keyCode) {
     for (let i = 0; i < keyDown.keys.length; ++i) {
       if (keyDown.keys[i] === keyCode) {
         return true
@@ -452,7 +442,7 @@ document.addEventListener('keydown', keyDown.keyDown)
 document.addEventListener('keyup', keyDown.keyUp)
 
 // code for Mac Safari
-window.addEventListener('gesturechange', function (evt) {
+window.addEventListener('gesturechange', (evt) => {
 // console.log(evt);
   evt.preventDefault()
   const timeRange = window.MetricQWebView.instances[0].graticule.curTimeRange

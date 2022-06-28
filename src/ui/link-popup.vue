@@ -94,7 +94,7 @@ export default {
     PopupHeader
   },
   props: { },
-  data: function () {
+  data () {
     return {
       popupTitle: 'Information'
     }
@@ -122,7 +122,7 @@ export default {
     closePopup (evt) {
       veil.destroy(evt)
     },
-    closePopupModal: function (evt) {
+    closePopupModal (evt) {
       if (evt.target.getAttribute('role') === 'dialog') {
         veil.destroy(evt)
       }

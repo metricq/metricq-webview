@@ -137,7 +137,7 @@ import AnalyzeTable from '.././components/analyzeTable.vue'
 export default {
   components: { PopupHeader, AnalyzeTable },
   props: {},
-  data: function () {
+  data () {
     return {
       popupTitle: 'Export',
       image: '',
@@ -150,27 +150,27 @@ export default {
       return ['png', 'jpeg', 'pdf']
     },
     selectedFileformat: {
-      get: function () {
+      get () {
         return this.configuration.exportFormat
       },
-      set: function (newValue) {
+      set (newValue) {
         this.$store.commit('setExportFormat', newValue)
       }
     },
     exportWidth: {
-      get: function () {
+      get () {
         return this.configuration.exportWidth
       },
-      set: function (newValue) {
+      set (newValue) {
         this.$store.commit('setExportWidth', parseInt(newValue))
       }
     },
     exportHeight:
         {
-          get: function () {
+          get () {
             return this.configuration.exportHeight
           },
-          set: function (newValue) {
+          set (newValue) {
             this.$store.commit('setExportHeight', parseInt(newValue))
           }
         },
@@ -188,7 +188,7 @@ export default {
     }
   },
   methods: {
-    doExport: async function () {
+    async doExport () {
       if (this.selectedFileformat === 'pdf') {
         let marginBottom = 0
         if (this.exportAnalyze) {
@@ -206,12 +206,12 @@ export default {
       veil.destroy()
       this.$store.commit('togglePopup', 'export')
     },
-    waitNewCanvas: function () {
-      return new Promise(resolve => {
+    waitNewCanvas () {
+      return new Promise((resolve) => {
         resolve('resolved')
       })
     },
-    closePopupModal: function (evt) {
+    closePopupModal (evt) {
       if (evt.target.getAttribute('role') === 'dialog') {
         veil.destroy(evt)
       }

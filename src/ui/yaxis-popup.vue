@@ -103,7 +103,7 @@ export default {
     PopupHeader
   },
   props: { },
-  data: function () {
+  data () {
     return {
       popupTitle: 'Wertebereich der Y-Achse'
     }
@@ -111,18 +111,18 @@ export default {
   computed: {
     manualDisabled: {
       cache: false,
-      get: function () {
+      get () {
         return window.MetricQWebView.instances[0].graticule.yRangeOverride.type !== 'manual'
       },
-      set: function (newValue) {
+      set (newValue) {
         window.MetricQWebView.instances[0].graticule.setYRangeOverride('local', undefined, undefined)
       }
     },
     yaxisRange: {
-      get: function () {
+      get () {
         return window.MetricQWebView.instances[0].graticule.yRangeOverride.type
       },
-      set: function (newValue) {
+      set (newValue) {
         let ele = document.getElementById('yaxis_min')
         if (ele) {
           ele.disabled = newValue !== 'manual'
@@ -145,14 +145,14 @@ export default {
     },
     allMin: {
       cache: false,
-      get: function () {
+      get () {
         const arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
         if (arr) {
           return (Number(arr[0])).toFixed(3)
         }
         return 0
       },
-      set: function (newValue) {
+      set (newValue) {
         let arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
         arr = [parseFloat(newValue), arr[1]]
         window.MetricQWebView.instances[0].graticule.setYRangeOverride(undefined, arr[0], arr[1])
@@ -161,14 +161,14 @@ export default {
     },
     allMax: {
       cache: false,
-      get: function () {
+      get () {
         const arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
         if (arr) {
           return (Number(arr[1])).toFixed(3)
         }
         return 1
       },
-      set: function (newValue) {
+      set (newValue) {
         let arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
         arr = [arr[0], parseFloat(newValue)]
         window.MetricQWebView.instances[0].graticule.setYRangeOverride(undefined, arr[0], arr[1])
@@ -191,7 +191,7 @@ export default {
     closePopup (evt) {
       veil.destroy(evt)
     },
-    closePopupModal: function (evt) {
+    closePopupModal (evt) {
       if (evt.target.getAttribute('role') === 'dialog') {
         veil.destroy(evt)
       }

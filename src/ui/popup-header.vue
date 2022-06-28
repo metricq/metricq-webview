@@ -29,7 +29,7 @@ export default {
     }
   },
   methods: {
-    closePopup: function (evt) {
+    closePopup (evt) {
       veil.destroy(evt)
     }
   }
