@@ -811,13 +811,36 @@ export class Graticule {
   }
 
   figureOutValueRange (allTimeValueRanges) {
-    const valueRange = this.data.getValueRange(allTimeValueRanges, this.curTimeRange[0], this.curTimeRange[1])
+    const dataValueRange = this.data.getValueRange(allTimeValueRanges, this.curTimeRange[0], this.curTimeRange[1])
     if (undefined !== valueRange[0]) {
+      let deltaRange = Math.abs(valueRange[1] - valueRange[0])
+      if(deltaRange < 10) {
+        deltaRange = 10
+      }
+      const displayValueRange = [dataValueRange[0], dataValueRange[1]]
       // add wiggle room
-      valueRange[0] -= (valueRange[1] - valueRange[0]) * 0.08
-      valueRange[1] += (valueRange[1] - valueRange[0]) * 0.04
+      // Note the layout decision,
+      //     to subtract 8 % of the delta at the bottom,
+      //     to add 4 % of the delta at the top.
+      //   Thus some rather unchanging metrics with a small delta
+      //     might be placed at two thirds' height of the rendering
+      displayValueRange[0] -= deltaRange * 0.08
+      displayValueRange[1] += deltaRange * 0.04
+      
+      // special case, if our 'wiggle room' makes the
+      //   coordinate system go beneath Zero value,
+      //   where there is no-below-zero data, we shall
+      //   move the min and max to start with Zero
+      if(displayValueRange[0] < 0 && dataValueRange[0] >= 0) {
+        const deltaForMovement = displayValueRange[0] * -1
+        displayValueRange[0] += deltaForMovement
+        displayValueRange[1] += deltaForMovement
+      }
+      return displayValueRange
+    } else {
+      console.error("Graticule/Coordinate System: Automatically determining value ranges (y-axis) failed: my data handler told me an 'undefined' minimum value!");
+      return dataValueRange
     }
-    return valueRange
   }
 
   canvasResize (canvasMargins) {
