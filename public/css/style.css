@@ -100,6 +100,7 @@ body {
 
 #legend_list {
     list-style-type: none;
+    margin-bottom: 0;
 }
 
 .legend_list_bottom {
