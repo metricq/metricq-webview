@@ -37,7 +37,7 @@ export default {
 
     privateSet (state, {
       metricKey,
-      metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg }
+      metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw }
     }) {
       if (name !== undefined && metricKey !== name) {
         throw new Error('metricKey and metric.name must be equal!')
@@ -56,7 +56,9 @@ export default {
           drawAvg: drawAvg === undefined ? true : drawAvg,
           drawMax: drawMax === undefined ? store.state.globalMinMax : drawMax,
           popupKey: 'popup_' + MetricHelper.filterKey(metricKey),
-          htmlName: metricKey
+          htmlName: metricKey,
+          pointsAgg: pointsAgg || null,
+          pointsRaw: pointsRaw || null
         })
       } else {
         if (name !== undefined) {
@@ -87,6 +89,12 @@ export default {
         }
         if (drawMax !== undefined) {
           Vue.set(state.metrics[metricKey], 'drawMax', drawMax)
+        }
+        if (pointsAgg !== undefined) {
+          Vue.set(state.metrics[metricKey], 'pointsAgg', pointsAgg)
+        }
+        if (pointsRaw !== undefined) {
+          Vue.set(state.metrics[metricKey], 'pointsRaw', pointsRaw)
         }
       }
     },
@@ -133,7 +141,9 @@ export default {
         errorprone,
         drawMin,
         drawMax,
-        drawAvg
+        drawAvg,
+        pointsAgg,
+        pointsRaw
       }
     }) {
       if (state.metrics[name] !== undefined) {
@@ -147,7 +157,7 @@ export default {
         }
         commit('privateSet', {
           metricKey: name,
-          metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg }
+          metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw }
         })
         const metric = state.metrics[name]
         // marker and color are stored here and deep inside MetricQWebView/MetricHandler/Graticule
@@ -222,6 +232,9 @@ export default {
     updateDrawState ({ dispatch, commit }, { metricKey, drawState: { drawMin, drawAvg, drawMax } }) {
       commit('privateSet', { metricKey, metric: { drawMin, drawAvg, drawMax } })
       dispatch('checkGlobalDrawState')
+    },
+    updateDataPoints ({ state, commit }, { metricKey, pointsAgg, pointsRaw }) {
+      commit('privateSet', { metricKey, metric: { pointsAgg: pointsAgg, pointsRaw: pointsRaw } })
     }
   },
   modules: {}

@@ -64,7 +64,7 @@ class MetricQWebView {
     this.handler.stopTime.updateTime(stopTime)
   }
 
-  renderMetrics (datapointsJSON) {
+  renderMetrics (datapointsJSON, startTime) {
     if (!this.hasPlot) {
       const myCanvas = document.createElement('canvas')
       this.ele = this.ele.appendChild(myCanvas)
@@ -85,6 +85,7 @@ class MetricQWebView {
       this.graticule.automaticallyDetermineRanges(false, true)
       this.graticule.draw(false)
     }
+    this.store.commit('setTotalTime', window.performance.now() - startTime)
   }
 
   updateMetricUrl () {

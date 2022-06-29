@@ -78,6 +78,16 @@
           v-bind:position="configuration.legendDisplay"></new-metric-legend>
         <clear-metrics-button
           v-bind:position="configuration.legendDisplay"></clear-metrics-button>
+        <li :class="'legend_end legend_item legend_item_' + configuration.legendDisplay + ' legend_list_' + configuration.legendDisplay + '_bottom'">
+          <query-times
+            v-bind:querytime="performance.querytime"
+            v-bind:totaltime="performance.totaltime"></query-times>
+        </li>
+        <li :class="'legend_end legend_item legend_item_' + configuration.legendDisplay + ' legend_list_' + configuration.legendDisplay + '_last'">
+          <query-points
+            v-bind:agg="performance.agg"
+            v-bind:raw="performance.raw"></query-points>
+        </li>
       </ul>
       <div id="wrapper_popup_legend">
         <metric-popup

@@ -16,6 +16,8 @@
           <th>Max</th>
           <th>Avg</th>
           <th>Einheit</th>
+          <th>Aggregate</th>
+          <th>Raw</th>
         </tr>
       </thead>
       <tbody>
@@ -37,16 +39,24 @@
             {{ entry.desc }}
           </td>
           <td class="number">
-            {{ entry.min }}
+            {{ entry.min | withDecimalPlaces(3) }}
           </td>
           <td class="number">
-            {{ entry.max }}
+            {{ entry.max | withDecimalPlaces(3) }}
           </td>
           <td class="number">
-            {{ entry.avg }}
+            {{ entry.avg | withDecimalPlaces(3) }}
           </td>
           <td class="unit">
             {{ entry.unit }}
+          </td>
+          <td class="number">
+            <template v-if="entry.agg !== null">
+              {{ entry.agg | withDecimalPlaces(0) }}
+            </template>
+          </td>
+          <td class="number">
+            {{ entry.raw | withDecimalPlaces(0) }}
           </td>
         </tr>
       </tbody>
@@ -88,9 +98,11 @@ export default {
             name: metric.htmlName,
             desc: metric.description,
             unit: metric.unit,
-            min: this.convert(Object.values(data)[0].minimum),
-            max: this.convert(Object.values(data)[0].maximum),
-            avg: this.convert(Object.values(data)[0].mean)
+            min: Object.values(data)[0].minimum,
+            max: Object.values(data)[0].maximum,
+            avg: Object.values(data)[0].mean,
+            agg: metric.pointsAgg,
+            raw: metric.pointsRaw
           }), () => ({
             name: metric.htmlName,
             desc: 'Fehler beim Laden der Metrik',
@@ -98,6 +110,8 @@ export default {
             min: 'NaN',
             max: 'NaN',
             avg: 'NaN',
+            agg: 'NaN',
+            raw: 'NaN',
             error: true
           })))
         }
@@ -107,12 +121,6 @@ export default {
     }
   },
   methods: {
-    convert (object) {
-      return object.toLocaleString('de', {
-        minimumFractionDigits: 3,
-        maximumFractionDigits: 3
-      })
-    },
     finishedLoading () {
       this.$emit('finished')
     }

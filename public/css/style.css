@@ -56,23 +56,6 @@ body {
     width: 100vw;
 }
 
-#legend_list {
-    list-style-type: none;
-}
-
-.legend_list_bottom {
-    display: inline-flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    white-space: nowrap;
-}
-
-.legend_list_right {
-    display: flex;
-    flex-direction: column;
-    width: max-content;
-}
-
 .legend_item {
     padding: 0px 1px 0px 10px;
     display: inline-flex;
@@ -113,6 +96,33 @@ body {
     height: 14px;
     position: relative;
     bottom: 1px;
+}
+
+#legend_list {
+    list-style-type: none;
+    margin-bottom: 0;
+}
+
+.legend_list_bottom {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.legend_list_right {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: max-content;
+}
+
+.legend_list_right_bottom {
+    margin-top: auto;
+}
+
+.legend_list_right_last {
+    margin-bottom: 0px;
 }
 
 .legend_end {

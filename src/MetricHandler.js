@@ -50,13 +50,13 @@ export class MetricHandler {
     for (let i = 0; i < nonErrorProneMetrics.length; ++i) {
       queryObj.target(nonErrorProneMetrics[i], defaultAggregates)
     }
+    const startTime = window.performance.now()
     if (queryObj.targets.length > 0) {
       // TODO: register some callback
-
       // execute query
       // TODO: pass parameter nonErrorProneMetrics
       queryObj.run().then((dataset) => {
-        this.handleResponse(nonErrorProneMetrics, dataset)
+        this.handleResponse(nonErrorProneMetrics, dataset, startTime)
       }).catch(() => {
         console.log('Request failed: ' + nonErrorProneMetrics.join(','))
         nonErrorProneMetrics.forEach((curVal) => {
@@ -72,13 +72,16 @@ export class MetricHandler {
         maxDataPoints)
       queryObj.target(remainingMetrics[i], defaultAggregates)
       queryObj.run().then((dataset) => {
-        this.handleResponse([remainingMetrics[i]], dataset)
+        this.handleResponse([remainingMetrics[i]], dataset, startTime)
       })
     }
   }
 
-  handleResponse (requestedMetrics, myData) {
+  handleResponse (requestedMetrics, myData, startTime) {
+    this.store.commit('setQueryTime', window.performance.now() - startTime)
     const listOfFaultyMetrics = []
+    let pointCountAgg = null
+    let pointCountRaw = 0
     for (let i = 0; i < requestedMetrics.length; ++i) {
       const metricName = requestedMetrics[i]
       const matchingAggregatesObj = {}
@@ -88,6 +91,20 @@ export class MetricHandler {
         if (splitted[0] === requestedMetrics[i]) {
           matchingAggregatesObj[splitted[1]] = true
           matchingAggregatesCount += 1
+          if (splitted[1] === 'count' || splitted[1] === 'raw') {
+            let pointsRaw = 0
+            if (splitted[1] === 'count') {
+              for (const entry in myData[curMetricName].data) {
+                pointsRaw += myData[curMetricName].data[entry].value
+              }
+              this.store.dispatch('metrics/updateDataPoints', { metricKey: splitted[0], pointsAgg: myData[curMetricName].data.length, pointsRaw: pointsRaw })
+              pointCountAgg += myData[curMetricName].data.length
+            } else {
+              pointsRaw = myData[curMetricName].data.length
+              this.store.dispatch('metrics/updateDataPoints', { metricKey: splitted[0], pointsAgg: null, pointsRaw: pointsRaw })
+            }
+            pointCountRaw += pointsRaw
+          }
         }
       }
       if (!this.checkIfMetricIsOk(metricName, matchingAggregatesCount, matchingAggregatesObj)) {
@@ -96,10 +113,12 @@ export class MetricHandler {
         this.receivedError(0, metricName)
       }
     }
+    this.store.commit('setAggregatePoints', pointCountAgg)
+    this.store.commit('setRawPoints', pointCountRaw)
     if (listOfFaultyMetrics.length > 0) {
       Vue.toasted.error('Fehler mit Metriken: ' + listOfFaultyMetrics.join(', '), this.store.state.toastConfiguration)
     }
-    this.renderer.renderMetrics(myData)
+    this.renderer.renderMetrics(myData, startTime)
   }
 
   checkIfMetricIsOk (metricName, aggregateCount, aggregateObj) {

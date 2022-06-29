@@ -10,6 +10,8 @@ import MetricPopup from './ui/metric-popup.vue'
 import NewMetricPopup from './ui/new-metric-popup.vue'
 import YaxisPopup from './ui/yaxis-popup.vue'
 import TimeButton from './ui/time-button.vue'
+import QueryTimes from './components/query-times.vue'
+import QueryPoints from './components/query-points.vue'
 import GraticuleContainer from './ui/graticule-container.vue'
 import store from './store/'
 import { mapMutations, mapState } from 'vuex'
@@ -17,6 +19,7 @@ import distinctColors from 'distinct-colors'
 import AnalyzePopup from './ui/analyze-popup.vue'
 
 import { importPlugins } from './plugins'
+import { importFilter } from './filter'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -25,6 +28,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import '../public/css/style.css'
 
 importPlugins()
+importFilter()
 
 Vue.config.productionTip = false
 
@@ -41,6 +45,8 @@ export const mainApp = new Vue({
     NewMetricPopup,
     YaxisPopup,
     TimeButton,
+    QueryTimes,
+    QueryPoints,
     GraticuleContainer,
     AnalyzePopup
   },
@@ -50,7 +56,8 @@ export const mainApp = new Vue({
       'timestamp',
       'globalMinMax',
       'popups',
-      'configuration'
+      'configuration',
+      'performance'
     ]),
     ...mapState({
       metricsList (state) {
