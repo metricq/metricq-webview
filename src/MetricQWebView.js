@@ -38,16 +38,6 @@ class MetricQWebView {
         right: 35,
         bottom: 40,
         left: 105
-      },
-      labels: {
-        left: 3,
-        bottom: 10
-      },
-      gears: {
-        y: {
-          left: 2,
-          top: 6
-        }
       }
     }
     this.lastThrottledReloadTime = 0
@@ -90,47 +80,6 @@ class MetricQWebView {
       this.graticule.automaticallyDetermineRanges(false, true)
       this.graticule.draw(false)
       registerCallbacks(myCanvas)
-
-      /* TODO: externalize gear stuff */
-      let gearEle = document.getElementById('gear_xaxis')
-      if (gearEle) {
-        gearEle.parentNode.removeChild(gearEle)
-        gearEle = document.getElementById('gear_yaxis')
-        gearEle.parentNode.removeChild(gearEle)
-      }
-      const BODY = document.getElementsByTagName('body')[0]
-      /* TODO: abstract gear creation into separate class */
-      const gearImages = [undefined, undefined]
-      const gearSrc = ['img/icons/gear.svg',
-        'img/icons/arrow-up-down.svg']
-      for (let i = 0; i < 2; ++i) {
-        gearImages[i] = document.createElement('img')
-        const img = new Image()
-        img.src = gearSrc[i]
-        gearImages[i].src = img.src
-        if (gearSrc[i].indexOf('gear') > -1) {
-          gearImages[i].setAttribute('class', 'gear_axis')
-        }
-        gearImages[i].setAttribute('width', '28')
-        gearImages[i].setAttribute('height', '28')
-      }
-      // TODO: THIS IS NOT MULTI-INSTANCE-SAFE
-      // TODO: RENAME THESE ids SO THAT THEY GET NEW INDIVIDUAL ids EACH AND EVERY TIME
-      const gearId = 'gear_yaxis'
-
-      let gearWrapper = document.createElement('div')
-      gearWrapper.setAttribute('id', gearId)
-      gearWrapper.classList.add('btn')
-      gearWrapper.classList.add('btn-outline-secondary')
-      gearWrapper.appendChild(gearImages[0])
-      gearWrapper.appendChild(document.createElement('br'))
-      gearWrapper.appendChild(gearImages[1])
-      gearWrapper = BODY.appendChild(gearWrapper)
-
-      this.positionYAxisGear(this.ele, gearWrapper)
-      gearWrapper.addEventListener('click', () => {
-        this.store.commit('togglePopup', 'yaxis')
-      })
     } else {
       this.graticule.data.processMetricQDatapoints(datapointsJSON)
       this.graticule.automaticallyDetermineRanges(false, true)
@@ -138,46 +87,12 @@ class MetricQWebView {
     }
   }
 
-  positionYAxisGear (rowBodyEle, gearEle) {
-    if (!rowBodyEle || !gearEle) {
-      return
-    }
-    gearEle.style.position = 'absolute'
-    const posGear = this.getTopLeft(rowBodyEle)
-    posGear[0] += this.margins.gears.y.left
-    posGear[1] += this.margins.gears.y.top
-    gearEle.style.left = posGear[0] + 'px'
-    gearEle.style.top = posGear[1] + 'px'
-  }
-
-  getTopLeft (ele) {
-    const topLeft = [0, 0]
-    const eleRect = ele.getBoundingClientRect()
-    topLeft[0] = eleRect.left + window.scrollX
-    topLeft[1] = eleRect.top + window.scrollY
-    return topLeft
-  }
-
   updateMetricUrl () {
-    let encodedStr = ''
-    // old style:
-    // if (false) {
-    //   const jsurlObj = {
-    //     cntr: [],
-    //     start: this.handler.startTime,
-    //     stop: this.handler.stopTime
-    //   }
-    //   for (const metricBase in this.handler.allMetrics) {
-    //     jsurlObj.cntr.push(this.handler.allMetrics[metricBase].name)
-    //   }
-    //   encodedStr = encodeURIComponent(window.JSURL.stringify(jsurlObj))
-    // } else {
-    encodedStr = '.' + this.handler.startTime.getValue() + '*' + this.handler.stopTime.getValue()
+    let encodedStr = '.' + this.handler.startTime.getValue() + '*' + this.handler.stopTime.getValue()
     for (const metricKey of this.store.getters['metrics/getAllKeys']()) {
       encodedStr += '*' + metricKey
     }
     encodedStr = encodeURIComponent(encodedStr)
-    // }
     window.location.href =
       parseLocationHref()[0] +
       '#' +

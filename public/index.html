@@ -65,10 +65,7 @@
     </nav>
   </div>
   <div :class="'body_and_legend_' + configuration.legendDisplay">
-    <div id="wrapper_body" class="wrapper_body">
-      <div id="webview_container" class="row_body">
-      </div>
-    </div>
+    <graticule-container></graticule-container>
     <div id="legend_container" :class="'row_foot row_foot_' + configuration.legendDisplay">
       <ul id="legend_list" :class="'legend_list legend_list_' + configuration.legendDisplay">
         <metric-legend

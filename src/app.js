@@ -10,6 +10,7 @@ import MetricPopup from './ui/metric-popup.vue'
 import NewMetricPopup from './ui/new-metric-popup.vue'
 import YaxisPopup from './ui/yaxis-popup.vue'
 import TimeButton from './ui/time-button.vue'
+import GraticuleContainer from './ui/graticule-container.vue'
 import store from './store/'
 import { mapMutations, mapState } from 'vuex'
 import distinctColors from 'distinct-colors'
@@ -40,6 +41,7 @@ export const mainApp = new Vue({
     NewMetricPopup,
     YaxisPopup,
     TimeButton,
+    GraticuleContainer,
     AnalyzePopup
   },
   data: { },
