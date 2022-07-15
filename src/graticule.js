@@ -436,7 +436,7 @@ export class Graticule {
       curTimePerPixel = this.setTimeRangeExport(exportValues[4])
       curValuesPerPixel = this.setValueRangeExport(exportValues[5])
     }
-    ctx.fillStyle = this.BG_COLOR;
+    ctx.fillStyle = this.BG_COLOR
     ctx.fillRect(0, 0, clearSize[0], clearSize[1])
     this.drawGrid(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
     ctx.save()
