@@ -26,6 +26,7 @@ export class Graticule {
     this.MAX_ZOOM_TIME = 20 * 365 * 24 * 3600 * 1000
     this.MIN_ZOOM_TIME = 10
     this.DEFAULT_FONT = 'sans-serif'
+    this.BG_COLOR = '#FFFFFF'
   }
 
   figureOutTimeSteps (maxStepsAllowed) {
@@ -435,7 +436,8 @@ export class Graticule {
       curTimePerPixel = this.setTimeRangeExport(exportValues[4])
       curValuesPerPixel = this.setValueRangeExport(exportValues[5])
     }
-    ctx.clearRect(0, 0, clearSize[0], clearSize[1])
+    ctx.fillStyle = this.BG_COLOR;
+    ctx.fillRect(0, 0, clearSize[0], clearSize[1])
     this.drawGrid(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
     ctx.save()
     ctx.beginPath()
