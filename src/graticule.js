@@ -743,17 +743,48 @@ export class Graticule {
                 ctx.beginPath()
                 ctx.moveTo(x, y)
               } else {
-                // connect direct
-                if (styleOptions.connect === 'direct') {
-                  ctx.lineTo(x, y)
-                  // connect last
-                } else if (styleOptions.connect === 'last') {
-                  ctx.lineTo(previousX, y)
-                  ctx.lineTo(x, y)
-                  // connect next
-                } else if (styleOptions.connect === 'next') {
-                  ctx.lineTo(x, previousY)
-                  ctx.lineTo(x, y)
+                // just leaving it here for future me.
+                // Surprisingly, the default drawing mode in webview is 'next'.
+                // The other modes got removed while fixing the null-values. And that is how it's done:
+                console.assert(styleOptions.connect === 'next', "Somehow you managed to switch the draw mode to something else than 'next'. I can't do that anymore.")
+
+                // if the current value is null, y is garbage
+                if (curSeries.points[j].value === null) {
+                  if (previousY !== null) {
+                    // if the previous Y is a sane value, we need to draw to last bits
+                    ctx.lineTo(x, previousY)
+                  }
+                  // if it's not a sane value, well, then we got a big gap at our hands here \o/
+
+                  // we set previousY to null, so we can check on that in the next "aggregate"
+                  previousY = null
+
+                  // and we advance X
+                  previousX = x
+
+                  // we use continue here, so our carefully set previousX/Y don't get overwritten down there
+                  continue
+                } else {
+                  // if the current value is not none, we can draw things, but...
+
+                  if (previousY === null) {
+                    // if the previous aggregate was null, we want to draw a gap
+                    //
+                    ctx.moveTo(x, y)
+                  } else {
+                    // first, we draw the horizontal part with the Y value of the previous
+                    // aggregate. We need to do that in this step, as we don't have the "nextX"
+                    // in the previous step.
+                    ctx.lineTo(x, previousY)
+
+                    // now, we draw the vertical line between the previous and the current Y value
+                    ctx.lineTo(x, y)
+
+                    // and in the next iteration, we start with drawing the horizontal part again
+                  }
+
+                  // this part apparently is for drawing the last horizontal bit.
+                  // And to be frank, it looks pretty sketchy to me, but I ain't here to fix that.
                   if (j === curSeries.points.length - 1) {
                     ctx.lineTo(x + x - previousX, y)
                   }
