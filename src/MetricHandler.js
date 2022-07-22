@@ -147,6 +147,8 @@ export class MetricHandler {
     let allMinMax = [undefined, undefined]
     const timeFrame = this.renderer.graticule.curTimeRange
     for (const curMetric of this.store.getters['metrics/getAll']()) {
+      if (!curMetric.draw) continue
+
       const curCache = this.renderer.graticule.data.getMetricCache(curMetric.key)
       if (curCache) {
         let curMinMax
