@@ -22,7 +22,7 @@ export class Graticule {
     }
     this.data = new DataCache(paramMetricQHistoryReference)
     // TODO: take these non-changing parameters
-    //      as parameters to initialisation
+    //      as parameters to initialization
     this.MAX_ZOOM_TIME = 20 * 365 * 24 * 3600 * 1000
     this.MIN_ZOOM_TIME = 10
     this.DEFAULT_FONT = 'sans-serif'
@@ -655,6 +655,8 @@ export class Graticule {
 
   drawBands (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
+      if (!store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).draw) continue
+
       if (store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).drawMin && store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).drawMax) {
         const curBand = this.data.metrics[i].band
         if (curBand) {
@@ -714,6 +716,8 @@ export class Graticule {
 
   drawSeries (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
     for (let i = 0; i < this.data.metrics.length; ++i) {
+      if (!store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).draw) continue
+
       if (this.data.metrics[i].series.raw === undefined) {
         const metricDrawState = store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name)
         this.data.metrics[i].series.avg.styleOptions.skip = !metricDrawState.drawAvg

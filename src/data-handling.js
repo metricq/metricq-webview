@@ -1,6 +1,7 @@
 import { crc32 } from '../lib/pseudo-crc32.js'
 import { hslToRgb } from '../lib/color-conversion.js'
 import moment from 'moment'
+import store from './store/'
 
 export class DataCache {
   constructor (paramMetricQHistoryReference) {
@@ -108,6 +109,8 @@ export class DataCache {
     let min
     let max
     for (let i = 0; i < this.metrics.length; ++i) {
+      if (!store.getters['metrics/getMetricDrawState'](this.metrics[i].name).draw) continue
+
       if (doGetAllTime && this.metrics[i].allTime) {
         if (undefined === min || min > this.metrics[i].allTime.min) {
           min = this.metrics[i].allTime.min

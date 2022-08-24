@@ -144,6 +144,12 @@ class MetricQWebView {
     this.setPlotRanges(false, true)
   }
 
+  toggleDraw (metricBase) {
+    this.store.dispatch('metrics/toggleDraw', { metricKey: metricBase })
+    if (this.graticule) this.graticule.draw(false)
+    this.setPlotRanges(false, true)
+  }
+
   async changeMetricName (oldMetric, newName) {
     if (await this.addMetric(newName, undefined, oldMetric)) {
       this.deleteMetric(oldMetric.name)
