@@ -1334,13 +1334,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metricq/history@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@metricq/history@npm:3.0.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40metricq%2Fhistory%2F3.0.0%2F726fceec853aad5e4378d4cde37c76052fa23b7e21115a86c87ae935efb1b714"
+"@metricq/history@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@metricq/history@npm:3.1.0"
   dependencies:
     axios: ^0.21.2
     moment: ^2.29.1
-  checksum: 4fccf3fcaf21b232898ace5c5e19561e2133fd0c7e85597881c92c2e91fb5a96a3e2f1cb0521d98eeb2054b3d5fc6a7a76e2d936c0179b6b8261139d488d18a5
+  checksum: b920bbc06ed7b3e9a062dd9739d68b5d4df1f01da436540222cf4c9dbcf9c2ac66b0825cd979a82dbb70e9c7a10b6edf7968a468d7d425202aefec77b3edbef7
   languageName: node
   linkType: hard
 
@@ -7531,7 +7531,7 @@ fsevents@^1.2.7:
   version: 0.0.0-use.local
   resolution: "metricq-webview@workspace:."
   dependencies:
-    "@metricq/history": 3.0.0
+    "@metricq/history": ^3.1.0
     "@popperjs/core": ^2.11.5
     "@vue/cli-plugin-babel": ~5.0.0-beta.3
     "@vue/cli-plugin-eslint": ~5.0.0-beta.3

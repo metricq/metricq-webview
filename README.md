@@ -12,14 +12,6 @@ Update your global yarn installation (we need support for project-based yarn)
 npm install -g yarn
 ````
 
-We have some dependencies in the GitHub registry, so you need a personal access token with at least `read:packages` permission. Add this with the following config to your `~/.yarnrc.yml`:
-
-```yaml
-npmRegistries:
-  //npm.pkg.github.com:
-    npmAuthToken: <your_token>
-```
-
 Then the build system and the dependencies can be installed
 
 ```shell
