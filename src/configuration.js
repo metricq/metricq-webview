@@ -18,7 +18,7 @@ export async function getMetricQBackendConfig () {
   console.log(config)
   try {
     const json = await jquery.ajax({
-      url: 'backend.json',
+      url: 'configuration.json',
       type: 'GET',
       dataType: 'json'
     })

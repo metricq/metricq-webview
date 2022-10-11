@@ -56,7 +56,7 @@ Move the `dist` folder content respectively the artifact content to your web ser
 
 #### override backend URL and authentication in production environment
 
-You can create a `backend.json` file next to the `index.html` from the `dist` folder with the following content:
+You can edit the `configuration.json` file next to the `index.html` in the `dist` folder to change the runtime configuration. At the moment the following fields are supported:
 
 ```json
 {
@@ -75,4 +75,4 @@ For example:
 }
 ```
 
-The fields `user` and `password` are optional and can be omitted.
+The fields `user` and `password` are optional and can be omitted. The default for all fields is the build time configuration.
