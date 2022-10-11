@@ -26,10 +26,10 @@ export async function getMetricQBackendConfig () {
     config.user = json.user
     config.password = json.password
   } catch (exc) {
-    Vue.toasted.info('Could not load backend configuration. Using build time defaults!', store.state.toastConfiguration)
     console.log('Could not load backend config.')
     console.log(exc)
   }
+  if (config.backend === undefined) Vue.toasted.info('Could not find a suitable MetricQ backend configuration.', store.state.toastConfiguration)
   return config
 }
 
