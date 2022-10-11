@@ -1,3 +1,38 @@
+import Vue from 'vue'
+import store from '@/store'
+import jquery from 'jquery'
+
+const METRICQ_BACKEND = process.env.VUE_APP_METRICQ_BACKEND
+const [METRICQ_BACKEND_USER, METRICQ_BACKEND_PASSWORD] = process.env.VUE_APP_METRICQ_BACKEND_AUTH === undefined ? [undefined, undefined] : process.env.VUE_APP_METRICQ_BACKEND_AUTH.split(':')
+
+class MetricQBackendConfig {
+  constructor () {
+    this.backend = METRICQ_BACKEND
+    this.user = METRICQ_BACKEND_USER
+    this.password = METRICQ_BACKEND_PASSWORD
+  }
+}
+
+export async function getMetricQBackendConfig () {
+  const config = new MetricQBackendConfig()
+  console.log(config)
+  try {
+    const json = await jquery.ajax({
+      url: 'backend.json',
+      type: 'GET',
+      dataType: 'json'
+    })
+    config.backend = json.backend
+    config.user = json.user
+    config.password = json.password
+  } catch (exc) {
+    Vue.toasted.info('Could not load backend configuration. Using build time defaults!', store.state.toastConfiguration)
+    console.log('Could not load backend config.')
+    console.log(exc)
+  }
+  return config
+}
+
 export class Configuration {
   constructor (resolutionParam, zoomSpeedParam) {
     this.resolution = resolutionParam

@@ -51,4 +51,28 @@ You can build the production version yourself download it as GitHub Actions arti
 yarn build
 ```
 
-Move the dist folder content respectively the artifact content to your web server and make it available at `/webview`.
+Move the `dist` folder content respectively the artifact content to your web server and make it available at `/webview`.
+
+
+#### override backend URL and authentication in production environment
+
+You can create a `backend.json` file next to the `index.html` from the `dist` folder with the following content:
+
+```json
+{
+  "backend": "<backend-url>",
+  "user": "<backend-user>",
+  "password": "<backend-password>"
+}
+```
+
+For example:
+```json
+{
+  "backend": "http://metricq-grafana",
+  "user": "webview",
+  "password": "SuperSecretPassword!"
+}
+```
+
+The fields `user` and `password` are optional and can be omitted.
