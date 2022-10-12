@@ -20,7 +20,8 @@ async function startup () {
       console.log(exc)
     }
   } else {
-    Vue.nextTick(function () { store.commit('togglePopup', 'newmetric') })
+    await Vue.nextTick()
+    store.commit('togglePopup', 'newmetric')
   }
 
   // as the CSS loading is pretty lazy (read slow), we hide main_app until it is loaded.
