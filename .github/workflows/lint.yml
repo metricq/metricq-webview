@@ -26,7 +26,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     # checksums for git repo dependencies are broken
-    - run: yarn config set 'npmScopes["metricq"].npmAuthToken' ${{ secrets.GITHUB_TOKEN }}
     - run: yarn install
     - run: yarn lint --no-fix --max-warnings 0 --max-errors 0
 
@@ -48,7 +47,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
-      - run: yarn config set 'npmScopes["metricq"].npmAuthToken' ${{ secrets.GITHUB_TOKEN }}
       - run: yarn install
       - run: yarn build
         env:
