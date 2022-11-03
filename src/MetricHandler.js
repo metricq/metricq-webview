@@ -2,18 +2,13 @@ import { MetricTimestamp } from './MetricTimestamp.js'
 import MetricQHistory from '@metricq/history'
 import Vue from 'vue'
 
-const METRICQ_BACKEND = process.env.VUE_APP_METRICQ_BACKEND
-const [METRICQ_BACKEND_USER, METRICQ_BACKEND_PASSWORD] = process.env.VUE_APP_METRICQ_BACKEND_AUTH === undefined ? [undefined, undefined] : process.env.VUE_APP_METRICQ_BACKEND_AUTH.split(':')
-
-export { METRICQ_BACKEND, METRICQ_BACKEND_USER, METRICQ_BACKEND_PASSWORD }
-
 export class MetricHandler {
-  constructor (paramRenderer, paramMetricsArr, paramStartTime, paramStopTime, store) {
+  constructor (paramRenderer, paramMetricsArr, paramStartTime, paramStopTime, store, metricqBackendConfig) {
     this.store = store
     this.renderer = paramRenderer
     this.startTime = new MetricTimestamp(paramStartTime, 'start')
     this.stopTime = new MetricTimestamp(paramStopTime, 'end')
-    this.metricQHistory = new MetricQHistory(METRICQ_BACKEND, METRICQ_BACKEND_USER, METRICQ_BACKEND_PASSWORD)
+    this.metricQHistory = new MetricQHistory(metricqBackendConfig.backend, metricqBackendConfig.user, metricqBackendConfig.password)
 
     this.WIGGLEROOM_PERCENTAGE = 0.05
     this.TIME_MARGIN_FACTOR = 1.00 / 3
