@@ -26,4 +26,5 @@ ENV METRICQ_BACKEND_USER=
 ENV METRICQ_BACKEND_PASS=
 
 COPY ./docker/50-webview-backend.sh /docker-entrypoint.d/
+RUN chmod +x /docker-entrypoint.d/50-webview-backend.sh
 COPY --from=build-stage /app/dist /usr/share/nginx/html/webview
