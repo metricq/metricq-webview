@@ -76,3 +76,6 @@ For example:
 ```
 
 The fields `user` and `password` are optional and can be omitted. The default for all fields is the build time configuration.
+
+For the docker image, you can use the environment variables METRICQ_BACKEND, METRICQ_BACKEND_USER, and METRICQ_BACKEND_PASS to override the backend URL.
+Note though, that if you want to override METRICQ_BACKEND_USER and METRICQ_BACKEND_PASS, METRICQ_BACKEND has to be set as well.
