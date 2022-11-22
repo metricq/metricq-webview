@@ -291,10 +291,11 @@ export class Graticule {
         if (y >= graticuleDimensions[1]) {
           ctx.fillRect(graticuleDimensions[0], y, graticuleDimensions[2], 2)
         }
-      } else {
-        yPositions.push(undefined)
-        console.log('Grid algorithm is broken, invalid y-axis grid line at ' + yAxisSteps[i][0])
-      }
+      } // else: grid line out of bounds
+    }
+    if(0 == yPositions.length)
+    {
+      console.warn("Could not determine any grid lines for the y-axis (i.e. value axis), perhaps some of the parameters that lead to that were wrong? - Parameters: timeRange, valueRange, timePerPixel, valuesPerPixel, graticuleDimensions, minDistanceBetweenGridLines, maxStepsCount", timeRange, valueRange, timePerPixel, valuesPerPixel, graticuleDimensions, minDistanceBetweenGridLines, maxStepsCount);
     }
     /* draw text */
     ctx.fillStyle = 'rgba(0,0,0,1)'
