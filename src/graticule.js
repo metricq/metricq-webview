@@ -775,7 +775,11 @@ export class Graticule {
       }
     }
   }
-
+  /* Generate a non-used canvas, onto which we draw the geometrical figure
+   *   (i.e. the marker/symbol) specificied with parameter 'styleOptions',
+   *   which then we can use to paste it to wherever we need that kind
+   *   of symbol as a marker
+   */
   generateOffsiteDot (styleOptions) {
     const BODY = document.getElementsByTagName('body')[0]
     const canvas = document.createElement('canvas')
@@ -784,9 +788,11 @@ export class Graticule {
     canvas.width = ctxDimensions[0]
     canvas.height = ctxDimensions[1]
     canvas.style.display = 'none'
-    // are they only ever appended? O_O
-    //   they clobber up over time...
-    BODY.appendChild(canvas)
+    // Note: we do not need to clobber the HTML's DOM with the canvas
+    //       which has the advantage, that the garbage collector will
+    //       (hopefully) delete this offsite canvas after the drawing
+    //       operations  have  completed  (as opposed  to the offsite
+    //       canvas elements littering the BODY endlessly)
     const canvasCtx = canvas.getContext('2d')
     if (styleOptions.drawDots) {
       canvasCtx.lineWidth = 1
