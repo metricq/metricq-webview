@@ -295,7 +295,7 @@ export class Graticule {
     }
     if(0 == yPositions.length)
     {
-      console.warn("Could not determine any grid lines for the y-axis (i.e. value axis), perhaps some of the parameters that lead to that were wrong? - Parameters: timeRange, valueRange, timePerPixel, valuesPerPixel, graticuleDimensions, minDistanceBetweenGridLines, maxStepsCount", timeRange, valueRange, timePerPixel, valuesPerPixel, graticuleDimensions, minDistanceBetweenGridLines, maxStepsCount);
+      console.warn("Could not determine any grid lines for the y-axis (i.e. value axis), perhaps some of the parameters that lead to that were wrong? - Parameters: timeRange, valueRange, timePerPixel, valuesPerPixel, graticuleDimensions, minDistanceBetweenGridLines, maxStepsCount", timeRange, valueRange, timePerPixel, valuesPerPixel, graticuleDimensions, minDistanceBetweenGridLines, maxStepsCount)
     }
     /* draw text */
     ctx.fillStyle = 'rgba(0,0,0,1)'
@@ -784,6 +784,8 @@ export class Graticule {
     canvas.width = ctxDimensions[0]
     canvas.height = ctxDimensions[1]
     canvas.style.display = 'none'
+    // are they only ever appended? O_O
+    //   they clobber up over time...
     BODY.appendChild(canvas)
     const canvasCtx = canvas.getContext('2d')
     if (styleOptions.drawDots) {
@@ -815,7 +817,7 @@ export class Graticule {
     const dataValueRange = this.data.getValueRange(allTimeValueRanges, this.curTimeRange[0], this.curTimeRange[1])
     if (undefined !== valueRange[0]) {
       let deltaRange = Math.abs(valueRange[1] - valueRange[0])
-      const WIGGLE = window.MetricQWebView.instances[0].handler.WIGGLEROOM_PERCENTAGE;
+      const WIGGLE = window.MetricQWebView.instances[0].handler.WIGGLEROOM_PERCENTAGE
       const displayValueRange = [dataValueRange[0], dataValueRange[1]]
       if(0 < deltaRange)
       {
@@ -825,11 +827,11 @@ export class Graticule {
         //   beautiful for data sets which do not have much variation
         //   (in @Quimoniz's personal opinion)
         //   currently (2022-11-22) WIGGLEROOM_PERCENTAGE has the value 0.05
-        displayValueRange[0] -= deltaRange * WIGGLE;
-        displayValueRange[1] += deltaRange * WIGGLE;
+        displayValueRange[0] -= deltaRange * WIGGLE
+        displayValueRange[1] += deltaRange * WIGGLE
         if(deltaRange < Math.pow(10, -317))
         {
-          console.warn("Warning: The range of values of the data set, is very very small (< 10^-317). Graphs probably won't be drawn correctly as we are very close to the minimum possible value 10^323 (minimum floating point value), our arithmetic is expected to break at this point.");
+          console.warn("Warning: The range of values of the data set, is very very small (< 10^-317). Graphs probably won't be drawn correctly as we are very close to the minimum possible value 10^323 (minimum floating point value), our arithmetic is expected to break at this point.")
         }
       } else // ok, what's going on? - there is zero difference between min and max here! 
       {
@@ -841,13 +843,13 @@ export class Graticule {
         {
           if(0 != displayValueRange[0])
           {
-            const wiggleAbsolute = Math.abs(displayValueRange[0]) * WIGGLE;
-            displayValueRange[0] -= wiggleAbsolute;
-            displayValueRange[1] += wiggleAbsolute;
+            const wiggleAbsolute = Math.abs(displayValueRange[0]) * WIGGLE
+            displayValueRange[0] -= wiggleAbsolute
+            displayValueRange[1] += wiggleAbsolute
           } else { // our range is completely broken, it's from '0' to '0'
                    //   so at this point just set it to be from -1 to +1
-            displayValueRange[0] = -1;
-            displayValueRange[1] =  1;
+            displayValueRange[0] = -1
+            displayValueRange[1] =  1
           }
         }  
       }
@@ -863,7 +865,7 @@ export class Graticule {
       }
       return displayValueRange
     } else {
-      console.error("Graticule/Coordinate System: Automatically determining value ranges (y-axis) failed: my data handler told me an 'undefined' minimum value!");
+      console.error("Graticule/Coordinate System: Automatically determining value ranges (y-axis) failed: my data handler told me an 'undefined' minimum value!")
       return dataValueRange
     }
   }
