@@ -933,6 +933,7 @@ export class Graticule {
       const deltaRange = Math.abs(dataValueRange[1] - dataValueRange[0])
       const WIGGLE = window.MetricQWebView.instances[0].handler.WIGGLEROOM_PERCENTAGE
       const displayValueRange = [dataValueRange[0], dataValueRange[1]]
+      let brokenRange = false
       if (deltaRange > 0) {
         // Here we assume the same wiggle room upwards as well as downwards,
         //   maybe we would want to change that in the future, to like
@@ -957,20 +958,25 @@ export class Graticule {
             displayValueRange[1] += wiggleAbsolute
           } else { // our range is completely broken, it's from '0' to '0'
             //   so at this point just set it to be from -1 to +1
+            brokenRange = true
             displayValueRange[0] = -1
             displayValueRange[1] = 1
           }
         }
       }
 
-      // special case, if our 'wiggle room' makes the
-      //   coordinate system go beneath Zero value,
-      //   where there is no-below-zero data, we shall
-      //   move the min and max to start with Zero
-      if (displayValueRange[0] < 0 && dataValueRange[0] >= 0) {
-        const deltaForMovement = displayValueRange[0] * -1
-        displayValueRange[0] += deltaForMovement
-        displayValueRange[1] += deltaForMovement
+      // Through this brokenRange check we can resolve @mbielert's suggestion in
+      //   https://github.com/metricq/metricq-webview/pull/188#issuecomment-1324989786
+      if (!brokenRange) {
+        // special case, if our 'wiggle room' makes the
+        //   coordinate system go beneath Zero value,
+        //   where there is no-below-zero data, we shall
+        //   move the min and max to start with Zero
+        if (displayValueRange[0] < 0 && dataValueRange[0] >= 0) {
+          const deltaForMovement = displayValueRange[0] * -1
+          displayValueRange[0] += deltaForMovement
+          displayValueRange[1] += deltaForMovement
+        }
       }
       return displayValueRange
     } else {
