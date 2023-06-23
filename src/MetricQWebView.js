@@ -5,13 +5,13 @@ import JSURL from 'jsurl'
 import Vue from 'vue'
 import * as Error from '@/errors'
 
-export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store) {
-  const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store)
+export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig) {
+  const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig)
   window.MetricQWebView.instances.push(webview)
 }
 
 class MetricQWebView {
-  constructor (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store) {
+  constructor (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig) {
     this.store = store
     this.id = 'metricqwebview_' + (new Date()).getTime()
     if (!window.MetricQWebView) {
@@ -29,7 +29,7 @@ class MetricQWebView {
     }
 
     this.ele = paramParentEle
-    this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime, this.store)
+    this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime, this.store, metricqBackendConfig)
     this.hasPlot = false
     this.graticule = undefined
     this.margins = {
@@ -140,6 +140,12 @@ class MetricQWebView {
     if (this.graticule) this.graticule.data.deleteMetric(metricBase)
     this.store.dispatch('metrics/delete', { metricKey: metricBase })
     // TODO: also clear this metric from MetricCache
+    if (this.graticule) this.graticule.draw(false)
+    this.setPlotRanges(false, true)
+  }
+
+  toggleDraw (metricBase) {
+    this.store.dispatch('metrics/toggleDraw', { metricKey: metricBase })
     if (this.graticule) this.graticule.draw(false)
     this.setPlotRanges(false, true)
   }

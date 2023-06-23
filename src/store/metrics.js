@@ -12,6 +12,7 @@ export default {
     getMetricDrawState: (state) => (metricName) => {
       const metric = state.metrics[metricName]
       return {
+        draw: metric.draw,
         drawMin: metric.drawMin,
         drawAvg: metric.drawAvg,
         drawMax: metric.drawMax
@@ -37,7 +38,7 @@ export default {
 
     privateSet (state, {
       metricKey,
-      metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw }
+      metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw, draw }
     }) {
       if (name !== undefined && metricKey !== name) {
         throw new Error('metricKey and metric.name must be equal!')
@@ -52,6 +53,7 @@ export default {
           color: color || MetricHelper.metricBaseToRgb(metricKey),
           errorprone: errorprone === undefined ? false : errorprone,
           popup: false,
+          draw: draw === undefined ? true : draw,
           drawMin: drawMin === undefined ? store.state.globalMinMax : drawMin,
           drawAvg: drawAvg === undefined ? true : drawAvg,
           drawMax: drawMax === undefined ? store.state.globalMinMax : drawMax,
@@ -80,6 +82,9 @@ export default {
         }
         if (errorprone !== undefined) {
           Vue.set(state.metrics[metricKey], 'errorprone', errorprone)
+        }
+        if (draw !== undefined) {
+          Vue.set(state.metrics[metricKey], 'draw', draw)
         }
         if (drawMin !== undefined) {
           Vue.set(state.metrics[metricKey], 'drawMin', drawMin)
@@ -232,6 +237,9 @@ export default {
     updateDrawState ({ dispatch, commit }, { metricKey, drawState: { drawMin, drawAvg, drawMax } }) {
       commit('privateSet', { metricKey, metric: { drawMin, drawAvg, drawMax } })
       dispatch('checkGlobalDrawState')
+    },
+    toggleDraw ({ state, commit }, { metricKey }) {
+      commit('privateSet', { metricKey, metric: { draw: !state.metrics[metricKey].draw } })
     },
     updateDataPoints ({ state, commit }, { metricKey, pointsAgg, pointsRaw }) {
       commit('privateSet', { metricKey, metric: { pointsAgg: pointsAgg, pointsRaw: pointsRaw } })
