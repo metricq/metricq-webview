@@ -11,6 +11,17 @@ export class Graticule {
     this.curValueRange = undefined
     this.curTimePerPixel = undefined
     this.curValuesPerPixel = undefined
+    this.labelOffsets = {
+      x_axis: {
+        x: 0,
+        y: 3
+      },
+      y_axis: {
+        x: 0,
+        y: 0
+      }
+
+    }
     this.pixelsLeft = 0
     this.pixelsBottom = 0
     this.clearSize = [0, 0]
@@ -371,21 +382,23 @@ export class Graticule {
     ctx.fillStyle = 'rgba(0,0,0,1)'
     const fontSize = 14
     ctx.font = fontSize + 'px ' + this.DEFAULT_FONT
-    // x-axis ticks (time/date)
+    // x-axis labels/ticks (time/date)
     ctx.textAlign = 'center'
     ctx.textBaseline = 'hanging'
     for (let i = 0; i < xAxisSteps.length; ++i) {
       // supports vertically stacked elements, e.g. time, date
       for (let j = 0; j < xAxisSteps[i].label.length; ++j) {
         // unfortunately measuring line height is complicated, so we use fontSize instead
-        ctx.fillText(xAxisSteps[i].label[j], xPositions[i], graticuleDimensions[1] + graticuleDimensions[3] + this.pixelsBottom + fontSize * j)
+        // add some slight y offset here
+        ctx.fillText(xAxisSteps[i].label[j], xPositions[i] + this.labelOffsets.x_axis.x, graticuleDimensions[1] + graticuleDimensions[3] + this.pixelsBottom + fontSize * j + this.labelOffsets.x_axis.y)
       }
     }
+    // y-axis labels/ticks (values)
     ctx.textAlign = 'right'
     ctx.textBaseline = 'middle'
     for (let i = 0; i < yAxisSteps.length; ++i) {
       if (yPositions[i] >= graticuleDimensions[1]) {
-        ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), graticuleDimensions[0] - this.pixelsLeft, yPositions[i])
+        ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), graticuleDimensions[0] - this.pixelsLeft + this.labelOffsets.y_axis.x, yPositions[i] + this.labelOffsets.y_axis.y)
       }
     }
     ctx.textAlign = 'middle'
