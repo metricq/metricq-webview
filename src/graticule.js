@@ -11,6 +11,17 @@ export class Graticule {
     this.curValueRange = undefined
     this.curTimePerPixel = undefined
     this.curValuesPerPixel = undefined
+    this.labelOffsets = {
+      x_axis: {
+        x: 0,
+        y: 3
+      },
+      y_axis: {
+        x: 0,
+        y: 0
+      }
+
+    }
     this.pixelsLeft = 0
     this.pixelsBottom = 0
     this.clearSize = [0, 0]
@@ -362,30 +373,32 @@ export class Graticule {
         if (y >= graticuleDimensions[1]) {
           ctx.fillRect(graticuleDimensions[0], y, graticuleDimensions[2], 2)
         }
-      } else {
-        yPositions.push(undefined)
-        console.log('Grid algorithm is broken, invalid y-axis grid line at ' + yAxisSteps[i][0])
-      }
+      } // else: grid line out of bounds
+    }
+    if (yPositions.length === 0) {
+      console.warn('Could not determine any grid lines for the y-axis (i.e. value axis), perhaps some of the parameters that lead to that were wrong? - Parameters: timeRange, valueRange, timePerPixel, valuesPerPixel, graticuleDimensions, minDistanceBetweenGridLines, maxStepsCount', timeRange, valueRange, timePerPixel, valuesPerPixel, graticuleDimensions, minDistanceBetweenGridLines, maxStepsCount)
     }
     /* draw text */
     ctx.fillStyle = 'rgba(0,0,0,1)'
     const fontSize = 14
     ctx.font = fontSize + 'px ' + this.DEFAULT_FONT
-    // x-axis ticks (time/date)
+    // x-axis labels/ticks (time/date)
     ctx.textAlign = 'center'
     ctx.textBaseline = 'hanging'
     for (let i = 0; i < xAxisSteps.length; ++i) {
       // supports vertically stacked elements, e.g. time, date
       for (let j = 0; j < xAxisSteps[i].label.length; ++j) {
         // unfortunately measuring line height is complicated, so we use fontSize instead
-        ctx.fillText(xAxisSteps[i].label[j], xPositions[i], graticuleDimensions[1] + graticuleDimensions[3] + this.pixelsBottom + fontSize * j)
+        // add some slight y offset here
+        ctx.fillText(xAxisSteps[i].label[j], xPositions[i] + this.labelOffsets.x_axis.x, graticuleDimensions[1] + graticuleDimensions[3] + this.pixelsBottom + fontSize * j + this.labelOffsets.x_axis.y)
       }
     }
+    // y-axis labels/ticks (values)
     ctx.textAlign = 'right'
     ctx.textBaseline = 'middle'
     for (let i = 0; i < yAxisSteps.length; ++i) {
       if (yPositions[i] >= graticuleDimensions[1]) {
-        ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), graticuleDimensions[0] - this.pixelsLeft, yPositions[i])
+        ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), graticuleDimensions[0] - this.pixelsLeft + this.labelOffsets.y_axis.x, yPositions[i] + this.labelOffsets.y_axis.y)
       }
     }
     ctx.textAlign = 'middle'
@@ -883,6 +896,11 @@ export class Graticule {
     }
   }
 
+  /* Generate a non-used canvas, onto which we draw the geometrical figure
+   *   (i.e. the marker/symbol) specificied with parameter 'styleOptions',
+   *   which then we can use to paste it to wherever we need that kind
+   *   of symbol as a marker
+   */
   generateOffsiteDot (styleOptions) {
     const BODY = document.getElementsByTagName('body')[0]
     const canvas = document.createElement('canvas')
@@ -891,7 +909,11 @@ export class Graticule {
     canvas.width = ctxDimensions[0]
     canvas.height = ctxDimensions[1]
     canvas.style.display = 'none'
-    BODY.appendChild(canvas)
+    // Note: we do not need to clobber the HTML's DOM with the canvas
+    //       which has the advantage, that the garbage collector will
+    //       (hopefully) delete this offsite canvas after the drawing
+    //       operations  have  completed  (as opposed  to the offsite
+    //       canvas elements littering the BODY endlessly)
     const canvasCtx = canvas.getContext('2d')
     if (styleOptions.drawDots) {
       canvasCtx.lineWidth = 1
@@ -919,13 +941,61 @@ export class Graticule {
   }
 
   figureOutValueRange (allTimeValueRanges) {
-    const valueRange = this.data.getValueRange(allTimeValueRanges, this.curTimeRange[0], this.curTimeRange[1])
-    if (undefined !== valueRange[0]) {
-      // add wiggle room
-      valueRange[0] -= (valueRange[1] - valueRange[0]) * 0.08
-      valueRange[1] += (valueRange[1] - valueRange[0]) * 0.04
+    const dataValueRange = this.data.getValueRange(allTimeValueRanges, this.curTimeRange[0], this.curTimeRange[1])
+    if (undefined !== dataValueRange[0]) {
+      const deltaRange = Math.abs(dataValueRange[1] - dataValueRange[0])
+      const WIGGLE = window.MetricQWebView.instances[0].handler.WIGGLEROOM_PERCENTAGE
+      const displayValueRange = [dataValueRange[0], dataValueRange[1]]
+      let brokenRange = false
+      if (deltaRange > 0) {
+        // Here we assume the same wiggle room upwards as well as downwards,
+        //   maybe we would want to change that in the future, to like
+        //   8 % upwards and 4 % downwards, as that tends to look more
+        //   beautiful for data sets which do not have much variation
+        //   (in @Quimoniz's personal opinion)
+        //   currently (2022-11-22) WIGGLEROOM_PERCENTAGE has the value 0.05
+        displayValueRange[0] -= deltaRange * WIGGLE
+        displayValueRange[1] += deltaRange * WIGGLE
+        if (deltaRange < Math.pow(10, -317)) {
+          console.warn("Warning: The range of values of the data set, is very very small (< 10^-317). Graphs probably won't be drawn correctly as we are very close to the minimum possible value 10^323 (minimum floating point value), our arithmetic is expected to break at this point.")
+        }
+      } else { // ok, what's going on? - there is zero difference between min and max here!
+        // as per @tilsche's suggestion ( https://github.com/metricq/metricq-webview/issues/174#issuecomment-1318516418 )
+        //   special treatment for when min == max
+        // here the if-condition is just explicitly spelled out (the check for '0 < deltaRange',
+        //     already implies that they both are equal)
+        if (displayValueRange[0] === displayValueRange[1]) {
+          if (displayValueRange[0] !== 0) {
+            const wiggleAbsolute = Math.abs(displayValueRange[0]) * WIGGLE
+            displayValueRange[0] -= wiggleAbsolute
+            displayValueRange[1] += wiggleAbsolute
+          } else { // our range is completely broken, it's from '0' to '0'
+            //   so at this point just set it to be from -1 to +1
+            brokenRange = true
+            displayValueRange[0] = -1
+            displayValueRange[1] = 1
+          }
+        }
+      }
+
+      // Through this brokenRange check we can resolve @mbielert's suggestion in
+      //   https://github.com/metricq/metricq-webview/pull/188#issuecomment-1324989786
+      if (!brokenRange) {
+        // special case, if our 'wiggle room' makes the
+        //   coordinate system go beneath Zero value,
+        //   where there is no-below-zero data, we shall
+        //   move the min and max to start with Zero
+        if (displayValueRange[0] < 0 && dataValueRange[0] >= 0) {
+          const deltaForMovement = displayValueRange[0] * -1
+          displayValueRange[0] += deltaForMovement
+          displayValueRange[1] += deltaForMovement
+        }
+      }
+      return displayValueRange
+    } else {
+      console.error("Graticule/Coordinate System: Automatically determining value ranges (y-axis) failed: my data handler told me an 'undefined' minimum value!")
+      return dataValueRange
     }
-    return valueRange
   }
 
   canvasResize (canvasMargins) {
@@ -935,6 +1005,8 @@ export class Graticule {
     this.ctx.canvas.width = newSize[0]
     this.ctx.canvas.height = newSize[1] - canvasMargins.top
     this.graticuleDimensions = [canvasMargins.left, canvasMargins.top, newSize[0] - canvasMargins.left - canvasMargins.right, newSize[1] - canvasMargins.top - canvasMargins.bottom]
+    // Note: this assumes we have only one MetricQWebView instance running,
+    //       i.e. will cause issues, as soon as we have two instances or more
     this.setTimeRange(window.MetricQWebView.instances[0].handler.startTime.getUnix(), window.MetricQWebView.instances[0].handler.stopTime.getUnix())
     this.setValueRange()
     this.draw(false)
