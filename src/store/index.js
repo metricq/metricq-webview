@@ -27,7 +27,8 @@ export default new Vuex.Store({
       agg: 0,
       raw: 0
     },
-    toastConfiguration: new ToastConfig()
+    toastConfiguration: new ToastConfig(),
+    isWebviewLoaded: false
   },
   mutations: {
     setStartTime (state, time) {
@@ -71,6 +72,9 @@ export default new Vuex.Store({
     },
     setExportFormat (state, newValue) {
       state.configuration.exportFormat = newValue
+    },
+    setIsWebviewLoaded (state, newValue) {
+      state.isWebviewLoaded = newValue
     }
   },
   actions: {},

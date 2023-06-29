@@ -8,6 +8,7 @@ import * as Error from '@/errors'
 export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig) {
   const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig)
   window.MetricQWebView.instances.push(webview)
+  store.commit('setIsWebviewLoaded', true)
 }
 
 class MetricQWebView {

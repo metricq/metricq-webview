@@ -57,7 +57,8 @@ export const mainApp = new Vue({
       'globalMinMax',
       'popups',
       'configuration',
-      'performance'
+      'performance',
+      'isWebviewLoaded'
     ]),
     ...mapState({
       metricsList (state) {

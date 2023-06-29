@@ -53,6 +53,7 @@
       </label>
       <label>
         <time-button id="date_range" class="btn btn-outline-primary btn-navbar"
+                     v-if="isWebviewLoaded"
                      v-bind:starttime="timestamp.start"
                      v-bind:endtime="timestamp.end"
                      v-b-tooltip title="Angezeigten Zeitraum einstellen">
