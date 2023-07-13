@@ -203,7 +203,9 @@ export class Graticule {
     // make sure that we don't start our steps before our minimum time
     if (i !== 1) {
       while (stepStart.getTime() < this.curTimeRange[0]) {
-        stepStart = new Date(stepStart.getTime() + stepSize)
+        let timeIncrement = stepSize
+        if (this.isLeapYear(stepStart.getFullYear())) timeIncrement += 86400 * 1000
+        stepStart = new Date(stepStart.getTime() + timeIncrement)
       }
     }
     // now finally, we got everything figured out
@@ -244,6 +246,7 @@ export class Graticule {
       switch (i) {
         case 0: // years
           stepItem.label.push('' + curDate.getFullYear())
+          if (this.isLeapYear(curDate.getFullYear())) j += 86400 * 1000
           break
         case 1: // months
           if (curDate.getMonth() === 0 || !previousCurDate || previousCurDate.getFullYear() !== curDate.getFullYear()) {
@@ -294,6 +297,17 @@ export class Graticule {
       previousCurDate = curDate
     }
     return outArr
+  }
+
+  isLeapYear (paramYear) {
+    paramYear = parseInt(paramYear)
+
+    if ((paramYear % 400) === 0 ||
+       ((paramYear % 4) === 0 &&
+        (paramYear % 100) !== 0)) {
+      return true
+    }
+    return false
   }
 
   figureOutLogarithmicSteps (rangeStart, rangeEnd, maxStepsAllowed) {
