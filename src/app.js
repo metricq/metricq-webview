@@ -62,7 +62,8 @@ export const mainApp = new Vue({
     ]),
     ...mapState({
       metricsList (state) {
-        return Object.values(state.metrics.metrics)
+        const metrics = Object.values(state.metrics.metrics)
+        return metrics.sort((a, b) => a.key > b.key)
       }
     })
   },
