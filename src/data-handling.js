@@ -167,7 +167,9 @@ export class DataCache {
     const valueArr = []
     for (let i = 0; i < this.metrics.length; ++i) {
       for (const curAggregate in this.metrics[i].series) {
-        if (this.metrics[i].series[curAggregate] && this.metrics[i].series[curAggregate].points.length > 0) {
+        if (this.metrics[i].series[curAggregate] &&
+            this.metrics[i].series[curAggregate].points.length > 0 &&
+            store.getters['metrics/getMetricDrawState'](this.metrics[i].name).draw) {
           const result = this.metrics[i].series[curAggregate].getValueAtTimeAndIndex(timeAt)
           if (result) {
             valueArr.push([
@@ -197,7 +199,8 @@ export class DataCache {
   distinctUnits () {
     const units = []
     for (let i = 0; i < this.metrics.length; ++i) {
-      if (this.metrics[i].meta && this.metrics[i].meta.unit) {
+      if (this.metrics[i].meta && this.metrics[i].meta.unit &&
+          store.getters['metrics/getMetricDrawState'](this.metrics[i].name).draw) {
         if (!units.includes(this.metrics[i].meta.unit)) {
           units.push(this.metrics[i].meta.unit)
         }
