@@ -317,7 +317,7 @@ export function registerCallbacks (anchoringObject) {
 }
 
 function calculateActualMousePos (evtObj) {
-  const curPos = [evtObj.x - evtObj.target.offsetLeft,
+  const curPos = [evtObj.x - 3 * evtObj.target.offsetLeft,
     evtObj.y - evtObj.target.offsetTop]
   const scrollOffset = calculateScrollOffset(evtObj.target)
   curPos[0] += scrollOffset[0]
