@@ -815,6 +815,10 @@ export class Graticule {
     for (let i = 0; i < this.data.metrics.length; ++i) {
       if (!store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).draw) continue
 
+      if (this.data.metrics[i].series.avg !== undefined) {
+        this.data.metrics[i].series.avg.styleOptions.connect = 'next'
+      }
+
       if (this.data.metrics[i].series.raw === undefined) {
         const metricDrawState = store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name)
         this.data.metrics[i].series.avg.styleOptions.skip = !metricDrawState.drawAvg
@@ -824,6 +828,9 @@ export class Graticule {
         } else {
           this.data.metrics[i].series.min.styleOptions.skip = true
           this.data.metrics[i].series.max.styleOptions.skip = true
+        }
+        if (!metricDrawState.drawMin && !metricDrawState.drawMax) {
+          this.data.metrics[i].series.avg.styleOptions.connect = 'direct'
         }
       }
       for (const curAggregate in this.data.metrics[i].series) {
@@ -839,17 +846,11 @@ export class Graticule {
           for (let j = 0, x, y, previousX, previousY; j < curSeries.points.length; ++j) {
             x = graticuleDimensions[0] + Math.round((curSeries.points[j].time - timeRange[0]) / timePerPixel)
             y = graticuleDimensions[1] + (graticuleDimensions[3] - Math.round((curSeries.points[j].value - valueRange[0]) / valuesPerPixel))
-            if (styleOptions.connect !== 'none') {
+            if (styleOptions.connect === 'next') {
               if (j === 0) {
                 ctx.beginPath()
                 ctx.moveTo(x, y)
               } else {
-                // just leaving it here for future me.
-                // Surprisingly, the default drawing mode in webview is 'next'.
-                // The other modes got removed while fixing the null-values. And that is how it's done:
-                // Note: Lars is sad, that the drawing modes got reduced to only 'next'
-                console.assert(styleOptions.connect === 'next', "Somehow you managed to switch the draw mode to something else than 'next'. I can't do that anymore.")
-
                 // if the current value is null, y is garbage
                 if (curSeries.points[j].value === null) {
                   if (previousY !== null) {
@@ -892,9 +893,55 @@ export class Graticule {
                   }
                 }
               }
+            } else if (styleOptions.connect === 'direct') {
+              // drawing direct means, we connect the middle points of two
+              // intervals. For good measure, put a square dot in place as well.
+              // I think it makes sense to move the points, as these represent
+              // averages over the time interval and not a sample.
+              if (j === 0) {
+                ctx.beginPath()
+                ctx.moveTo(x, y)
+              } else {
+                // we need to handle gaps. For that matter, we need to look back
+                // twice.
+                if (curSeries.points[j - 1].value === null) {
+                  if (curSeries.points[j].value !== null) {
+                    // if the last one was a gap, but this ain't, we remember
+                    // the current one and move a bit.
+                    ctx.moveTo(x, y)
+                    previousY = y
+                    previousX = x
+                  }
+                  continue
+                } else if (j === 1 || curSeries.points[j - 2].value === null) {
+                  // if the current one is a gap, we are doomed and I'm not
+                  // sure how to handle that. ¯\_(ツ)_/¯
+                  ctx.moveTo(0.5 * (x + previousX), previousY)
+                }
+
+                // simply line to the middle point between the current value
+                // and the previous one
+                ctx.lineTo(0.5 * (x + previousX), previousY)
+
+                // and draw a little rectangle there to denote the point.
+                ctx.fillRect(0.5 * (x + previousX) - styleOptions.pointWidth / 4, previousY - styleOptions.pointWidth / 4, styleOptions.pointWidth / 2, styleOptions.pointWidth / 2)
+
+                if (j === curSeries.points.length - 1) {
+                  // fill in the last one, we technically don't know enough, so
+                  // this might be placed wrong. It's fine.
+                  ctx.lineTo(x + 0.5 * (x - previousX), y)
+                  ctx.fillRect(x + 0.5 * (x - previousX) - styleOptions.pointWidth / 4, y - styleOptions.pointWidth / 4, styleOptions.pointWidth / 2, styleOptions.pointWidth / 2)
+                }
+              }
+            } else {
+              // just leaving it here for future me.
+              // Surprisingly, the default drawing mode in webview is 'next'.
+              // The other modes got removed while fixing the null-values. And that is how it's done:
+              // Note: Lars is sad, that the drawing modes got reduced to only 'next'.
+              //       But, he is happy that direct style is back on the menu now.
+              console.assert(styleOptions.connect === 'none', "Somehow you managed to switch the draw mode to something else than 'next' or 'connect'. I can't do that anymore.")
             }
             if (curSeries.points[j].count === 1 || (styleOptions.drawDots && curSeries.points[j].count !== 0)) {
-              // this.ctx.fillRect(x - styleOptions.halfPointWidth, y - styleOptions.halfPointWidth, styleOptions.pointWidth, styleOptions.pointWidth);
               ctx.drawImage(offsiteCanvas.ele, x + offsiteCanvas.offsetX, y + offsiteCanvas.offsetY)
             }
             previousX = x

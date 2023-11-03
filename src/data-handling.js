@@ -257,7 +257,7 @@ class MetricCache {
 
   clearRawAggregate () {
     if (this.series.raw) {
-      this.series.raw.clear()
+      this.series.raw = undefined
     }
   }
 
