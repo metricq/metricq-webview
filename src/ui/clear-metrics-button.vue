@@ -20,7 +20,7 @@ export default {
   },
   methods: {
     clearAllButtonClicked: function () {
-      this.$store.getters['metrics/getAllKeys']().forEach((metricBase) => window.MetricQWebView.instances[0].deleteMetric(metricBase))
+      this.$store.getters['metrics/getAllKeys']().forEach((metricBase) => window.MetricQWebView.deleteMetric(metricBase))
       this.$store.commit('setGlobalMinMax', true)
     }
   }

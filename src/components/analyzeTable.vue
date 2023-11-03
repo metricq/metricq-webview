@@ -92,8 +92,7 @@ export default {
         const promises = []
         for (const metricKey of this.$store.getters['metrics/getAllKeys']()) {
           const metric = this.$store.getters['metrics/get'](metricKey)
-          const instance = window.MetricQWebView.instances[0]
-          promises.push(instance.handler.metricQHistory.analyze(this.timestamp.start, this.timestamp.end).target(metricKey).run().then((data) => ({
+          promises.push(window.MetricQWebView.handler.metricQHistory.analyze(this.timestamp.start, this.timestamp.end).target(metricKey).run().then((data) => ({
             color: metric.color,
             name: metric.htmlName,
             desc: metric.description,

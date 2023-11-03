@@ -40,7 +40,7 @@ export default {
     if (popupEle) {
       const disablePopupFunc = () => {
         this.$store.commit('togglePopup', 'analyze')
-        window.MetricQWebView.instances[0].reload()
+        window.MetricQWebView.reload()
       }
       veil.create(disablePopupFunc)
       veil.attachPopup(popupEle)

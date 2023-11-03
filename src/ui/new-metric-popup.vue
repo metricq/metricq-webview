@@ -87,7 +87,7 @@ export default {
     if (popupEle) {
       const disablePopupFunc = () => {
         this.$store.commit('togglePopup', 'newmetric')
-        window.MetricQWebView.instances[0].reload()
+        window.MetricQWebView.reload()
       }
       veil.create(disablePopupFunc)
       veil.attachPopup(popupEle)
@@ -116,7 +116,7 @@ export default {
     addMetrics (evt) {
       if (this.value != null) {
         for (const item of this.value) {
-          window.MetricQWebView.instances[0].addMetric(item.title, item.desc)
+          window.MetricQWebView.addMetric(item.title, item.desc)
         }
       }
       this.closePopup(evt)
@@ -130,9 +130,8 @@ export default {
       }
     },
     changeSearch (value) {
-      const instance = window.MetricQWebView.instances[0]
       const requestId = ++this.requestCount
-      instance.handler.searchMetricsPromise(value, true).then((matches) => {
+      window.MetricQWebView.handler.searchMetricsPromise(value, true).then((matches) => {
         if (requestId < this.requestCount) {
           return
         }

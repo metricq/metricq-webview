@@ -48,8 +48,8 @@ export default {
       const daterange = $('#date_range')
 
       daterange.daterangepicker({
-        startDate: moment(window.MetricQWebView.instances[0].handler.startTime.getUnix()),
-        endDate: moment(window.MetricQWebView.instances[0].handler.stopTime.getUnix()),
+        startDate: moment(window.MetricQWebView.handler.startTime.getUnix()),
+        endDate: moment(window.MetricQWebView.handler.stopTime.getUnix()),
         opens: 'left',
         cancelButtonClasses: 'btn btn-danger',
         timePicker: true,
@@ -89,13 +89,13 @@ export default {
         ranges: labelMap
       }, (start, end, label) => {
         if (label) {
-          window.MetricQWebView.instances[0].handler.setRelativeTimes(labelMap[label][0], labelMap[label][1])
+          window.MetricQWebView.handler.setRelativeTimes(labelMap[label][0], labelMap[label][1])
         } else {
-          window.MetricQWebView.instances[0].handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
+          window.MetricQWebView.handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
         }
-        window.MetricQWebView.instances[0].reload()
-        this.startDate = moment(window.MetricQWebView.instances[0].handler.startTime.getUnix())
-        this.endDate = moment(window.MetricQWebView.instances[0].handler.stopTime.getUnix())
+        window.MetricQWebView.reload()
+        this.startDate = moment(window.MetricQWebView.handler.startTime.getUnix())
+        this.endDate = moment(window.MetricQWebView.handler.stopTime.getUnix())
       })
     })
   }

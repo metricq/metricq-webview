@@ -283,7 +283,7 @@ function uiInteractCheck (eventType, pertainingElement, evtObj) {
         }
       }
       if (matchingSoFar) {
-        uiFunctions[uiInteractArr[i][2]](window.MetricQWebView.getInstance(pertainingElement), evtObj)
+        uiFunctions[uiInteractArr[i][2]](window.MetricQWebView, evtObj)
       }
     }
   }
@@ -308,7 +308,7 @@ export function registerCallbacks (anchoringObject) {
   })
   anchoringObject.addEventListener('mouseout', () => {
     if (anchoringObject) {
-      window.MetricQWebView.getInstance(anchoringObject).graticule.draw(false)
+      window.MetricQWebView.graticule.draw(false)
     }
   })
   anchoringObject.addEventListener('wheel', (evtObj) => {
@@ -445,14 +445,14 @@ document.addEventListener('keyup', keyDown.keyUp)
 window.addEventListener('gesturechange', (evt) => {
 // console.log(evt);
   evt.preventDefault()
-  const timeRange = window.MetricQWebView.instances[0].graticule.curTimeRange
+  const timeRange = window.MetricQWebView.graticule.curTimeRange
   const delta = timeRange[1] - timeRange[0]
   const timeMargin = Math.round((delta * evt.scale - delta) / 2)
   timeRange[0] -= timeMargin
   timeRange[1] += timeMargin
-  window.MetricQWebView.instances[0].handler.setTimeRange(timeRange[0], timeRange[1])
-  window.MetricQWebView.instances[0].throttledReload()
-  window.MetricQWebView.instances[0].graticule.draw(false)
+  window.MetricQWebView.handler.setTimeRange(timeRange[0], timeRange[1])
+  window.MetricQWebView.throttledReload()
+  window.MetricQWebView.graticule.draw(false)
 })
 window.addEventListener('contextmenu', (event) => {
   if (event.target && event.target.tagName === 'CANVAS') {

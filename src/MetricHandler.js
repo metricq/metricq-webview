@@ -20,7 +20,7 @@ export class MetricHandler {
     this.store.commit('metrics/resetAll')
     for (let i = 0; i < initialMetricNames.length; ++i) {
       const curMetricName = initialMetricNames[i]
-      window.MetricQWebView.instances[0].addMetric(curMetricName)
+      window.MetricQWebView.addMetric(curMetricName)
     }
   }
 
@@ -213,7 +213,7 @@ export class MetricHandler {
 
     this.renderer.updateMetricUrl()
     // maybe move this line to MetricQWebView.setPlotRanges()? NAW
-    window.MetricQWebView.instances[0].graticule.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())
+    window.MetricQWebView.graticule.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())
     return timeSuitable
     // this.lastRangeChangeTime = (new Date()).getTime();
     // TODO: return false when intended zoom area is smaller than e.g. 1000 ms

@@ -181,7 +181,7 @@ export default {
     if (popupEle) {
       const disablePopupFunc = () => {
         this.$store.commit('togglePopup', 'export')
-        window.MetricQWebView.instances[0].reload()
+        window.MetricQWebView.reload()
       }
       veil.create(disablePopupFunc)
       veil.attachPopup(popupEle)
@@ -200,8 +200,7 @@ export default {
         const result = await this.waitNewCanvas()
         this.$refs.html2Pdf.generatePdf()
       } else {
-        const instance = window.MetricQWebView.instances[0]
-        instance.doExport()
+        window.MetricQWebView.doExport()
       }
       veil.destroy()
       this.$store.commit('togglePopup', 'export')
@@ -223,23 +222,22 @@ export default {
       return exportCanvas
     },
     addData (canvas) {
-      const instance = window.MetricQWebView.instances[0]
       const exportCanvasContext = canvas.getContext('2d')
       const scale = 2
       canvas.width *= scale
       canvas.height *= scale
       exportCanvasContext.scale(scale, scale)
       const margins = {
-        top: instance.margins.canvas.top,
-        bottom: instance.margins.canvas.bottom,
-        left: instance.margins.canvas.left,
-        right: instance.margins.canvas.right
+        top: window.MetricQWebView.margins.canvas.top,
+        bottom: window.MetricQWebView.margins.canvas.bottom,
+        left: window.MetricQWebView.margins.canvas.left,
+        right: window.MetricQWebView.margins.canvas.right
       }
       const size = [canvas.width / scale, canvas.height / scale, margins.left,
         margins.top,
         canvas.width / scale - (margins.right + margins.left),
         canvas.height / scale - (margins.top + margins.bottom)]
-      instance.graticule.draw(false, exportCanvasContext, size)
+      window.MetricQWebView.graticule.draw(false, exportCanvasContext, size)
     },
     analyzeTableLoaded () {
       this.analyzeTableReady = true

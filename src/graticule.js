@@ -1005,7 +1005,7 @@ export class Graticule {
     const dataValueRange = this.data.getValueRange(allTimeValueRanges, this.curTimeRange[0], this.curTimeRange[1])
     if (undefined !== dataValueRange[0]) {
       const deltaRange = Math.abs(dataValueRange[1] - dataValueRange[0])
-      const WIGGLE = window.MetricQWebView.instances[0].handler.WIGGLEROOM_PERCENTAGE
+      const WIGGLE = window.MetricQWebView.handler.WIGGLEROOM_PERCENTAGE
       const displayValueRange = [dataValueRange[0], dataValueRange[1]]
       let brokenRange = false
       if (deltaRange > 0) {
@@ -1066,9 +1066,7 @@ export class Graticule {
     this.ctx.canvas.width = newSize[0]
     this.ctx.canvas.height = newSize[1] - canvasMargins.top
     this.graticuleDimensions = [canvasMargins.left, canvasMargins.top, newSize[0] - canvasMargins.left - canvasMargins.right, newSize[1] - canvasMargins.top - canvasMargins.bottom]
-    // Note: this assumes we have only one MetricQWebView instance running,
-    //       i.e. will cause issues, as soon as we have two instances or more
-    this.setTimeRange(window.MetricQWebView.instances[0].handler.startTime.getUnix(), window.MetricQWebView.instances[0].handler.stopTime.getUnix())
+    this.setTimeRange(window.MetricQWebView.handler.startTime.getUnix(), window.MetricQWebView.handler.stopTime.getUnix())
     this.setValueRange()
     this.draw(false)
   }

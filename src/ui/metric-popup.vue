@@ -183,13 +183,12 @@ export default {
     }
   },
   mounted () {
-    const instance = window.MetricQWebView.instances[0]
     const popupEle = document.getElementById(this.metric.popupKey)
     if (!popupEle) {
       return
     }
 
-    const disablePopupFunc = ((paramMyMetric, paramMyNewMetric, paramMyInstance) => {
+    const disablePopupFunc = ((paramMyMetric, paramMyNewMetric) => {
       return (evt) => {
         const metricKey = paramMyMetric.key
         this.$store.commit('metrics/setPopup', { metricKey, popupState: false })
@@ -199,14 +198,14 @@ export default {
 
         if (evt.target.getAttribute('class') === 'popup_trashcan') {
           if (newName.length > 0) {
-            paramMyInstance.deleteMetric(newName)
+            window.MetricQWebView.deleteMetric(newName)
           }
         } else {
           if (paramMyMetric.name !== newName) {
             if (paramMyMetric.name === '' && !newName) {
               // do nothing
             } else {
-              paramMyInstance.changeMetricName(paramMyMetric, newName)
+              window.MetricQWebView.changeMetricName(paramMyMetric, newName)
             }
           }
           if (paramMyNewMetric.color !== paramMyMetric.color) {
@@ -223,7 +222,7 @@ export default {
           // renderMetrics();
         }
       }
-    })(this.metric, this.newMetric, instance)
+    })(this.metric, this.newMetric)
     veil.create(disablePopupFunc)
     veil.attachPopup(popupEle)
 
@@ -248,12 +247,11 @@ export default {
       veil.destroy(evt)
     },
     metricNameKeyup (evt) {
-      const instance = window.MetricQWebView.instances[0]
       if (evt.key.toLowerCase() === 'enter') {
         veil.destroy(evt)
       }
       // TODO: implement throttling?
-      instance.handler.searchMetricsPromise(evt.target.value).then((searchSuggestions) => {
+      window.MetricQWebView.handler.searchMetricsPromise(evt.target.value).then((searchSuggestions) => {
         const datalistEle = document.getElementById('autocomplete_metric')
         if (!datalistEle) {
           Vue.toasted.error('Auto-Vervollständigung nicht verfügbar, konnte Element #autocomplete_metric nicht finden.', this.$store.state.toastConfiguration)

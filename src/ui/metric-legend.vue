@@ -112,7 +112,7 @@ export default {
       })
     },
     trashcanClicked () {
-      window.MetricQWebView.instances[0].deleteMetric(this.$props.metric.name)
+      window.MetricQWebView.deleteMetric(this.$props.metric.name)
     },
     onResize () {
       const style = getComputedStyle(document.body)
@@ -120,7 +120,7 @@ export default {
       this.multiline = this.maxwidth > docMaxWidth
     },
     toggleDraw () {
-      window.MetricQWebView.instances[0].toggleDraw(this.$props.metric.name)
+      window.MetricQWebView.toggleDraw(this.$props.metric.name)
     }
   }
 }

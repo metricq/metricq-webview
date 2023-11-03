@@ -156,7 +156,7 @@ export default {
       } else {
         let metadataObj
         try {
-          metadataObj = await window.MetricQWebView.instances[0].handler.metricQHistory.metadata(name)
+          metadataObj = await window.MetricQWebView.handler.metricQHistory.metadata(name)
         } catch (error) {
           throw new Error.InvalidMetricError(name)
         }
@@ -190,7 +190,7 @@ export default {
     updateColor ({ commit, state }, { metricKey, color }) {
       commit('privateSet', { metricKey, metric: { color } })
       const name = state.metrics[metricKey].name
-      const renderer = window.MetricQWebView.instances[0]
+      const renderer = window.MetricQWebView
       if (renderer && renderer.graticule && renderer.graticule.data) {
         const metricCache = renderer.graticule.data.getMetricCache(name)
         if (metricCache) {
@@ -202,7 +202,7 @@ export default {
     updateMarker ({ commit, state }, { metricKey, marker }) {
       commit('privateSet', { metricKey, metric: { marker } })
       const metric = state.metrics[metricKey]
-      const renderer = window.MetricQWebView.instances[0]
+      const renderer = window.MetricQWebView
       if (renderer && renderer.graticule && renderer.graticule.data) {
         const metricCache = renderer.graticule.data.getMetricCache(metric.name)
         if (metricCache) {
@@ -231,7 +231,7 @@ export default {
         }
         commit('privateSet', { metricKey, metric: newDrawStates })
       }
-      window.MetricQWebView.instances[0].graticule.draw(false)
+      window.MetricQWebView.graticule.draw(false)
       commit('setGlobalMinMax', newState, { root: true })
     },
     updateDrawState ({ dispatch, commit }, { metricKey, drawState: { drawMin, drawAvg, drawMax } }) {

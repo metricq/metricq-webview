@@ -112,15 +112,15 @@ export default {
     manualDisabled: {
       cache: false,
       get () {
-        return window.MetricQWebView.instances[0].graticule.yRangeOverride.type !== 'manual'
+        return window.MetricQWebView.graticule.yRangeOverride.type !== 'manual'
       },
       set (newValue) {
-        window.MetricQWebView.instances[0].graticule.setYRangeOverride('local', undefined, undefined)
+        window.MetricQWebView.graticule.setYRangeOverride('local', undefined, undefined)
       }
     },
     yaxisRange: {
       get () {
-        return window.MetricQWebView.instances[0].graticule.yRangeOverride.type
+        return window.MetricQWebView.graticule.yRangeOverride.type
       },
       set (newValue) {
         let ele = document.getElementById('yaxis_min')
@@ -130,49 +130,49 @@ export default {
           ele.disabled = newValue !== 'manual'
         }
         if (newValue === 'global') {
-          window.MetricQWebView.instances[0].graticule.setYRangeOverride(newValue, undefined, undefined)
+          window.MetricQWebView.graticule.setYRangeOverride(newValue, undefined, undefined)
         } else {
           if (newValue === 'manual') {
-            const arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
-            window.MetricQWebView.instances[0].graticule.setYRangeOverride(newValue, arr[0], arr[1])
+            const arr = window.MetricQWebView.handler.getAllMinMax()
+            window.MetricQWebView.graticule.setYRangeOverride(newValue, arr[0], arr[1])
             this.$forceUpdate()
           } else {
-            window.MetricQWebView.instances[0].graticule.setYRangeOverride(newValue, undefined, undefined)
+            window.MetricQWebView.graticule.setYRangeOverride(newValue, undefined, undefined)
           }
         }
-        window.MetricQWebView.instances[0].setPlotRanges(false, true)
+        window.MetricQWebView.setPlotRanges(false, true)
       }
     },
     allMin: {
       cache: false,
       get () {
-        const arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
+        const arr = window.MetricQWebView.handler.getAllMinMax()
         if (arr) {
           return (Number(arr[0])).toFixed(3)
         }
         return 0
       },
       set (newValue) {
-        let arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
+        let arr = window.MetricQWebView.handler.getAllMinMax()
         arr = [parseFloat(newValue), arr[1]]
-        window.MetricQWebView.instances[0].graticule.setYRangeOverride(undefined, arr[0], arr[1])
-        window.MetricQWebView.instances[0].setPlotRanges(false, true)
+        window.MetricQWebView.graticule.setYRangeOverride(undefined, arr[0], arr[1])
+        window.MetricQWebView.setPlotRanges(false, true)
       }
     },
     allMax: {
       cache: false,
       get () {
-        const arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
+        const arr = window.MetricQWebView.handler.getAllMinMax()
         if (arr) {
           return (Number(arr[1])).toFixed(3)
         }
         return 1
       },
       set (newValue) {
-        let arr = window.MetricQWebView.instances[0].handler.getAllMinMax()
+        let arr = window.MetricQWebView.handler.getAllMinMax()
         arr = [arr[0], parseFloat(newValue)]
-        window.MetricQWebView.instances[0].graticule.setYRangeOverride(undefined, arr[0], arr[1])
-        window.MetricQWebView.instances[0].setPlotRanges(false, true)
+        window.MetricQWebView.graticule.setYRangeOverride(undefined, arr[0], arr[1])
+        window.MetricQWebView.setPlotRanges(false, true)
       }
     }
   },
@@ -181,7 +181,7 @@ export default {
     if (popupEle) {
       const disablePopupFunc = () => {
         this.$store.commit('togglePopup', 'yaxis')
-        window.MetricQWebView.instances[0].reload()
+        window.MetricQWebView.reload()
       }
       veil.create(disablePopupFunc)
       veil.attachPopup(popupEle)

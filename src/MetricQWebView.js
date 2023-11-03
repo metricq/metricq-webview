@@ -6,29 +6,13 @@ import Vue from 'vue'
 import * as Error from '@/errors'
 
 export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig) {
-  const webview = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig)
-  window.MetricQWebView.instances.push(webview)
+  window.MetricQWebView = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig)
   store.commit('setIsWebviewLoaded', true)
 }
 
 class MetricQWebView {
   constructor (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig) {
     this.store = store
-    this.id = 'metricqwebview_' + (new Date()).getTime()
-    if (!window.MetricQWebView) {
-      window.MetricQWebView = {
-        instances: [],
-        getInstance (htmlEle) {
-          for (let i = 0; i < window.MetricQWebView.instances.length; ++i) {
-            if (window.MetricQWebView.instances[i].ele.isSameNode(htmlEle)) {
-              return window.MetricQWebView.instances[i]
-            }
-          }
-          return undefined
-        }
-      }
-    }
-
     this.ele = paramParentEle
     this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime, this.store, metricqBackendConfig)
     this.hasPlot = false
@@ -271,7 +255,6 @@ export function importMetricUrl () {
 export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
   let newManager
   if (window.MetricQWebView) {
-    newManager = window.MetricQWebView.instances[0]
-    newManager.reinitialize(metricNamesArr, timeStart, timeStop)
+    window.MetricQWebView.reinitialize(metricNamesArr, timeStart, timeStop)
   }
 }

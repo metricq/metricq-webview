@@ -74,11 +74,11 @@ export const mainApp = new Vue({
   watch: {
     'configuration.legendDisplay' () {
       // TODO: check moving to store
-      if (window.MetricQWebView.instances[0].graticule) window.MetricQWebView.instances[0].graticule.canvasReset()
+      if (window.MetricQWebView.graticule) window.MetricQWebView.graticule.canvasReset()
     },
     metricsList () {
-      window.MetricQWebView.instances[0].updateMetricUrl()
-      setTimeout(() => { window.MetricQWebView.instances[0].reload() }, 0)
+      window.MetricQWebView.updateMetricUrl()
+      setTimeout(() => { window.MetricQWebView.reload() }, 0)
     }
   },
   methods: {
