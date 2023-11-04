@@ -9,7 +9,7 @@ const uiOptions = {
   errorArrowInterval: 2000
 }
 
-let uiInteractArr = [
+const uiInteractArr = [
   ['drag', ['17'], 'uiInteractPan'],
   ['drag', ['!16', '!17'], 'uiInteractZoomArea'],
   ['drop', ['!16', '!17'], 'uiInteractZoomIn'],
@@ -17,29 +17,23 @@ let uiInteractArr = [
   ['wheel', [], 'uiInteractZoomWheel']
 ]
 
-export function setUiInteractArr (newValue) {
-  uiInteractArr = newValue
-}
-
-export { uiInteractArr }
-
-function uiInteractPan (metricQInstance, evtObj) {
+function uiInteractPan (evtObj) {
   if (mouseDown.previousPos[0] !== mouseDown.currentPos[0] ||
     mouseDown.previousPos[1] !== mouseDown.currentPos[1]) {
-    const timeToMoveBy = (mouseDown.currentPos[0] - mouseDown.previousPos[0]) * -1 * metricQInstance.graticule.curTimePerPixel
+    const timeToMoveBy = (mouseDown.currentPos[0] - mouseDown.previousPos[0]) * -1 * window.MetricQWebView.graticule.curTimePerPixel
     // TODO: handler.shifttimerange
-    metricQInstance.handler.setTimeRange(metricQInstance.handler.startTime.getUnix() + timeToMoveBy,
-      metricQInstance.handler.stopTime.getUnix() + timeToMoveBy)
-    metricQInstance.throttledReload()
-    metricQInstance.graticule.draw(false)
+    window.MetricQWebView.handler.setTimeRange(window.MetricQWebView.handler.startTime.getUnix() + timeToMoveBy,
+      window.MetricQWebView.handler.stopTime.getUnix() + timeToMoveBy)
+    window.MetricQWebView.throttledReload()
+    window.MetricQWebView.graticule.draw(false)
   }
 }
 
-function uiInteractZoomArea (metricQInstance, evtObj) {
+function uiInteractZoomArea (evtObj) {
   if (mouseDown.previousPos[0] !== mouseDown.currentPos[0] ||
     mouseDown.previousPos[1] !== mouseDown.currentPos[1]) {
-    metricQInstance.graticule.draw(false)
-    const myCtx = metricQInstance.graticule.ctx
+    window.MetricQWebView.graticule.draw(false)
+    const myCtx = window.MetricQWebView.graticule.ctx
     myCtx.fillStyle = 'rgba(0,0,0,0.2)'
     let minXPos = mouseDown.currentPos[0]
     if (mouseDown.startPos[0] < minXPos) {
@@ -49,15 +43,15 @@ function uiInteractZoomArea (metricQInstance, evtObj) {
     if (mouseDown.startPos[0] > maxXPos) {
       maxXPos = mouseDown.startPos[0]
     }
-    myCtx.fillRect(minXPos, metricQInstance.graticule.graticuleDimensions[1], maxXPos - minXPos, metricQInstance.graticule.graticuleDimensions[3])
-    const timeValueStart = metricQInstance.graticule.getTimeValueAtPoint([minXPos, mouseDown.relativeStartPos[1]])
-    const timeValueEnd = metricQInstance.graticule.getTimeValueAtPoint([maxXPos, mouseDown.relativeStartPos[1]])
+    myCtx.fillRect(minXPos, window.MetricQWebView.graticule.graticuleDimensions[1], maxXPos - minXPos, window.MetricQWebView.graticule.graticuleDimensions[3])
+    const timeValueStart = window.MetricQWebView.graticule.getTimeValueAtPoint([minXPos, mouseDown.relativeStartPos[1]])
+    const timeValueEnd = window.MetricQWebView.graticule.getTimeValueAtPoint([maxXPos, mouseDown.relativeStartPos[1]])
 
     if (timeValueStart && timeValueEnd) {
       const timeDelta = timeValueEnd[0] - timeValueStart[0]
       const centerPos = [
         Math.floor(minXPos + (maxXPos - minXPos) / 2),
-        Math.floor(metricQInstance.graticule.graticuleDimensions[1] + (metricQInstance.graticule.graticuleDimensions[3] - metricQInstance.graticule.graticuleDimensions[1]) / 2)
+        Math.floor(window.MetricQWebView.graticule.graticuleDimensions[1] + (window.MetricQWebView.graticule.graticuleDimensions[3] - window.MetricQWebView.graticule.graticuleDimensions[1]) / 2)
       ]
       let deltaString = ''
       if (timeDelta > 86400000) {
@@ -78,13 +72,19 @@ function uiInteractZoomArea (metricQInstance, evtObj) {
   }
 }
 
-function uiInteractZoomIn (metricQInstance, evtObj) {
+function uiInteractZoomIn (evtObj) {
+  console.log(evtObj)
   evtObj.preventDefault()
   const relativeStart = mouseDown.relativeStartPos
   const relativeEnd = calculateActualMousePos(evtObj)
+
+  relativeEnd[0] = Math.max(window.MetricQWebView.graticule.graticuleDimensions[0],
+    Math.min(Math.abs(relativeEnd[0]), window.MetricQWebView.graticule.graticuleDimensions[2]))
+
+  console.log(relativeStart[0], relativeEnd[0])
   if (Math.abs(relativeStart[0] - relativeEnd[0]) > 1) {
-    let posEnd = metricQInstance.graticule.getTimeValueAtPoint(relativeStart)
-    let posStart = metricQInstance.graticule.getTimeValueAtPoint(relativeEnd)
+    let posEnd = window.MetricQWebView.graticule.getTimeValueAtPoint(relativeStart)
+    let posStart = window.MetricQWebView.graticule.getTimeValueAtPoint(relativeEnd)
     if (!posEnd || !posStart) {
       return
     }
@@ -93,33 +93,33 @@ function uiInteractZoomIn (metricQInstance, evtObj) {
       posEnd = posStart
       posStart = swap
     }
-    if (!metricQInstance.handler.setTimeRange(Math.round(posStart[0]), Math.round(posEnd[0]))) {
+    if (!window.MetricQWebView.handler.setTimeRange(Math.round(posStart[0]), Math.round(posEnd[0]))) {
       Vue.toasted.error('Zoom-Limit erreicht.', store.state.toastConfiguration)
     }
-    metricQInstance.reload() // no need to throttle reload here
-    metricQInstance.graticule.draw(false)
+    window.MetricQWebView.reload() // no need to throttle reload here
+    window.MetricQWebView.graticule.draw(false)
   }
 }
 
-function uiInteractZoomWheel (metricQInstance, evtObj) {
-  if (!evtObj.target || !metricQInstance) {
+function uiInteractZoomWheel (evtObj) {
+  if (!evtObj.target || !window.MetricQWebView) {
     return
   }
   evtObj.preventDefault()
   if (evtObj.deltaX && uiOptions.horizontalScrolling) { // horizontal scrolling
-    const deltaRange = metricQInstance.handler.stopTime.getUnix() - metricQInstance.handler.startTime.getUnix()// metricQInstance.graticule.curTimeRange[1] - metricQInstance.graticule.curTimeRange[0];
+    const deltaRange = window.MetricQWebView.handler.stopTime.getUnix() - window.MetricQWebView.handler.startTime.getUnix()// window.MetricQWebView.graticule.curTimeRange[1] - window.MetricQWebView.graticule.curTimeRange[0];
     // TODO: set start and stopTime of the handler
     if (evtObj.deltaX < 0) {
-      if (!metricQInstance.handler.setTimeRange(metricQInstance.graticule.curTimeRange[0] - deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] - deltaRange * 0.2)) {
+      if (!window.MetricQWebView.handler.setTimeRange(window.MetricQWebView.graticule.curTimeRange[0] - deltaRange * 0.2, window.MetricQWebView.graticule.curTimeRange[1] - deltaRange * 0.2)) {
         Vue.toasted.error('Zoom-Limit erreicht.', store.state.toastConfiguration)
       }
     } else if (evtObj.deltaX > 0) {
-      if (!metricQInstance.handler.setTimeRange(metricQInstance.graticule.curTimeRange[0] + deltaRange * 0.2, metricQInstance.graticule.curTimeRange[1] + deltaRange * 0.2)) {
+      if (!window.MetricQWebView.handler.setTimeRange(window.MetricQWebView.graticule.curTimeRange[0] + deltaRange * 0.2, window.MetricQWebView.graticule.curTimeRange[1] + deltaRange * 0.2)) {
         Vue.toasted.error('Zoom-Limit erreicht.', store.state.toastConfiguration)
       }
     }
-    metricQInstance.throttledReload()
-    metricQInstance.graticule.draw(false)
+    window.MetricQWebView.throttledReload()
+    window.MetricQWebView.graticule.draw(false)
   } else { // vertical scrolling
     let scrollDirection = evtObj.deltaY
     if (scrollDirection < 0) {
@@ -130,32 +130,32 @@ function uiInteractZoomWheel (metricQInstance, evtObj) {
     }
     scrollDirection *= store.state.configuration.zoomSpeed / 10
     const curPos = calculateActualMousePos(evtObj)
-    const curTimeValue = metricQInstance.graticule.getTimeValueAtPoint(curPos)
+    const curTimeValue = window.MetricQWebView.graticule.getTimeValueAtPoint(curPos)
     if (curTimeValue) {
-      if (!metricQInstance.handler.zoomTimeAtPoint(curTimeValue, scrollDirection)) {
+      if (!window.MetricQWebView.handler.zoomTimeAtPoint(curTimeValue, scrollDirection)) {
         Vue.toasted.error('Konnte nicht weiter zoomen, Limit erreicht', store.state.toastConfiguration)
       }
-      metricQInstance.throttledReload()
-      metricQInstance.graticule.draw(false)
+      window.MetricQWebView.throttledReload()
+      window.MetricQWebView.graticule.draw(false)
     }
   }
 }
 
-function uiInteractLegend (metricQInstance, evtObj) {
+function uiInteractLegend (evtObj) {
   const curPosOnCanvas = calculateActualMousePos(evtObj)
-  const curPoint = metricQInstance.graticule.getTimeValueAtPoint(curPosOnCanvas)
+  const curPoint = window.MetricQWebView.graticule.getTimeValueAtPoint(curPosOnCanvas)
   if (!curPoint) {
     return
   }
-  metricQInstance.graticule.draw(false)
-  const myCtx = metricQInstance.graticule.ctx
+  window.MetricQWebView.graticule.draw(false)
+  const myCtx = window.MetricQWebView.graticule.ctx
   myCtx.fillStyle = 'rgba(0,0,0,0.8)'
-  myCtx.fillRect(curPosOnCanvas[0] - 1, metricQInstance.graticule.graticuleDimensions[1], 2, metricQInstance.graticule.graticuleDimensions[3])
-  myCtx.font = '14px ' + metricQInstance.graticule.DEFAULT_FONT // actually it's sans-serif
+  myCtx.fillRect(curPosOnCanvas[0] - 1, window.MetricQWebView.graticule.graticuleDimensions[1], 2, window.MetricQWebView.graticule.graticuleDimensions[3])
+  myCtx.font = '14px ' + window.MetricQWebView.graticule.DEFAULT_FONT // actually it's sans-serif
   const metricsArray = []
   let maxNameWidth = 0
   let maxValueWidth = 0
-  const allValuesAtTime = metricQInstance.graticule.data.getAllValuesAtTime(curPoint[0])
+  const allValuesAtTime = window.MetricQWebView.graticule.data.getAllValuesAtTime(curPoint[0])
   for (let i = 0; i < allValuesAtTime.length; ++i) {
     const newEntry = { metric: allValuesAtTime[i][2] }
     let curText = ''
@@ -216,7 +216,7 @@ function uiInteractLegend (metricQInstance, evtObj) {
   const verticalDiff = 20
   const borderPadding = 10
 
-  const distanceToRightEdge = getDistanceToRightEdge(curPosOnCanvas[0], offsetMid, borderPadding, metricQInstance.graticule.canvasSize[0])
+  const distanceToRightEdge = getDistanceToRightEdge(curPosOnCanvas[0], offsetMid, borderPadding, window.MetricQWebView.graticule.canvasSize[0])
   drawHoverDate(myCtx, timeString, curPosOnCanvas[0], maxNameWidth, offsetTop, offsetMid, verticalDiff, distanceToRightEdge)
   drawHoverText(myCtx, metricsArray, curPosOnCanvas[0], maxValueWidth, maxNameWidth, offsetTop, offsetMid, verticalDiff, borderPadding, distanceToRightEdge)
 }
@@ -283,7 +283,7 @@ function uiInteractCheck (eventType, pertainingElement, evtObj) {
         }
       }
       if (matchingSoFar) {
-        uiFunctions[uiInteractArr[i][2]](window.MetricQWebView, evtObj)
+        uiFunctions[uiInteractArr[i][2]](evtObj)
       }
     }
   }
@@ -297,7 +297,7 @@ export function registerCallbacks (anchoringObject) {
     }
   })
   mouseDown.registerDropCallback((evtObj) => {
-    if (anchoringObject && mouseDown.startTarget && mouseDown.startTarget.isSameNode(anchoringObject)) {
+    if (anchoringObject && mouseDown.startTarget && mouseDown.startTarget === anchoringObject) {
       uiInteractCheck('drop', anchoringObject, evtObj)
     }
   })
@@ -443,7 +443,7 @@ document.addEventListener('keyup', keyDown.keyUp)
 
 // code for Mac Safari
 window.addEventListener('gesturechange', (evt) => {
-// console.log(evt);
+  // console.log(evt)
   evt.preventDefault()
   const timeRange = window.MetricQWebView.graticule.curTimeRange
   const delta = timeRange[1] - timeRange[0]
@@ -454,6 +454,7 @@ window.addEventListener('gesturechange', (evt) => {
   window.MetricQWebView.throttledReload()
   window.MetricQWebView.graticule.draw(false)
 })
+
 window.addEventListener('contextmenu', (event) => {
   if (event.target && event.target.tagName === 'CANVAS') {
     event.preventDefault()
