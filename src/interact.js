@@ -43,7 +43,7 @@ function uiInteractZoomArea (evtObj) {
     if (mouseDown.startPos[0] > maxXPos) {
       maxXPos = mouseDown.startPos[0]
     }
-    myCtx.fillRect(minXPos, window.MetricQWebView.graticule.graticuleDimensions[1], maxXPos - minXPos, window.MetricQWebView.graticule.graticuleDimensions[3])
+    myCtx.fillRect(minXPos, window.MetricQWebView.graticule.dimensions.y, maxXPos - minXPos, window.MetricQWebView.graticule.dimensions.height)
     const timeValueStart = window.MetricQWebView.graticule.getTimeValueAtPoint([minXPos, mouseDown.relativeStartPos[1]])
     const timeValueEnd = window.MetricQWebView.graticule.getTimeValueAtPoint([maxXPos, mouseDown.relativeStartPos[1]])
 
@@ -51,7 +51,7 @@ function uiInteractZoomArea (evtObj) {
       const timeDelta = timeValueEnd[0] - timeValueStart[0]
       const centerPos = [
         Math.floor(minXPos + (maxXPos - minXPos) / 2),
-        Math.floor(window.MetricQWebView.graticule.graticuleDimensions[1] + (window.MetricQWebView.graticule.graticuleDimensions[3] - window.MetricQWebView.graticule.graticuleDimensions[1]) / 2)
+        Math.floor(window.MetricQWebView.graticule.dimensions.y + (window.MetricQWebView.graticule.dimensions.height - window.MetricQWebView.graticule.dimensions.y) / 2)
       ]
       let deltaString = ''
       if (timeDelta > 86400000) {
@@ -78,8 +78,8 @@ function uiInteractZoomIn (evtObj) {
   const relativeStart = mouseDown.relativeStartPos
   const relativeEnd = calculateActualMousePos(evtObj)
 
-  relativeEnd[0] = Math.max(window.MetricQWebView.graticule.graticuleDimensions[0],
-    Math.min(Math.abs(relativeEnd[0]), window.MetricQWebView.graticule.graticuleDimensions[2]))
+  relativeEnd[0] = Math.max(window.MetricQWebView.graticule.dimensions.x,
+    Math.min(Math.abs(relativeEnd[0]), window.MetricQWebView.graticule.dimensions.width))
 
   console.log(relativeStart[0], relativeEnd[0])
   if (Math.abs(relativeStart[0] - relativeEnd[0]) > 1) {
@@ -150,7 +150,7 @@ function uiInteractLegend (evtObj) {
   window.MetricQWebView.graticule.draw(false)
   const myCtx = window.MetricQWebView.graticule.ctx
   myCtx.fillStyle = 'rgba(0,0,0,0.8)'
-  myCtx.fillRect(curPosOnCanvas[0] - 1, window.MetricQWebView.graticule.graticuleDimensions[1], 2, window.MetricQWebView.graticule.graticuleDimensions[3])
+  myCtx.fillRect(curPosOnCanvas[0] - 1, window.MetricQWebView.graticule.dimensions.y, 2, window.MetricQWebView.graticule.dimensions.height)
   myCtx.font = '14px ' + window.MetricQWebView.graticule.DEFAULT_FONT // actually it's sans-serif
   const metricsArray = []
   let maxNameWidth = 0

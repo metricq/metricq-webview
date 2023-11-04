@@ -6,7 +6,12 @@ export class Graticule {
     this.ele = paramEle
     this.ctx = ctx
     this.canvasSize = [0, 0]
-    this.graticuleDimensions = [0, 0, 0, 0]
+    this.dimensions = {
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0
+    }
     this.curTimeRange = undefined
     this.curValueRange = undefined
     this.curTimePerPixel = undefined
@@ -353,21 +358,21 @@ export class Graticule {
     return value
   }
 
-  drawGrid (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions = this.graticuleDimensions) {
+  drawGrid (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, dimensions) {
     /* draw lines */
     ctx.fillStyle = 'rgba(192,192,192,0.5)'
 
     // vertical grid
     let minDistanceBetweenGridLines = 110
-    let maxStepsCount = Math.floor(this.graticuleDimensions[2] / minDistanceBetweenGridLines)
+    let maxStepsCount = Math.floor(this.dimensions.width / minDistanceBetweenGridLines)
     const xAxisSteps = this.figureOutTimeSteps(maxStepsCount)
     const xPositions = []
     for (let i = 0; i < xAxisSteps.length; ++i) {
-      const x = Math.round(graticuleDimensions[0] + ((xAxisSteps[i].timestamp - timeRange[0]) / timePerPixel))
-      if (x >= graticuleDimensions[0] &&
-        x <= (graticuleDimensions[0] + graticuleDimensions[2])) {
+      const x = Math.round(dimensions.x + ((xAxisSteps[i].timestamp - timeRange[0]) / timePerPixel))
+      if (x >= dimensions.x &&
+        x <= (dimensions.x + dimensions.width)) {
         xPositions.push(x)
-        ctx.fillRect(x, graticuleDimensions[1], 2, graticuleDimensions[3])
+        ctx.fillRect(x, dimensions.y, 2, dimensions.height)
       } else {
         xPositions.push(undefined)
         console.log('Grid algorithm is broken, invalid x-axis grid line at ' + xAxisSteps[i].label.join(','))
@@ -376,16 +381,15 @@ export class Graticule {
 
     // horizontal grid
     minDistanceBetweenGridLines = 30
-    maxStepsCount = Math.floor(graticuleDimensions[3] / minDistanceBetweenGridLines)
+    maxStepsCount = Math.floor(dimensions.height / minDistanceBetweenGridLines)
     const yAxisSteps = this.figureOutLogarithmicSteps(valueRange[0], valueRange[1], maxStepsCount)
     const yPositions = []
     for (let i = 0; i < yAxisSteps.length; ++i) {
-      const y = Math.round(graticuleDimensions[3] - ((yAxisSteps[i][0] - valueRange[0]) / valuesPerPixel) + graticuleDimensions[1])
-      if (y >= graticuleDimensions[1] &&
-        y <= (graticuleDimensions[1] + graticuleDimensions[3])) {
+      const y = Math.round(dimensions.height - ((yAxisSteps[i][0] - valueRange[0]) / valuesPerPixel) + dimensions.y)
+      if (y >= dimensions.y && y <= (dimensions.y + dimensions.height)) {
         yPositions.push(y)
-        if (y >= graticuleDimensions[1]) {
-          ctx.fillRect(graticuleDimensions[0], y, graticuleDimensions[2], 2)
+        if (y >= dimensions.y) {
+          ctx.fillRect(dimensions.x, y, dimensions.width, 2)
         }
       } else {
         yPositions.push(undefined)
@@ -404,15 +408,15 @@ export class Graticule {
       for (let j = 0; j < xAxisSteps[i].label.length; ++j) {
         // unfortunately measuring line height is complicated, so we use fontSize instead
         // add some slight y offset here
-        ctx.fillText(xAxisSteps[i].label[j], xPositions[i] + this.labelOffsets.x_axis.x, graticuleDimensions[1] + graticuleDimensions[3] + this.pixelsBottom + fontSize * j + this.labelOffsets.x_axis.y)
+        ctx.fillText(xAxisSteps[i].label[j], xPositions[i] + this.labelOffsets.x_axis.x, dimensions.y + dimensions.height + this.pixelsBottom + fontSize * j + this.labelOffsets.x_axis.y)
       }
     }
     // y-axis labels/ticks (values)
     ctx.textAlign = 'right'
     ctx.textBaseline = 'middle'
     for (let i = 0; i < yAxisSteps.length; ++i) {
-      if (yPositions[i] >= graticuleDimensions[1]) {
-        ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), graticuleDimensions[0] - this.pixelsLeft + this.labelOffsets.y_axis.x, yPositions[i] + this.labelOffsets.y_axis.y)
+      if (yPositions[i] >= dimensions.y) {
+        ctx.fillText(this.formatAxisNumber(yAxisSteps[i][1]), dimensions.x - this.pixelsLeft + this.labelOffsets.y_axis.x, yPositions[i] + this.labelOffsets.y_axis.y)
       }
     }
     ctx.textAlign = 'middle'
@@ -423,22 +427,21 @@ export class Graticule {
       curUnits.forEach((val, index, arr) => { unitString += (unitString.length > 0 ? ' / ' : '') + val })
       ctx.save()
       ctx.rotate(Math.PI / 2 * 3)
-      ctx.fillText(unitString, (Math.round(graticuleDimensions[3] / 2) + graticuleDimensions[1]) * -1, fontSize)
+      ctx.fillText(unitString, (Math.round(dimensions.height / 2) + dimensions.y) * -1, fontSize)
       ctx.restore()
     }
   }
 
   getTimeValueAtPoint (positionArr) {
-    const relationalPos = [positionArr[0] - this.graticuleDimensions[0],
-      positionArr[1] - this.graticuleDimensions[1]]
+    const relationalPos = [positionArr[0] - this.dimensions.x, positionArr[1] - this.dimensions.y]
     if (undefined !== this.curTimeRange &&
       undefined !== this.curValueRange &&
       relationalPos[0] >= 0 &&
-      relationalPos[0] <= this.graticuleDimensions[2] &&
+      relationalPos[0] <= this.dimensions.width &&
       relationalPos[1] >= 0 &&
-      relationalPos[1] <= this.graticuleDimensions[3]) {
+      relationalPos[1] <= this.dimensions.height) {
       return [Math.round((relationalPos[0] * this.curTimePerPixel) + this.curTimeRange[0]),
-        ((this.graticuleDimensions[3] - relationalPos[1]) * this.curValuesPerPixel) + this.curValueRange[0]
+        ((this.dimensions.height - relationalPos[1]) * this.curValuesPerPixel) + this.curValueRange[0]
       ]
     } else {
       return undefined
@@ -455,7 +458,7 @@ export class Graticule {
 
   setTimeRange (paramStartTime, paramStopTime) {
     this.curTimeRange = [paramStartTime, paramStopTime]
-    this.curTimePerPixel = (this.curTimeRange[1] - this.curTimeRange[0]) / this.graticuleDimensions[2]
+    this.curTimePerPixel = (this.curTimeRange[1] - this.curTimeRange[0]) / this.dimensions.width
     this.lastRangeChangeTime = (new Date()).getTime()
     return true
   }
@@ -463,15 +466,15 @@ export class Graticule {
   setValueRange (paramRangeStart = undefined, paramRangeEnd = undefined) {
     if (undefined !== paramRangeStart) this.curValueRange[0] = paramRangeStart
     if (undefined !== paramRangeEnd) this.curValueRange[1] = paramRangeEnd
-    this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.graticuleDimensions[3]
+    this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.dimensions.height
     this.lastRangeChangeTime = (new Date()).getTime()
   }
 
-  setTimeRangeExport (timeSpace = this.graticuleDimensions[2]) {
+  setTimeRangeExport (timeSpace = this.dimensions.width) {
     return (this.curTimeRange[1] - this.curTimeRange[0]) / timeSpace
   }
 
-  setValueRangeExport (valueSpace = this.graticuleDimensions[3]) {
+  setValueRangeExport (valueSpace = this.dimensions.height) {
     return (this.curValueRange[1] - this.curValueRange[0]) / valueSpace
   }
 
@@ -500,7 +503,7 @@ export class Graticule {
     }
     if (determineValueRange && this.yRangeOverride.type === 'local') {
       this.curValueRange = this.figureOutValueRange(this.yRangeOverride.type === 'global')
-      this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.graticuleDimensions[3]
+      this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.dimensions.height
     }
     if (determineTimeRange || determineValueRange) {
       this.lastRangeChangeTime = (new Date()).getTime()
@@ -525,11 +528,15 @@ export class Graticule {
       curTimePerPixel = this.curTimePerPixel
       curValuesPerPixel = this.curValuesPerPixel
       clearSize = [this.clearSize[0], this.clearSize[1]]
-      graticuleDimensions = [this.graticuleDimensions[0], this.graticuleDimensions[1],
-        this.graticuleDimensions[2], this.graticuleDimensions[3]]
+      graticuleDimensions = this.dimensions
     } else {
       clearSize = [exportValues[0], exportValues[1]]
-      graticuleDimensions = [exportValues[2], exportValues[3], exportValues[4], exportValues[5]]
+      graticuleDimensions = {
+        x: exportValues[2],
+        y: exportValues[3],
+        width: exportValues[4],
+        height: exportValues[5]
+      }
       curTimePerPixel = this.setTimeRangeExport(exportValues[4])
       curValuesPerPixel = this.setValueRangeExport(exportValues[5])
     }
@@ -538,8 +545,8 @@ export class Graticule {
     this.drawGrid(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
     ctx.save()
     ctx.beginPath()
-    ctx.rect(graticuleDimensions[0], graticuleDimensions[1],
-      graticuleDimensions[2], graticuleDimensions[3])
+    ctx.rect(graticuleDimensions.x, graticuleDimensions.y,
+      graticuleDimensions.width, graticuleDimensions.height)
     ctx.clip()
     if (!this.data.hasSeriesToPlot() && !this.data.hasBandToPlot()) {
       console.log('No series to plot')
@@ -765,8 +772,8 @@ export class Graticule {
 
           const switchOverIndex = curBand.switchOverIndex
           for (let j = 0, x, y, previousX, previousY; j < curBand.points.length; ++j) {
-            x = graticuleDimensions[0] + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
-            y = graticuleDimensions[1] + (graticuleDimensions[3] - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
+            x = graticuleDimensions.x + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
+            y = graticuleDimensions.y + (graticuleDimensions.height - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
             if (j === 0) {
               ctx.beginPath()
               ctx.moveTo(x, y)
@@ -844,8 +851,8 @@ export class Graticule {
           const offsiteCanvas = this.generateOffsiteDot(styleOptions)
 
           for (let j = 0, x, y, previousX, previousY; j < curSeries.points.length; ++j) {
-            x = graticuleDimensions[0] + Math.round((curSeries.points[j].time - timeRange[0]) / timePerPixel)
-            y = graticuleDimensions[1] + (graticuleDimensions[3] - Math.round((curSeries.points[j].value - valueRange[0]) / valuesPerPixel))
+            x = graticuleDimensions.x + Math.round((curSeries.points[j].time - timeRange[0]) / timePerPixel)
+            y = graticuleDimensions.y + (graticuleDimensions.height - Math.round((curSeries.points[j].value - valueRange[0]) / valuesPerPixel))
             if (styleOptions.connect === 'next') {
               if (j === 0) {
                 ctx.beginPath()
@@ -1065,7 +1072,12 @@ export class Graticule {
     this.clearSize = newSize
     this.ctx.canvas.width = newSize[0]
     this.ctx.canvas.height = newSize[1] - canvasMargins.top
-    this.graticuleDimensions = [canvasMargins.left, canvasMargins.top, newSize[0] - canvasMargins.left - canvasMargins.right, newSize[1] - canvasMargins.top - canvasMargins.bottom]
+    this.dimensions = {
+      x: canvasMargins.left,
+      y: canvasMargins.top,
+      width: newSize[0] - canvasMargins.left - canvasMargins.right,
+      height: newSize[1] - canvasMargins.top - canvasMargins.bottom
+    }
     this.setTimeRange(window.MetricQWebView.handler.startTime.getUnix(), window.MetricQWebView.handler.stopTime.getUnix())
     this.setValueRange()
     this.draw(false)
