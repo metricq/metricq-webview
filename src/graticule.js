@@ -153,7 +153,7 @@ export class Graticule {
       case 1:
         fields[0] = startTime.getFullYear()
         // getMonth() will return a number 0 - 11, which I find rather
-        //   intuitive. We have to increment it by one each time we query it.
+        //   unintuitive. We have to increment it by one each time we query it.
         fields[1] = (startTime.getMonth() + 1) - ((startTime.getMonth() + 1) % curRangeMultiplier)
         if (fields[1] < 1) {
           fields[1] = 1
@@ -206,7 +206,7 @@ export class Graticule {
     }
     stepStart = new Date(fields[0] + '-' + (fields[1] < 10 ? '0' : '') + fields[1] + '-' + (fields[2] < 10 ? '0' : '') + fields[2] + ' ' + (fields[3] < 10 ? '0' : '') + fields[3] + ':' + (fields[4] < 10 ? '0' : '') + fields[4] + ':' + (fields[5] < 10 ? '0' : '') + fields[5] + '.' + (fields[6] < 100 ? '00' : (fields[6] < 10 ? '0' : '')) + fields[6])
     // make sure that we don't start our steps before our minimum time
-    if (i !== 1) {
+    if (i === 0) {
       while (stepStart.getTime() < this.curTimeRange[0]) {
         let timeIncrement = stepSize
         if (this.isLeapYear(stepStart.getFullYear())) timeIncrement += 86400 * 1000
