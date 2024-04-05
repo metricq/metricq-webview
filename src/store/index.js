@@ -28,7 +28,8 @@ export default new Vuex.Store({
       raw: 0
     },
     toastConfiguration: new ToastConfig(),
-    isWebviewLoaded: false
+    isWebviewLoaded: false,
+    legacyLink: undefined
   },
   mutations: {
     setStartTime (state, time) {
@@ -75,9 +76,17 @@ export default new Vuex.Store({
     },
     setIsWebviewLoaded (state, newValue) {
       state.isWebviewLoaded = newValue
+    },
+    setLegacyLink (state, newValue) {
+      state.legacyLink = newValue
     }
   },
   actions: {},
+  getters: {
+    getLegacyLink: (state) => () => {
+      return state.legacyLink
+    }
+  },
   modules: {
     metrics
   },
