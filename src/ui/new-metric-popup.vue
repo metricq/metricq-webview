@@ -14,11 +14,11 @@
         <div class="modal-body ">
           <VueMultiSelect
             ref="multi"
-            v-model="value"
-            track-by="title"
+            track-by="name"
             select-label=""
             deselect-label=""
             selected-label=""
+            :value="metrics"
             :options="options"
             :multiple="true"
             :searchable="true"
@@ -26,14 +26,14 @@
             :clear-on-select="false"
             :close-on-select="false"
             :options-limit="3000"
-            :limit="5"
-            :limit-text="limitText"
             :max-height="searchHeight"
             :show-no-results="false"
             :hide-selected="false"
             :custom-label="customLabel"
             placeholder="Metrik suchen"
-            @open="firstSearch"
+            @select="onSelected"
+            @remove="onRemoved"
+            @open="changeSearch('')"
             @search-change="changeSearch"
             @close="keepOpen"
           >
@@ -41,7 +41,12 @@
               slot="option"
               slot-scope="props"
             >
-              <span>{{ multiselectLabel(props.option.title, props.option.desc) }}</span>
+              <span v-if="props.option.description">
+                {{ props.option.name }} - {{ props.option.description }}
+              </span>
+              <span v-else>
+                {{ props.option.name }}
+              </span>
             </template>
           </VueMultiSelect>
         </div>
@@ -50,8 +55,8 @@
             class="btn btn-primary btn-metric"
             @click="addMetrics"
           >
-            <b-icon-plus-circle />
-            Hinzufügen
+            <b-icon-check2-circle />
+            Anwenden
           </button>
         </div>
       </div>
@@ -62,9 +67,10 @@
 <script>
 import PopupHeader from './popup-header.vue'
 import { veil } from './veil.js'
-import Vue from 'vue'
 import VueMultiSelect from 'vue-multiselect'
-import { DuplicateMetricError } from '@/errors'
+
+import { mapState } from 'vuex'
+
 import style from 'vue-multiselect/dist/vue-multiselect.min.css'
 
 export default {
@@ -75,12 +81,23 @@ export default {
   props: {},
   data () {
     return {
-      popupTitle: 'Metriken hinzufügen',
+      popupTitle: 'Metriken auswählen',
       value: null,
       options: [],
       requestCount: 0,
       searchHeight: document.body.scrollHeight * 0.60
     }
+  },
+  computed: {
+    ...mapState({
+      metrics: state => {
+        const result = []
+        for (const metric in state.metrics.metrics) {
+          result.push({ name: metric })
+        }
+        return result
+      }
+    })
   },
   mounted () {
     const popupEle = document.querySelector('.new_metric_popup_div')
@@ -95,18 +112,14 @@ export default {
     }
   },
   methods: {
-    customLabel ({ title }) {
-      return `${title}`
+    onSelected (metric) {
+      window.MetricQWebView.addMetric(metric.name, metric.description)
     },
-    multiselectLabel (title, desc) {
-      if (desc) {
-        return `${title} – ${desc}`
-      } else {
-        return `${title} – no description`
-      }
+    onRemoved (metric) {
+      window.MetricQWebView.deleteMetric(metric.name)
     },
-    limitText (count) {
-      return `und ${count} weitere Metriken`
+    customLabel ({ name }) {
+      return name
     },
     keepOpen () {
       if (veil.myPopup) {
@@ -129,23 +142,15 @@ export default {
         veil.destroy(evt)
       }
     },
-    changeSearch (value) {
-      const requestId = ++this.requestCount
-      window.MetricQWebView.handler.searchMetricsPromise(value, true).then((matches) => {
-        if (requestId < this.requestCount) {
-          return
-        }
-        this.options.length = 0
-        for (let i = 0; i < Object.keys(matches).length; ++i) {
-          this.options.push({
-            title: Object.keys(matches)[i],
-            desc: Object.values(matches)[i].description
-          })
-        }
-      })
-    },
-    firstSearch (value) {
-      this.changeSearch('')
+    async changeSearch (value) {
+      const matches = await window.MetricQWebView.handler.searchMetricsPromise(value, true)
+      this.options.length = 0
+      for (let i = 0; i < Object.keys(matches).length; ++i) {
+        this.options.push({
+          name: Object.keys(matches)[i],
+          description: Object.values(matches)[i].description
+        })
+      }
     }
   }
 }
