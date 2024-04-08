@@ -73,7 +73,6 @@ function uiInteractZoomArea (evtObj) {
 }
 
 function uiInteractZoomIn (evtObj) {
-  console.log(evtObj)
   evtObj.preventDefault()
   const relativeStart = mouseDown.relativeStartPos
   const relativeEnd = calculateActualMousePos(evtObj)
@@ -81,7 +80,6 @@ function uiInteractZoomIn (evtObj) {
   relativeEnd[0] = Math.max(window.MetricQWebView.graticule.dimensions.x,
     Math.min(Math.abs(relativeEnd[0]), window.MetricQWebView.graticule.dimensions.width))
 
-  console.log(relativeStart[0], relativeEnd[0])
   if (Math.abs(relativeStart[0] - relativeEnd[0]) > 1) {
     let posEnd = window.MetricQWebView.graticule.getTimeValueAtPoint(relativeStart)
     let posStart = window.MetricQWebView.graticule.getTimeValueAtPoint(relativeEnd)
