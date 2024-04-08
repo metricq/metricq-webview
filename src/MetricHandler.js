@@ -3,7 +3,7 @@ import MetricQHistory from '@metricq/history'
 import Vue from 'vue'
 
 export class MetricHandler {
-  constructor (paramRenderer, paramMetricsArr, paramStartTime, paramStopTime, store, metricqBackendConfig) {
+  constructor (paramRenderer, paramStartTime, paramStopTime, store, metricqBackendConfig) {
     this.store = store
     this.renderer = paramRenderer
     this.startTime = new MetricTimestamp(paramStartTime, 'start')
@@ -13,7 +13,7 @@ export class MetricHandler {
     this.WIGGLEROOM_PERCENTAGE = 0.05
     this.TIME_MARGIN_FACTOR = 1.00 / 3
 
-    this.initializeMetrics(paramMetricsArr)
+    this.initializeMetrics([])
   }
 
   initializeMetrics (initialMetricNames) {
@@ -26,14 +26,14 @@ export class MetricHandler {
 
   doRequest (maxDataPoints) {
     const timeMargin = (this.stopTime.getUnix() - this.startTime.getUnix()) * this.TIME_MARGIN_FACTOR
-    const nonErrorProneMetrics = []
-    const remainingMetrics = []
+    const metrics = []
+    const errorProneMetrics = []
     for (const curMetric of this.store.getters['metrics/getAll']()) {
       if (curMetric.name.length > 0) {
         if (curMetric.errorprone) {
-          remainingMetrics.push(curMetric.name)
+          errorProneMetrics.push(curMetric.name)
         } else {
-          nonErrorProneMetrics.push(curMetric.name)
+          metrics.push(curMetric.name)
         }
       }
     }
@@ -42,8 +42,8 @@ export class MetricHandler {
       this.stopTime.getUnix() + timeMargin,
       Math.round(maxDataPoints + (maxDataPoints * this.TIME_MARGIN_FACTOR * 2)))
     const defaultAggregates = ['min', 'max', 'avg', 'count']
-    for (let i = 0; i < nonErrorProneMetrics.length; ++i) {
-      queryObj.target(nonErrorProneMetrics[i], defaultAggregates)
+    for (let i = 0; i < metrics.length; ++i) {
+      queryObj.target(metrics[i], defaultAggregates)
     }
     const startTime = window.performance.now()
     if (queryObj.targets.length > 0) {
@@ -51,23 +51,23 @@ export class MetricHandler {
       // execute query
       // TODO: pass parameter nonErrorProneMetrics
       queryObj.run().then((dataset) => {
-        this.handleResponse(nonErrorProneMetrics, dataset, startTime)
+        this.handleResponse(metrics, dataset, startTime)
       }).catch(() => {
-        console.log('Request failed: ' + nonErrorProneMetrics.join(','))
-        nonErrorProneMetrics.forEach((curVal) => {
+        console.log('Request failed: ' + metrics.join(','))
+        metrics.forEach((curVal) => {
           console.log('Marking as faulty: ' + curVal)
           this.receivedError(0, curVal)
         })
         this.doRequest(maxDataPoints)
       })
     }
-    for (let i = 0; i < remainingMetrics.length; ++i) {
+    for (let i = 0; i < errorProneMetrics.length; ++i) {
       const queryObj = this.metricQHistory.query(this.startTime.getUnix() - timeMargin,
         this.stopTime.getUnix() + timeMargin,
         maxDataPoints)
-      queryObj.target(remainingMetrics[i], defaultAggregates)
+      queryObj.target(errorProneMetrics[i], defaultAggregates)
       queryObj.run().then((dataset) => {
-        this.handleResponse([remainingMetrics[i]], dataset, startTime)
+        this.handleResponse([errorProneMetrics[i]], dataset, startTime)
       })
     }
   }
@@ -77,13 +77,14 @@ export class MetricHandler {
     const listOfFaultyMetrics = []
     let pointCountAgg = null
     let pointCountRaw = 0
-    for (let i = 0; i < requestedMetrics.length; ++i) {
-      const metricName = requestedMetrics[i]
+
+    for (const metric of requestedMetrics) {
       const matchingAggregatesObj = {}
       let matchingAggregatesCount = 0
+
       for (const curMetricName in myData) {
         const splitted = curMetricName.split('/')
-        if (splitted[0] === requestedMetrics[i]) {
+        if (splitted[0] === metric) {
           matchingAggregatesObj[splitted[1]] = true
           matchingAggregatesCount += 1
           if (splitted[1] === 'count' || splitted[1] === 'raw') {
@@ -102,31 +103,31 @@ export class MetricHandler {
           }
         }
       }
-      if (!this.checkIfMetricIsOk(metricName, matchingAggregatesCount, matchingAggregatesObj)) {
-        listOfFaultyMetrics.push(metricName)
-        console.log('Metric not ok:' + metricName)
-        this.receivedError(0, metricName)
+
+      if (!this.checkIfMetricIsOk(metric, matchingAggregatesCount, matchingAggregatesObj)) {
+        listOfFaultyMetrics.push(metric)
+        console.log('Metric not ok:' + metric)
+        this.receivedError(0, metric)
       }
     }
+
     this.store.commit('setAggregatePoints', pointCountAgg)
     this.store.commit('setRawPoints', pointCountRaw)
+
     if (listOfFaultyMetrics.length > 0) {
-      Vue.toasted.error('Fehler mit Metriken: ' + listOfFaultyMetrics.join(', '), this.store.state.toastConfiguration)
+      Vue.toasted.error('Fehler beim Abfragen von: ' + listOfFaultyMetrics.join(', '), this.store.state.toastConfiguration)
     }
+
     this.renderer.renderMetrics(myData, startTime)
   }
 
   checkIfMetricIsOk (metricName, aggregateCount, aggregateObj) {
-    if (!metricName ||
-      aggregateCount < 1 ||
-      (!aggregateObj.count && !aggregateObj.raw)) {
+    if (!metricName || aggregateCount < 1 || (!aggregateObj.count && !aggregateObj.raw)) {
       return false
     }
-    if (!((aggregateObj.raw && !aggregateObj.min && !aggregateObj.max) ||
-      (!aggregateObj.raw && aggregateObj.min && aggregateObj.max))) {
-      return false
-    }
-    return true
+
+    // we want (raw xor (min and max))
+    return aggregateObj.raw !== (aggregateObj.min && aggregateObj.max)
   }
 
   searchMetricsPromise (inputStr, metadata = false) {
@@ -135,11 +136,10 @@ export class MetricHandler {
 
   // TODO: move this function to DataCache, maybe?
   getAllMinMax () {
-    const referenceAttribute = 'minmax'
     if (this.renderer.graticule.yRangeOverride.type === 'manual') {
       return [this.renderer.graticule.yRangeOverride.min, this.renderer.graticule.yRangeOverride.max]
     }
-    let allMinMax = [undefined, undefined]
+    const result = [Infinity, -Infinity]
     const timeFrame = this.renderer.graticule.curTimeRange
     for (const curMetric of this.store.getters['metrics/getAll']()) {
       if (!curMetric.draw) continue
@@ -154,73 +154,50 @@ export class MetricHandler {
           curMinMax = curCache.getAllMinMax(timeFrame[0], timeFrame[1])
         }
         if (curMinMax) {
-          if (undefined === allMinMax[0]) {
-            allMinMax = curMinMax
-          } else {
-            if (curMinMax[0] < allMinMax[0]) {
-              allMinMax[0] = curMinMax[0]
-            }
-            if (curMinMax[1] > allMinMax[1]) {
-              allMinMax[1] = curMinMax[1]
-            }
+          if (curMinMax[0] < result[0]) {
+            result[0] = curMinMax[0]
+          }
+          if (curMinMax[1] > result[1]) {
+            result[1] = curMinMax[1]
           }
         }
       }
     }
     // add a little wiggle room, so that markers won't be cut off
-    const delta = allMinMax[1] - allMinMax[0]
-    allMinMax[0] -= delta * this.WIGGLEROOM_PERCENTAGE
-    allMinMax[1] += delta * this.WIGGLEROOM_PERCENTAGE
-    return allMinMax
+    const delta = result[1] - result[0]
+    result[0] -= delta * this.WIGGLEROOM_PERCENTAGE
+    result[1] += delta * this.WIGGLEROOM_PERCENTAGE
+    return result
   }
 
-  setTimeRange (paramStartTime, paramStopTime) {
-    // TODO: check for zoom area if it is too narrow (i.e. less than 1000 ms)
-    // TODO: sync the aforementioned minimum time window
-    if (undefined === paramStartTime || paramStartTime instanceof MetricTimestamp) {
-      paramStartTime = this.startTime.getUnix()
-    } else {
-      this.startTime.updateTime(paramStartTime)
+  setTimeRange (newStartTime, newStopTime) {
+    if (undefined === newStartTime || newStartTime instanceof MetricTimestamp) {
+      newStartTime = this.startTime.getUnix()
     }
-    if (undefined === paramStopTime || paramStopTime instanceof MetricTimestamp) {
-      paramStopTime = this.stopTime.getUnix()
-    } else {
-      this.stopTime.updateTime(paramStopTime)
+    if (undefined === newStopTime || newStopTime instanceof MetricTimestamp) {
+      newStopTime = this.stopTime.getUnix()
     }
 
-    if (isNaN(paramStartTime) || isNaN(paramStopTime)) {
+    if (isNaN(newStartTime) || isNaN(newStopTime)) {
       throw new Error('uh oh time is NaN')
     }
-    if (paramStartTime >= paramStopTime) {
-      throw new Error(`startTime(${paramStartTime}) is not smaller than stopTime(${paramStopTime})`)
+    if (newStartTime >= newStopTime) {
+      throw new Error(`startTime(${newStartTime}) is not smaller than stopTime(${newStopTime})`)
     }
 
-    let timeSuitable = true
-    if ((paramStopTime - paramStartTime) < this.renderer.graticule.MIN_ZOOM_TIME) {
-      const oldDelta = paramStopTime - paramStartTime
-      const newDelta = this.renderer.graticule.MIN_ZOOM_TIME
-      paramStartTime -= Math.round((newDelta - oldDelta) / 2.00)
-      paramStopTime += Math.round((newDelta - oldDelta) / 2.00)
-      timeSuitable = false
+    if (newStopTime - newStartTime < this.renderer.graticule.MIN_ZOOM_TIME) {
+      return false
     }
-    if ((paramStopTime - paramStartTime) > this.renderer.graticule.MAX_ZOOM_TIME) {
-      const oldDelta = paramStopTime - paramStartTime
-      const newDelta = this.renderer.graticule.MAX_ZOOM_TIME
-      paramStartTime += Math.round((oldDelta - newDelta) / 2.00)
-      paramStopTime -= Math.round((oldDelta - newDelta) / 2.00)
-      timeSuitable = false
+    if (newStopTime - newStartTime > this.renderer.graticule.MAX_ZOOM_TIME) {
+      return false
     }
+
+    this.startTime.updateTime(newStartTime)
+    this.stopTime.updateTime(newStopTime)
 
     this.renderer.updateMetricUrl()
-    // maybe move this line to MetricQWebView.setPlotRanges()? NAW
-    window.MetricQWebView.graticule.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())
-    return timeSuitable
-    // this.lastRangeChangeTime = (new Date()).getTime();
-    // TODO: return false when intended zoom area is smaller than e.g. 1000 ms
-    // TODO: define a CONSTANT that is MINIMUM_ZOOM_AREA
-
-    // TODO: call url export here?
-    // return true;
+    this.renderer.graticule.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())
+    return true
   }
 
   zoomTimeAtPoint (pointAt, zoomDirection) {
@@ -237,10 +214,10 @@ export class MetricHandler {
     return couldZoom
   }
 
-  receivedError (errorCode, metricBase) {
+  receivedError (_errorCode, metric) {
     // mark a metric so it is being excluded in bulk-requests
-    if (this.store.getters['metrics/get'](metricBase)) {
-      this.store.dispatch('metrics/setError', { metricKey: metricBase })
+    if (this.store.getters['metrics/get'](metric)) {
+      this.store.dispatch('metrics/setError', { metricKey: metric })
     }
   }
 

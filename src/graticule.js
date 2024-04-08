@@ -2,8 +2,8 @@ import { DataCache } from './data-handling.js'
 import store from './store/'
 
 export class Graticule {
-  constructor (paramMetricQHistoryReference, paramEle, ctx) {
-    this.ele = paramEle
+  constructor (metricq, ele, ctx) {
+    this.ele = ele
     this.ctx = ctx
     this.canvasSize = [0, 0]
     this.dimensions = {
@@ -18,12 +18,12 @@ export class Graticule {
     this.curValuesPerPixel = undefined
     this.labelOffsets = {
       x_axis: {
-        x: 0,
-        y: 3
+        x: 1,
+        y: 4
       },
       y_axis: {
         x: 0,
-        y: 0
+        y: 2
       }
 
     }
@@ -36,7 +36,7 @@ export class Graticule {
       min: 0,
       max: 0
     }
-    this.data = new DataCache(paramMetricQHistoryReference)
+    this.data = new DataCache(metricq)
     // TODO: take these non-changing parameters
     //      as parameters to initialization
     this.MAX_ZOOM_TIME = 20 * 365 * 24 * 3600 * 1000
@@ -119,7 +119,7 @@ export class Graticule {
     //    perfect multiplier, which I believe is a sensible fallback in case of
     //    corner cases)
     if ((curRangeMultiplier * 0.50) <= moreBeautifulMultiplier &&
-      (curRangeMultiplier * 1.50) >= moreBeautifulMultiplier) {
+            (curRangeMultiplier * 1.50) >= moreBeautifulMultiplier) {
       curRangeMultiplier = moreBeautifulMultiplier
     } else {
       curRangeMultiplier = Math.floor(curRangeMultiplier)
@@ -134,15 +134,15 @@ export class Graticule {
     let stepSize = timeStretches[i] * curRangeMultiplier
     let stepStart
     const fields =
-      [
-        1970,
-        1,
-        1,
-        0,
-        0,
-        0,
-        0
-      ]
+            [
+              1970,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0
+            ]
     // based on our reference time unit (variable 'i') make all smaller
     //   time units be the default, by not setting them, and leaving them
     //   at the default date values of 1970-01-01T00:00:00.000
@@ -304,15 +304,9 @@ export class Graticule {
     return outArr
   }
 
-  isLeapYear (paramYear) {
-    paramYear = parseInt(paramYear)
-
-    if ((paramYear % 400) === 0 ||
-       ((paramYear % 4) === 0 &&
-        (paramYear % 100) !== 0)) {
-      return true
-    }
-    return false
+  isLeapYear (year) {
+    year = parseInt(year)
+    return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0)
   }
 
   figureOutLogarithmicSteps (rangeStart, rangeEnd, maxStepsAllowed) {
@@ -370,7 +364,7 @@ export class Graticule {
     for (let i = 0; i < xAxisSteps.length; ++i) {
       const x = Math.round(dimensions.x + ((xAxisSteps[i].timestamp - timeRange[0]) / timePerPixel))
       if (x >= dimensions.x &&
-        x <= (dimensions.x + dimensions.width)) {
+                x <= (dimensions.x + dimensions.width)) {
         xPositions.push(x)
         ctx.fillRect(x, dimensions.y, 2, dimensions.height)
       } else {
@@ -435,11 +429,11 @@ export class Graticule {
   getTimeValueAtPoint (positionArr) {
     const relationalPos = [positionArr[0] - this.dimensions.x, positionArr[1] - this.dimensions.y]
     if (undefined !== this.curTimeRange &&
-      undefined !== this.curValueRange &&
-      relationalPos[0] >= 0 &&
-      relationalPos[0] <= this.dimensions.width &&
-      relationalPos[1] >= 0 &&
-      relationalPos[1] <= this.dimensions.height) {
+            undefined !== this.curValueRange &&
+            relationalPos[0] >= 0 &&
+            relationalPos[0] <= this.dimensions.width &&
+            relationalPos[1] >= 0 &&
+            relationalPos[1] <= this.dimensions.height) {
       return [Math.round((relationalPos[0] * this.curTimePerPixel) + this.curTimeRange[0]),
         ((this.dimensions.height - relationalPos[1]) * this.curValuesPerPixel) + this.curValueRange[0]
       ]
@@ -480,9 +474,9 @@ export class Graticule {
 
   setYRangeOverride (paramTypeStr, paramValueStart, paramValueEnd) {
     if (paramTypeStr !== 'local' &&
-      paramTypeStr !== 'global' &&
-      paramTypeStr !== 'manual' &&
-      undefined !== paramTypeStr) {
+            paramTypeStr !== 'global' &&
+            paramTypeStr !== 'manual' &&
+            undefined !== paramTypeStr) {
       throw new Error(`yRange Override must be either local, global or manual "${paramTypeStr}" is invalid.`)
     }
     if (undefined !== paramTypeStr) this.yRangeOverride.type = paramTypeStr
@@ -544,20 +538,15 @@ export class Graticule {
     ctx.fillRect(0, 0, clearSize[0], clearSize[1])
     this.drawGrid(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
     ctx.save()
-    ctx.beginPath()
-    ctx.rect(graticuleDimensions.x, graticuleDimensions.y,
-      graticuleDimensions.width, graticuleDimensions.height)
-    ctx.clip()
-    if (!this.data.hasSeriesToPlot() && !this.data.hasBandToPlot()) {
-      console.log('No series to plot')
-    } else {
+    if (this.data.hasSeriesToPlot() || this.data.hasBandToPlot()) {
+      ctx.beginPath()
+      ctx.rect(graticuleDimensions.x, graticuleDimensions.y,
+        graticuleDimensions.width, graticuleDimensions.height)
+      ctx.clip()
       this.drawBands(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
       this.drawSeries(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
       ctx.restore()
     }
-    // timers.drawing.end = (new Date()).getTime()
-    // TODO: Make timings accessible
-    // showTimers();
   }
 
   parseStyleOptions (styleOptions, ctx) {
@@ -965,10 +954,10 @@ export class Graticule {
   }
 
   /* Generate a non-used canvas, onto which we draw the geometrical figure
-   *   (i.e. the marker/symbol) specificied with parameter 'styleOptions',
-   *   which then we can use to paste it to wherever we need that kind
-   *   of symbol as a marker
-   */
+     *   (i.e. the marker/symbol) specificied with parameter 'styleOptions',
+     *   which then we can use to paste it to wherever we need that kind
+     *   of symbol as a marker
+     */
   generateOffsiteDot (styleOptions) {
     const BODY = document.getElementsByTagName('body')[0]
     const canvas = document.createElement('canvas')

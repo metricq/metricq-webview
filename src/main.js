@@ -3,23 +3,26 @@ import Vue from 'vue'
 import { createGlobalMetricQWebview, importMetricUrl } from './MetricQWebView.js'
 import store from './store/'
 
+import moment from 'moment'
+
 import './app.js'
 import { getMetricQBackendConfig } from '@/configuration'
 
 async function startup () {
   const metricqBackendConfig = await getMetricQBackendConfig()
-  createGlobalMetricQWebview(document.getElementById('webview_container'), [], (new Date()).getTime() - 7200 * 1000, (new Date()).getTime(), store, metricqBackendConfig)
+  createGlobalMetricQWebview(document.getElementById('webview_container'), moment().subtract(2, 'hours').valueOf(), moment().valueOf(), store, metricqBackendConfig)
 
-  // At Startup:
-  if (window.location.href.indexOf('#') > -1) {
-    try {
-      importMetricUrl()
-    } catch (exc) {
-      Vue.toasted.error('Ungültige URL: Metriken konnten nicht hinzugefügt werden.', store.state.toastConfiguration)
-      console.log('Could not import metrics.')
-      console.log(exc)
-    }
-  } else {
+  let imported = false
+
+  try {
+    imported = importMetricUrl()
+  } catch (exc) {
+    Vue.toasted.error('Ungültige URL: Metriken konnten nicht hinzugefügt werden.', store.state.toastConfiguration)
+    console.log('Could not import metrics.')
+    console.log(exc)
+  }
+
+  if (!imported) {
     await Vue.nextTick()
     store.commit('togglePopup', 'newmetric')
   }

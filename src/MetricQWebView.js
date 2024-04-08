@@ -5,19 +5,18 @@ import JSURL from 'jsurl'
 import Vue from 'vue'
 import * as Error from '@/errors'
 
-export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig) {
-  window.MetricQWebView = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig)
+export function createGlobalMetricQWebview (parent, startTime, stopTime, store, metricqBackendConfig) {
+  window.MetricQWebView = new MetricQWebView(parent, startTime, stopTime, store, metricqBackendConfig)
   store.commit('setLegacyLink', metricqBackendConfig.legacyCharts)
   store.commit('setIsWebviewLoaded', true)
 }
 
 class MetricQWebView {
-  constructor (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig) {
+  constructor (parent, startTime, stopTime, store, metricqBackendConfig) {
     this.store = store
-    this.ele = paramParentEle
-    this.handler = new MetricHandler(this, paramMetricNamesArr, paramStartTime, paramStopTime, this.store, metricqBackendConfig)
-    this.hasPlot = false
-    this.graticule = undefined
+    this.ele = parent
+    this.handler = new MetricHandler(this, startTime, stopTime, store, metricqBackendConfig)
+
     this.margins = {
       canvas: {
         top: 10,
@@ -26,22 +25,26 @@ class MetricQWebView {
         left: 105
       }
     }
+
     this.lastThrottledReloadTime = 0
     this.RELOAD_THROTTLING_DELAY = 150
     this.reloadThrottleTimeout = undefined
 
-    if (paramMetricNamesArr.length > 0) {
-      this.handler.doRequest(400)
-    }
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (this.graticule) {
-          this.graticule.canvasResize(this.margins.canvas)
-        }
+    const resizeObserver = new ResizeObserver(() => {
+      if (this.graticule) {
+        this.graticule.canvasResize(this.margins.canvas)
       }
     })
     resizeObserver.observe(document.getElementById('webview_container'))
     resizeObserver.observe(document.body)
+    resizeObserver.observe(document.getElementById('legend_container'))
+
+    const myCanvas = document.createElement('canvas')
+    this.ele.appendChild(myCanvas)
+    const myContext = myCanvas.getContext('2d')
+    this.graticule = new Graticule(this.handler.metricQHistory,
+      myCanvas, myContext)
+    registerCallbacks(myCanvas)
   }
 
   reinitialize (metricsArr, startTime, stopTime) {
@@ -51,26 +54,9 @@ class MetricQWebView {
   }
 
   renderMetrics (datapointsJSON, startTime) {
-    if (!this.hasPlot) {
-      const myCanvas = document.createElement('canvas')
-      this.ele = this.ele.appendChild(myCanvas)
-      const myContext = myCanvas.getContext('2d')
-      // Params: (ctx, offsetDimension, paramPixelsLeft, paramPixelsBottom, paramClearSize)
-      this.graticule = new Graticule(this.handler.metricQHistory,
-        myCanvas, myContext)
-      this.hasPlot = true
-      // TODO: neue Funktion handler.refreshTimeRange?
-      this.handler.setTimeRange(this.handler.startTime, this.handler.stopTime)
-      this.graticule.data.processMetricQDatapoints(datapointsJSON)
-      // URL import problem here: the response's start and end time are taken here :/
-      this.graticule.automaticallyDetermineRanges(false, true)
-      this.graticule.draw(false)
-      registerCallbacks(myCanvas)
-    } else {
-      this.graticule.data.processMetricQDatapoints(datapointsJSON)
-      this.graticule.automaticallyDetermineRanges(false, true)
-      this.graticule.draw(false)
-    }
+    this.graticule.data.processMetricQDatapoints(datapointsJSON)
+    this.graticule.automaticallyDetermineRanges(false, true)
+    this.graticule.draw(false)
     this.store.commit('setTotalTime', window.performance.now() - startTime)
   }
 
@@ -79,18 +65,13 @@ class MetricQWebView {
     for (const metricKey of this.store.getters['metrics/getAllKeys']()) {
       encodedStr += '*' + metricKey
     }
-    encodedStr = encodeURIComponent(encodedStr)
-    window.location.href =
-      parseLocationHref()[0] +
-      '#' +
-      encodedStr
+    window.location.href = parseLocationHref()[0] + '#' + encodeURIComponent(encodedStr)
   }
 
   setPlotRanges (updateXAxis, updateYAxis) {
     if (!updateXAxis && !updateYAxis) {
       return
     }
-    // TODO: code me
     const allMinMax = this.handler.getAllMinMax()
     this.graticule.setValueRange(allMinMax[0], allMinMax[1])
 
@@ -174,24 +155,21 @@ class MetricQWebView {
 }
 
 function parseLocationHref () {
-  const hashPos = window.location.href.indexOf('#')
-  let baseUrl = ''
-  let jsurlStr = ''
-  if (hashPos === -1) {
-    baseUrl = window.location.href
-  } else {
-    baseUrl = window.location.href.substring(0, hashPos)
-    jsurlStr = decodeURIComponent(window.location.href.substring(hashPos + 1))
+  const urlComponents = window.location.href.split('#', 2)
+
+  if (urlComponents.length === 1) {
+    return [urlComponents[0], '']
   }
-  return [baseUrl, jsurlStr]
+
+  return [urlComponents[0], decodeURIComponent(urlComponents[1])]
 }
 
-function determineTimeRangeOfJsUrl (jsUrlObj) {
+function determineTimeRangeOfJsUrl (request) {
   let timeStart, timeEnd
-  if (jsUrlObj.start && jsUrlObj.stop) {
-    timeStart = parseInt(jsUrlObj.start)
-    timeEnd = parseInt(jsUrlObj.stop)
-  } else if (jsUrlObj.value && jsUrlObj.unit) {
+  if (request.start && request.stop) {
+    timeStart = parseInt(request.start)
+    timeEnd = parseInt(request.stop)
+  } else if (request.value && request.unit) {
     // including the units from old tool settings.js  (line 62)
     const unitConversion = {
       second: 's',
@@ -210,9 +188,9 @@ function determineTimeRangeOfJsUrl (jsUrlObj) {
       'year(s)': 'y'
     }
 
-    const unit = unitConversion[jsUrlObj.unit]
+    const unit = unitConversion[request.unit]
 
-    return [`now-${jsUrlObj.value}${unit}`, 'now']
+    return [`now-${request.value}${unit}`, 'now']
   } else {
     console.info('No time specification given in URL')
   }
@@ -220,42 +198,33 @@ function determineTimeRangeOfJsUrl (jsUrlObj) {
 }
 
 export function importMetricUrl () {
-  const jsurlStr = parseLocationHref()[1]
-  if (jsurlStr.length > 1) {
-    const firstChar = jsurlStr.charAt(0)
-    const firstTwoChars = firstChar + jsurlStr.charAt(1)
-    if (firstTwoChars === '/~' ||
-      firstChar === '~') {
-      let metricsObj
-      try {
-        if (firstTwoChars === '/~') {
-          metricsObj = JSURL.parse(jsurlStr.substring(1))
-        } else {
-          metricsObj = JSURL.parse(jsurlStr)
-        }
-      } catch (exc) {
-        console.log('Could not interpret URL')
-        console.log(exc)
-        return false
+  const fragment = parseLocationHref()[1]
+
+  if (fragment.length === 0) return false
+
+  if (fragment.startsWith('/~') || fragment.startsWith('~')) {
+    let request
+    try {
+      if (fragment.startsWith('/~')) {
+        request = JSURL.parse(fragment.substring(1))
+      } else {
+        request = JSURL.parse(fragment)
       }
-      const timeRanges = determineTimeRangeOfJsUrl(metricsObj)
-      initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1])
+    } catch (exc) {
+      console.log('Could not interpret URL')
+      console.log(exc)
+      return false
+    }
+    const timeRange = determineTimeRangeOfJsUrl(request)
+    window.MetricQWebView.reinitialize(request.cntr, timeRange[0], timeRange[1])
+    return true
+  } else if (fragment.startsWith('.')) {
+    const splitted = fragment.split('*')
+    if (splitted.length > 1) {
+      window.MetricQWebView.reinitialize(splitted.slice(2), splitted[0].substring(1), splitted[1])
       return true
-    } else if (firstChar === '.') {
-      const splitted = jsurlStr.split('*')
-      if (splitted.length > 1) {
-        initializeMetrics(splitted.slice(2), splitted[0].substring(1), splitted[1])
-        return true
-      }
     }
   }
-  return false
-}
 
-/* TODO: generalize this for cases where is no "legendApp" */
-export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
-  let newManager
-  if (window.MetricQWebView) {
-    window.MetricQWebView.reinitialize(metricNamesArr, timeStart, timeStop)
-  }
+  return false
 }
