@@ -2,6 +2,7 @@ import Vue from 'vue'
 import store from '@/store/index'
 import { MetricHelper } from '@/metric'
 import * as Error from '@/errors'
+import distinctColors from 'distinct-colors'
 
 export default {
   namespaced: true,
@@ -26,6 +27,9 @@ export default {
     },
     get: (state) => (metricKey) => {
       return state.metrics[metricKey]
+    },
+    getColor: (state) => (metric) => {
+      return state.metrics[metric].color
     }
   },
   mutations: {
@@ -197,17 +201,8 @@ export default {
       }
       commit('privateSet', { metricKey, metric: { unit: unit } })
     },
-    updateColor ({ commit, state }, { metricKey, color }) {
+    updateColor ({ commit }, { metricKey, color }) {
       commit('privateSet', { metricKey, metric: { color } })
-      const name = state.metrics[metricKey].name
-      const renderer = window.MetricQWebView
-      if (renderer && renderer.graticule && renderer.graticule.data) {
-        const metricCache = renderer.graticule.data.getMetricCache(name)
-        if (metricCache) {
-          metricCache.updateColor(color)
-          renderer.graticule.draw(false)
-        }
-      }
     },
     redraw () {
       window.MetricQWebView.graticule.draw(false)
@@ -244,8 +239,15 @@ export default {
         }
         commit('privateSet', { metricKey, metric: newDrawStates })
       }
-      window.MetricQWebView.graticule.draw(false)
       commit('setGlobalMinMax', newState, { root: true })
+    },
+    setDistinctColors ({ state, dispatch }) {
+      const metrics = Object.keys(state.metrics)
+      const palette = distinctColors({ count: metrics.length, lightMin: 25, lightMax: 75 }).values()
+      metrics.forEach((metric) => {
+        const color = palette.next().value.css()
+        dispatch('updateColor', { metricKey: metric, color: color })
+      })
     },
     updateDrawState ({ dispatch, commit }, { metricKey, drawState: { drawMin, drawAvg, drawMax } }) {
       commit('privateSet', { metricKey, metric: { drawMin, drawAvg, drawMax } })

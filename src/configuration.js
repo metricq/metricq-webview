@@ -23,10 +23,10 @@ export async function getMetricQBackendConfig () {
       type: 'GET',
       dataType: 'json'
     })
-    config.backend = json.backend
-    config.user = json.user
-    config.password = json.password
-    config.legacyCharts = json.legacyCharts
+    config.backend = json.backend ?? config.backend
+    config.user = json.user ?? config.user
+    config.password = json.password ?? config.password
+    config.legacyCharts = json.legacyCharts ?? config.legacyCharts
   } catch (exc) {
     console.log('Could not load backend config.')
     console.log(exc)

@@ -1,5 +1,3 @@
-import { crc32 } from '../lib/pseudo-crc32.js'
-import { hslToRgb } from '../lib/color-conversion.js'
 import moment from 'moment'
 import store from './store/'
 
@@ -209,7 +207,7 @@ export class DataCache {
     return units
   }
 
-  initializeCacheWithColor (metricName, newColor) {
+  initializeCache (metricName) {
     const newCache = this.assureMetricExists(metricName)
     Object.keys(newCache.series).forEach((aggregate) => { this.newSeries(metricName, aggregate) })
     if (!newCache.band) {
@@ -218,10 +216,6 @@ export class DataCache {
     const toUpdate = [newCache.band]
     Object.keys(newCache.series).forEach((aggregate) => { toUpdate.push(newCache.series[aggregate]) })
 
-    toUpdate.forEach((val) => {
-      val.styleOptions.color = newColor
-    })
-
     return newCache
   }
 }
@@ -229,7 +223,6 @@ export class DataCache {
 class MetricCache {
   constructor (paramMetricQReference, paramMetricName) {
     this.name = paramMetricName
-    this.color = determineColorForMetric(paramMetricName)
     this.series = {
       min: undefined,
       max: undefined,
@@ -340,29 +333,11 @@ class MetricCache {
   }
 
   defaultBandStyling () {
-    const options = matchStylingOptions('band')
-    if (options.color === 'default') {
-      options.color = this.color
-    }
-    return options
+    return matchStylingOptions('band')
   }
 
   defaultSeriesStyling (aggregateName) {
-    const options = matchStylingOptions(aggregateName)
-    if (options.color === 'default') {
-      options.color = this.color
-    }
-    return options
-  }
-
-  updateColor (color) {
-    this.color = color
-    this.band.styleOptions.color = color
-    for (const key in this.series) {
-      if (this.series[key]) {
-        this.series[key].styleOptions.color = color
-      }
-    }
+    return matchStylingOptions(aggregateName)
   }
 }
 
@@ -577,7 +552,6 @@ class Point {
   constructor (paramTime, paramValue) {
     this.time = paramTime
     this.value = paramValue
-    this.count = undefined
   }
 
   clone () {
@@ -589,7 +563,6 @@ const stylingOptions = {
   avg: {
     title: 'AVG Series',
     skip: false,
-    color: 'default',
     connect: 'next',
     width: 8,
     lineWidth: 2,
@@ -599,7 +572,6 @@ const stylingOptions = {
   min: {
     title: 'Min Series',
     skip: true,
-    color: 'default',
     connect: 'next',
     width: 2,
     lineWidth: 2,
@@ -609,7 +581,6 @@ const stylingOptions = {
   max: {
     title: 'Max Series',
     skip: true,
-    color: 'default',
     connect: 'next',
     width: 2,
     lineWidth: 2,
@@ -619,7 +590,6 @@ const stylingOptions = {
   raw: {
     title: 'Raw Series',
     skip: false,
-    color: 'default',
     connect: 'none',
     width: 8,
     dots: true
@@ -628,7 +598,6 @@ const stylingOptions = {
     title: 'All Bands',
     skip: false,
     connect: 'next',
-    color: 'default',
     alpha: 0.3
   }
 }
@@ -638,9 +607,4 @@ function matchStylingOptions (styleType) {
     return undefined
   }
   return JSON.parse(JSON.stringify(stylingOptions[styleType]))
-}
-
-function determineColorForMetric (metricBaseName) {
-  const rgb = hslToRgb((crc32(metricBaseName) >> 24 & 255) / 255.00, 1, 0.46)
-  return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')'
 }

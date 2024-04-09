@@ -12,19 +12,10 @@ export class MetricHandler {
 
     this.WIGGLEROOM_PERCENTAGE = 0.05
     this.TIME_MARGIN_FACTOR = 1.00 / 3
-
-    this.initializeMetrics([])
-  }
-
-  initializeMetrics (initialMetricNames) {
-    this.store.commit('metrics/resetAll')
-    for (let i = 0; i < initialMetricNames.length; ++i) {
-      const curMetricName = initialMetricNames[i]
-      window.MetricQWebView.addMetric(curMetricName)
-    }
   }
 
   doRequest (maxDataPoints) {
+    if (maxDataPoints === 0) return
     const timeMargin = (this.stopTime.getUnix() - this.startTime.getUnix()) * this.TIME_MARGIN_FACTOR
     const metrics = []
     const errorProneMetrics = []

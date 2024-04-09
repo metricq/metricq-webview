@@ -15,7 +15,7 @@ async function startup () {
   let imported = false
 
   try {
-    imported = importMetricUrl()
+    imported = await importMetricUrl()
   } catch (exc) {
     Vue.toasted.error('Ungültige URL: Metriken konnten nicht hinzugefügt werden.', store.state.toastConfiguration)
     console.log('Could not import metrics.')

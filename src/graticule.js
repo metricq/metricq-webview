@@ -725,10 +725,6 @@ export class Graticule {
       }
 
       // second parse Options to be applied to ctx immediatly
-      if (styleOptions.color !== undefined) {
-        ctx.fillStyle = styleOptions.color
-        ctx.strokeStyle = styleOptions.color
-      }
       if (styleOptions.alpha !== undefined) {
         ctx.globalAlpha = parseFloat(styleOptions.alpha)
       }
@@ -747,6 +743,9 @@ export class Graticule {
         const curBand = this.data.metrics[i].band
         if (curBand) {
           const styleOptions = this.parseStyleOptions(curBand.styleOptions, ctx)
+          const color = store.getters['metrics/getColor'](this.data.metrics[i].name)
+          ctx.fillStyle = color
+          ctx.strokeStyle = color
           if (styleOptions.skip || curBand.points.length === 0) {
             this.resetCtx(ctx)
             continue
@@ -826,11 +825,14 @@ export class Graticule {
         const curSeries = this.data.metrics[i].series[curAggregate]
         if (curSeries) {
           const styleOptions = this.parseStyleOptions(curSeries.styleOptions, ctx)
+          const color = store.getters['metrics/getColor'](this.data.metrics[i].name)
+          ctx.fillStyle = color
+          ctx.strokeStyle = color
           if (styleOptions.skip || curSeries.points.length === 0) {
             this.resetCtx(ctx)
             continue
           }
-          const offsiteCanvas = this.generateOffsiteDot(styleOptions)
+          const offsiteCanvas = this.generateOffsiteDot(styleOptions, color)
 
           for (let j = 0, x, y, previousX, previousY; j < curSeries.points.length; ++j) {
             x = graticuleDimensions.x + Math.round((curSeries.points[j].time - timeRange[0]) / timePerPixel)
@@ -951,8 +953,7 @@ export class Graticule {
      *   which then we can use to paste it to wherever we need that kind
      *   of symbol as a marker
      */
-  generateOffsiteDot (styleOptions) {
-    const BODY = document.getElementsByTagName('body')[0]
+  generateOffsiteDot (styleOptions, color) {
     const canvas = document.createElement('canvas')
     const ctxDimensions = [styleOptions.pointWidth,
       styleOptions.pointWidth]
@@ -967,8 +968,8 @@ export class Graticule {
     const canvasCtx = canvas.getContext('2d')
     if (styleOptions.drawDots) {
       canvasCtx.lineWidth = 1
-      canvasCtx.fillStyle = styleOptions.color
-      canvasCtx.strokeStyle = styleOptions.color
+      canvasCtx.fillStyle = color
+      canvasCtx.strokeStyle = color
       styleOptions.drawDots.func(canvasCtx, ctxDimensions[0], ctxDimensions[1])
     }
     return {

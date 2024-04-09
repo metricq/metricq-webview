@@ -1,6 +1,5 @@
 import { hslToRgb } from '../lib/color-conversion.js'
 import { crc32 } from '../lib/pseudo-crc32.js'
-import store from './store/'
 
 // adapted from https://plot.ly/python/marker-style/
 // not working:

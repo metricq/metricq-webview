@@ -47,8 +47,13 @@ class MetricQWebView {
     registerCallbacks(myCanvas)
   }
 
-  reinitialize (metricsArr, startTime, stopTime) {
-    this.handler.initializeMetrics(metricsArr)
+  async reinitialize (metrics, startTime, stopTime) {
+    this.store.commit('metrics/resetAll')
+
+    for (const metric of metrics) {
+      await this.addMetric(metric)
+    }
+
     this.handler.startTime.updateTime(startTime)
     this.handler.stopTime.updateTime(stopTime)
   }
@@ -197,7 +202,7 @@ function determineTimeRangeOfJsUrl (request) {
   return [timeStart, timeEnd]
 }
 
-export function importMetricUrl () {
+export async function importMetricUrl () {
   const fragment = parseLocationHref()[1]
 
   if (fragment.length === 0) return false
@@ -216,7 +221,9 @@ export function importMetricUrl () {
       return false
     }
     const timeRange = determineTimeRangeOfJsUrl(request)
-    window.MetricQWebView.reinitialize(request.cntr, timeRange[0], timeRange[1])
+    await window.MetricQWebView.reinitialize(request.cntr, timeRange[0], timeRange[1])
+    window.MetricQWebView.store.dispatch('metrics/updateDrawStateGlobally', false)
+    window.MetricQWebView.store.dispatch('metrics/setDistinctColors')
     return true
   } else if (fragment.startsWith('.')) {
     const splitted = fragment.split('*')

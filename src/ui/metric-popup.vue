@@ -219,7 +219,7 @@ export default {
             this.$store.dispatch('metrics/updateMarker', { metricKey, marker: paramMyMetric.marker })
           }
           // don't do a complete repaint
-          // renderMetrics();
+          window.MetricQWebView.graticule.draw(false)
         }
       }
     })(this.metric, this.newMetric)

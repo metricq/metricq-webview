@@ -83,11 +83,8 @@ export const mainApp = new Vue({
   },
   methods: {
     colorPaletteClicked () {
-      const palette = distinctColors({ count: this.metricsList.length, lightMin: 25, lightMax: 75 }).values()
-      this.metricsList.forEach((metric) => {
-        const color = palette.next().value.css()
-        this.$store.dispatch('metrics/updateColor', { metricKey: metric.key, color: color })
-      })
+      this.$store.dispatch('metrics/setDistinctColors')
+      window.MetricQWebView.graticule.draw(false)
     },
     exportButtonClicked () {
       this.togglePopup('export')
@@ -103,6 +100,7 @@ export const mainApp = new Vue({
     },
     toggleMinMaxButton (evt) {
       this.$store.dispatch('metrics/updateDrawStateGlobally', evt.target.checked)
+      window.MetricQWebView.graticule.draw(false)
     },
     ...mapMutations([
       'togglePopup'
