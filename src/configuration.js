@@ -4,12 +4,14 @@ import jquery from 'jquery'
 
 const METRICQ_BACKEND = process.env.VUE_APP_METRICQ_BACKEND
 const [METRICQ_BACKEND_USER, METRICQ_BACKEND_PASSWORD] = process.env.VUE_APP_METRICQ_BACKEND_AUTH === undefined ? [undefined, undefined] : process.env.VUE_APP_METRICQ_BACKEND_AUTH.split(':')
+const LEGACY_CHARTS = process.env.VUE_APP_LEGACY_CHARTS
 
 class MetricQBackendConfig {
   constructor () {
     this.backend = METRICQ_BACKEND
     this.user = METRICQ_BACKEND_USER
     this.password = METRICQ_BACKEND_PASSWORD
+    this.legacyCharts = LEGACY_CHARTS
   }
 }
 
@@ -24,6 +26,7 @@ export async function getMetricQBackendConfig () {
     config.backend = json.backend
     config.user = json.user
     config.password = json.password
+    config.legacyCharts = json.legacyCharts
   } catch (exc) {
     console.log('Could not load backend config.')
     console.log(exc)

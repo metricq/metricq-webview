@@ -7,6 +7,7 @@ import * as Error from '@/errors'
 
 export function createGlobalMetricQWebview (paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig) {
   window.MetricQWebView = new MetricQWebView(paramParentEle, paramMetricNamesArr, paramStartTime, paramStopTime, store, metricqBackendConfig)
+  store.commit('setLegacyLink', metricqBackendConfig.legacyCharts)
   store.commit('setIsWebviewLoaded', true)
 }
 

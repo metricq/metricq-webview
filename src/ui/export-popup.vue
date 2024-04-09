@@ -80,6 +80,7 @@
           </div>
         </div>
         <div class="modal-footer">
+          <legacy-link-button class="text-align-left" />
           <button
             class="btn btn-primary"
             :disabled="!analyzeTableReady && selectedFileformat === 'pdf' && exportAnalyze"
@@ -133,9 +134,10 @@ import { veil } from './veil.js'
 import PopupHeader from './popup-header.vue'
 import { mapState } from 'vuex'
 import AnalyzeTable from '.././components/analyzeTable.vue'
+import LegacyLinkButton from './legacy-link-button.vue'
 
 export default {
-  components: { PopupHeader, AnalyzeTable },
+  components: { PopupHeader, AnalyzeTable, LegacyLinkButton },
   props: {},
   data () {
     return {
