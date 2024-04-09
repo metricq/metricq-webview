@@ -95,7 +95,16 @@ export default {
     }
   },
   updated () {
-    this.maxwidth = this.$refs.metricName.clientWidth + this.$refs.metricDesc.clientWidth + 100
+    let width = this.$refs.metricName.clientWidth + 100
+
+    // we need this check, as this handler might be called when the description
+    // element does not exist. Guess it's a timing issue related to the v-if.
+    if (this.$refs.metricDesc !== undefined) {
+      width += this.$refs.metricDesc.clientWidth
+    }
+
+    this.maxwidth = width
+
     this.onResize()
   },
   mounted () {

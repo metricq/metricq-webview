@@ -13,7 +13,7 @@ export class Graticule {
       height: 0
     }
     this.curTimeRange = undefined
-    this.curValueRange = undefined
+    this.curValueRange = [0, 1]
     this.curTimePerPixel = undefined
     this.curValuesPerPixel = undefined
     this.labelOffsets = {

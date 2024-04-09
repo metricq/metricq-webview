@@ -198,11 +198,11 @@ export class DataCache {
 
   distinctUnits () {
     const units = []
-    for (let i = 0; i < this.metrics.length; ++i) {
-      if (this.metrics[i].meta && this.metrics[i].meta.unit &&
-          store.getters['metrics/getMetricDrawState'](this.metrics[i].name).draw) {
-        if (!units.includes(this.metrics[i].meta.unit)) {
-          units.push(this.metrics[i].meta.unit)
+    for (const metric of this.metrics) {
+      if (metric.meta && metric.meta.unit &&
+          store.getters['metrics/getMetricDrawState'](metric.name).draw) {
+        if (!units.includes(metric.meta.unit)) {
+          units.push(metric.meta.unit)
         }
       }
     }

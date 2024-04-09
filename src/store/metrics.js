@@ -136,7 +136,7 @@ export default {
       dispatch('checkGlobalDrawState')
     },
 
-    async create ({ commit, state, dispatch, getters }, {
+    async create ({ commit, state, dispatch }, {
       metric: {
         name,
         description,
@@ -160,28 +160,38 @@ export default {
         } catch (error) {
           throw new Error.InvalidMetricError(name)
         }
+
+        if (description === undefined) {
+          description = metadataObj.description
+        }
+
+        if (unit === undefined) {
+          unit = metadataObj.unit
+        }
+
         commit('privateSet', {
           metricKey: name,
           metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw }
         })
+
         const metric = state.metrics[name]
         // marker and color are stored here and deep inside MetricQWebView/MetricHandler/Graticule
         dispatch('updateColor', { metricKey: name, color: metric.color })
         dispatch('updateMarker', { metricKey: name, color: metric.marker })
-        // fetch description from the backend, if necessary
-        dispatch('updateDescription', { metricKey: name, description, metadataObj })
+
         // maybe we changed the globale draw state?
         dispatch('checkGlobalDrawState')
-        dispatch('updateUnit', { metricKey: name, unit, metadataObj })
+
+        dispatch('redraw')
       }
     },
-    updateDescription ({ commit, state }, { metricKey, description, metadataObj }) {
+    updateDescription ({ commit }, { metricKey, description, metadataObj }) {
       if (description === undefined) {
         description = metadataObj.description
       }
       commit('privateSet', { metricKey, metric: { description: description } })
     },
-    updateUnit ({ commit, state }, { metricKey, unit, metadataObj }) {
+    updateUnit ({ commit }, { metricKey, unit, metadataObj }) {
       if (unit === undefined) {
         unit = metadataObj.unit
       }
@@ -195,9 +205,12 @@ export default {
         const metricCache = renderer.graticule.data.getMetricCache(name)
         if (metricCache) {
           metricCache.updateColor(color)
+          renderer.graticule.draw(false)
         }
-        renderer.graticule.draw(false)
       }
+    },
+    redraw () {
+      window.MetricQWebView.graticule.draw(false)
     },
     updateMarker ({ commit, state }, { metricKey, marker }) {
       commit('privateSet', { metricKey, metric: { marker } })
@@ -207,7 +220,7 @@ export default {
         const metricCache = renderer.graticule.data.getMetricCache(metric.name)
         if (metricCache) {
           for (const curSeries in metricCache.series) {
-            // TODO: change this so that marker type ist being stored
+            // TODO: change this so that marker type is being stored
             //        but it only applies marker to /raw aggregate
             if (metricCache.series[curSeries]) {
               metricCache.series[curSeries].styleOptions.dots = marker

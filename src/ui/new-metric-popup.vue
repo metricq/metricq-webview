@@ -129,7 +129,7 @@ export default {
     addMetrics (evt) {
       if (this.value != null) {
         for (const item of this.value) {
-          window.MetricQWebView.addMetric(item.title, item.desc)
+          window.MetricQWebView.addMetric(item.title, item.description)
         }
       }
       this.closePopup(evt)
