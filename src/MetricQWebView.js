@@ -20,7 +20,7 @@ class MetricQWebView {
     this.margins = {
       canvas: {
         top: 10,
-        right: 35,
+        right: 5,
         bottom: 40,
         left: 105
       }
