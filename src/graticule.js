@@ -30,7 +30,6 @@ export class Graticule {
     this.pixelsLeft = 0
     this.pixelsBottom = 0
     this.clearSize = [0, 0]
-    this.lastRangeChangeTime = 0
     this.yRangeOverride = {
       type: 'local',
       min: 0,
@@ -447,13 +446,11 @@ export class Graticule {
     this.curTimeRange[1] += moveTimeBy
     this.curValueRange[0] += moveValueBy
     this.curValueRange[1] += moveValueBy
-    this.lastRangeChangeTime = (new Date()).getTime()
   }
 
   setTimeRange (paramStartTime, paramStopTime) {
     this.curTimeRange = [paramStartTime, paramStopTime]
     this.curTimePerPixel = (this.curTimeRange[1] - this.curTimeRange[0]) / this.dimensions.width
-    this.lastRangeChangeTime = (new Date()).getTime()
     return true
   }
 
@@ -461,7 +458,6 @@ export class Graticule {
     if (undefined !== paramRangeStart) this.curValueRange[0] = paramRangeStart
     if (undefined !== paramRangeEnd) this.curValueRange[1] = paramRangeEnd
     this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.dimensions.height
-    this.lastRangeChangeTime = (new Date()).getTime()
   }
 
   setTimeRangeExport (timeSpace = this.dimensions.width) {
@@ -498,9 +494,6 @@ export class Graticule {
     if (determineValueRange && this.yRangeOverride.type === 'local') {
       this.curValueRange = this.figureOutValueRange(this.yRangeOverride.type === 'global')
       this.curValuesPerPixel = (this.curValueRange[1] - this.curValueRange[0]) / this.dimensions.height
-    }
-    if (determineTimeRange || determineValueRange) {
-      this.lastRangeChangeTime = (new Date()).getTime()
     }
   }
 
