@@ -514,7 +514,7 @@ export class Graticule {
     if (exportValues === undefined) {
       curTimePerPixel = this.curTimePerPixel
       curValuesPerPixel = this.curValuesPerPixel
-      clearSize = [this.clearSize[0], this.clearSize[1]]
+      clearSize = this.clearSize
       graticuleDimensions = this.dimensions
     } else {
       clearSize = [exportValues[0], exportValues[1]]
@@ -1051,16 +1051,24 @@ export class Graticule {
 
   canvasResize (canvasMargins) {
     this.canvasReset()
-    const newSize = [document.getElementById('webview_container').offsetWidth, document.getElementById('wrapper_body').clientHeight]
-    this.clearSize = newSize
-    this.ctx.canvas.width = newSize[0]
-    this.ctx.canvas.height = newSize[1] - canvasMargins.top
+    const dpr = window.devicePixelRatio || 1
+    const [width, height] = [document.getElementById('webview_container').offsetWidth, document.getElementById('wrapper_body').clientHeight - canvasMargins.top]
+    this.clearSize = [width, height]
+
+    this.ele.style.height = height + 'px'
+
+    this.ele.width = Math.floor(width * dpr)
+    this.ele.height = Math.floor(height * dpr)
+
+    this.ctx.scale(dpr, dpr)
+
     this.dimensions = {
       x: canvasMargins.left,
       y: canvasMargins.top,
-      width: newSize[0] - canvasMargins.left - canvasMargins.right,
-      height: newSize[1] - canvasMargins.top - canvasMargins.bottom
+      width: width - canvasMargins.left - canvasMargins.right,
+      height: height - canvasMargins.top - canvasMargins.bottom
     }
+
     this.setTimeRange(window.MetricQWebView.handler.startTime.getUnix(), window.MetricQWebView.handler.stopTime.getUnix())
     this.setValueRange()
     this.draw(false)
