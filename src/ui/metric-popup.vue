@@ -143,7 +143,7 @@ export default {
   computed: {
     isEmpty: {
       get () {
-        return this.metric.name === ''
+        return this.metric.key === ''
       },
       set (newValue) {
         // do nothing
@@ -175,10 +175,10 @@ export default {
     },
     metricName: {
       get () {
-        return this.metric.name
+        return this.metric.key
       },
       set (newValue) {
-        this.newMetric.name = newValue
+        this.newMetric.key = newValue
       }
     }
   },
@@ -194,15 +194,15 @@ export default {
         this.$store.commit('metrics/setPopup', { metricKey, popupState: false })
         veil.destroy()
 
-        const newName = paramMyNewMetric.name
+        const newName = paramMyNewMetric.key
 
         if (evt.target.getAttribute('class') === 'popup_trashcan') {
           if (newName.length > 0) {
             window.MetricQWebView.deleteMetric(newName)
           }
         } else {
-          if (paramMyMetric.name !== newName) {
-            if (paramMyMetric.name === '' && !newName) {
+          if (paramMyMetric.key !== newName) {
+            if (paramMyMetric.key === '' && !newName) {
               // do nothing
             } else {
               window.MetricQWebView.changeMetricName(paramMyMetric, newName)

@@ -48,15 +48,11 @@ export default {
 
     privateSet (state, {
       metricKey,
-      metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw, draw }
+      metric: { description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw, draw }
     }) {
-      if (name !== undefined && metricKey !== name) {
-        throw new Error('metricKey and metric.name must be equal!')
-      }
       if (state.metrics[metricKey] === undefined) {
         Vue.set(state.metrics, metricKey, {
           key: metricKey,
-          name: metricKey,
           description: description || '',
           unit: unit || '',
           marker: marker || MetricHelper.metricBaseToMarker(metricKey),
@@ -68,16 +64,12 @@ export default {
           drawAvg: drawAvg === undefined ? true : drawAvg,
           drawMax: drawMax === undefined ? store.state.globalMinMax : drawMax,
           popupKey: 'popup_' + MetricHelper.filterKey(metricKey),
-          htmlName: metricKey,
           pointsAgg: pointsAgg || null,
           pointsRaw: pointsRaw || null
         })
       } else {
-        if (name !== undefined) {
-          Vue.set(state.metrics[metricKey], 'name', name)
-          Vue.set(state.metrics[metricKey], 'htmlName', name)
-          Vue.set(state.metrics[metricKey], 'popupKey', 'popup_' + MetricHelper.filterKey(name))
-        }
+        Vue.set(state.metrics[metricKey], 'popupKey', 'popup_' + MetricHelper.filterKey(metricKey))
+
         if (description !== undefined) {
           Vue.set(state.metrics[metricKey], 'description', description)
         }
@@ -146,7 +138,7 @@ export default {
       dispatch('checkGlobalDrawState')
     },
 
-    async create ({ commit, state, dispatch, getters }, {
+    async create ({ commit, state, dispatch }, {
       metric: {
         name,
         description,
@@ -172,7 +164,7 @@ export default {
         }
         commit('privateSet', {
           metricKey: name,
-          metric: { name, description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw }
+          metric: { description, unit, color, marker, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw }
         })
         const metric = state.metrics[name]
         // marker and color are stored here and deep inside MetricQWebView/MetricHandler/Graticule
@@ -199,10 +191,9 @@ export default {
     },
     updateColor ({ commit, state }, { metricKey, color }) {
       commit('privateSet', { metricKey, metric: { color } })
-      const name = state.metrics[metricKey].name
       const renderer = window.MetricQWebView
       if (renderer && renderer.graticule && renderer.graticule.data) {
-        const metricCache = renderer.graticule.data.getMetricCache(name)
+        const metricCache = renderer.graticule.data.getMetricCache(metricKey)
         if (metricCache) {
           metricCache.updateColor(color)
         }
@@ -211,10 +202,9 @@ export default {
     },
     updateMarker ({ commit, state }, { metricKey, marker }) {
       commit('privateSet', { metricKey, metric: { marker } })
-      const metric = state.metrics[metricKey]
       const renderer = window.MetricQWebView
       if (renderer && renderer.graticule && renderer.graticule.data) {
-        const metricCache = renderer.graticule.data.getMetricCache(metric.name)
+        const metricCache = renderer.graticule.data.getMetricCache(metricKey)
         if (metricCache) {
           for (const curSeries in metricCache.series) {
             // TODO: change this so that marker type ist being stored
@@ -226,9 +216,8 @@ export default {
         }
       }
     },
-    setError ({ commit, state }, { metricKey }) {
-      const metric = state.metrics[metricKey]
-      commit('privateSet', { metricKey: metricKey, metric: { name: metric.name, errorprone: true } })
+    setError ({ commit }, { metricKey }) {
+      commit('privateSet', { metricKey: metricKey, metric: { errorprone: true } })
     },
     updateDrawStateGlobally ({ state, commit }, newState) {
       for (const metricKey in state.metrics) {

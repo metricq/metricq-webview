@@ -23,7 +23,7 @@
       <tbody>
         <tr
           v-for="entry in entries"
-          :key="entry.name"
+          :key="entry.key"
           :class="entry.error? 'entry_error' : ''"
         >
           <td>
@@ -33,7 +33,7 @@
             />
           </td>
           <td class="text">
-            {{ entry.name }}
+            {{ entry.key }}
           </td>
           <td class="text">
             {{ entry.desc }}
@@ -90,11 +90,12 @@ export default {
     entries: {
       get () {
         const promises = []
-        for (const metricKey of this.$store.getters['metrics/getAllKeys']()) {
-          const metric = this.$store.getters['metrics/get'](metricKey)
-          promises.push(window.MetricQWebView.handler.metricQHistory.analyze(this.timestamp.start, this.timestamp.end).target(metricKey).run().then((data) => ({
+        for (const metric of this.$store.getters['metrics/getAll']()) {
+          if (!metric.draw) continue
+
+          promises.push(window.MetricQWebView.handler.metricQHistory.analyze(this.timestamp.start, this.timestamp.end).target(metric.key).run().then((data) => ({
             color: metric.color,
-            name: metric.htmlName,
+            key: metric.key,
             desc: metric.description,
             unit: metric.unit,
             min: Object.values(data)[0].minimum,
@@ -103,7 +104,7 @@ export default {
             agg: metric.pointsAgg,
             raw: metric.pointsRaw
           }), () => ({
-            name: metric.htmlName,
+            key: metric.key,
             desc: 'Fehler beim Laden der Metrik',
             unit: '-',
             min: 'NaN',
@@ -116,7 +117,7 @@ export default {
         }
         return Promise.all(promises)
       },
-      default: [{ name: 'Bitte warten!', desc: 'Tabelle lädt!' }]
+      default: [{ key: 'Bitte warten!', desc: 'Tabelle lädt!' }]
     }
   },
   methods: {

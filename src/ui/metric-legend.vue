@@ -15,7 +15,7 @@
           <span
             ref="metricName"
             class="metricText"
-          >&nbsp;{{ metric.htmlName }}</span>
+          >&nbsp;{{ metric.key }}</span>
         </td>
         <td v-if="!multiline || position==='bottom'">
           <span
@@ -107,12 +107,12 @@ export default {
   methods: {
     metricPopup () {
       this.$store.commit('metrics/setPopup', {
-        metricKey: this.$props.metric.name,
+        metricKey: this.$props.metric.key,
         popupState: !this.$props.metric.popup
       })
     },
     trashcanClicked () {
-      window.MetricQWebView.deleteMetric(this.$props.metric.name)
+      window.MetricQWebView.deleteMetric(this.$props.metric.key)
     },
     onResize () {
       const style = getComputedStyle(document.body)
@@ -120,7 +120,7 @@ export default {
       this.multiline = this.maxwidth > docMaxWidth
     },
     toggleDraw () {
-      window.MetricQWebView.toggleDraw(this.$props.metric.name)
+      window.MetricQWebView.toggleDraw(this.$props.metric.key)
     }
   }
 }

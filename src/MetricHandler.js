@@ -29,11 +29,11 @@ export class MetricHandler {
     const nonErrorProneMetrics = []
     const remainingMetrics = []
     for (const curMetric of this.store.getters['metrics/getAll']()) {
-      if (curMetric.name.length > 0) {
+      if (curMetric.key.length > 0) {
         if (curMetric.errorprone) {
-          remainingMetrics.push(curMetric.name)
+          remainingMetrics.push(curMetric.key)
         } else {
-          nonErrorProneMetrics.push(curMetric.name)
+          nonErrorProneMetrics.push(curMetric.key)
         }
       }
     }
@@ -135,7 +135,6 @@ export class MetricHandler {
 
   // TODO: move this function to DataCache, maybe?
   getAllMinMax () {
-    const referenceAttribute = 'minmax'
     if (this.renderer.graticule.yRangeOverride.type === 'manual') {
       return [this.renderer.graticule.yRangeOverride.min, this.renderer.graticule.yRangeOverride.max]
     }

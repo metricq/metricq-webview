@@ -138,7 +138,7 @@ class MetricQWebView {
 
   async changeMetricName (oldMetric, newName) {
     if (await this.addMetric(newName, undefined, oldMetric)) {
-      this.deleteMetric(oldMetric.name)
+      this.deleteMetric(oldMetric.key)
       if (this.graticule) {
         this.graticule.data.initializeCacheWithColor(newName, oldMetric.color)
       }
