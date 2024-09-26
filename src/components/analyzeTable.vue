@@ -3,9 +3,9 @@
     <div v-if="$asyncComputed.entries.success">
       {{ finishedLoading() }}
     </div>
-    <span class="time">Zeitraum: {{ startTimeFormatted }} - {{
-      endTimeFormatted
-    }}</span>
+    <span class="time">
+      Zeitraum: {{ startTimeFormatted }} - {{ endTimeFormatted }} ( {{ timeLenghtFormatted }} Sekunden )
+    </span>
     <table style="border-collapse: collapse">
       <thead>
         <tr>
@@ -81,6 +81,9 @@ export default {
     },
     endTimeFormatted () {
       return moment(this.timestamp.end).format()
+    },
+    timeLenghtFormatted () {
+      return moment(this.timestamp.end).diff(moment(this.timestamp.start), 'seconds')
     },
     ...mapState([
       'timestamp'
