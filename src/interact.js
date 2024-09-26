@@ -144,38 +144,41 @@ function uiInteractZoomWheel (evtObj) {
 function uiInteractLegend (evtObj) {
   const curPosOnCanvas = calculateActualMousePos(evtObj)
   const curPoint = window.MetricQWebView.graticule.getTimeValueAtPoint(curPosOnCanvas)
+
   if (!curPoint) {
     return
   }
+
   window.MetricQWebView.graticule.draw(false)
+
   const myCtx = window.MetricQWebView.graticule.ctx
   myCtx.fillStyle = 'rgba(0,0,0,0.8)'
   myCtx.fillRect(curPosOnCanvas[0] - 1, window.MetricQWebView.graticule.dimensions.y, 2, window.MetricQWebView.graticule.dimensions.height)
   myCtx.font = '14px ' + window.MetricQWebView.graticule.DEFAULT_FONT // actually it's sans-serif
+
   const metricsArray = []
   let maxNameWidth = 0
   let maxValueWidth = 0
   const allValuesAtTime = window.MetricQWebView.graticule.data.getAllValuesAtTime(curPoint[0])
+
   for (let i = 0; i < allValuesAtTime.length; ++i) {
     const newEntry = { metric: allValuesAtTime[i][2] }
+
     let curText = ''
-    let sortValue = 0
     if (allValuesAtTime[i][4] === 'raw') {
       curText = (Number(allValuesAtTime[i][1])).toFixed(3)
-      sortValue = Number(allValuesAtTime[i][1])
     } else {
       curText = ''
       const metricDrawState = store.getters['metrics/getMetricDrawState'](allValuesAtTime[i][3])
       if (metricDrawState.drawMin) {
-        curText += '▼' + (Number(allValuesAtTime[i][1])).toFixed(3)
+        curText += '▼ ' + (Number(allValuesAtTime[i][1])).toFixed(3) + ' | '
       }
       if (metricDrawState.drawAvg) {
-        curText += ' ⌀' + (Number(allValuesAtTime[i + 2][1])).toFixed(3)
+        curText += ' ⌀ ' + (Number(allValuesAtTime[i + 2][1])).toFixed(3)
       }
       if (metricDrawState.drawMax) {
-        curText += ' ▲' + (Number(allValuesAtTime[i + 1][1])).toFixed(3)
+        curText += ' | ▲ ' + (Number(allValuesAtTime[i + 1][1])).toFixed(3)
       }
-      sortValue = Number(allValuesAtTime[i + 2][1])
       i += 2
     }
 
@@ -183,30 +186,31 @@ function uiInteractLegend (evtObj) {
     newEntry.name = allValuesAtTime[i][3]
     newEntry.curTextWidth = myCtx.measureText(curText).width
     newEntry.nameWidth = myCtx.measureText(allValuesAtTime[i][3]).width
-    // sortValue is either avg or raw
-    newEntry.sortValue = sortValue
+
     if (newEntry.curTextWidth > maxValueWidth) {
       maxValueWidth = newEntry.curTextWidth
     }
+
     if (newEntry.nameWidth > maxNameWidth) {
       maxNameWidth = newEntry.nameWidth
     }
+
     metricsArray.push(newEntry)
   }
-  if (uiOptions.sortTooltip) {
-    metricsArray.sort((a, b) => { return b.sortValue - a.sortValue })
-  }
-  let posDate = new Date(curPoint[0])
-  let smallestDelta
-  for (let i = 0; i < allValuesAtTime.length; ++i) {
-    const curDelta = Math.abs(curPoint[0] - allValuesAtTime[i][0])
-    if (undefined === smallestDelta ||
-      curDelta < smallestDelta) {
-      smallestDelta = curDelta
-      posDate = new Date(allValuesAtTime[i][0])
+
+  let timeString = new Date(curPoint[0]).toLocaleString()
+
+  if (window.MetricQWebView.graticule.curTimeRange !== undefined) {
+    const deltaTime = window.MetricQWebView.graticule.curTimeRange[1] - window.MetricQWebView.graticule.curTimeRange[0]
+    if (deltaTime < 2500) {
+      timeString += '.' + ('00' + curPoint[0] % 1000).slice(-3)
+    } else if (deltaTime < 10000) {
+      timeString += '.' + ('0' + Math.trunc(curPoint[0] % 1000 / 10)).slice(-2)
+    } else if (deltaTime < 30000) {
+      timeString += '.' + Math.trunc(curPoint[0] % 1000 / 100)
     }
   }
-  const timeString = posDate.toLocaleString()
+
   // offsetMid: offset from center line
   // offsetTop: offset from top of canvas
   // verticalDiff: y coordinate difference between lines

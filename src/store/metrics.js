@@ -19,10 +19,20 @@ export default {
       }
     },
     getAllKeys: (state) => () => {
-      return Object.keys(state.metrics)
+      const metrics = Object.keys(state.metrics)
+      return metrics.sort((a, b) => {
+        if (a > b) return 1
+        if (a < b) return -1
+        return 0
+      })
     },
     getAll: (state) => () => {
-      return Object.values(state.metrics)
+      const metrics = Object.values(state.metrics)
+      return metrics.sort((a, b) => {
+        if (a.key > b.key) return 1
+        if (a.key < b.key) return -1
+        return 0
+      })
     },
     get: (state) => (metricKey) => {
       return state.metrics[metricKey]
