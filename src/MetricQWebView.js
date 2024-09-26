@@ -33,11 +33,9 @@ class MetricQWebView {
     if (paramMetricNamesArr.length > 0) {
       this.handler.doRequest(400)
     }
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (this.graticule) {
-          this.graticule.canvasResize(this.margins.canvas)
-        }
+    const resizeObserver = new ResizeObserver(() => {
+      if (this.graticule) {
+        this.graticule.canvasResize(this.margins.canvas)
       }
     })
     resizeObserver.observe(document.getElementById('webview_container'))
