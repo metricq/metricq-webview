@@ -216,13 +216,9 @@ function uiInteractLegend (evtObj) {
   const verticalDiff = 20
   const borderPadding = 10
 
-  const distanceToRightEdge = getDistanceToRightEdge(curPosOnCanvas[0], offsetMid, borderPadding, window.MetricQWebView.graticule.canvasSize[0])
+  const distanceToRightEdge = window.MetricQWebView.graticule.dimensions.width - curPosOnCanvas[0] - offsetMid - borderPadding
   drawHoverDate(myCtx, timeString, curPosOnCanvas[0], maxNameWidth, offsetTop, offsetMid, verticalDiff, distanceToRightEdge)
   drawHoverText(myCtx, metricsArray, curPosOnCanvas[0], maxValueWidth, maxNameWidth, offsetTop, offsetMid, verticalDiff, borderPadding, distanceToRightEdge)
-}
-
-function getDistanceToRightEdge (curXPosOnCanvas, offsetMid, borderPadding, rightEdge) {
-  return rightEdge - curXPosOnCanvas - offsetMid - borderPadding
 }
 
 function drawHoverDate (myCtx, timeString, curXPosOnCanvas, maxNameWidth, offsetTop, offsetMid, verticalDiff, distanceToRightEdge) {

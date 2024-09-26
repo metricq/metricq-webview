@@ -5,7 +5,6 @@ export class Graticule {
   constructor (paramMetricQHistoryReference, paramEle, ctx) {
     this.ele = paramEle
     this.ctx = ctx
-    this.canvasSize = [0, 0]
     this.dimensions = {
       x: 0,
       y: 0,
@@ -970,7 +969,6 @@ export class Graticule {
    *   of symbol as a marker
    */
   generateOffsiteDot (styleOptions) {
-    const BODY = document.getElementsByTagName('body')[0]
     const canvas = document.createElement('canvas')
     const ctxDimensions = [styleOptions.pointWidth,
       styleOptions.pointWidth]
