@@ -23,7 +23,16 @@ export class MetricTimestamp {
     } else {
       const stringToUnixMap = {
         now: moment(),
-        startday: moment().startOf('day')
+        starthour: moment().startOf('hour'),
+        endhour: moment().endOf('hour'),
+        startday: moment().startOf('day'),
+        endday: moment().endOf('day'),
+        startweek: moment().startOf('week'),
+        endweek: moment().endOf('week'),
+        startmonth: moment().startOf('month'),
+        endmonth: moment().endOf('month'),
+        startyear: moment().startOf('year'),
+        endyear: moment().endOf('year')
       }
       const timeArray = ['y', 'M', 'd', 'h', 'm', 's']
       const splitTime = String(this.timeValue).split('-')

@@ -24,7 +24,17 @@ const labelMap = {
   'Letzte 6 Monate': ['now-6M', 'now'],
   'Letztes Jahr': ['now-1y', 'now'],
   'Letzte 3 Jahre': ['now-3y', 'now'],
-  Heute: ['startday', 'now']
+  Heute: ['startday', 'endday'],
+  'Heute bis jetzt': ['startday', 'now'],
+  'Diese Stunde': ['starthour', 'endhour'],
+  'Diese Woche': ['startweek', 'endweek'],
+  'Diese Woche bis jetzt': ['startweek', 'now'],
+  'Dieser Monat': ['startmonth', 'endmonth'],
+  'Dieser Monat bis jetzt': ['startmonth', 'now'],
+  'Vorheriger Monat ': ['startmonth-1M', 'endmonth-1M'],
+  'Dieses Jahr': ['startyear', 'endyear'],
+  'Dieses Jahr bis jetzt': ['startyear', 'now'],
+  'Vorheriges Jahr': ['startyear-1y', 'endyear-1y']
 }
 
 export default {
@@ -94,14 +104,18 @@ export default {
           window.MetricQWebView.handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
         }
         window.MetricQWebView.reload()
-        this.startDate = moment(window.MetricQWebView.handler.startTime.getUnix())
-        this.endDate = moment(window.MetricQWebView.handler.stopTime.getUnix())
+        $('#date_range').data('daterangepicker').setStartDate(moment(window.MetricQWebView.handler.startTime.getUnix()))
+        $('#date_range').data('daterangepicker').setEndDate(moment(window.MetricQWebView.handler.stopTime.getUnix()))
       })
     })
   }
 }
 </script>
 
-<style scoped>
+<style>
+.ranges {
+    height: 33vh;
+    overflow-y: scroll;
+}
 
 </style>
