@@ -3,64 +3,71 @@
     <div v-if="$asyncComputed.entries.success">
       {{ finishedLoading() }}
     </div>
-    <span class="time">
-      Zeitraum: {{ startTimeFormatted }} - {{ endTimeFormatted }} ( {{ timeLenghtFormatted }} Sekunden )
-    </span>
-    <table style="border-collapse: collapse">
-      <thead>
-        <tr>
-          <th />
-          <th>Metrikname</th>
-          <th>Beschreibung</th>
-          <th>Min</th>
-          <th>Max</th>
-          <th>Avg</th>
-          <th>Einheit</th>
-          <th>Aggregate</th>
-          <th>Raw</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
+    <b-table-simple
+      small
+      hover
+      striped
+      bordered
+      caption-top
+    >
+      <caption>
+        Zeitraum von {{ startTimeFormatted }} bis {{ endTimeFormatted }} ( {{ timeLenghtFormatted }} Sekunden )
+      </caption>
+      <b-thead>
+        <b-tr>
+          <b-th />
+          <b-th>Metrik</b-th>
+          <b-th>Beschreibung</b-th>
+          <b-th>Min</b-th>
+          <b-th>Avg</b-th>
+          <b-th>Max</b-th>
+          <b-th>Einheit</b-th>
+          <b-th>Datenpunkte</b-th>
+        </b-tr>
+      </b-thead>
+      <b-tbody>
+        <b-tr
           v-for="entry in entries"
           :key="entry.key"
           :class="entry.error? 'entry_error' : ''"
         >
-          <td>
+          <b-td class="color">
             <div
               class="box"
               :style="{ backgroundColor: entry.color }"
             />
-          </td>
-          <td class="text">
+          </b-td>
+          <b-td class="text">
             {{ entry.key }}
-          </td>
-          <td class="text">
+          </b-td>
+          <b-td class="text">
             {{ entry.desc }}
-          </td>
-          <td class="number">
+          </b-td>
+          <b-td class="number">
             {{ entry.min | withDecimalPlaces(3) }}
-          </td>
-          <td class="number">
-            {{ entry.max | withDecimalPlaces(3) }}
-          </td>
-          <td class="number">
+          </b-td>
+          <b-td class="number">
             {{ entry.avg | withDecimalPlaces(3) }}
-          </td>
-          <td class="unit">
+          </b-td>
+          <b-td class="number">
+            {{ entry.max | withDecimalPlaces(3) }}
+          </b-td>
+          <b-td class="unit">
             {{ entry.unit }}
-          </td>
-          <td class="number">
-            <template v-if="entry.agg !== null">
-              {{ entry.agg | withDecimalPlaces(0) }}
-            </template>
-          </td>
-          <td class="number">
-            {{ entry.raw | withDecimalPlaces(0) }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </b-td>
+          <b-td
+            class="number"
+          >
+            <span
+              v-b-tooltip.hover.noninteractive
+              :title="`in ${entry.agg} Aggregates`"
+            >
+              {{ entry.raw | withDecimalPlaces(0) }}
+            </span>
+          </b-td>
+        </b-tr>
+      </b-tbody>
+    </b-table-simple>
   </div>
 </template>
 
@@ -77,10 +84,10 @@ export default {
   },
   computed: {
     startTimeFormatted () {
-      return moment(this.timestamp.start).format()
+      return moment(this.timestamp.start).format('DD.MM.YYYY, HH:mm:ss')
     },
     endTimeFormatted () {
-      return moment(this.timestamp.end).format()
+      return moment(this.timestamp.end).format('DD.MM.YYYY, HH:mm:ss')
     },
     timeLenghtFormatted () {
       return moment(this.timestamp.end).diff(moment(this.timestamp.start), 'seconds')
@@ -108,13 +115,14 @@ export default {
             raw: metric.pointsRaw
           }), () => ({
             key: metric.key,
+            color: metric.color,
             desc: 'Fehler beim Laden der Metrik',
             unit: '-',
             min: 'NaN',
             max: 'NaN',
             avg: 'NaN',
-            agg: 'NaN',
-            raw: 'NaN',
+            agg: null,
+            raw: '-',
             error: true
           })))
         }
@@ -133,57 +141,22 @@ export default {
 
 <style scoped>
 
-table, th, tr, td {
-  border: 1px solid black;
-}
-
-table {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-th, td {
-  padding-left: 10px;
-  padding-right: 10px;
-}
-
-.text {
-  text-align: left;
-}
-
 .entry_error .text {
-  text-align: center;
   color: red;
 }
 
-.number {
-  text-align: right;
-}
-
-.entry_error .number {
-  text-align: center;
+.entry_error {
   color: grey;
 }
 
-.unit {
+.color {
   text-align: center;
-}
-
-.entry_error .unit {
-  color: grey;
-}
-
-.analyzeTable {
-  text-align: center;
-}
-
-.time {
-  display: inline-block;
 }
 
 .box {
   display: inline-block;
-  width: 15px;
-  height: 15px;
+  vertical-align: baseline;
+  width: 1.5ex;
+  height: 1.5ex;
 }
 </style>
