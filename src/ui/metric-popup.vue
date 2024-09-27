@@ -42,28 +42,6 @@
           </div>
           <div class="form-group row">
             <label
-              class="col-sm-2 col-form-label"
-              for="select_marker"
-            >Symbol</label>
-            <div class="col-sm-10">
-              <select
-                id="select_marker"
-                class="form-control custom-select popup_legend_select"
-                size="1"
-                :value="metric.marker"
-                @change="changeMarker"
-              >
-                <option
-                  v-for="symbol in markerSymbols"
-                  :key="symbol"
-                >
-                  {{ symbol }}
-                </option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group row">
-            <label
               class="col-sm-2"
             >Anzeige</label>
             <div class="col-sm-3">
@@ -119,7 +97,6 @@
 </template>
 
 <script>
-import { markerSymbols } from '../metric.js'
 import PopupHeader from './popup-header.vue'
 import { veil } from './veil.js'
 import { Colorchooser } from '../colorchooser.js'
@@ -135,19 +112,13 @@ export default {
   },
   data () {
     return {
-      markerSymbols: markerSymbols,
       popupTitle: 'Metrik-Eigenschaften',
       newMetric: Object.assign({}, this.metric)
     }
   },
   computed: {
-    isEmpty: {
-      get () {
-        return this.metric.key === ''
-      },
-      set (newValue) {
-        // do nothing
-      }
+    isEmpty () {
+      return this.metric.key === ''
     },
     metricMin: {
       get () {
@@ -215,9 +186,6 @@ export default {
               colorEle[0].style.color = paramMyMetric.color
             }
           }
-          if (paramMyNewMetric.marker !== paramMyMetric.marker) {
-            this.$store.dispatch('metrics/updateMarker', { metricKey, marker: paramMyMetric.marker })
-          }
           // don't do a complete repaint
           // renderMetrics();
         }
@@ -239,9 +207,6 @@ export default {
       } else {
         this.$store.dispatch('metrics/checkGlobalDrawState')
       }
-    },
-    changeMarker (evt) {
-      this.$store.dispatch('metrics/updateMarker', { metricKey: this.metric.key, marker: evt.target.value })
     },
     trashcanClicked (evt) {
       veil.destroy(evt)
@@ -280,9 +245,6 @@ export default {
 </script>
 
 <style scoped>
-.metric_popup_div {
-}
-
 .popup_trashcan {
   margin: 2px;
 }

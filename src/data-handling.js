@@ -1,5 +1,3 @@
-import { crc32 } from '../lib/pseudo-crc32.js'
-import { hslToRgb } from '../lib/color-conversion.js'
 import moment from 'moment'
 import store from './store/'
 
@@ -45,7 +43,7 @@ export class DataCache {
       relatedMetric.series[metricAggregate].clear()
       return relatedMetric.series[metricAggregate]
     } else {
-      const newSeries = new Series(metricAggregate, relatedMetric.defaultSeriesStyling(metricAggregate))
+      const newSeries = new Series(metricAggregate, relatedMetric.color)
       relatedMetric.series[metricAggregate] = newSeries
       return newSeries
     }
@@ -199,10 +197,11 @@ export class DataCache {
   distinctUnits () {
     const units = []
     for (let i = 0; i < this.metrics.length; ++i) {
-      if (this.metrics[i].meta && this.metrics[i].meta.unit &&
+      if (this.metrics[i].metadata &&
+          this.metrics[i].metadata.unit &&
           store.getters['metrics/getMetricDrawState'](this.metrics[i].name).draw) {
-        if (!units.includes(this.metrics[i].meta.unit)) {
-          units.push(this.metrics[i].meta.unit)
+        if (!units.includes(this.metrics[i].metadata.unit)) {
+          units.push(this.metrics[i].metadata.unit)
         }
       }
     }
@@ -229,70 +228,45 @@ export class DataCache {
 class MetricCache {
   constructor (paramMetricQReference, paramMetricName) {
     this.name = paramMetricName
-    this.color = determineColorForMetric(paramMetricName)
+    this.color = store.getters['metrics/getColor'](this.name)
     this.series = {
       min: undefined,
       max: undefined,
       avg: undefined,
       raw: undefined
     }
-    this.band = undefined
+    this.band = new Band(this.color)
     this.allTime = {}
-    this.meta = undefined
+    this.metadata = undefined
     this.metricQHistory = paramMetricQReference
     this.fetchAllTimeMinMax()
     this.fetchMetadata()
   }
 
   clearNonRawAggregates () {
-    for (const curAggregate in this.series) {
-      if (curAggregate !== 'raw' && this.series[curAggregate]) {
-        this.series[curAggregate].clear()
-      }
-    }
-    if (this.band) {
-      this.band.clear()
-    }
+    this.series.min = undefined
+    this.series.max = undefined
+    this.series.avg = undefined
+    this.band.clear()
   }
 
   clearRawAggregate () {
-    if (this.series.raw) {
-      this.series.raw = undefined
-    }
+    this.series.raw = undefined
   }
 
   generateBand () {
-    if (this.band) {
-      this.band.clear()
-    } else {
-      this.band = new Band(this.defaultBandStyling())
-    }
     if (!this.series.min || !this.series.max) {
       return undefined
     }
-    const minSeries = this.series.min
-    const maxSeries = this.series.max
-    const seriesLength = minSeries.points.length
-    if (minSeries.length !== maxSeries.length) {
+
+    if (this.series.min.length !== this.series.max.length) {
       throw new Error('Serienlängen nicht identisch!')
     }
-    if (seriesLength < 2) {
-      return this.band
+
+    if (this.series.min.points.length >= 2) {
+      this.band.populate(this.series.min, this.series.max)
     }
-    for (let i = 0; i < seriesLength; ++i) {
-      this.band.addPoint(minSeries.points[i].clone())
-    }
-    const lastMinPoint = minSeries.points[seriesLength - 1].clone()
-    const interval = lastMinPoint.time - minSeries.points[seriesLength - 2].time
-    lastMinPoint.time += interval
-    this.band.addPoint(lastMinPoint)
-    this.band.setSwitchOverIndex()
-    const lastMaxPoint = maxSeries.points[seriesLength - 1].clone()
-    lastMaxPoint.time += interval
-    this.band.addPoint(lastMaxPoint)
-    for (let i = seriesLength - 1; i >= 0; --i) {
-      this.band.addPoint(maxSeries.points[i].clone())
-    }
+
     return this.band
   }
 
@@ -309,8 +283,8 @@ class MetricCache {
     }
   }
 
-  fetchMetadata () {
-    this.metricQHistory.metadata(this.name).then((metadataObj) => { this.meta = metadataObj })
+  async fetchMetadata () {
+    this.metadata = await this.metricQHistory.metadata(this.name)
   }
 
   fetchAllTimeMinMax () {
@@ -339,47 +313,32 @@ class MetricCache {
     return [allMin, allMax]
   }
 
-  defaultBandStyling () {
-    const options = matchStylingOptions('band')
-    if (options.color === 'default') {
-      options.color = this.color
-    }
-    return options
-  }
-
-  defaultSeriesStyling (aggregateName) {
-    const options = matchStylingOptions(aggregateName)
-    if (options.color === 'default') {
-      options.color = this.color
-    }
-    return options
-  }
-
   updateColor (color) {
     this.color = color
-    this.band.styleOptions.color = color
-    for (const key in this.series) {
-      if (this.series[key]) {
-        this.series[key].styleOptions.color = color
+    this.band.setColor(color)
+    for (const serie of Object.values(this.series)) {
+      if (serie) {
+        serie.setColor(color)
       }
     }
   }
 }
 
 class Band {
-  constructor (paramStyleOptions) {
+  constructor (color) {
     this.points = []
-    this.styleOptions = paramStyleOptions
+    this.styleOptions = {
+      skip: false,
+      connect: 'next',
+      color: color,
+      alpha: 0.3
+    }
     this.switchOverIndex = 0
   }
 
   addPoint (newPoint) {
     this.points.push(newPoint)
     return newPoint
-  }
-
-  setSwitchOverIndex () {
-    this.switchOverIndex = this.points.length
   }
 
   getTimeRange () {
@@ -410,13 +369,44 @@ class Band {
     delete this.points
     this.points = []
   }
+
+  setColor (color) {
+    this.styleOptions.color = color
+  }
+
+  populate (minSeries, maxSeries) {
+    this.clear()
+
+    const seriesLength = minSeries.points.length
+
+    for (let i = 0; i < seriesLength; ++i) {
+      this.addPoint(minSeries.points[i].clone())
+    }
+
+    const lastMinPoint = minSeries.points[seriesLength - 1].clone()
+
+    const interval = lastMinPoint.time - minSeries.points[seriesLength - 2].time
+    lastMinPoint.time += interval
+
+    this.addPoint(lastMinPoint)
+    this.switchOverIndex = this.points.length
+
+    const lastMaxPoint = maxSeries.points[seriesLength - 1].clone()
+    lastMaxPoint.time += interval
+
+    this.addPoint(lastMaxPoint)
+
+    for (let i = seriesLength - 1; i >= 0; --i) {
+      this.addPoint(maxSeries.points[i].clone())
+    }
+  }
 }
 
 class Series {
-  constructor (paramAggregate, paramStyleOptions) {
+  constructor (aggregate, color) {
     this.points = []
-    this.aggregate = paramAggregate
-    this.styleOptions = paramStyleOptions
+    this.aggregate = aggregate
+    this.styleOptions = { ...matchStylingOptions(aggregate), color }
     this.allTime = undefined
   }
 
@@ -452,7 +442,9 @@ class Series {
     }
     const closestPointIndex = closestIndex
     if (this.points[closestPointIndex].time !== timeAt &&
-      this.styleOptions && this.styleOptions.connect && this.styleOptions.connect !== 'none') {
+        this.styleOptions &&
+        this.styleOptions.connect &&
+        this.styleOptions.connect !== 'none') {
       let betterIndex = closestPointIndex
       if (this.styleOptions.connect === 'next') {
         if (this.points[betterIndex].time > timeAt) {
@@ -571,6 +563,10 @@ class Series {
     }
     return [min, max]
   }
+
+  setColor (color) {
+    this.styleOptions.color = color
+  }
 }
 
 class Point {
@@ -587,49 +583,31 @@ class Point {
 
 const stylingOptions = {
   avg: {
-    title: 'AVG Series',
     skip: false,
-    color: 'default',
-    connect: 'next',
     width: 8,
     lineWidth: 2,
     dots: false,
     alpha: 0.8
   },
   min: {
-    title: 'Min Series',
     skip: true,
-    color: 'default',
-    connect: 'next',
     width: 2,
     lineWidth: 2,
     dots: false,
     alpha: 1
   },
   max: {
-    title: 'Max Series',
     skip: true,
-    color: 'default',
-    connect: 'next',
     width: 2,
     lineWidth: 2,
     dots: false,
     alpha: 1
   },
   raw: {
-    title: 'Raw Series',
     skip: false,
-    color: 'default',
     connect: 'none',
     width: 8,
     dots: true
-  },
-  band: {
-    title: 'All Bands',
-    skip: false,
-    connect: 'next',
-    color: 'default',
-    alpha: 0.3
   }
 }
 
@@ -637,10 +615,5 @@ function matchStylingOptions (styleType) {
   if (typeof styleType !== 'string') {
     return undefined
   }
-  return JSON.parse(JSON.stringify(stylingOptions[styleType]))
-}
-
-function determineColorForMetric (metricBaseName) {
-  const rgb = hslToRgb((crc32(metricBaseName) >> 24 & 255) / 255.00, 1, 0.46)
-  return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')'
+  return { ...stylingOptions[styleType] }
 }

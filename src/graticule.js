@@ -118,7 +118,7 @@ export class Graticule {
     //    perfect multiplier, which I believe is a sensible fallback in case of
     //    corner cases)
     if ((curRangeMultiplier * 0.50) <= moreBeautifulMultiplier &&
-      (curRangeMultiplier * 1.50) >= moreBeautifulMultiplier) {
+        (curRangeMultiplier * 1.50) >= moreBeautifulMultiplier) {
       curRangeMultiplier = moreBeautifulMultiplier
     } else {
       curRangeMultiplier = Math.floor(curRangeMultiplier)
@@ -307,7 +307,7 @@ export class Graticule {
     paramYear = parseInt(paramYear)
 
     if ((paramYear % 400) === 0 ||
-       ((paramYear % 4) === 0 &&
+        ((paramYear % 4) === 0 &&
         (paramYear % 100) !== 0)) {
       return true
     }
@@ -369,7 +369,7 @@ export class Graticule {
     for (let i = 0; i < xAxisSteps.length; ++i) {
       const x = Math.round(dimensions.x + ((xAxisSteps[i].timestamp - timeRange[0]) / timePerPixel))
       if (x >= dimensions.x &&
-        x <= (dimensions.x + dimensions.width)) {
+          x <= (dimensions.x + dimensions.width)) {
         xPositions.push(x)
         ctx.fillRect(x, dimensions.y, 2, dimensions.height)
       } else {
@@ -434,11 +434,11 @@ export class Graticule {
   getTimeValueAtPoint (positionArr) {
     const relationalPos = [positionArr[0] - this.dimensions.x, positionArr[1] - this.dimensions.y]
     if (undefined !== this.curTimeRange &&
-      undefined !== this.curValueRange &&
-      relationalPos[0] >= 0 &&
-      relationalPos[0] <= this.dimensions.width &&
-      relationalPos[1] >= 0 &&
-      relationalPos[1] <= this.dimensions.height) {
+        undefined !== this.curValueRange &&
+        relationalPos[0] >= 0 &&
+        relationalPos[0] <= this.dimensions.width &&
+        relationalPos[1] >= 0 &&
+        relationalPos[1] <= this.dimensions.height) {
       return [Math.round((relationalPos[0] * this.curTimePerPixel) + this.curTimeRange[0]),
         ((this.dimensions.height - relationalPos[1]) * this.curValuesPerPixel) + this.curValueRange[0]
       ]
@@ -479,9 +479,9 @@ export class Graticule {
 
   setYRangeOverride (paramTypeStr, paramValueStart, paramValueEnd) {
     if (paramTypeStr !== 'local' &&
-      paramTypeStr !== 'global' &&
-      paramTypeStr !== 'manual' &&
-      undefined !== paramTypeStr) {
+        paramTypeStr !== 'global' &&
+        paramTypeStr !== 'manual' &&
+        undefined !== paramTypeStr) {
       throw new Error(`yRange Override must be either local, global or manual "${paramTypeStr}" is invalid.`)
     }
     if (undefined !== paramTypeStr) this.yRangeOverride.type = paramTypeStr
@@ -550,7 +550,7 @@ export class Graticule {
     if (!this.data.hasSeriesToPlot() && !this.data.hasBandToPlot()) {
       console.log('No series to plot')
     } else {
-      this.drawBands(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
+      this.drawBands(ctx, curTimePerPixel, curValuesPerPixel, graticuleDimensions)
       this.drawSeries(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
       ctx.restore()
     }
@@ -756,64 +756,68 @@ export class Graticule {
     return styleOptions
   }
 
-  drawBands (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
-    for (let i = 0; i < this.data.metrics.length; ++i) {
-      if (!store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).draw) continue
+  drawBands (ctx, timePerPixel, valuesPerPixel, graticuleDimensions) {
+    for (const metric of this.data.metrics) {
+      const drawState = store.getters['metrics/getMetricDrawState'](metric.name)
+      if (!drawState.draw) continue
 
-      if (store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).drawMin && store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).drawMax) {
-        const curBand = this.data.metrics[i].band
-        if (curBand) {
-          const styleOptions = this.parseStyleOptions(curBand.styleOptions, ctx)
-          if (styleOptions.skip || curBand.points.length === 0) {
-            this.resetCtx(ctx)
-            continue
-          }
+      if (drawState.drawMin && drawState.drawMax) {
+        this.drawBand(ctx, timePerPixel, valuesPerPixel, graticuleDimensions, metric)
+      }
+    }
 
-          const switchOverIndex = curBand.switchOverIndex
-          for (let j = 0, x, y, previousX, previousY; j < curBand.points.length; ++j) {
-            x = graticuleDimensions.x + Math.round((curBand.points[j].time - timeRange[0]) / timePerPixel)
-            y = graticuleDimensions.y + (graticuleDimensions.height - Math.round((curBand.points[j].value - valueRange[0]) / valuesPerPixel))
-            if (j === 0) {
-              ctx.beginPath()
-              ctx.moveTo(x, y)
-            } else {
-              // connect direct
-              if (styleOptions.connect === 'direct') {
+    this.resetCtx(ctx)
+  }
+
+  drawBand (ctx, timePerPixel, valuesPerPixel, graticuleDimensions, metric) {
+    const band = metric.band
+    if (band) {
+      const styleOptions = this.parseStyleOptions(band.styleOptions, ctx)
+      if (styleOptions.skip || band.points.length === 0) {
+        return
+      }
+
+      for (let j = 0, previousX, previousY; j < band.points.length; ++j) {
+        const x = graticuleDimensions.x + Math.round((band.points[j].time - this.curTimeRange[0]) / timePerPixel)
+        const y = graticuleDimensions.y + (graticuleDimensions.height - Math.round((band.points[j].value - this.curValueRange[0]) / valuesPerPixel))
+        if (j === 0) {
+          ctx.beginPath()
+          ctx.moveTo(x, y)
+        } else {
+          // connect direct
+          if (styleOptions.connect === 'direct') {
+            ctx.lineTo(x, y)
+          } else {
+            if (j < band.switchOverIndex) {
+              // connect last
+              if (styleOptions.connect === 'last') {
+                ctx.lineTo(previousX, y)
                 ctx.lineTo(x, y)
-              } else {
-                if (j < switchOverIndex) {
-                  // connect last
-                  if (styleOptions.connect === 'last') {
-                    ctx.lineTo(previousX, y)
-                    ctx.lineTo(x, y)
-                    // connect next
-                  } else if (styleOptions.connect === 'next') {
-                    ctx.lineTo(x, previousY)
-                    ctx.lineTo(x, y)
-                  }
-                } else if (j === switchOverIndex) {
-                  ctx.lineTo(x, y)
-                } else {
-                  // connect last
-                  if (styleOptions.connect === 'last') {
-                    ctx.lineTo(x, previousY)
-                    ctx.lineTo(x, y)
-                    // connext next
-                  } else if (styleOptions.connect === 'next') {
-                    ctx.lineTo(previousX, y)
-                    ctx.lineTo(x, y)
-                  }
-                }
+                // connect next
+              } else if (styleOptions.connect === 'next') {
+                ctx.lineTo(x, previousY)
+                ctx.lineTo(x, y)
+              }
+            } else if (j === band.switchOverIndex) {
+              ctx.lineTo(x, y)
+            } else {
+              // connect last
+              if (styleOptions.connect === 'last') {
+                ctx.lineTo(x, previousY)
+                ctx.lineTo(x, y)
+                // connext next
+              } else if (styleOptions.connect === 'next') {
+                ctx.lineTo(previousX, y)
+                ctx.lineTo(x, y)
               }
             }
-            previousX = x
-            previousY = y
           }
-          ctx.closePath()
-          ctx.fill()
-          this.resetCtx(ctx)
         }
+        previousX = x
+        previousY = y
       }
+      ctx.closePath()
+      ctx.fill()
     }
   }
 
