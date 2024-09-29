@@ -149,6 +149,8 @@ function uiInteractLegend (evtObj) {
     return
   }
 
+  const timeAt = curPoint[0]
+
   window.MetricQWebView.graticule.draw(false)
 
   const myCtx = window.MetricQWebView.graticule.ctx
@@ -159,33 +161,47 @@ function uiInteractLegend (evtObj) {
   const metricsArray = []
   let maxNameWidth = 0
   let maxValueWidth = 0
-  const allValuesAtTime = window.MetricQWebView.graticule.data.getAllValuesAtTime(curPoint[0])
 
-  for (let i = 0; i < allValuesAtTime.length; ++i) {
-    const newEntry = { metric: allValuesAtTime[i][2] }
+  for (const metric of Object.values(window.MetricQWebView.graticule.data.metrics)) {
+    const metricDrawState = store.getters['metrics/getMetricDrawState'](metric.name)
 
-    let curText = ''
-    if (allValuesAtTime[i][4] === 'raw') {
-      curText = (Number(allValuesAtTime[i][1])).toFixed(3)
-    } else {
+    if (!metricDrawState.draw) continue
+
+    let curText
+    if (metric.series.raw !== undefined) {
+      const value = metric.series.raw.getValueAtTimeAndIndex(timeAt)
+      if (value === undefined) continue
+
+      curText = (Number(value[1])).toFixed(3)
+    } else if (metric.series.min !== undefined &&
+               metric.series.max !== undefined &&
+               metric.series.avg !== undefined) {
+      const min = metric.series.min.getValueAtTimeAndIndex(timeAt)
+      const max = metric.series.max.getValueAtTimeAndIndex(timeAt)
+      const avg = metric.series.avg.getValueAtTimeAndIndex(timeAt)
+      if (min === undefined || max === undefined || avg === undefined) continue
+
       curText = ''
-      const metricDrawState = store.getters['metrics/getMetricDrawState'](allValuesAtTime[i][3])
       if (metricDrawState.drawMin) {
-        curText += '▼ ' + (Number(allValuesAtTime[i][1])).toFixed(3) + ' | '
+        curText += '▼ ' + (Number(min[1])).toFixed(3) + ' | '
       }
       if (metricDrawState.drawAvg) {
-        curText += ' ⌀ ' + (Number(allValuesAtTime[i + 2][1])).toFixed(3)
+        curText += ' ⌀ ' + (Number(avg[1])).toFixed(3)
       }
       if (metricDrawState.drawMax) {
-        curText += ' | ▲ ' + (Number(allValuesAtTime[i + 1][1])).toFixed(3)
+        curText += ' | ▲ ' + (Number(max[1])).toFixed(3)
       }
-      i += 2
+    } else {
+      continue
     }
 
-    newEntry.curText = curText
-    newEntry.name = allValuesAtTime[i][3]
-    newEntry.curTextWidth = myCtx.measureText(curText).width
-    newEntry.nameWidth = myCtx.measureText(allValuesAtTime[i][3]).width
+    const newEntry = {
+      metric: metric,
+      curText: curText,
+      name: metric.name,
+      curTextWidth: myCtx.measureText(curText).width,
+      nameWidth: myCtx.measureText(metric.name).width
+    }
 
     if (newEntry.curTextWidth > maxValueWidth) {
       maxValueWidth = newEntry.curTextWidth
@@ -249,7 +265,7 @@ function drawHoverText (myCtx, metricsArray, curXPosOnCanvas, maxValueWidth, max
   }
   for (let i = 0; i < metricsArray.length; ++i) {
     const y = offsetTop + i * verticalDiff
-    myCtx.fillStyle = metricsArray[i].metric.styleOptions.color
+    myCtx.fillStyle = metricsArray[i].metric.color
     myCtx.globalAlpha = 0.4
     myCtx.fillRect(curXPosOnCanvas + offsetMid - offsetRight - borderPadding, y, maxValueWidth + maxNameWidth + (offsetMid + borderPadding) * 2, 20)
     myCtx.fillStyle = '#000000'

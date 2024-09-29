@@ -161,29 +161,6 @@ export class DataCache {
     return false
   }
 
-  getAllValuesAtTime (timeAt) {
-    const valueArr = []
-    for (let i = 0; i < this.metrics.length; ++i) {
-      for (const curAggregate in this.metrics[i].series) {
-        if (this.metrics[i].series[curAggregate] &&
-            this.metrics[i].series[curAggregate].points.length > 0 &&
-            store.getters['metrics/getMetricDrawState'](this.metrics[i].name).draw) {
-          const result = this.metrics[i].series[curAggregate].getValueAtTimeAndIndex(timeAt)
-          if (result) {
-            valueArr.push([
-              result[0],
-              result[1],
-              this.metrics[i].series[curAggregate],
-              this.metrics[i].name,
-              curAggregate
-            ])
-          }
-        }
-      }
-    }
-    return valueArr
-  }
-
   deleteMetric (metricName) {
     for (let i = 0; i < this.metrics.length; ++i) {
       if (metricName === this.metrics[i].name) {
@@ -441,43 +418,20 @@ class Series {
       }
     }
     const closestPointIndex = closestIndex
-    if (this.points[closestPointIndex].time !== timeAt &&
-        this.styleOptions &&
-        this.styleOptions.connect &&
-        this.styleOptions.connect !== 'none') {
-      let betterIndex = closestPointIndex
-      if (this.styleOptions.connect === 'next') {
-        if (this.points[betterIndex].time > timeAt) {
-          --betterIndex
-        }
-      } else if (this.styleOptions.connect === 'last') {
-        if (this.points[betterIndex].time < timeAt) {
-          ++betterIndex
-        }
-      } else if (this.styleOptions.connect === 'direct') { // linear-interpolation
-        let firstPoint, secondPoint
-        if ((timeAt < this.points[betterIndex].time && betterIndex < 0) || (betterIndex + 1) >= this.points.length) {
-          firstPoint = this.points[betterIndex - 1]
-          secondPoint = this.points[betterIndex]
-        } else {
-          firstPoint = this.points[betterIndex]
-          secondPoint = this.points[betterIndex + 1]
-        }
-        const timeDelta = secondPoint.time - firstPoint.time
-        const valueDelta = secondPoint.value - firstPoint.value
-        return [timeAt, firstPoint.value + valueDelta * ((timeAt - firstPoint.time) / timeDelta), betterIndex]
-      }
-      if (betterIndex < 0) {
-        betterIndex = 0
-        return undefined
-      } else if (betterIndex >= this.points.length) {
-        betterIndex = this.points.length - 1
-        return undefined
-      }
-      return [this.points[betterIndex].time, this.points[betterIndex].value, betterIndex]
-    } else {
-      return [this.points[closestPointIndex].time, this.points[closestPointIndex].value, closestPointIndex]
+
+    if (closestPointIndex === 0 &&
+      this.points[closestPointIndex].time > timeAt
+    ) {
+      return undefined
     }
+
+    if (closestPointIndex === this.points.length - 1 &&
+      this.points[closestPointIndex].time < timeAt
+    ) {
+      return undefined
+    }
+
+    return [this.points[closestPointIndex].time, this.points[closestPointIndex].value, closestPointIndex]
   }
 
   addPoint (newPoint, isBigger) {
