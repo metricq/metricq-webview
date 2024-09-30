@@ -61,7 +61,7 @@ body {
     display: inline-flex;
     background-color: #FFFFFF;
     border-radius: 4px;
-    box-shadow: 0px 1px 2px 1px #D0D0D0;
+    box-shadow: 1px 1px 2px 1px #D0D0D0;
 }
 
 .legend_item_bottom {
@@ -77,7 +77,7 @@ body {
 }
 
 .legend_item:hover {
-    box-shadow: 2px 2px 3px 3px #B0B0B0;
+    box-shadow: 2px 2px 2px 1px #B0B0B0;
 }
 
 .legend_item div {

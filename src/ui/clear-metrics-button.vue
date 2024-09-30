@@ -1,5 +1,6 @@
 <template>
   <li
+    v-if="hasMetrics"
     :class="'clickable legend_end legend_item legend_item_' + position"
     @click="clearAllButtonClicked"
   >
@@ -16,6 +17,11 @@ export default {
     position: {
       type: String,
       required: true
+    }
+  },
+  computed: {
+    hasMetrics () {
+      return this.$store.getters['metrics/length']() > 0
     }
   },
   methods: {

@@ -1,5 +1,6 @@
 <template>
   <li
+    v-if="hasMetrics"
     :class="'legend_double_item legend_item_' + position"
   >
     <span
@@ -32,6 +33,11 @@ export default {
     position: {
       type: String,
       required: true
+    }
+  },
+  computed: {
+    hasMetrics () {
+      return this.$store.getters['metrics/length']() > 0
     }
   },
   methods: {

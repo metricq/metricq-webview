@@ -71,31 +71,29 @@
       <ul id="legend_list" :class="'legend_list legend_list_' + configuration.legendDisplay">
         <metric-legend
           v-for="metric in metricsList"
-          v-bind:metric="metric"
-          v-bind:key="metric.name"
-          v-bind:position="configuration.legendDisplay"
+          :metric="metric"
+          :key="metric.name"
+          :position="configuration.legendDisplay"
         ></metric-legend>
         <hide-metrics-button v-bind:position="configuration.legendDisplay"></hide-metrics-button>
         <new-metric-legend
-          v-bind:position="configuration.legendDisplay"></new-metric-legend>
+          :position="configuration.legendDisplay"></new-metric-legend>
         <clear-metrics-button
-          v-bind:position="configuration.legendDisplay"></clear-metrics-button>
-        <li :class="'legend_end legend_item legend_item_' + configuration.legendDisplay + ' legend_list_' + configuration.legendDisplay + '_bottom'">
-          <query-times
-            v-bind:querytime="performance.querytime"
-            v-bind:totaltime="performance.totaltime"></query-times>
-        </li>
-        <li :class="'legend_end legend_item legend_item_' + configuration.legendDisplay + ' legend_list_' + configuration.legendDisplay + '_last'">
-          <query-points
-            v-bind:agg="performance.agg"
-            v-bind:raw="performance.raw"></query-points>
-        </li>
+          :position="configuration.legendDisplay"></clear-metrics-button>
+        <query-times
+            :performance="performance"
+            :configuration="configuration"
+        ></query-times>
+        <query-points
+            :performance="performance"
+            :configuration="configuration"
+        ></query-points>
       </ul>
       <div id="wrapper_popup_legend">
         <metric-popup
           v-for="metric in metricsList"
-          v-bind:metric="metric"
-          v-bind:key="metric.popupKey"
+          :metric="metric"
+          :key="metric.popupKey"
           v-if="metric.popup"
         ></metric-popup>
         <div id="wrapper_popup_newlegend">
@@ -106,7 +104,7 @@
       </div>
       <div id="wrapper_popup_configuration">
         <configuration-popup
-          v-bind:key="configuration.key"
+          :key="configuration.key"
           v-if="popups.configuration"
         ></configuration-popup>
       </div>

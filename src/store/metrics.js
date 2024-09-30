@@ -34,6 +34,9 @@ export default {
         return 0
       })
     },
+    length: (state) => () => {
+      return Object.keys(state.metrics).length
+    },
     get: (state) => (metricKey) => {
       return state.metrics[metricKey]
     },
