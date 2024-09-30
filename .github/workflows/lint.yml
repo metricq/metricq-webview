@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [16.x, 18.x, 20.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -28,32 +28,3 @@ jobs:
     # checksums for git repo dependencies are broken
     - run: yarn install
     - run: yarn lint --no-fix --max-warnings 0 --max-errors 0
-
-  build:
-    name: Build for deployment
-    needs: [lint]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set short git hash for PR
-        if: github.event_name == 'pull_request'
-        id: vars-pr
-        run: echo "::set-output name=sha_short::$(git rev-parse --short ${{ github.event.pull_request.head.sha }})"
-      - name: Set short git hash for push
-        if: github.event_name == 'push'
-        id: vars-push
-        run: echo "::set-output name=sha_short::$(git rev-parse --short ${{ github.sha }})"
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16.x
-      - run: yarn install
-      - run: yarn build
-        env:
-          VUE_APP_VERSION_BUILD: ${{ steps.vars-pr.outputs.sha_short || steps.vars-push.outputs.sha_short }}
-          VUE_APP_METRICQ_BACKEND: ${{ secrets.DEPLOYED_METRICQ_BACKEND }}
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: webview
-          path: dist
