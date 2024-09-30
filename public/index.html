@@ -75,6 +75,7 @@
           v-bind:key="metric.name"
           v-bind:position="configuration.legendDisplay"
         ></metric-legend>
+        <hide-metrics-button v-bind:position="configuration.legendDisplay"></hide-metrics-button>
         <new-metric-legend
           v-bind:position="configuration.legendDisplay"></new-metric-legend>
         <clear-metrics-button
