@@ -218,9 +218,12 @@ export default {
     document.getElementById('input_metric_name').focus()
   },
   methods: {
-    onFactorUpdate (evt) {
-      console.log(evt)
-      this.$store.dispatch('metrics/updateFactor', { metricKey: this.metric.key, factor: Number.parseFloat(this.$refs.input_factor.value) })
+    onFactorUpdate () {
+      let factor = Number.parseFloat(this.$refs.input_factor.value)
+      if (Number.isNaN(factor)) {
+        factor = 1
+      }
+      this.$store.dispatch('metrics/updateFactor', { metricKey: this.metric.key, factor })
     },
     changeDraw (evt) {
       if (this.metric.drawMin === false && this.metric.drawAvg === false && this.metric.drawMax === false) {
