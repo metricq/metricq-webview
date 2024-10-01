@@ -42,6 +42,9 @@ export default {
     },
     getColor: (state) => (metric) => {
       return state.metrics[metric].color
+    },
+    getUnit: (state) => (metric) => {
+      return state.metrics[metric].unit
     }
   },
   mutations: {

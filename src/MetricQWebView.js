@@ -252,7 +252,6 @@ export function importMetricUrl () {
 
 /* TODO: generalize this for cases where is no "legendApp" */
 export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
-  let newManager
   if (window.MetricQWebView) {
     window.MetricQWebView.reinitialize(metricNamesArr, timeStart, timeStop)
   }
