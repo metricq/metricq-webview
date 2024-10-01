@@ -18,10 +18,10 @@ export class Graticule {
     this.labelOffsets = {
       x_axis: {
         x: 0,
-        y: 3
+        y: 5
       },
       y_axis: {
-        x: 0,
+        x: -5,
         y: 0
       }
 
