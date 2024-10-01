@@ -423,7 +423,7 @@ export class Graticule {
     const curUnits = this.data.distinctUnits()
     if (curUnits && curUnits.length > 0) {
       let unitString = ''
-      curUnits.forEach((val, index, arr) => { unitString += (unitString.length > 0 ? ' / ' : '') + val })
+      curUnits.forEach((val, index, arr) => { unitString += (unitString.length > 0 ? ' | ' : '') + val })
       ctx.save()
       ctx.rotate(Math.PI / 2 * 3)
       ctx.fillText(unitString, (Math.round(dimensions.height / 2) + dimensions.y) * -1, fontSize)

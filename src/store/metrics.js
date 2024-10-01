@@ -177,16 +177,17 @@ export default {
         dispatch('updateUnit', { metricKey: name, unit, metadataObj })
       }
     },
-    updateDescription ({ commit, state }, { metricKey, description, metadataObj }) {
+    updateDescription ({ commit }, { metricKey, description, metadataObj }) {
       if (description === undefined) {
         description = metadataObj.description
       }
       commit('privateSet', { metricKey, metric: { description: description } })
     },
-    updateUnit ({ commit, state }, { metricKey, unit, metadataObj }) {
+    updateUnit ({ commit }, { metricKey, unit, metadataObj }) {
       if (unit === undefined) {
         unit = metadataObj.unit
       }
+      unit = MetricHelper.normalizeSIUnits(unit)
       commit('privateSet', { metricKey, metric: { unit: unit } })
     },
     updateColor ({ commit, state }, { metricKey, color }) {
