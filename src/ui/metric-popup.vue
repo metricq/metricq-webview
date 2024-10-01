@@ -75,6 +75,24 @@
               </label>
             </div>
           </div>
+          <div class="form-group row">
+            <label
+              class="col-sm-2 col-form-label"
+              for="input_metric_factor"
+            >Faktor</label>
+            <div class="col-sm-10">
+              <input
+                id="input_metric_factor"
+                ref="input_factor"
+                :value="metric.factor"
+                type="number"
+                list="autocomplete_metric"
+                class="form-control"
+                step="any"
+                @change="onFactorUpdate"
+              >
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button
@@ -200,6 +218,10 @@ export default {
     document.getElementById('input_metric_name').focus()
   },
   methods: {
+    onFactorUpdate (evt) {
+      console.log(evt)
+      this.$store.dispatch('metrics/updateFactor', { metricKey: this.metric.key, factor: Number.parseFloat(this.$refs.input_factor.value) })
+    },
     changeDraw (evt) {
       if (this.metric.drawMin === false && this.metric.drawAvg === false && this.metric.drawMax === false) {
         evt.target.click()

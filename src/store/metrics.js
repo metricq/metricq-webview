@@ -54,7 +54,7 @@ export default {
 
     privateSet (state, {
       metricKey,
-      metric: { description, unit, color, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw, draw }
+      metric: { description, unit, color, errorprone, drawMin, drawMax, drawAvg, pointsAgg, pointsRaw, draw, factor }
     }) {
       if (state.metrics[metricKey] === undefined) {
         Vue.set(state.metrics, metricKey, {
@@ -70,7 +70,8 @@ export default {
           drawMax: drawMax === undefined ? store.state.globalMinMax : drawMax,
           popupKey: 'popup_' + MetricHelper.filterKey(metricKey),
           pointsAgg: pointsAgg || null,
-          pointsRaw: pointsRaw || null
+          pointsRaw: pointsRaw || null,
+          factor: factor || 1
         })
       } else {
         Vue.set(state.metrics[metricKey], 'popupKey', 'popup_' + MetricHelper.filterKey(metricKey))
@@ -104,6 +105,9 @@ export default {
         }
         if (pointsRaw !== undefined) {
           Vue.set(state.metrics[metricKey], 'pointsRaw', pointsRaw)
+        }
+        if (factor !== undefined) {
+          Vue.set(state.metrics[metricKey], 'factor', factor)
         }
       }
     },
@@ -190,7 +194,21 @@ export default {
       unit = MetricHelper.normalizeSIUnits(unit)
       commit('privateSet', { metricKey, metric: { unit: unit } })
     },
-    updateColor ({ commit, state }, { metricKey, color }) {
+    updateFactor ({ commit, state }, { metricKey, factor }) {
+      if (state.metrics[metricKey] === undefined || state.metrics[metricKey].factor === factor) {
+        return
+      }
+      commit('privateSet', { metricKey, metric: { factor } })
+      const renderer = window.MetricQWebView
+      if (renderer && renderer.graticule && renderer.graticule.data) {
+        const metricCache = renderer.graticule.data.getMetricCache(metricKey)
+        if (metricCache) {
+          metricCache.updateFactor(factor)
+        }
+        renderer.setPlotRanges(false, true)
+      }
+    },
+    updateColor ({ commit }, { metricKey, color }) {
       commit('privateSet', { metricKey, metric: { color } })
       const renderer = window.MetricQWebView
       if (renderer && renderer.graticule && renderer.graticule.data) {

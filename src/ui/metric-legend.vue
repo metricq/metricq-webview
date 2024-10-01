@@ -15,7 +15,18 @@
           <span
             ref="metricName"
             class="metricText"
-          >&nbsp;{{ metric.key }}</span>
+          >
+            <span
+              v-if="metric.factor !== 1"
+              class="factor"
+            >
+              {{ metric.factor }} ×
+            </span>
+            {{ metric.key }}
+            <span v-if="metric.unit">
+              [{{ metric.unit }}]
+            </span>
+          </span>
         </td>
         <td v-if="!multiline || position==='bottom'">
           <span
@@ -132,6 +143,10 @@ export default {
   margin-bottom: -2px;
   display: inline-block;
   text-align: left;
+}
+
+.factor {
+  font-weight: bold;
 }
 
 .no_drawing {

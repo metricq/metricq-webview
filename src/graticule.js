@@ -778,8 +778,8 @@ export class Graticule {
       }
 
       for (let j = 0, previousX, previousY; j < band.points.length; ++j) {
-        const x = graticuleDimensions.x + Math.round((band.points[j].time - this.curTimeRange[0]) / timePerPixel)
-        const y = graticuleDimensions.y + (graticuleDimensions.height - Math.round((band.points[j].value - this.curValueRange[0]) / valuesPerPixel))
+        const x = graticuleDimensions.x + Math.round((band.getTimeAtIndex(j) - this.curTimeRange[0]) / timePerPixel)
+        const y = graticuleDimensions.y + (graticuleDimensions.height - Math.round((band.getValueAtIndex(j) - this.curValueRange[0]) / valuesPerPixel))
         if (j === 0) {
           ctx.beginPath()
           ctx.moveTo(x, y)
@@ -843,6 +843,7 @@ export class Graticule {
           this.data.metrics[i].series.avg.styleOptions.connect = 'direct'
         }
       }
+
       for (const curAggregate in this.data.metrics[i].series) {
         const curSeries = this.data.metrics[i].series[curAggregate]
         if (curSeries) {
@@ -854,8 +855,8 @@ export class Graticule {
           const offsiteCanvas = this.generateOffsiteDot(styleOptions)
 
           for (let j = 0, x, y, previousX, previousY; j < curSeries.points.length; ++j) {
-            x = graticuleDimensions.x + Math.round((curSeries.points[j].time - timeRange[0]) / timePerPixel)
-            y = graticuleDimensions.y + (graticuleDimensions.height - Math.round((curSeries.points[j].value - valueRange[0]) / valuesPerPixel))
+            x = graticuleDimensions.x + Math.round((curSeries.getTimeAtIndex(j) - timeRange[0]) / timePerPixel)
+            y = graticuleDimensions.y + (graticuleDimensions.height - Math.round((curSeries.getValueAtIndex(j) - valueRange[0]) / valuesPerPixel))
             if (styleOptions.connect === 'next') {
               if (j === 0) {
                 ctx.beginPath()
@@ -915,7 +916,7 @@ export class Graticule {
                 // we need to handle gaps. For that matter, we need to look back
                 // twice.
                 if (curSeries.points[j - 1].value === null) {
-                  if (curSeries.points[j].value !== null) {
+                  if (curSeries.getValueAtIndex(j) !== null) {
                     // if the last one was a gap, but this ain't, we remember
                     // the current one and move a bit.
                     ctx.moveTo(x, y)

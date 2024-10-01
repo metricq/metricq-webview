@@ -43,7 +43,7 @@ export class DataCache {
       relatedMetric.series[metricAggregate].clear()
       return relatedMetric.series[metricAggregate]
     } else {
-      const newSeries = new Series(metricAggregate, relatedMetric.color)
+      const newSeries = new Series(metricAggregate, relatedMetric.color, relatedMetric.factor)
       relatedMetric.series[metricAggregate] = newSeries
       return newSeries
     }
@@ -111,10 +111,10 @@ export class DataCache {
 
       if (doGetAllTime && this.metrics[i].allTime) {
         if (undefined === min || min > this.metrics[i].allTime.min) {
-          min = this.metrics[i].allTime.min
+          min = this.metrics[i].allTime.min * this.factor
         }
         if (undefined === max || max < this.metrics[i].allTime.max) {
-          max = this.metrics[i].allTime.max
+          max = this.metrics[i].allTime.max * this.factor
         }
         continue
       } else {
@@ -173,15 +173,15 @@ export class DataCache {
 
   distinctUnits () {
     const units = []
-    for (let i = 0; i < this.metrics.length; ++i) {
-      if (this.metrics[i].metadata &&
-          this.metrics[i].metadata.unit &&
-          store.getters['metrics/getMetricDrawState'](this.metrics[i].name).draw) {
-        if (!units.includes(this.metrics[i].metadata.unit)) {
-          units.push(this.metrics[i].metadata.unit)
+
+    for (const metric of store.getters['metrics/getAll']()) {
+      if (metric.unit && metric.draw) {
+        if (!units.includes(metric.unit)) {
+          units.push(metric.unit)
         }
       }
     }
+
     return units
   }
 
@@ -205,6 +205,7 @@ export class DataCache {
 class MetricCache {
   constructor (paramMetricQReference, paramMetricName) {
     this.name = paramMetricName
+    this.factor = 1
     this.color = store.getters['metrics/getColor'](this.name)
     this.series = {
       min: undefined,
@@ -212,12 +213,10 @@ class MetricCache {
       avg: undefined,
       raw: undefined
     }
-    this.band = new Band(this.color)
+    this.band = new Band(this.color, this.factor)
     this.allTime = {}
-    this.metadata = undefined
     this.metricQHistory = paramMetricQReference
     this.fetchAllTimeMinMax()
-    this.fetchMetadata()
   }
 
   clearNonRawAggregates () {
@@ -241,6 +240,7 @@ class MetricCache {
     }
 
     if (this.series.min.points.length >= 2) {
+      this.band.setFactor(this.factor)
       this.band.populate(this.series.min, this.series.max)
     }
 
@@ -258,10 +258,6 @@ class MetricCache {
         }
       }
     }
-  }
-
-  async fetchMetadata () {
-    this.metadata = await this.metricQHistory.metadata(this.name)
   }
 
   fetchAllTimeMinMax () {
@@ -299,6 +295,16 @@ class MetricCache {
       }
     }
   }
+
+  updateFactor (factor) {
+    this.factor = factor
+    this.band.setFactor(factor)
+    for (const serie of Object.values(this.series)) {
+      if (serie) {
+        serie.setFactor(factor)
+      }
+    }
+  }
 }
 
 class Band {
@@ -311,6 +317,15 @@ class Band {
       alpha: 0.3
     }
     this.switchOverIndex = 0
+    this.factor = 1
+  }
+
+  getTimeAtIndex (index) {
+    return this.points[index].time
+  }
+
+  getValueAtIndex (index) {
+    return this.points[index].value * this.factor
   }
 
   addPoint (newPoint) {
@@ -330,13 +345,14 @@ class Band {
     if (this.points.length === 0) {
       return [0, 0]
     }
-    let min = this.points[0].value
-    let max = this.points[0].value
+    let min = this.getValueAtIndex(0)
+    let max = min
     for (let i = 1; i < this.points.length; ++i) {
-      if (this.points[i].value < min) {
-        min = this.points[i].value
-      } else if (this.points[i].value > max) {
-        max = this.points[i].value
+      const value = this.getValueAtIndex(i)
+      if (value < min) {
+        min = value
+      } else if (value > max) {
+        max = value
       }
     }
     return [min, max]
@@ -349,6 +365,10 @@ class Band {
 
   setColor (color) {
     this.styleOptions.color = color
+  }
+
+  setFactor (factor) {
+    this.factor = factor
   }
 
   populate (minSeries, maxSeries) {
@@ -380,11 +400,12 @@ class Band {
 }
 
 class Series {
-  constructor (aggregate, color) {
+  constructor (aggregate, color, factor) {
     this.points = []
     this.aggregate = aggregate
     this.styleOptions = { ...matchStylingOptions(aggregate), color }
     this.allTime = undefined
+    this.factor = factor
   }
 
   clear () {
@@ -431,7 +452,15 @@ class Series {
       return undefined
     }
 
-    return [this.points[closestPointIndex].time, this.points[closestPointIndex].value, closestPointIndex]
+    return [this.points[closestPointIndex].time, this.getValueAtIndex(closestPointIndex), closestPointIndex]
+  }
+
+  getTimeAtIndex (index) {
+    return this.points[index].time
+  }
+
+  getValueAtIndex (index) {
+    return this.points[index].value * this.factor
   }
 
   addPoint (newPoint, isBigger) {
@@ -478,7 +507,7 @@ class Series {
     if (this.points.length === 0) {
       return [0, 0]
     } else {
-      return [this.points[0].time, this.points[this.points.length - 1].time]
+      return [this.getTimeAtIndex(0), this.getTimeAtIndex(this.points.length - 1).time]
     }
   }
 
@@ -486,32 +515,34 @@ class Series {
     if (this.points.length === 0) {
       return undefined
     }
-    let min = this.points[0].value
-    let max = this.points[0].value
+    let min = this.getValueAtIndex(0)
+    let max = this.getValueAtIndex(0)
     if (undefined !== timeRangeStart && undefined !== timeRangeEnd) {
       let i = 0
       for (i = 0; i < this.points.length; ++i) {
-        if (this.points[i].time >= timeRangeStart) {
+        if (this.getTimeAtIndex(i) >= timeRangeStart) {
           break
         }
       }
       if (i < this.points.length) {
-        min = this.points[i].value
-        max = this.points[i].value
+        min = this.getValueAtIndex(i)
+        max = min
       }
-      for (; (i < this.points.length && this.points[i].time < timeRangeEnd); ++i) {
-        if (this.points[i].value < min) {
-          min = this.points[i].value
-        } else if (this.points[i].value > max) {
-          max = this.points[i].value
+      for (; (i < this.points.length && this.getTimeAtIndex(i) < timeRangeEnd); ++i) {
+        const value = this.getValueAtIndex(i)
+        if (value < min) {
+          min = value
+        } else if (value > max) {
+          max = value
         }
       }
     } else {
       for (let i = 1; i < this.points.length; ++i) {
-        if (this.points[i].value < min) {
-          min = this.points[i].value
-        } else if (this.points[i].value > max) {
-          max = this.points[i].value
+        const value = this.getValueAtIndex(i)
+        if (value < min) {
+          min = value
+        } else if (value > max) {
+          max = value
         }
       }
     }
@@ -520,6 +551,10 @@ class Series {
 
   setColor (color) {
     this.styleOptions.color = color
+  }
+
+  setFactor (factor) {
+    this.factor = factor
   }
 }
 
