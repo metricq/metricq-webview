@@ -1070,11 +1070,15 @@ export class Graticule {
   }
 
   canvasResize (canvasMargins) {
+    const ratio = window.devicePixelRatio || 1
     this.canvasReset()
     const newSize = [document.getElementById('webview_container').offsetWidth, document.getElementById('wrapper_body').clientHeight]
     this.clearSize = newSize
-    this.ctx.canvas.width = newSize[0]
-    this.ctx.canvas.height = newSize[1] - canvasMargins.top
+    this.ctx.canvas.width = newSize[0] * ratio
+    this.ctx.canvas.height = (newSize[1] - canvasMargins.top) * ratio
+    this.ctx.canvas.style.width = newSize[0] + 'px'
+    this.ctx.canvas.style.height = (newSize[1] - canvasMargins.top) + 'px'
+    this.ctx.scale(ratio, ratio)
     this.dimensions = {
       x: canvasMargins.left,
       y: canvasMargins.top,
