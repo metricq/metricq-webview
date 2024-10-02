@@ -27,7 +27,7 @@
     <nav class="navbar navbar-light bg-light">
       <a class="navbar-brand" href="?">
         <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
-        MetricQ-WebView
+        MetricQ WebView
       </a>
       <label class="btn btn-outline-primary btn-navbar" id="button_configuration"
              v-on:click="configurationButtonClicked"
@@ -46,10 +46,6 @@
              v-b-tooltip.hover title="Deaktiviert werden nur Durchschnittswerte angezeigt">
         <input type="checkbox" id='checkbox_min_max' v-bind:checked="globalMinMax" v-on:change="toggleMinMaxButton">
         <span>Werteumfang zeichnen</span>
-      </label>
-      <label class="btn btn-outline-primary btn-navbar" id="button_palette" v-on:click="colorPaletteClicked"
-             v-b-tooltip.hover title="Metriken eindeutig färben">
-        <b-icon-palette></b-icon-palette>
       </label>
       <label>
         <time-button id="date_range" class="btn btn-outline-primary btn-navbar"
@@ -75,7 +71,8 @@
           :key="metric.name"
           :position="configuration.legendDisplay"
         ></metric-legend>
-        <hide-metrics-button v-bind:position="configuration.legendDisplay"></hide-metrics-button>
+        <hide-metrics-button :position="configuration.legendDisplay"></hide-metrics-button>
+        <recolor-metrics-button :position="configuration.legendDisplay"></recolor-metrics-button>
         <new-metric-legend
           :position="configuration.legendDisplay"></new-metric-legend>
         <clear-metrics-button

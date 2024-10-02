@@ -5,6 +5,7 @@ import ExportPopup from './ui/export-popup.vue'
 import LinkPopup from './ui/link-popup.vue'
 import MetricLegend from './ui/metric-legend.vue'
 import HideMetricsButton from './ui/hide-metrics-button.vue'
+import RecolorMetricsButton from './ui/recolor-metrics-button.vue'
 import NewMetricLegend from './ui/new-metric-legend.vue'
 import ClearMetricsButton from './ui/clear-metrics-button.vue'
 import MetricPopup from './ui/metric-popup.vue'
@@ -41,6 +42,7 @@ export const mainApp = new Vue({
     LinkPopup,
     MetricLegend,
     HideMetricsButton,
+    RecolorMetricsButton,
     NewMetricLegend,
     ClearMetricsButton,
     MetricPopup,

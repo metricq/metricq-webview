@@ -5,8 +5,8 @@
   >
     <span>
       <span>Datenpunkte:</span>
-      <span> Raw: {{ performance.raw | withDecimalPlaces(0) }}
-        <span v-if="performance.agg !== null">( Aggregate: {{ performance.agg | withDecimalPlaces(0) }} )</span>
+      <span> {{ performance.raw | withDecimalPlaces(0) }} Punkte
+        <span v-if="performance.agg !== null">in {{ performance.agg | withDecimalPlaces(0) }} Aggregate</span>
       </span>
     </span>
   </li>
