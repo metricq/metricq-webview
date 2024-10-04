@@ -14,7 +14,7 @@
         <td>
           <span
             ref="metricName"
-            class="metricText"
+            :class="['metricText', peakedClass]"
           >
             <span
               v-if="metric.factor !== 1"
@@ -103,6 +103,11 @@ export default {
     },
     color () {
       return this.$props.metric.draw ? this.$props.metric.color : 'grey'
+    },
+    peakedClass () {
+      if (this.$store.getters['metrics/getPeakedMetric']() === this.metric.key) return 'peaked'
+
+      return undefined
     }
   },
   updated () {
@@ -171,5 +176,9 @@ table {
   justify-content: flex-end;
   position: relative;
   top: 3px;
+}
+
+.peaked {
+  font-weight: bold;
 }
 </style>

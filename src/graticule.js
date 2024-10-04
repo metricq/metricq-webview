@@ -432,15 +432,16 @@ export class Graticule {
   }
 
   getTimeValueAtPoint (positionArr) {
-    const relationalPos = [positionArr[0] - this.dimensions.x, positionArr[1] - this.dimensions.y]
+    const x = positionArr[0] - this.dimensions.x
+    const y = positionArr[1] - this.dimensions.y
     if (undefined !== this.curTimeRange &&
         undefined !== this.curValueRange &&
-        relationalPos[0] >= 0 &&
-        relationalPos[0] <= this.dimensions.width &&
-        relationalPos[1] >= 0 &&
-        relationalPos[1] <= this.dimensions.height) {
-      return [Math.round((relationalPos[0] * this.curTimePerPixel) + this.curTimeRange[0]),
-        ((this.dimensions.height - relationalPos[1]) * this.curValuesPerPixel) + this.curValueRange[0]
+        x >= 0 &&
+        x <= this.dimensions.width &&
+        y >= 0 &&
+        y <= this.dimensions.height) {
+      return [Math.round((x * this.curTimePerPixel) + this.curTimeRange[0]),
+        ((this.dimensions.height - y) * this.curValuesPerPixel) + this.curValueRange[0]
       ]
     } else {
       return undefined
@@ -757,19 +758,20 @@ export class Graticule {
   }
 
   drawBands (ctx, timePerPixel, valuesPerPixel, graticuleDimensions) {
+    const peakedMetric = store.getters['metrics/getPeakedMetric']()
     for (const metric of this.data.metrics) {
       const drawState = store.getters['metrics/getMetricDrawState'](metric.name)
       if (!drawState.draw) continue
 
       if (drawState.drawMin && drawState.drawMax) {
-        this.drawBand(ctx, timePerPixel, valuesPerPixel, graticuleDimensions, metric)
+        this.drawBand(ctx, timePerPixel, valuesPerPixel, graticuleDimensions, metric, peakedMetric)
       }
     }
 
     this.resetCtx(ctx)
   }
 
-  drawBand (ctx, timePerPixel, valuesPerPixel, graticuleDimensions, metric) {
+  drawBand (ctx, timePerPixel, valuesPerPixel, graticuleDimensions, metric, peakedMetric) {
     const band = metric.band
     if (band) {
       const styleOptions = this.parseStyleOptions(band.styleOptions, ctx)
@@ -817,11 +819,17 @@ export class Graticule {
         previousY = y
       }
       ctx.closePath()
+      if (metric.name === peakedMetric) {
+        ctx.lineWidth = 2
+        ctx.globalAlpha = 0.5
+        ctx.stroke()
+      }
       ctx.fill()
     }
   }
 
   drawSeries (timeRange, valueRange, timePerPixel, valuesPerPixel, ctx, graticuleDimensions) {
+    const peakedMetric = store.getters['metrics/getPeakedMetric']()
     for (let i = 0; i < this.data.metrics.length; ++i) {
       if (!store.getters['metrics/getMetricDrawState'](this.data.metrics[i].name).draw) continue
 
@@ -846,12 +854,18 @@ export class Graticule {
 
       for (const curAggregate in this.data.metrics[i].series) {
         const curSeries = this.data.metrics[i].series[curAggregate]
+
         if (curSeries) {
-          const styleOptions = this.parseStyleOptions(curSeries.styleOptions, ctx)
+          const styleOptions = { ...this.parseStyleOptions(curSeries.styleOptions, ctx) }
           if (styleOptions.skip || curSeries.points.length === 0) {
             this.resetCtx(ctx)
             continue
           }
+
+          if (peakedMetric === this.data.metrics[i].name) {
+            styleOptions.pointWidth = 10
+          }
+
           const offsiteCanvas = this.generateOffsiteDot(styleOptions)
 
           for (let j = 0, x, y, previousX, previousY; j < curSeries.points.length; ++j) {

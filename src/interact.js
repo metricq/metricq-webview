@@ -75,7 +75,7 @@ function uiInteractZoomArea (evtObj) {
 function uiInteractZoomIn (evtObj) {
   evtObj.preventDefault()
   const relativeStart = mouseDown.relativeStartPos
-  const relativeEnd = calculateActualMousePos(evtObj)
+  const relativeEnd = calculateActualMousePos(evtObj, window.MetricQWebView.graticule.ele)
 
   relativeEnd[0] = Math.max(window.MetricQWebView.graticule.dimensions.x,
     Math.min(Math.abs(relativeEnd[0]), window.MetricQWebView.graticule.dimensions.width))
@@ -127,7 +127,7 @@ function uiInteractZoomWheel (evtObj) {
       scrollDirection = 0.2
     }
     scrollDirection *= store.state.configuration.zoomSpeed / 10
-    const curPos = calculateActualMousePos(evtObj)
+    const curPos = calculateActualMousePos(evtObj, window.MetricQWebView.graticule.ele)
     const curTimeValue = window.MetricQWebView.graticule.getTimeValueAtPoint(curPos)
     if (curTimeValue) {
       if (!window.MetricQWebView.handler.zoomTimeAtPoint(curTimeValue, scrollDirection)) {
@@ -140,7 +140,7 @@ function uiInteractZoomWheel (evtObj) {
 }
 
 function uiInteractLegend (evtObj) {
-  const curPosOnCanvas = calculateActualMousePos(evtObj)
+  const curPosOnCanvas = calculateActualMousePos(evtObj, window.MetricQWebView.graticule.ele)
   const curPoint = window.MetricQWebView.graticule.getTimeValueAtPoint(curPosOnCanvas)
 
   if (!curPoint) {
@@ -148,17 +148,25 @@ function uiInteractLegend (evtObj) {
   }
 
   const timeAt = curPoint[0]
+  const valueAt = curPoint[1]
 
   window.MetricQWebView.graticule.draw(false)
 
   const myCtx = window.MetricQWebView.graticule.ctx
   myCtx.fillStyle = 'rgba(0,0,0,0.8)'
   myCtx.fillRect(curPosOnCanvas[0] - 1, window.MetricQWebView.graticule.dimensions.y, 2, window.MetricQWebView.graticule.dimensions.height)
+  // myCtx.fillRect(window.MetricQWebView.graticule.dimensions.x, curPosOnCanvas[1] - 1, window.MetricQWebView.graticule.dimensions.width, 2)
   myCtx.font = '14px ' + window.MetricQWebView.graticule.DEFAULT_FONT // actually it's sans-serif
 
   const legendEntries = []
   let maxLabelWidth = 0
   let maxTextWidth = 0
+
+  let closestMetric
+  let closestMetricValue
+
+  const range = window.MetricQWebView.graticule.curValueRange
+  const maxDistance = 0.05 * (range[1] - range[0])
 
   for (const metric of Object.values(window.MetricQWebView.graticule.data.metrics)) {
     const metricDrawState = store.getters['metrics/getMetricDrawState'](metric.name)
@@ -170,6 +178,16 @@ function uiInteractLegend (evtObj) {
       const value = metric.series.raw.getValueAtTimeAndIndex(timeAt)
       if (value === undefined) continue
 
+      if (
+        Math.abs(valueAt - value[1]) < maxDistance &&
+        (
+          closestMetric === undefined ||
+          Math.abs(value[1] - valueAt) < Math.abs(closestMetricValue - valueAt)
+        )
+      ) {
+        closestMetric = metric.name
+        closestMetricValue = value[1]
+      }
       curText = (Number(value[1])).toFixed(3)
     } else if (metric.series.min !== undefined &&
                metric.series.max !== undefined &&
@@ -178,6 +196,19 @@ function uiInteractLegend (evtObj) {
       const max = metric.series.max.getValueAtTimeAndIndex(timeAt)
       const avg = metric.series.avg.getValueAtTimeAndIndex(timeAt)
       if (min === undefined || max === undefined || avg === undefined) continue
+
+      if (
+        (valueAt < max[1] && valueAt > min[1] && metricDrawState.drawMin && metricDrawState.drawMax) ||
+        maxDistance > Math.abs(valueAt - avg[1])
+      ) {
+        if (
+          closestMetric === undefined ||
+            Math.abs(avg[1] - valueAt) < Math.abs(closestMetricValue - valueAt)
+        ) {
+          closestMetric = metric.name
+          closestMetricValue = avg[1]
+        }
+      }
 
       curText = ''
       if (metricDrawState.drawMin) {
@@ -217,6 +248,8 @@ function uiInteractLegend (evtObj) {
     legendEntries.push(newEntry)
   }
 
+  store.dispatch('metrics/updatePeakedMetric', { metric: closestMetric })
+
   let timeString = new Date(curPoint[0]).toLocaleString()
 
   if (window.MetricQWebView.graticule.curTimeRange !== undefined) {
@@ -251,7 +284,7 @@ function uiInteractLegend (evtObj) {
   }
 
   drawHoverDate(myCtx, timeString, curPosOnCanvas[0], maxLabelWidth, offsetTop, offsetMid, verticalDiff, distanceToRightEdge)
-  drawHoverText(myCtx, legendEntries, curPosOnCanvas[0], maxTextWidth, maxLabelWidth, offsetTop, offsetMid, verticalDiff, borderPadding, distanceToRightEdge)
+  drawHoverText(myCtx, legendEntries, curPosOnCanvas[0], maxTextWidth, maxLabelWidth, offsetTop, offsetMid, verticalDiff, borderPadding, distanceToRightEdge, closestMetric)
 }
 
 function drawHoverDate (myCtx, timeString, curXPosOnCanvas, maxNameWidth, offsetTop, offsetMid, verticalDiff, distanceToRightEdge) {
@@ -265,7 +298,7 @@ function drawHoverDate (myCtx, timeString, curXPosOnCanvas, maxNameWidth, offset
   myCtx.fillText(timeString, curXPosOnCanvas + offsetMid, offsetTop - 0.5 * verticalDiff)
 }
 
-function drawHoverText (myCtx, metricsArray, curXPosOnCanvas, maxValueWidth, maxLabelWidth, offsetTop, offsetMid, verticalDiff, borderPadding, distanceToRightEdge) {
+function drawHoverText (myCtx, metricsArray, curXPosOnCanvas, maxValueWidth, maxLabelWidth, offsetTop, offsetMid, verticalDiff, borderPadding, distanceToRightEdge, peakedMetric) {
   myCtx.textBaseline = 'middle'
   myCtx.textAlign = 'left'
   let offsetRight = 0
@@ -279,9 +312,18 @@ function drawHoverText (myCtx, metricsArray, curXPosOnCanvas, maxValueWidth, max
   for (let i = 0; i < metricsArray.length; ++i) {
     const y = offsetTop + i * verticalDiff
     myCtx.fillStyle = metricsArray[i].metric.color
-    myCtx.globalAlpha = 0.4
+    if (metricsArray[i].metric.name === peakedMetric) {
+      myCtx.globalAlpha = 0.8
+    } else {
+      myCtx.globalAlpha = 0.4
+    }
     myCtx.fillRect(curXPosOnCanvas + offsetMid - offsetRight - borderPadding, y, maxValueWidth + maxLabelWidth + (offsetMid + borderPadding) * 2, 20)
     myCtx.fillStyle = '#000000'
+    if (metricsArray[i].metric.name === peakedMetric) {
+      myCtx.lineWidth = 2
+      myCtx.color = '#000000'
+      myCtx.strokeRect(curXPosOnCanvas + offsetMid - offsetRight - borderPadding, y, maxValueWidth + maxLabelWidth + (offsetMid + borderPadding) * 2, 20)
+    }
     myCtx.globalAlpha = 1
     myCtx.fillText(metricsArray[i].curText, curXPosOnCanvas + offsetMid - offsetRight, y + 0.5 * verticalDiff)
     myCtx.fillText(metricsArray[i].label, curXPosOnCanvas + (offsetMid * 3 + maxValueWidth) - offsetRight, y + 0.5 * verticalDiff)
@@ -345,12 +387,10 @@ export function registerCallbacks (anchoringObject) {
   })
 }
 
-function calculateActualMousePos (evtObj) {
-  const curPos = [evtObj.x - 3 * evtObj.target.offsetLeft,
-    evtObj.y - evtObj.target.offsetTop]
-  const scrollOffset = calculateScrollOffset(evtObj.target)
-  curPos[0] += scrollOffset[0]
-  curPos[1] += scrollOffset[1]
+function calculateActualMousePos (evtObj, target) {
+  if (target === undefined) target = evtObj.target
+  const box = target.getBoundingClientRect()
+  const curPos = [evtObj.x - box.left, evtObj.y - box.top]
   return curPos
 }
 

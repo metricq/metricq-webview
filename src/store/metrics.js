@@ -6,7 +6,8 @@ import * as Error from '@/errors'
 export default {
   namespaced: true,
   state: {
-    metrics: {}
+    metrics: {},
+    peakedMetric: undefined
   },
   getters: {
     getMetricDrawState: (state) => (metricName) => {
@@ -45,6 +46,9 @@ export default {
     },
     getUnit: (state) => (metric) => {
       return state.metrics[metric].unit
+    },
+    getPeakedMetric: (state) => () => {
+      return state.peakedMetric
     }
   },
   mutations: {
@@ -121,7 +125,14 @@ export default {
       } else {
         throw new Error('Metric not found!')
       }
+    },
+
+    setPeakedMetric (state, { metric }) {
+      if (state.metrics[metric] || metric === undefined) {
+        Vue.set(state, 'peakedMetric', metric)
+      }
     }
+
   },
   actions: {
     checkGlobalDrawState ({ commit, getters }) {
@@ -248,6 +259,9 @@ export default {
     },
     updateDataPoints ({ state, commit }, { metricKey, pointsAgg, pointsRaw }) {
       commit('privateSet', { metricKey, metric: { pointsAgg: pointsAgg, pointsRaw: pointsRaw } })
+    },
+    updatePeakedMetric ({ commit }, { metric }) {
+      commit('setPeakedMetric', { metric })
     }
   },
   modules: {}
