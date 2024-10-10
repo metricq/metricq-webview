@@ -166,7 +166,7 @@ function uiInteractLegend (evtObj) {
   let closestMetricValue
 
   const range = window.MetricQWebView.graticule.curValueRange
-  const maxDistance = 0.05 * (range[1] - range[0])
+  const maxDistance = 0.01 * (range[1] - range[0])
 
   for (const metric of Object.values(window.MetricQWebView.graticule.data.metrics)) {
     const metricDrawState = store.getters['metrics/getMetricDrawState'](metric.name)
