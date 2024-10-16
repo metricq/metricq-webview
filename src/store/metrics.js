@@ -47,6 +47,9 @@ export default {
     getUnit: (state) => (metric) => {
       return state.metrics[metric].unit
     },
+    getFactor: (state) => (metric) => {
+      return state.metrics[metric].factor
+    },
     getPeakedMetric: (state) => () => {
       return state.peakedMetric
     }
@@ -169,7 +172,8 @@ export default {
         drawMax,
         drawAvg,
         pointsAgg,
-        pointsRaw
+        pointsRaw,
+        factor
       }
     }) {
       if (state.metrics[name] !== undefined) {
@@ -193,6 +197,7 @@ export default {
         // maybe we changed the globale draw state?
         dispatch('checkGlobalDrawState')
         dispatch('updateUnit', { metricKey: name, unit, metadataObj })
+        dispatch('updateFactor', { metricKey: name, factor })
       }
     },
     updateDescription ({ commit }, { metricKey, description, metadataObj }) {

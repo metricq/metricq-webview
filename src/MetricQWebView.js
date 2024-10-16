@@ -74,8 +74,12 @@ class MetricQWebView {
 
   updateMetricUrl () {
     let encodedStr = '.' + this.handler.startTime.getValue() + '*' + this.handler.stopTime.getValue()
-    for (const metricKey of this.store.getters['metrics/getAllKeys']()) {
-      encodedStr += '*' + metricKey
+    for (const metric of this.store.getters['metrics/getAll']()) {
+      if (metric.factor !== 1 && metric.factor !== undefined) {
+        encodedStr += '*(' + metric.key + '~' + metric.factor + ')'
+      } else {
+        encodedStr += '*' + metric.key
+      }
     }
     encodedStr = encodeURIComponent(encodedStr)
     window.location.href =
@@ -108,7 +112,13 @@ class MetricQWebView {
 
   async addMetric (metricBase, description = undefined, oldMetric = undefined) {
     try {
-      await this.store.dispatch('metrics/create', { metric: { ...oldMetric, name: metricBase, description: description, traces: [] } })
+      if (metricBase.startsWith('(') && metricBase.endsWith(')')) {
+        const [metric, factorStr] = metricBase.substring(1, metricBase.length - 1).split('~')
+        const factor = Number.parseFloat(factorStr)
+        await this.store.dispatch('metrics/create', { metric: { ...oldMetric, name: metric, description: description, traces: [], factor: factor } })
+      } else {
+        await this.store.dispatch('metrics/create', { metric: { ...oldMetric, name: metricBase, description: description, traces: [] } })
+      }
       return true
     } catch (error) {
       if (error instanceof Error.DuplicateMetricError) {

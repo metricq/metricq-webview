@@ -205,7 +205,7 @@ export class DataCache {
 class MetricCache {
   constructor (paramMetricQReference, paramMetricName) {
     this.name = paramMetricName
-    this.factor = 1
+    this.factor = store.getters['metrics/getFactor'](this.name)
     this.color = store.getters['metrics/getColor'](this.name)
     this.series = {
       min: undefined,

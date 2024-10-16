@@ -224,6 +224,7 @@ export default {
         factor = 1
       }
       this.$store.dispatch('metrics/updateFactor', { metricKey: this.metric.key, factor })
+      window.MetricQWebView.updateMetricUrl()
     },
     changeDraw (evt) {
       if (this.metric.drawMin === false && this.metric.drawAvg === false && this.metric.drawMax === false) {
