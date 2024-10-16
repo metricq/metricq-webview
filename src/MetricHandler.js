@@ -174,52 +174,49 @@ export class MetricHandler {
   }
 
   setTimeRange (paramStartTime, paramStopTime) {
-    // TODO: check for zoom area if it is too narrow (i.e. less than 1000 ms)
-    // TODO: sync the aforementioned minimum time window
-    if (undefined === paramStartTime || paramStartTime instanceof MetricTimestamp) {
-      paramStartTime = this.startTime.getUnix()
+    let newStartTime
+    let newStopTime
+
+    if (undefined === paramStartTime) {
+      newStartTime = this.startTime.getUnix()
+    } else if (paramStartTime instanceof MetricTimestamp) {
+      newStartTime = paramStartTime.getUnix()
+      paramStartTime = paramStartTime.getValue()
     } else {
-      this.startTime.updateTime(paramStartTime)
-    }
-    if (undefined === paramStopTime || paramStopTime instanceof MetricTimestamp) {
-      paramStopTime = this.stopTime.getUnix()
-    } else {
-      this.stopTime.updateTime(paramStopTime)
+      newStartTime = paramStartTime
     }
 
-    if (isNaN(paramStartTime) || isNaN(paramStopTime)) {
+    if (undefined === paramStopTime) {
+      newStopTime = this.stopTime.getUnix()
+    } else if (paramStopTime instanceof MetricTimestamp) {
+      newStopTime = paramStopTime.getUnix()
+      paramStopTime = paramStopTime.getValue()
+    } else {
+      newStopTime = paramStopTime
+    }
+
+    if (isNaN(newStartTime) || isNaN(newStopTime)) {
       throw new Error('uh oh time is NaN')
     }
-    if (paramStartTime >= paramStopTime) {
+
+    if (newStartTime >= newStopTime) {
       throw new Error(`startTime(${paramStartTime}) is not smaller than stopTime(${paramStopTime})`)
     }
 
-    let timeSuitable = true
-    if ((paramStopTime - paramStartTime) < this.renderer.graticule.MIN_ZOOM_TIME) {
-      const oldDelta = paramStopTime - paramStartTime
-      const newDelta = this.renderer.graticule.MIN_ZOOM_TIME
-      paramStartTime -= Math.round((newDelta - oldDelta) / 2.00)
-      paramStopTime += Math.round((newDelta - oldDelta) / 2.00)
-      timeSuitable = false
+    if ((newStopTime - newStartTime) < this.renderer.graticule.MIN_ZOOM_TIME) {
+      return false
     }
-    if ((paramStopTime - paramStartTime) > this.renderer.graticule.MAX_ZOOM_TIME) {
-      const oldDelta = paramStopTime - paramStartTime
-      const newDelta = this.renderer.graticule.MAX_ZOOM_TIME
-      paramStartTime += Math.round((oldDelta - newDelta) / 2.00)
-      paramStopTime -= Math.round((oldDelta - newDelta) / 2.00)
-      timeSuitable = false
+    if ((newStopTime - newStartTime) > this.renderer.graticule.MAX_ZOOM_TIME) {
+      return false
     }
+
+    this.startTime.updateTime(paramStartTime)
+    this.stopTime.updateTime(paramStopTime)
 
     this.renderer.updateMetricUrl()
-    // maybe move this line to MetricQWebView.setPlotRanges()? NAW
     window.MetricQWebView.graticule.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())
-    return timeSuitable
-    // this.lastRangeChangeTime = (new Date()).getTime();
-    // TODO: return false when intended zoom area is smaller than e.g. 1000 ms
-    // TODO: define a CONSTANT that is MINIMUM_ZOOM_AREA
 
-    // TODO: call url export here?
-    // return true;
+    return true
   }
 
   zoomTimeAtPoint (pointAt, zoomDirection) {
@@ -252,6 +249,8 @@ export class MetricHandler {
   setRelativeTimes (start, end) {
     this.startTime.updateTime(start)
     this.stopTime.updateTime(end)
-    this.setTimeRange(this.startTime, this.stopTime)
+
+    this.renderer.updateMetricUrl()
+    window.MetricQWebView.graticule.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())
   }
 }
