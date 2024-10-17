@@ -112,7 +112,11 @@ class MetricQWebView {
 
   async addMetric (metricBase, description = undefined, oldMetric = undefined) {
     try {
-      if (metricBase.startsWith('(') && metricBase.endsWith(')')) {
+      if (metricBase instanceof Array) {
+        // assuming we import a scaled metric from ye olde times
+        const [metric, factor] = metricBase
+        await this.store.dispatch('metrics/create', { metric: { ...oldMetric, name: metric, description: description, traces: [], factor: factor } })
+      } else if (metricBase.startsWith('(') && metricBase.endsWith(')')) {
         const [metric, factorStr] = metricBase.substring(1, metricBase.length - 1).split('~')
         const factor = Number.parseFloat(factorStr)
         await this.store.dispatch('metrics/create', { metric: { ...oldMetric, name: metric, description: description, traces: [], factor: factor } })
