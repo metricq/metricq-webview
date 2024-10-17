@@ -23,6 +23,7 @@ module.exports = {
                 config.user = user
                 config.password = password
               }
+              config.legacyCharts = process.env.VUE_APP_LEGACY_CHARTS
               return JSON.stringify(config)
             }
           }

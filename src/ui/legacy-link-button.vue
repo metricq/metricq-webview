@@ -30,8 +30,12 @@ export default {
         stop: endTime
       }
 
-      for (const metricKey of this.$store.getters['metrics/getAllKeys']()) {
-        target.cntr.push(metricKey)
+      for (const metric of this.$store.getters['metrics/getAll']()) {
+        if (metric.factor === undefined || metric.factor === 1) {
+          target.cntr.push(metric.key)
+        } else {
+          target.cntr.push([metric.key, metric.factor])
+        }
       }
 
       return this.$store.getters.getLegacyLink() + '#' + JSURL.stringify(target)
