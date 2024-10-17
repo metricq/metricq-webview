@@ -251,22 +251,15 @@ export function importMetricUrl () {
         return false
       }
       const timeRanges = determineTimeRangeOfJsUrl(metricsObj)
-      initializeMetrics(metricsObj.cntr, timeRanges[0], timeRanges[1])
+      window.MetricQWebView.reinitialize(metricsObj.cntr, timeRanges[0], timeRanges[1])
       return true
     } else if (firstChar === '.') {
       const splitted = jsurlStr.split('*')
       if (splitted.length > 1) {
-        initializeMetrics(splitted.slice(2), splitted[0].substring(1), splitted[1])
+        window.MetricQWebView.reinitialize(splitted.slice(2), splitted[0].substring(1), splitted[1])
         return true
       }
     }
   }
   return false
-}
-
-/* TODO: generalize this for cases where is no "legendApp" */
-export function initializeMetrics (metricNamesArr, timeStart, timeStop) {
-  if (window.MetricQWebView) {
-    window.MetricQWebView.reinitialize(metricNamesArr, timeStart, timeStop)
-  }
 }
