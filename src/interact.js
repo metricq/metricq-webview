@@ -168,14 +168,14 @@ function uiInteractLegend (evtObj) {
   const range = window.MetricQWebView.graticule.curValueRange
   const maxDistance = 0.01 * (range[1] - range[0])
 
-  for (const metric of Object.values(window.MetricQWebView.graticule.data.metrics)) {
-    const metricDrawState = store.getters['metrics/getMetricDrawState'](metric.name)
+  for (const metric of store.getters['metrics/getAll']()) {
+    const metricData = window.MetricQWebView.graticule.data.getMetricCache(metric.key)
 
-    if (!metricDrawState.draw) continue
+    if (!metric.draw) continue
 
     let curText
-    if (metric.series.raw !== undefined) {
-      const value = metric.series.raw.getValueAtTimeAndIndex(timeAt)
+    if (metricData.series.raw !== undefined) {
+      const value = metricData.series.raw.getValueAtTimeAndIndex(timeAt)
       if (value === undefined) continue
 
       if (
@@ -185,47 +185,47 @@ function uiInteractLegend (evtObj) {
           Math.abs(value[1] - valueAt) < Math.abs(closestMetricValue - valueAt)
         )
       ) {
-        closestMetric = metric.name
+        closestMetric = metricData.name
         closestMetricValue = value[1]
       }
       curText = (Number(value[1])).toFixed(3)
-    } else if (metric.series.min !== undefined &&
-               metric.series.max !== undefined &&
-               metric.series.avg !== undefined) {
-      const min = metric.series.min.getValueAtTimeAndIndex(timeAt)
-      const max = metric.series.max.getValueAtTimeAndIndex(timeAt)
-      const avg = metric.series.avg.getValueAtTimeAndIndex(timeAt)
+    } else if (metricData.series.min !== undefined &&
+               metricData.series.max !== undefined &&
+               metricData.series.avg !== undefined) {
+      const min = metricData.series.min.getValueAtTimeAndIndex(timeAt)
+      const max = metricData.series.max.getValueAtTimeAndIndex(timeAt)
+      const avg = metricData.series.avg.getValueAtTimeAndIndex(timeAt)
       if (min === undefined || max === undefined || avg === undefined) continue
 
       if (
-        (valueAt < max[1] && valueAt > min[1] && metricDrawState.drawMin && metricDrawState.drawMax) ||
+        (valueAt < max[1] && valueAt > min[1] && metric.drawMin && metric.drawMax) ||
         maxDistance > Math.abs(valueAt - avg[1])
       ) {
         if (
           closestMetric === undefined ||
             Math.abs(avg[1] - valueAt) < Math.abs(closestMetricValue - valueAt)
         ) {
-          closestMetric = metric.name
+          closestMetric = metricData.name
           closestMetricValue = avg[1]
         }
       }
 
       curText = ''
-      if (metricDrawState.drawMin) {
+      if (metric.drawMin) {
         curText += '▼ ' + (Number(min[1])).toFixed(3) + ' | '
       }
-      if (metricDrawState.drawAvg) {
+      if (metric.drawAvg) {
         curText += ' ⌀ ' + (Number(avg[1])).toFixed(3)
       }
-      if (metricDrawState.drawMax) {
+      if (metric.drawMax) {
         curText += ' | ▲ ' + (Number(max[1])).toFixed(3)
       }
     } else {
       continue
     }
 
-    let label = metric.name
-    const unit = store.getters['metrics/getUnit'](metric.name)
+    let label = metricData.name
+    const unit = store.getters['metrics/getUnit'](metricData.name)
     if (unit !== undefined && unit !== '1') {
       label += ` [${unit}]`
     }
@@ -240,7 +240,7 @@ function uiInteractLegend (evtObj) {
     }
 
     const newEntry = {
-      metric,
+      metric: metricData,
       curText,
       label
     }
