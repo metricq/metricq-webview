@@ -553,11 +553,8 @@ export class Graticule {
     } else {
       this.drawBands(ctx, curTimePerPixel, curValuesPerPixel, graticuleDimensions)
       this.drawSeries(this.curTimeRange, this.curValueRange, curTimePerPixel, curValuesPerPixel, ctx, graticuleDimensions)
-      ctx.restore()
     }
-    // timers.drawing.end = (new Date()).getTime()
-    // TODO: Make timings accessible
-    // showTimers();
+    ctx.restore()
   }
 
   parseStyleOptions (styleOptions, ctx) {
