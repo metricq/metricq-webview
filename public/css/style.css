@@ -8,12 +8,12 @@
 }
 
 html {
-    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 body {
     background-color: #EDEDED;
-    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 .row_head {
@@ -52,7 +52,7 @@ body {
 
 .row_foot_bottom {
     overflow: auto;
-    height: 10vh;
+    height: 10dvh;
     width: 100vw;
 }
 
@@ -217,7 +217,7 @@ body {
 .main_app {
     display: flex;
     flex-direction: column;
-    height: 99vh;
+    height: 99dvh;
 }
 
 /* Fix positions of tooltips. Known issue, see:
