@@ -65,7 +65,7 @@
           </ul>
         </div>
         <div class="modal-footer">
-          MetricQ-WebView Copyright (C) 2021 Technische Universität Dresden
+          Copyright (C) 2021-2024 Technische Universität Dresden
           <br>
           This program is free software: you can redistribute it and/or modify
           it under the terms of the GNU General Public License as published by
@@ -96,12 +96,16 @@ export default {
   props: { },
   data () {
     return {
-      popupTitle: 'Information'
+      popupTitle: 'Über WebView'
     }
   },
   computed: {
     version () {
-      return process.env.VUE_APP_VERSION + '+' + process.env.VUE_APP_VERSION_BUILD
+      if (process.env.VUE_APP_VERSION_BUILD) {
+        return process.env.VUE_APP_VERSION + '+' + process.env.VUE_APP_VERSION_BUILD
+      }
+
+      return process.env.VUE_APP_VERSION
     },
     buildDate () {
       return process.env.VUE_APP_BUILD_DATE

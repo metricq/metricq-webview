@@ -105,8 +105,12 @@ export const mainApp = new Vue({
     analyzeButtonClicked () {
       this.togglePopup('analyze')
     },
-    toggleMinMaxButton (evt) {
-      this.$store.dispatch('metrics/updateDrawStateGlobally', evt.target.checked)
+    toggleMinMaxButton () {
+      if (this.$refs.minMaxButton.indeterminate) {
+        this.$store.dispatch('metrics/updateDrawStateGlobally', false)
+      } else {
+        this.$store.dispatch('metrics/updateDrawStateGlobally', !this.$refs.minMaxButton.checked)
+      }
     },
     ...mapMutations([
       'togglePopup'

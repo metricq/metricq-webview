@@ -241,8 +241,8 @@ export class MetricHandler {
   }
 
   reload () {
-    const rowBodyEle = document.querySelector('.row_body')
-    const maxDataPoints = Math.round(rowBodyEle.offsetWidth / this.store.state.configuration.resolution)
+    const webviewElement = document.getElementById('webview_container')
+    const maxDataPoints = Math.round(webviewElement.offsetWidth / this.store.state.configuration.resolution)
     this.doRequest(maxDataPoints)
   }
 

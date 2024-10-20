@@ -1,132 +1,144 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="utf8"/>
-  <title>MetricQ WebView</title>
-  <link rel="icon" href="<%= BASE_URL %>img/icons/graph-up.svg"/>
-  <link rel="stylesheet" type="text/css" href="css/base.css" />
+    <meta charset="utf8" />
+    <title>MetricQ WebView</title>
+    <link rel="icon" href="<%= BASE_URL %>img/icons/graph-up.svg" />
+    <link rel="stylesheet" type="text/css" href="css/base.css" />
 
+    <!-- need to prevent safari users to do fancy two-finger-zooming on the webpage -->
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, minimal-ui, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 
-  <!-- need to prevent safari users to do fancy two-finger-zooming on the webpage -->
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-
-  <noscript>
-    <link rel="stylesheet" type="text/css" href="css/noscript.css" />
-    <h2>MetricQ Webview erfordert Javascript, aber es ist deaktiviert oder wird nicht unterstützt.</h2>
-    Bitte aktivieren Sie JavaScript oder benutzen einen Webbrowser mit Unterstützung für JavaScript.
-  </noscript>
+    <noscript>
+        <link rel="stylesheet" type="text/css" href="css/noscript.css" />
+        <h2>MetricQ Webview erfordert Javascript, aber es ist deaktiviert oder wird nicht unterstützt.</h2>
+        Bitte aktivieren Sie JavaScript oder benutzen einen Webbrowser mit Unterstützung für JavaScript.
+    </noscript>
 </head>
+
 <body>
 
-<div id="loading_app" class="spin">
-</div>
+    <div id="loading_app" class="spin">
+    </div>
 
-<div id="main_app" class="main_app" style="display: none">
-  <div id="row_head" class="row_head">
-    <nav class="navbar navbar-light bg-light">
-      <a class="navbar-brand" href="?">
-        <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo" style="border-radius: .25rem;"/>
-        MetricQ WebView
-      </a>
-      <label class="btn btn-outline-primary btn-navbar" id="button_configuration"
-             v-on:click="configurationButtonClicked"
-             v-b-tooltip.hover title="Einstellungen">
-        <b-icon-tools></b-icon-tools>
-      </label>
-      <label class="btn btn-outline-primary btn-navbar" id="button_export" v-on:click="exportButtonClicked"
-             v-b-tooltip.hover title="Export">
-        <b-icon-file-earmark-arrow-down></b-icon-file-earmark-arrow-down>
-      </label>
-      <label class="btn btn-outline-primary btn-navbar" id="button_analyze" v-on:click="analyzeButtonClicked"
-             v-b-tooltip.hover title="Analyse">
-        <b-icon-table />
-      </label>
-      <label class="btn btn-outline-primary btn-navbar"
-             v-b-tooltip.hover title="Deaktiviert werden nur Durchschnittswerte angezeigt">
-        <input type="checkbox" id='checkbox_min_max' v-bind:checked="globalMinMax" v-on:change="toggleMinMaxButton">
-        <span>Werteumfang zeichnen</span>
-      </label>
-      <label>
-        <time-button id="date_range" class="btn btn-outline-primary btn-navbar"
-                     v-if="isWebviewLoaded"
-                     v-bind:starttime="timestamp.start"
-                     v-bind:endtime="timestamp.end"
-                     v-b-tooltip title="Angezeigten Zeitraum einstellen">
-        </time-button>
-      </label>
-      <label class="btn btn-outline-primary btn-navbar" id="button_link" v-on:click="linkButtonClicked"
-             v-b-tooltip.hover title="Informationen anzeigen">
-        <b-icon-info-circle></b-icon-info-circle>
-      </label>
-    </nav>
-  </div>
-  <div :class="'body_and_legend_' + configuration.legendDisplay">
-    <graticule-container></graticule-container>
-    <div id="legend_container" :class="'row_foot row_foot_' + configuration.legendDisplay">
-      <ul id="legend_list" :class="'legend_list legend_list_' + configuration.legendDisplay">
-        <metric-legend
-          v-for="metric in metricsList"
-          :metric="metric"
-          :key="metric.name"
-          :position="configuration.legendDisplay"
-        ></metric-legend>
-        <hide-metrics-button :position="configuration.legendDisplay"></hide-metrics-button>
-        <recolor-metrics-button :position="configuration.legendDisplay"></recolor-metrics-button>
-        <new-metric-legend
-          :position="configuration.legendDisplay"></new-metric-legend>
-        <clear-metrics-button
-          :position="configuration.legendDisplay"></clear-metrics-button>
-        <query-times
-            :performance="performance"
-            :configuration="configuration"
-        ></query-times>
-        <query-points
-            :performance="performance"
-            :configuration="configuration"
-        ></query-points>
-      </ul>
-      <div id="wrapper_popup_legend">
-        <metric-popup
-          v-for="metric in metricsList"
-          :metric="metric"
-          :key="metric.popupKey"
-          v-if="metric.popup"
-        ></metric-popup>
-        <div id="wrapper_popup_newlegend">
-          <new-metric-popup
-            v-if="popups.newmetric"
-          ></new-metric-popup>
+    <div id="main_app" class="main_app" style="display: none">
+        <div class="header">
+            <b-navbar toggleable="md" type="light" variant="light">
+                <b-navbar-brand href="?">
+                    <img src="img/metricq-logo.png" width="35" height="35" alt="MetricQ-Logo"
+                        style="border-radius: .25rem;" />
+                    <span class="navbar-brand d-none d-xl-inline">MetricQ WebView</span>
+                </b-navbar-brand>
+
+                <!-- <b-button variant="outline-secondary"> -->
+                <!--     <b-icon-search /> -->
+                <!-- </b-button> -->
+
+                <time-button class="d-md-none btn btn-outline-primary" v-if="isWebviewLoaded"
+                    :starttime="timestamp.start" :endtime="timestamp.end" v-b-tooltip
+                    title="Angezeigten Zeitraum einstellen">
+                </time-button>
+
+                <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+
+                <b-collapse id="nav-collapse" is-nav class="justify-content-end">
+                    <b-navbar-nav class="d-inline-flex flex-row w-sm-100 justify-content-between">
+                        <b-nav-item>
+                            <b-button id="button_configuration" variant="outline-primary"
+                                @click="configurationButtonClicked" v-b-tooltip.hover title="Einstellungen">
+                                <b-icon-tools />
+                            </b-button>
+                        </b-nav-item>
+                        <b-nav-item>
+                            <b-button variant="outline-primary" id="button_export" @click="exportButtonClicked"
+                                v-b-tooltip.hover title="Export">
+                                <b-icon-cloud-download />
+                            </b-button>
+                        </b-nav-item>
+                        <b-nav-item>
+                            <b-button variant="outline-primary" id="button_analyze" @click="analyzeButtonClicked"
+                                v-b-tooltip.hover title="Analyse">
+                                <b-icon-table />
+                            </b-button>
+                        </b-nav-item>
+                        <b-nav-item>
+                            <b-button variant="outline-primary" v-b-tooltip.hover
+                                title="Deaktiviert werden nur Durchschnittswerte angezeigt" @click="toggleMinMaxButton">
+                                <b-form-checkbox ref="minMaxButton" :checked="globalMinMax" id="checkbox_min_max">
+                                    <span class="d-none d-lg-inline">Werteumfang zeichnen</span>
+                                    <b-icon-align-middle class="d-inline d-lg-none" />
+                                </b-form-checkbox>
+                            </b-button>
+                        </b-nav-item>
+                        <b-nav-item class="d-none d-md-flex">
+                            <time-button class="btn btn-outline-primary btn-navbar" v-if="isWebviewLoaded"
+                                :starttime="timestamp.start" :endtime="timestamp.end" v-b-tooltip
+                                title="Angezeigten Zeitraum einstellen">
+                            </time-button>
+                        </b-nav-item>
+                        <b-nav-item>
+                            <b-button variant="outline-primary" id="button_link" @click="linkButtonClicked"
+                                v-b-tooltip.hover title="Informationen anzeigen">
+                                <b-icon-info-lg />
+                            </b-button>
+                        </b-nav-item>
+                    </b-navbar-nav>
+                </b-collapse>
+            </b-navbar>
         </div>
-      </div>
-      <div id="wrapper_popup_configuration">
-        <configuration-popup
-          :key="configuration.key"
-          v-if="popups.configuration"
-        ></configuration-popup>
-      </div>
-      <div id="wrapper_popup_analyze">
-        <analyze-popup
-          v-if="popups.analyze"
-        ></analyze-popup>
-      </div>
-      <div id="wrapper_popup_yaxis">
-        <yaxis-popup
-          v-if="popups.yaxis"
-        ></yaxis-popup>
-      </div>
-      <div id="wrapper_popup_export">
-        <export-popup
-          v-if="popups.export"
-        ></export-popup>
-      </div>
+        <div :class="'body_and_legend_' + configuration.legendDisplay">
+            <graticule-container></graticule-container>
+            <div :class="'legend legend_' + configuration.legendDisplay">
+                <ul :class="'legend_list legend_list_' + configuration.legendDisplay">
+                    <metric-legend v-for="metric in metricsList" :metric="metric" :key="metric.name"
+                        :position="configuration.legendDisplay"></metric-legend>
+                    <li class="d-inline-flex d-sm-none gap-1">
+                        <hide-metrics-button :position="configuration.legendDisplay"></hide-metrics-button>
+                        <recolor-metrics-button :position="configuration.legendDisplay"></recolor-metrics-button>
+                        <new-metric-legend :position="configuration.legendDisplay"></new-metric-legend>
+                        <clear-metrics-button :position="configuration.legendDisplay"></clear-metrics-button>
+                    </li>
+
+                    <hide-metrics-button class="d-none d-sm-inline-flex"
+                        :position="configuration.legendDisplay"></hide-metrics-button>
+                    <recolor-metrics-button class="d-none d-sm-inline"
+                        :position="configuration.legendDisplay"></recolor-metrics-button>
+                    <new-metric-legend class="d-none d-sm-inline"
+                        :position="configuration.legendDisplay"></new-metric-legend>
+                    <clear-metrics-button class="d-none d-sm-inline"
+                        :position="configuration.legendDisplay"></clear-metrics-button>
+                    <query-times :performance="performance" :configuration="configuration"
+                        class="d-none d-lg-inline"></query-times>
+                    <query-points :performance="performance" :configuration="configuration"
+                        class="d-none d-lg-inline"></query-points>
+                </ul>
+                <div id="wrapper_popup_legend">
+                    <metric-popup v-for="metric in metricsList" :metric="metric" :key="metric.popupKey"
+                        v-if="metric.popup" />
+                </div>
+                <div id="wrapper_popup_newlegend">
+                    <new-metric-popup v-if="popups.newmetric" />
+                </div>
+                <div id="wrapper_popup_configuration">
+                    <configuration-popup :key="configuration.key" v-if="popups.configuration" />
+                </div>
+                <div id="wrapper_popup_analyze">
+                    <analyze-popup v-if="popups.analyze" />
+                </div>
+                <div id="wrapper_popup_yaxis">
+                    <yaxis-popup v-if="popups.yaxis" />
+                </div>
+                <div id="wrapper_popup_export">
+                    <export-popup v-if="popups.export" />
+                </div>
+                <div id="wrapper_popup_link">
+                    <link-popup v-if="popups.link" />
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="wrapper_popup_link">
-      <link-popup
-        v-if="popups.link"
-      ></link-popup>
-    </div>
-  </div>
-</div>
 </body>
+
 </html>

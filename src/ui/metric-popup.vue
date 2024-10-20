@@ -214,8 +214,6 @@ export default {
 
     const colorchooserEle = popupEle.querySelector('.popup_colorchooser')
     const colorchooserObj = new Colorchooser(colorchooserEle, this.metric)
-
-    document.getElementById('input_metric_name').focus()
   },
   methods: {
     onFactorUpdate () {

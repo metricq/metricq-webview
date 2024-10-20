@@ -6,7 +6,7 @@
   >
     <span id="button_clear_all">
       <b-icon-trash />
-      <span class="m-1">Alle Metriken entfernen</span>
+      <span class="m-1 d-none d-sm-inline">Alle Metriken entfernen</span>
     </span>
   </li>
 </template>

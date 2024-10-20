@@ -21,9 +21,9 @@ class MetricQWebView {
     this.margins = {
       canvas: {
         top: 10,
-        right: 35,
-        bottom: 40,
-        left: 105
+        right: 5,
+        bottom: 45,
+        left: 95
       }
     }
     this.lastThrottledReloadTime = 0

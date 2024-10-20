@@ -6,7 +6,7 @@
   >
     <span>
       <b-icon-palette />
-      <span class="m-2">
+      <span class="m-2 d-none d-sm-inline">
         Metriken eindeutig einfärben
       </span>
     </span>

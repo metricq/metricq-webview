@@ -168,6 +168,9 @@ function uiInteractLegend (evtObj) {
   const range = window.MetricQWebView.graticule.curValueRange
   const maxDistance = 0.01 * (range[1] - range[0])
 
+  // myCtx.fillRect(window.MetricQWebView.graticule.dimensions.x, curPosOnCanvas[1] - maxDistance / window.MetricQWebView.graticule.curValuesPerPixel, window.MetricQWebView.graticule.dimensions.width, 2)
+  // myCtx.fillRect(window.MetricQWebView.graticule.dimensions.x, curPosOnCanvas[1] + maxDistance / window.MetricQWebView.graticule.curValuesPerPixel, window.MetricQWebView.graticule.dimensions.width, 2)
+
   for (const metric of store.getters['metrics/getAll']()) {
     const metricData = window.MetricQWebView.graticule.data.getMetricCache(metric.key)
 
@@ -493,6 +496,24 @@ const keyDown = {
   }
 }
 
+const touch = {
+  touches: [],
+  moveCallbacks: [],
+  touchStart (evt) {
+    touch.touches = evt.touches
+  },
+  touchMove (evt) {
+    for (const cb of touch.moveCallbacks) {
+      cb(evt)
+    }
+  },
+  touchEnd (evt) {
+  },
+  registerMoveCallback (callbackFunc) {
+    touch.moveCallbacks.push(callbackFunc)
+  }
+}
+
 /* figure out scroll offset */
 function calculateScrollOffset (curLevelElement) {
   let scrollOffset = [0, 0]
@@ -512,19 +533,113 @@ document.addEventListener('keyup', keyDown.keyUp)
 
 // code for Mac Safari
 window.addEventListener('gesturechange', (evt) => {
-  evt.preventDefault()
-  const timeRange = window.MetricQWebView.graticule.curTimeRange
-  const delta = timeRange[1] - timeRange[0]
-  const timeMargin = Math.round((delta * evt.scale - delta) / 2)
-  timeRange[0] -= timeMargin
-  timeRange[1] += timeMargin
-  window.MetricQWebView.handler.setTimeRange(timeRange[0], timeRange[1])
-  window.MetricQWebView.throttledReload()
-  window.MetricQWebView.graticule.draw(false)
+  // evt.preventDefault()
+  // const timeRange = window.MetricQWebView.graticule.curTimeRange
+  // const delta = timeRange[1] - timeRange[0]
+  // const timeMargin = Math.round((delta * evt.scale - delta) / 2)
+  // timeRange[0] -= timeMargin
+  // timeRange[1] += timeMargin
+  // window.MetricQWebView.handler.setTimeRange(timeRange[0], timeRange[1])
+  // window.MetricQWebView.throttledReload()
+  // window.MetricQWebView.graticule.draw(false)
 })
 
 window.addEventListener('contextmenu', (event) => {
   if (event.target && event.target.tagName === 'CANVAS') {
     event.preventDefault()
+  }
+})
+
+let touchesStart
+
+window.addEventListener('touchstart', (event) => {
+  if (!event.target || event.target.tagName !== 'CANVAS') {
+    return
+  }
+  if (event.touches.length === 1 || event.touches.length === 2) {
+    event.preventDefault()
+    touchesStart = event.touches
+  }
+})
+
+window.addEventListener('touchmove', (event) => {
+  if (!event.target || event.target.tagName !== 'CANVAS') {
+    return
+  }
+
+  event.preventDefault()
+
+  if (event.touches.length === 1) {
+    const touch = event.touches[0]
+
+    if (touchesStart[0].screenX !== touch.screenX) {
+      const timeToMoveBy = (touchesStart[0].screenX - touch.screenX) * window.MetricQWebView.graticule.curTimePerPixel
+      touchesStart = event.touches
+
+      window.MetricQWebView.handler.setTimeRange(
+        window.MetricQWebView.handler.startTime.getUnix() + timeToMoveBy,
+        window.MetricQWebView.handler.stopTime.getUnix() + timeToMoveBy
+      )
+
+      window.MetricQWebView.throttledReload()
+      window.MetricQWebView.graticule.draw(false)
+    }
+  } else if (event.touches.length === 2) {
+    if (touchesStart.length !== 2) {
+      return
+    }
+
+    const times = [
+      window.MetricQWebView.graticule.getTimeAtX(touchesStart[0].screenX),
+      window.MetricQWebView.graticule.getTimeAtX(touchesStart[1].screenX)
+    ]
+
+    const logDates = (text, dates) => {
+      console.log(text, new Date(dates[0]).toLocaleString(), new Date(dates[1]).toLocaleString())
+    }
+
+    logDates('curTimeRange: ', window.MetricQWebView.graticule.curTimeRange)
+    console.log(touchesStart[0].screenX, touchesStart[1].screenX)
+    console.log(event.touches[0].screenX, event.touches[1].screenX)
+    logDates('times: ', times)
+
+    const a = touchesStart[0].screenX
+    const b = touchesStart[1].screenX
+    const c = event.touches[0].screenX
+    const d = event.touches[1].screenX
+
+    const lambda = (s) => {
+      return (s - b) / (a - b)
+    }
+
+    const prime = (s) => {
+      const l = lambda(s)
+      return l * c + (1 - l) * d
+    }
+
+    const newTimes = [
+      window.MetricQWebView.graticule.getTimeAtX(prime(window.MetricQWebView.graticule.dimensions.x)),
+      window.MetricQWebView.graticule.getTimeAtX(prime(window.MetricQWebView.graticule.dimensions.width))
+    ]
+
+    logDates('newTimes: ', newTimes)
+
+    window.MetricQWebView.handler.setTimeRange(
+      newTimes[0], newTimes[1]
+    )
+
+    touchesStart = event.touches
+
+    window.MetricQWebView.throttledReload()
+    window.MetricQWebView.graticule.draw(false)
+  }
+}, { passive: false })
+
+// On orientation change, automatically switch the legend from right to bottom
+screen.orientation.addEventListener('change', () => {
+  if (screen.orientation.type.startsWith('portrait')) {
+    store.commit('setLegendDisplay', 'bottom')
+  } else {
+    store.commit('setLegendDisplay', 'right')
   }
 })

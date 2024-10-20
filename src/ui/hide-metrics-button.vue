@@ -8,20 +8,14 @@
       @click="onHideClicked"
     >
       <b-icon-eye-slash />
-      <span
-        v-once
-        class="m-2"
-      >Alle Metriken verstecken</span>
+      <span class="d-none d-sm-inline">Metriken verstecken</span>
     </span>
     <span
       class="clickable legend_item legend_end"
       @click="onShowClicked"
     >
       <b-icon-eye-fill />
-      <span
-        v-once
-        class="m-2"
-      >Alle Metriken anzeigen</span>
+      <span class="d-none d-sm-inline">Metriken anzeigen</span>
     </span>
   </li>
 </template>
@@ -61,11 +55,17 @@ export default {
     padding: 0;
     display: inline-flex;
     column-gap: 10px;
+    row-gap: 5px;
+    flex-wrap: nowrap;
 }
 
 .legend_double_item > .legend_item {
     display: inline-block;
     flex: 1;
     text-align: center;
+}
+
+.legend_double_item > .legend_item > span {
+    margin-left: 8px;
 }
 </style>

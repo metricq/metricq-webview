@@ -16,7 +16,7 @@
             Legende
           </h5>
           <div class="form-group row">
-            <label class="col-sm-5 col-form-label">
+            <label class="col-5 col-form-label">
               Position
             </label>
             <div class="form-check form-check-inline">
@@ -56,10 +56,10 @@
           </h5>
           <div class="form-group row">
             <label
-              class="col-sm-5 col-form-label"
+              class="col-5 col-form-label"
               for="resolution_input"
             >Auflösung</label>
-            <div class="col-sm-5">
+            <div class="col-5">
               <input
                 id="resolution_input"
                 v-model="uiResolution"
@@ -71,16 +71,16 @@
               >
             </div>
             <label
-              class="col-sm-2 col-form-label"
+              class="col-2 col-form-label"
               for="resolution_input"
             >{{ configuration.resolution }}</label>
           </div>
           <div class="form-group row">
             <label
-              class="col-sm-5 col-form-label"
+              class="col-5 col-form-label"
               for="zoom_speed_input"
             >Zoom Geschwindigkeit</label>
-            <div class="col-sm-5">
+            <div class="col-5">
               <input
                 id="zoom_speed_input"
                 v-model="uiZoomSpeed"
@@ -92,7 +92,7 @@
               >
             </div>
             <label
-              class="col-sm-2 col-form-label"
+              class="col-2 col-form-label"
               for="resolution_input"
             >{{ configuration.zoomSpeed }}</label>
           </div>
@@ -175,9 +175,4 @@ export default {
 </script>
 
 <style scoped>
-.config_radio_legend {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-}
 </style>

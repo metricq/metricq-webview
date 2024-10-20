@@ -12,72 +12,40 @@
       <div class="modal-content">
         <popup-header :popup-title="popupTitle" />
         <div class="modal-body">
-          <div class="form-group row">
-            <label
-              class="col-sm-3 col-form-label"
-              for="export_width"
-            >Breite</label>
-            <div class="col-sm-7">
-              <input
-                id="export_width"
-                v-model="exportWidth"
-                type="number"
-                class="form-control"
-              >
-            </div>
-          </div>
-          <div class="form-group row">
-            <label
-              class="col-sm-3 col-form-label"
-              for="export_height"
-            >Höhe</label>
-            <div class="col-sm-7">
-              <input
-                id="export_height"
-                v-model="exportHeight"
-                type="number"
-                class="form-control"
-              >
-            </div>
-          </div>
-          <div class="form-group row">
-            <label
-              class="col-sm-3 col-form-label"
-              for="export_format"
-            >Dateiformat</label>
-            <div class="col-sm-7">
-              <select
-                id="export_format"
-                v-model="selectedFileformat"
-                size="1"
-                class="form-control custom-select"
-                style="width: 100%;"
-              >
-                <option
-                  v-for="fileformatName in fileformats"
-                  :key="fileformatName"
-                >
-                  {{
-                    fileformatName
-                  }}
-                </option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group row">
-            <label
-              class="col-sm-3 col-form-label"
-              for="export_format"
-            >mit Analyse</label>
-            <div class="col-sm-7">
-              <input
-                id="exportAnalyzeCheck"
-                v-model="exportAnalyze"
-                type="checkbox"
-                class="form-control-sm"
-              >
-            </div>
-          </div>
+          <b-form-group label="Dateiformat">
+            <b-form-select
+              v-model="selectedFileformat"
+              :options="fileformats"
+            />
+          </b-form-group>
+          <b-form-group
+            v-if="selectedFileformat !== 'pdf'"
+            label="Breite"
+            label-for="export_width"
+          >
+            <b-form-input
+              id="export_width"
+              v-model="exportWidth"
+              type="number"
+              class="form-control"
+            />
+          </b-form-group>
+          <b-form-group
+            v-if="selectedFileformat !== 'pdf'"
+            label="Höhe"
+            label-for="export_height"
+          >
+            <b-form-input
+              id="export_height"
+              v-model="exportHeight"
+              type="number"
+            />
+          </b-form-group>
+          <b-form-group v-if="selectedFileformat === 'pdf'">
+            <b-form-checkbox v-model="exportAnalyze">
+              mit Legende und Wertetabelle
+            </b-form-checkbox>
+          </b-form-group>
         </div>
         <div class="modal-footer">
           <legacy-link-button class="text-align-left" />
@@ -121,7 +89,7 @@
             id="anaTable"
             class="anaTable"
           >
-            <analyzeTable @finished="analyzeTableLoaded" />
+            <analyzeTable @finished="onAnalyzeTableLoaded" />
           </div>
         </section>
       </VueHtml2pdf>
@@ -241,7 +209,7 @@ export default {
         canvas.height / scale - (margins.top + margins.bottom)]
       window.MetricQWebView.graticule.draw(false, exportCanvasContext, size)
     },
-    analyzeTableLoaded () {
+    onAnalyzeTableLoaded () {
       this.analyzeTableReady = true
     }
   }

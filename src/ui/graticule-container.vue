@@ -1,22 +1,18 @@
 <template>
   <div
     id="wrapper_body"
-    class="wrapper_body"
   >
-    <div
+    <div id="webview_container" />
+    <b-button
       v-b-tooltip.hover
-      class="btn btn-outline-secondary overlay"
+      variant="outline-secondary"
+      class="overlay"
       title="Wertebereich der Y-Achse einstellen"
+      size="sm"
       @click="togglePopup"
     >
-      <b-icon-gear variant="dark" />
-      <br>
-      <b-icon-arrow-down-up variant="dark" />
-    </div>
-    <div
-      id="webview_container"
-      class="row_body"
-    />
+      <b-icon-border-left />
+    </b-button>
   </div>
 </template>
 
@@ -32,12 +28,23 @@ export default {
 
 <style scoped>
 #wrapper_body {
+    margin: 0px 10px 0px 10px;
+    padding: 0 5px 0 5px;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0px 1px 2px 1px #D0D0D0;
+    flex: 1;
     position: relative;
 }
 
+#webview_container {
+    touch-action: none;
+}
+
 .overlay {
-    position: fixed;
-    margin-top: 6px;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
     z-index: 1;
 }
 </style>

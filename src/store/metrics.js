@@ -241,7 +241,7 @@ export default {
     setError ({ commit }, { metricKey }) {
       commit('privateSet', { metricKey: metricKey, metric: { errorprone: true } })
     },
-    updateDrawStateGlobally ({ state, commit }, newState) {
+    updateDrawStateGlobally ({ state, commit, dispatch }, newState) {
       for (const metricKey in state.metrics) {
         const newDrawStates = {
           drawMin: newState,
@@ -254,6 +254,7 @@ export default {
       }
       window.MetricQWebView.graticule.draw(false)
       commit('setGlobalMinMax', newState, { root: true })
+      dispatch('checkGlobalDrawState')
     },
     updateDrawState ({ dispatch, commit }, { metricKey, drawState: { drawMin, drawAvg, drawMax } }) {
       commit('privateSet', { metricKey, metric: { drawMin, drawAvg, drawMax } })

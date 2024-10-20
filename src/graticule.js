@@ -351,8 +351,17 @@ export class Graticule {
   }
 
   formatAxisNumber (value) {
-    if (Math.abs(value) >= 10000) {
+    if (Math.abs(value) > 1e12) {
       return Number.parseFloat(value).toExponential(3)
+    }
+    if (Math.abs(value) > 1e9) {
+      return Number.parseFloat(value / 1e9).toFixed(1) + 'G'
+    }
+    if (Math.abs(value) > 1e6) {
+      return Number.parseFloat(value / 1e6).toFixed(1) + 'M'
+    }
+    if (Math.abs(value) > 1e3) {
+      return Number.parseFloat(value / 1e3).toFixed(1) + 'k'
     }
     return value
   }
@@ -429,6 +438,17 @@ export class Graticule {
       ctx.fillText(unitString, (Math.round(dimensions.height / 2) + dimensions.y) * -1, fontSize)
       ctx.restore()
     }
+  }
+
+  getTimeAtX (startX) {
+    if (this.curTimeRange === undefined) return undefined
+
+    const x = startX - this.dimensions.x
+
+    if (x >= 0 && x <= this.dimensions.width) {
+      return Math.round((x * this.curTimePerPixel) + this.curTimeRange[0])
+    }
+    return undefined
   }
 
   getTimeValueAtPoint (positionArr) {
@@ -1102,8 +1122,11 @@ export class Graticule {
   }
 
   canvasReset () {
+    this.ctx.reset()
     // is needed so that metriclegend can take the necessary space and canvas takes the rest
     this.ctx.canvas.width = 0
     this.ctx.canvas.height = 0
+    this.ctx.canvas.style.width = ''
+    this.ctx.canvas.style.height = ''
   }
 }

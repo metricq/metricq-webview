@@ -7,7 +7,7 @@
       <b-icon-plus-circle />
       <span
         v-once
-        class="m-2"
+        class="m-2 d-none d-sm-inline"
       >Metriken hinzufügen</span>
     </span>
   </li>

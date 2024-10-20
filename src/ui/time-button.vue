@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <b-icon-clock-history />
-    &nbsp;
-    <span>{{ starttime | formatDate }} - {{ endtime | formatDate }}</span>
+  <div ref="date_range">
+    <b-icon-clock-history class="d-none d-sm-inline" />
+    <span class="d-inline d-sm-none">{{ starttime | formatShortDate }} - {{ endtime | formatShortDate }}</span>
+    <span class="d-none d-sm-inline">&nbsp;{{ starttime | formatDate }} - {{ endtime | formatDate }}</span>
   </div>
 </template>
 
@@ -26,6 +26,7 @@ const labelMap = {
   'Letzte 3 Jahre': ['now-3y', 'now'],
   Heute: ['startday', 'endday'],
   'Heute bis jetzt': ['startday', 'now'],
+  Gestern: ['startday-1d', 'endday-1d'],
   'Diese Stunde': ['starthour', 'endhour'],
   'Diese Woche': ['startweek', 'endweek'],
   'Diese Woche bis jetzt': ['startweek', 'now'],
@@ -41,7 +42,11 @@ export default {
   filters: {
     formatDate: function (date) {
       return moment(date).format('DD.MM.YYYY, HH:mm')
+    },
+    formatShortDate: function (date, short) {
+      return moment(date).format('DD.MM.YY HH:mm')
     }
+
   },
   props: {
     starttime: {
@@ -55,7 +60,7 @@ export default {
   },
   mounted () {
     $(() => {
-      const daterange = $('#date_range')
+      const daterange = $(this.$refs.date_range)
 
       daterange.daterangepicker({
         startDate: moment(window.MetricQWebView.handler.startTime.getUnix()),
@@ -104,8 +109,8 @@ export default {
           window.MetricQWebView.handler.setTimeRange(start.unix() * 1000, end.unix() * 1000)
         }
         window.MetricQWebView.reload()
-        $('#date_range').data('daterangepicker').setStartDate(moment(window.MetricQWebView.handler.startTime.getUnix()))
-        $('#date_range').data('daterangepicker').setEndDate(moment(window.MetricQWebView.handler.stopTime.getUnix()))
+        daterange.data('daterangepicker').setStartDate(moment(window.MetricQWebView.handler.startTime.getUnix()))
+        daterange.data('daterangepicker').setEndDate(moment(window.MetricQWebView.handler.stopTime.getUnix()))
       })
     })
   }
@@ -114,7 +119,8 @@ export default {
 
 <style>
 .ranges {
-    height: 33vh;
+    min-height: 33dvh;
+    max-height: 70dvh;
     overflow-y: scroll;
 }
 
