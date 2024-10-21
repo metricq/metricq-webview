@@ -551,11 +551,14 @@ window.addEventListener('contextmenu', (event) => {
 })
 
 let touchesStart
+let touchVelocity
 
 window.addEventListener('touchstart', (event) => {
   if (!event.target || event.target.tagName !== 'CANVAS') {
     return
   }
+
+  // somebody put their dirty little fingies on the thing
   if (event.touches.length === 1 || event.touches.length === 2) {
     event.preventDefault()
     touchesStart = event.touches
@@ -569,11 +572,14 @@ window.addEventListener('touchmove', (event) => {
 
   event.preventDefault()
 
+  // uuh, they moved their fingies
   if (event.touches.length === 1) {
     const touch = event.touches[0]
 
+    // one thingy, so side-scroll the thing
     if (touchesStart[0].screenX !== touch.screenX) {
       const timeToMoveBy = (touchesStart[0].screenX - touch.screenX) * window.MetricQWebView.graticule.curTimePerPixel
+      touchVelocity = timeToMoveBy
       touchesStart = event.touches
 
       window.MetricQWebView.handler.setTimeRange(
@@ -589,51 +595,109 @@ window.addEventListener('touchmove', (event) => {
       return
     }
 
+    // this might be a two finger pinch gesture to zoom in or out
+
     const times = [
       window.MetricQWebView.graticule.getTimeAtX(touchesStart[0].screenX),
       window.MetricQWebView.graticule.getTimeAtX(touchesStart[1].screenX)
     ]
 
-    const logDates = (text, dates) => {
-      console.log(text, new Date(dates[0]).toLocaleString(), new Date(dates[1]).toLocaleString())
+    // get old and new touch positions
+    let a = window.MetricQWebView.graticule.getTimeAtX(touchesStart[0].screenX)
+    let b = window.MetricQWebView.graticule.getTimeAtX(touchesStart[1].screenX)
+    let ap = window.MetricQWebView.graticule.getTimeAtX(event.touches[0].screenX)
+    let bp = window.MetricQWebView.graticule.getTimeAtX(event.touches[1].screenX)
+
+    // sort the touch fingers if it's wierd
+    if (b < a) {
+      [a, b] = [b, a]
+    }
+    if (bp < ap) {
+      [ap, bp] = [bp, ap]
     }
 
-    logDates('curTimeRange: ', window.MetricQWebView.graticule.curTimeRange)
-    console.log(touchesStart[0].screenX, touchesStart[1].screenX)
-    console.log(event.touches[0].screenX, event.touches[1].screenX)
-    logDates('times: ', times)
+    // now let's try to find a fixed point in this
+    const lambdaf = 1 / ((a - ap) / (bp - b) + 1)
+    const f = lambdaf * a + (1 - lambdaf) * b
 
-    const a = touchesStart[0].screenX
-    const b = touchesStart[1].screenX
-    const c = event.touches[0].screenX
-    const d = event.touches[1].screenX
+    let newTimes
 
-    const lambda = (s) => {
-      return (s - b) / (a - b)
+    if (a > f || f > b) {
+      // if there is no fixed point just let us use on finger as slide anchor
+      const timeToMoveBy = a - ap
+      newTimes = [
+        window.MetricQWebView.handler.startTime.getUnix() + timeToMoveBy,
+        window.MetricQWebView.handler.stopTime.getUnix() + timeToMoveBy
+      ]
+    } else {
+      const [x0, x1] = window.MetricQWebView.graticule.curTimeRange
+
+      // use fixed point as baseline to scale new start and stop times
+      const x0pf = Math.abs(a - f) * Math.abs(x0 - f) / Math.abs(ap - f)
+      const x1pf = Math.abs(b - f) * Math.abs(x1 - f) / Math.abs(bp - f)
+
+      newTimes = [
+        f - x0pf,
+        f + x1pf
+      ]
     }
-
-    const prime = (s) => {
-      const l = lambda(s)
-      return l * c + (1 - l) * d
-    }
-
-    const newTimes = [
-      window.MetricQWebView.graticule.getTimeAtX(prime(window.MetricQWebView.graticule.dimensions.x)),
-      window.MetricQWebView.graticule.getTimeAtX(prime(window.MetricQWebView.graticule.dimensions.width))
-    ]
-
-    logDates('newTimes: ', newTimes)
 
     window.MetricQWebView.handler.setTimeRange(
       newTimes[0], newTimes[1]
     )
 
     touchesStart = event.touches
+    touchVelocity = 0
 
     window.MetricQWebView.throttledReload()
     window.MetricQWebView.graticule.draw(false)
   }
 }, { passive: false })
+
+window.addEventListener('touchend', (event) => {
+  if (!event.target || event.target.tagName !== 'CANVAS') {
+    return
+  }
+
+  // no more fingies on the thing. Have you tried UV though?
+  touchesStart = undefined
+
+  event.preventDefault()
+
+  // give the viewport a little nudge
+  applyMomentum()
+})
+
+function applyMomentum () {
+  function momentum () {
+    // while we would move visibly aka at least one pixel
+    if (Math.abs(touchVelocity) > window.MetricQWebView.graticule.curTimePerPixel) {
+      // only set the time range for the rendering
+      window.MetricQWebView.graticule.setTimeRange(
+        window.MetricQWebView.graticule.curTimeRange[0] + touchVelocity,
+        window.MetricQWebView.graticule.curTimeRange[1] + touchVelocity
+      )
+
+      // redraw shit
+      window.MetricQWebView.graticule.draw(false)
+
+      // dampening the speed
+      touchVelocity *= 0.95
+
+      // next frame do the next momentum
+      requestAnimationFrame(momentum)
+    } else {
+      // once we stopped, do the real update
+      window.MetricQWebView.handler.setTimeRange(
+        window.MetricQWebView.graticule.curTimeRange[0],
+        window.MetricQWebView.graticule.curTimeRange[1]
+      )
+      window.MetricQWebView.throttledReload()
+      window.MetricQWebView.graticule.draw(false)
+    }
+  }
+  momentum()
+}
 
 // On orientation change, automatically switch the legend from right to bottom
 screen.orientation.addEventListener('change', () => {
