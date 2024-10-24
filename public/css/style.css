@@ -97,8 +97,16 @@ body {
     height: min-content;
 }
 
+@media (max-width: 767px) {
+    .legend_item_bottom {
+        width: 100%;
+        margin: 5px 0;
+        background-color: red;
+    }
+}
+
 .legend_item_right {
-    max-width: 30vw;
+    width: 30vw;
     margin-bottom: 8px;
 }
 
