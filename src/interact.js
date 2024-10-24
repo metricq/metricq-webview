@@ -597,59 +597,44 @@ window.addEventListener('touchmove', (event) => {
 
     // this might be a two finger pinch gesture to zoom in or out
 
-    const times = [
-      window.MetricQWebView.graticule.getTimeAtX(touchesStart[0].screenX),
-      window.MetricQWebView.graticule.getTimeAtX(touchesStart[1].screenX)
-    ]
+    const dims = window.MetricQWebView.graticule.dimensions
+    const timePerPixel = window.MetricQWebView.graticule.curTimePerPixel
 
-    // get old and new touch positions
-    let a = window.MetricQWebView.graticule.getTimeAtX(touchesStart[0].screenX)
-    let b = window.MetricQWebView.graticule.getTimeAtX(touchesStart[1].screenX)
-    let ap = window.MetricQWebView.graticule.getTimeAtX(event.touches[0].screenX)
-    let bp = window.MetricQWebView.graticule.getTimeAtX(event.touches[1].screenX)
+    const xa = touchesStart[0].screenX
+    const xb = touchesStart[1].screenX
 
-    // sort the touch fingers if it's wierd
-    if (b < a) {
-      [a, b] = [b, a]
-    }
-    if (bp < ap) {
-      [ap, bp] = [bp, ap]
-    }
+    const xap = event.touches[0].screenX
+    const xbp = event.touches[1].screenX
 
-    // now let's try to find a fixed point in this
-    const lambdaf = 1 / ((a - ap) / (bp - b) + 1)
-    const f = lambdaf * a + (1 - lambdaf) * b
+    if (xa === xap && xb === xbp) return
 
-    let newTimes
+    const ta = (xa - dims.x) * timePerPixel + window.MetricQWebView.graticule.curTimeRange[0]
+    const tb = (xb - dims.x) * timePerPixel + window.MetricQWebView.graticule.curTimeRange[0]
 
-    if (a > f || f > b) {
-      // if there is no fixed point just let us use on finger as slide anchor
-      const timeToMoveBy = a - ap
-      newTimes = [
-        window.MetricQWebView.handler.startTime.getUnix() + timeToMoveBy,
-        window.MetricQWebView.handler.stopTime.getUnix() + timeToMoveBy
-      ]
-    } else {
-      const [x0, x1] = window.MetricQWebView.graticule.curTimeRange
+    if (ta === undefined || tb === undefined) return
 
-      // use fixed point as baseline to scale new start and stop times
-      const x0pf = Math.abs(a - f) * Math.abs(x0 - f) / Math.abs(ap - f)
-      const x1pf = Math.abs(b - f) * Math.abs(x1 - f) / Math.abs(bp - f)
+    const dp = xbp - xap
+    const dt = tb - ta
 
-      newTimes = [
-        f - x0pf,
-        f + x1pf
-      ]
+    if (dp === 0 || dt === 0) {
+      return
     }
 
-    window.MetricQWebView.handler.setTimeRange(
-      newTimes[0], newTimes[1]
-    )
+    const dp0 = xap - dims.x
+    const dp1 = dims.width - xbp + dims.x
+
+    const dt0 = dp0 * dt / dp
+    const dt1 = dp1 * dt / dp
+
+    // only set the time range for the rendering
+    if (!window.MetricQWebView.handler.setTimeRange(ta - dt0, tb + dt1, true)) {
+      // if zoom didn't work, lets show an error message
+      Vue.toasted.error('Zoom-Limit erreicht.', store.state.toastConfiguration)
+    }
 
     touchesStart = event.touches
     touchVelocity = 0
 
-    window.MetricQWebView.throttledReload()
     window.MetricQWebView.graticule.draw(false)
   }
 }, { passive: false })
@@ -692,7 +677,7 @@ function applyMomentum () {
         window.MetricQWebView.graticule.curTimeRange[0],
         window.MetricQWebView.graticule.curTimeRange[1]
       )
-      window.MetricQWebView.throttledReload()
+      window.MetricQWebView.reload()
       window.MetricQWebView.graticule.draw(false)
     }
   }

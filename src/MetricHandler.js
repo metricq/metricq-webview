@@ -11,7 +11,7 @@ export class MetricHandler {
     this.metricQHistory = new MetricQHistory(metricqBackendConfig.backend, metricqBackendConfig.user, metricqBackendConfig.password)
 
     this.WIGGLEROOM_PERCENTAGE = 0.05
-    this.TIME_MARGIN_FACTOR = 1.00 / 3
+    this.TIME_MARGIN_FACTOR = 1.00
 
     this.initializeMetrics(paramMetricsArr)
   }
@@ -173,7 +173,7 @@ export class MetricHandler {
     return allMinMax
   }
 
-  setTimeRange (paramStartTime, paramStopTime) {
+  setTimeRange (paramStartTime, paramStopTime, onlyForRender = false) {
     let newStartTime
     let newStopTime
 
@@ -210,11 +210,13 @@ export class MetricHandler {
       return false
     }
 
-    this.startTime.updateTime(paramStartTime)
-    this.stopTime.updateTime(paramStopTime)
+    if (!onlyForRender) {
+      this.startTime.updateTime(paramStartTime)
+      this.stopTime.updateTime(paramStopTime)
 
-    this.renderer.updateMetricUrl()
-    window.MetricQWebView.graticule.setTimeRange(this.startTime.getUnix(), this.stopTime.getUnix())
+      this.renderer.updateMetricUrl()
+    }
+    window.MetricQWebView.graticule.setTimeRange(paramStartTime, paramStopTime)
 
     return true
   }
