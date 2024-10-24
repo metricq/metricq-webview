@@ -37,7 +37,7 @@
                 <!-- </b-button> -->
 
                 <time-button class="d-md-none btn btn-outline-primary" v-if="isWebviewLoaded"
-                    :starttime="timestamp.start" :endtime="timestamp.end" v-b-tooltip
+                    :starttime="timestamp.start" :endtime="timestamp.end" v-b-tooltip.noninteractive
                     title="Angezeigten Zeitraum einstellen">
                 </time-button>
 
@@ -47,24 +47,24 @@
                     <b-navbar-nav class="d-inline-flex flex-row w-sm-100 justify-content-between">
                         <b-nav-item>
                             <b-button id="button_configuration" variant="outline-primary"
-                                @click="configurationButtonClicked" v-b-tooltip.hover title="Einstellungen">
+                                @click="configurationButtonClicked" v-b-tooltip.noninteractive title="Einstellungen">
                                 <b-icon-tools />
                             </b-button>
                         </b-nav-item>
                         <b-nav-item>
                             <b-button variant="outline-primary" id="button_export" @click="exportButtonClicked"
-                                v-b-tooltip.hover title="Export">
+                                v-b-tooltip.noninteractive title="Export">
                                 <b-icon-cloud-download />
                             </b-button>
                         </b-nav-item>
                         <b-nav-item>
                             <b-button variant="outline-primary" id="button_analyze" @click="analyzeButtonClicked"
-                                v-b-tooltip.hover title="Analyse">
+                                v-b-tooltip.noninteractive title="Analyse">
                                 <b-icon-table />
                             </b-button>
                         </b-nav-item>
                         <b-nav-item>
-                            <b-button variant="outline-primary" v-b-tooltip.hover
+                            <b-button variant="outline-primary" v-b-tooltip.noninteractive
                                 title="Deaktiviert werden nur Durchschnittswerte angezeigt" @click="toggleMinMaxButton">
                                 <b-form-checkbox ref="minMaxButton" :checked="globalMinMax" id="checkbox_min_max">
                                     <span class="d-none d-lg-inline">Werteumfang zeichnen</span>
@@ -74,13 +74,13 @@
                         </b-nav-item>
                         <b-nav-item class="d-none d-md-flex">
                             <time-button class="btn btn-outline-primary btn-navbar" v-if="isWebviewLoaded"
-                                :starttime="timestamp.start" :endtime="timestamp.end" v-b-tooltip
+                                :starttime="timestamp.start" :endtime="timestamp.end" v-b-tooltip.noninteractive
                                 title="Angezeigten Zeitraum einstellen">
                             </time-button>
                         </b-nav-item>
                         <b-nav-item>
                             <b-button variant="outline-primary" id="button_link" @click="linkButtonClicked"
-                                v-b-tooltip.hover title="Informationen anzeigen">
+                                v-b-tooltip.noninteractive title="Informationen anzeigen">
                                 <b-icon-info-lg />
                             </b-button>
                         </b-nav-item>
