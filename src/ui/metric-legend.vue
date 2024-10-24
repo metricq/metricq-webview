@@ -2,6 +2,8 @@
   <li
     :class="[{ 'no_drawing' : !draw } , 'legend_item', 'legend_item_' + position]"
     @click="metricPopup"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
   >
     <span>
       <div
@@ -83,6 +85,14 @@ export default {
     }
   },
   methods: {
+    onMouseEnter () {
+      this.$store.commit('metrics/setPeakedMetric', { metric: this.metric.key })
+      window.MetricQWebView.graticule.draw(false)
+    },
+    onMouseLeave () {
+      this.$store.commit('metrics/setPeakedMetric', { metric: undefined })
+      window.MetricQWebView.graticule.draw(false)
+    },
     metricPopup () {
       this.$store.commit('metrics/setPopup', {
         metricKey: this.$props.metric.key,
