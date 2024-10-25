@@ -71,13 +71,12 @@
         :float-layout="true"
         :enable-download="true"
         :preview-modal="true"
-        :paginate-elements-by-height="5000"
         filename="MetricQWebview"
         :pdf-quality="2"
-        :manual-pagination="false"
+        :manual-pagination="true"
         pdf-format="a4"
         pdf-orientation="landscape"
-        pdf-content-width="100%"
+        pdf-content-width="99%"
       >
         <section slot="pdf-content">
           <img
@@ -87,7 +86,7 @@
           <div
             v-if="exportAnalyze"
             id="anaTable"
-            class="anaTable"
+            class="anaTable mx-3"
           >
             <analyzeTable @finished="onAnalyzeTableLoaded" />
           </div>
@@ -198,16 +197,19 @@ export default {
       canvas.height *= scale
       exportCanvasContext.scale(scale, scale)
       const margins = {
-        top: window.MetricQWebView.margins.canvas.top,
+        top: window.MetricQWebView.margins.canvas.top + 16,
         bottom: window.MetricQWebView.margins.canvas.bottom,
         left: window.MetricQWebView.margins.canvas.left,
-        right: window.MetricQWebView.margins.canvas.right
+        right: window.MetricQWebView.margins.canvas.right + 16
       }
       const size = [canvas.width / scale, canvas.height / scale, margins.left,
         margins.top,
         canvas.width / scale - (margins.right + margins.left),
         canvas.height / scale - (margins.top + margins.bottom)]
       window.MetricQWebView.graticule.draw(false, exportCanvasContext, size)
+      const timeRangeText = window.MetricQWebView.handler.startTime.getString() + ' - ' + window.MetricQWebView.handler.stopTime.getString()
+      exportCanvasContext.textAlign = 'center'
+      exportCanvasContext.fillText(timeRangeText, size[4] / 2 + margins.left, 15)
     },
     onAnalyzeTableLoaded () {
       this.analyzeTableReady = true

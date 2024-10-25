@@ -10,9 +10,6 @@
       bordered
       caption-top
     >
-      <caption>
-        Zeitraum von {{ startTimeFormatted }} bis {{ endTimeFormatted }} ( {{ timeLenghtFormatted }} Sekunden )
-      </caption>
       <b-thead>
         <b-tr>
           <b-th />
@@ -83,12 +80,6 @@ export default {
     }
   },
   computed: {
-    startTimeFormatted () {
-      return moment(this.timestamp.start).format('DD.MM.YYYY, HH:mm:ss')
-    },
-    endTimeFormatted () {
-      return moment(this.timestamp.end).format('DD.MM.YYYY, HH:mm:ss')
-    },
     timeLenghtFormatted () {
       return moment(this.timestamp.end).diff(moment(this.timestamp.start), 'seconds')
     },

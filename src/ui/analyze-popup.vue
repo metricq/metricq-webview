@@ -12,6 +12,9 @@
       <div class="modal-content">
         <popup-header :popup-title="popupTitle" />
         <div class="modal-body">
+          <div class="mb-3 text-center">
+            Zeitraum von <b>{{ startTimeFormatted }}</b> bis <b>{{ endTimeFormatted }}</b> <span class="text-secondary">{{ timeLenghtFormatted }} Sekunden</span>
+          </div>
           <analyzeTable />
         </div>
       </div>
@@ -20,6 +23,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import { veil } from './veil.js'
 import PopupHeader from './popup-header.vue'
 import AnalyzeTable from '../components/analyzeTable'
@@ -34,7 +38,17 @@ export default {
       popupTitle: 'Analyse'
     }
   },
-  computed: {},
+  computed: {
+    startTimeFormatted () {
+      return new Date(this.timestamp.start).toLocaleString()
+    },
+    endTimeFormatted () {
+      return new Date(this.timestamp.end).toLocaleString()
+    },
+    ...mapState([
+      'timestamp'
+    ])
+  },
   mounted () {
     const popupEle = document.querySelector('.analyze_popup_div')
     if (popupEle) {

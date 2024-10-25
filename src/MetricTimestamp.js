@@ -52,4 +52,8 @@ export class MetricTimestamp {
   getValue () {
     return this.timeValue
   }
+
+  getString () {
+    return new Date(this.getUnix()).toLocaleString()
+  }
 }
