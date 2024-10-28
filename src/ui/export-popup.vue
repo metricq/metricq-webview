@@ -43,7 +43,7 @@
           </b-form-group>
           <b-form-group v-if="selectedFileformat === 'pdf'">
             <b-form-checkbox v-model="exportAnalyze">
-              mit Legende und Wertetabelle
+              mit Wertetabelle
             </b-form-checkbox>
           </b-form-group>
         </div>
@@ -67,10 +67,6 @@
     <div>
       <VueHtml2pdf
         ref="html2Pdf"
-        :show-layout="false"
-        :float-layout="true"
-        :enable-download="true"
-        :preview-modal="true"
         filename="MetricQWebview"
         :pdf-quality="2"
         :manual-pagination="true"
@@ -81,7 +77,7 @@
         <section slot="pdf-content">
           <img
             :src="image"
-            style="height: 100%; width: 100%"
+            class="w-100"
           >
           <div
             v-if="exportAnalyze"
@@ -158,19 +154,39 @@ export default {
   },
   methods: {
     async doExport () {
+      // width and height from A7 with 300dpi for pdf
+      // chosen as reasonable pixel count and ratio
+      let width = 1240
+      let height = 874
+      if (this.exportAnalyze) {
+        // why 27? Because that is the smallest number without a page break
+        height -= document.getElementById('anaTable').offsetHeight + 27
+      } else if (this.selectedFileformat !== 'pdf') {
+        width = this.exportWidth
+        height = this.exportHeight
+      }
+
+      const canvas = this.createNewCanvas(width, height)
+
+      this.renderExportTo(canvas)
+
+      let imageFormat = 'image/png'
+      if (this.selectedFileformat !== 'pdf') {
+        imageFormat = 'image/' + this.selectedFileformat
+      }
+
+      this.image = canvas.toDataURL(imageFormat)
+      await this.waitNewCanvas()
+
       if (this.selectedFileformat === 'pdf') {
-        let marginBottom = 0
-        if (this.exportAnalyze) {
-          marginBottom = document.getElementById('anaTable').offsetHeight
-        }
-        const canvas = this.createNewCanvas(marginBottom)
-        this.addData(canvas)
-        this.image = canvas.toDataURL('image/png')
-        const result = await this.waitNewCanvas()
         this.$refs.html2Pdf.generatePdf()
       } else {
-        window.MetricQWebView.doExport()
+        const linkEle = document.createElement('a')
+        linkEle.setAttribute('href', this.image)
+        linkEle.setAttribute('download', 'MetricQ-WebView.' + this.selectedFileformat)
+        linkEle.click()
       }
+
       veil.destroy()
       this.$store.commit('togglePopup', 'export')
     },
@@ -184,32 +200,96 @@ export default {
         veil.destroy(evt)
       }
     },
-    createNewCanvas (tableHeight) {
+    createNewCanvas (width, height) {
       const exportCanvas = document.createElement('canvas')
-      exportCanvas.setAttribute('width', 1100)
-      exportCanvas.setAttribute('height', 770 - tableHeight)
+      exportCanvas.setAttribute('width', width)
+      exportCanvas.setAttribute('height', height)
       return exportCanvas
     },
-    addData (canvas) {
-      const exportCanvasContext = canvas.getContext('2d')
-      const scale = 2
+    renderExportTo (canvas) {
+      const ctx = canvas.getContext('2d')
+
+      const scale = this.selectedFileformat === 'pdf' ? 2 : 1
       canvas.width *= scale
       canvas.height *= scale
-      exportCanvasContext.scale(scale, scale)
+      ctx.scale(scale, scale)
+
       const margins = {
         top: window.MetricQWebView.margins.canvas.top + 16,
         bottom: window.MetricQWebView.margins.canvas.bottom,
         left: window.MetricQWebView.margins.canvas.left,
         right: window.MetricQWebView.margins.canvas.right + 16
       }
-      const size = [canvas.width / scale, canvas.height / scale, margins.left,
+
+      const size = [
+        canvas.width / scale,
+        canvas.height / scale,
+        margins.left,
         margins.top,
         canvas.width / scale - (margins.right + margins.left),
-        canvas.height / scale - (margins.top + margins.bottom)]
-      window.MetricQWebView.graticule.draw(false, exportCanvasContext, size)
+        canvas.height / scale - (margins.top + margins.bottom)
+      ]
+
+      window.MetricQWebView.graticule.draw(false, ctx, size)
+
       const timeRangeText = window.MetricQWebView.handler.startTime.getString() + ' - ' + window.MetricQWebView.handler.stopTime.getString()
-      exportCanvasContext.textAlign = 'center'
-      exportCanvasContext.fillText(timeRangeText, size[4] / 2 + margins.left, 15)
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'hanging'
+      ctx.fillText(timeRangeText, size[4] / 2 + margins.left, 8)
+
+      if (!this.exportAnalyze) {
+        this.renderLegend(ctx, margins, size)
+      }
+    },
+    renderLegend (ctx, margins, size) {
+      const entries = []
+      let longestLabel = ''
+      for (const metric of this.$store.getters['metrics/getAll']()) {
+        if (metric.draw) {
+          let label = metric.key
+          if (metric.unit) {
+            label += ` [${metric.unit}]`
+          }
+          if (label.length > longestLabel) {
+            longestLabel = label
+          }
+          entries.push({
+            label,
+            color: metric.color
+          })
+        }
+      }
+      const labelWidth = ctx.measureText(longestLabel).width
+
+      const legendBox = {
+        x: size[0] - labelWidth - margins.right - 20,
+        y: margins.top,
+        width: labelWidth + 20,
+        height: entries.length * 20
+      }
+
+      // draw a white box with black border
+      ctx.fillStyle = 'white'
+      ctx.globalAlpha = 0.8
+      ctx.fillRect(legendBox.x, legendBox.y, legendBox.width, legendBox.height)
+      ctx.fillStyle = 'black'
+      ctx.strokeRect(legendBox.x, legendBox.y, legendBox.width, legendBox.height)
+
+      ctx.globalAlpha = 1
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'hanging'
+
+      // draw each legend entry
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i]
+        // draw metric name and unit in black
+        ctx.fillStyle = 'black'
+        ctx.fillText(entry.label, legendBox.x + 16, 4 + legendBox.y + i * 20)
+
+        // draw a 8x8-pixel square in the color of the metric
+        ctx.fillStyle = entry.color
+        ctx.fillRect(legendBox.x + 4, 4 + legendBox.y + i * 20, 8, 8)
+      }
     },
     onAnalyzeTableLoaded () {
       this.analyzeTableReady = true
