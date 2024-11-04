@@ -13,7 +13,7 @@
         <popup-header :popup-title="popupTitle" />
         <div class="modal-body">
           <div class="mb-3 text-center">
-            Zeitraum von <b>{{ startTimeFormatted }}</b> bis <b>{{ endTimeFormatted }}</b> <span class="text-secondary">{{ timeLenghtFormatted }} Sekunden</span>
+            Zeitraum von <b>{{ startTimeFormatted }}</b> bis <b>{{ endTimeFormatted }}</b>, <span class="text-secondary">{{ durationFormatted }} Sekunden</span>
           </div>
           <analyzeTable />
         </div>
@@ -44,6 +44,9 @@ export default {
     },
     endTimeFormatted () {
       return new Date(this.timestamp.end).toLocaleString()
+    },
+    durationFormatted () {
+      return (this.timestamp.end - this.timestamp.start) / 1000
     },
     ...mapState([
       'timestamp'
