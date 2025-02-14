@@ -21,8 +21,8 @@ export default {
       return this.$store.getters.getLegacyLink() !== undefined
     },
     legacyLink () {
-      const startTime = window.MetricQWebView.handler.startTime.getValue()
-      const endTime = window.MetricQWebView.handler.stopTime.getValue()
+      const startTime = window.MetricQWebView.handler.startTime.getUnix()
+      const endTime = window.MetricQWebView.handler.stopTime.getUnix()
 
       const target = {
         cntr: [],
