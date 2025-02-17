@@ -30,3 +30,11 @@ async function startup () {
 }
 
 startup()
+
+window.addEventListener('popstate', function (event) {
+  // popstate will only be triggered by user actions
+  // We will just reload everything. It's a dirty hack, but gracefully
+  // apply the changed URL does not work reliably because of the snarled
+  // spaghetti code. I tried and gave up. Sorry. :(
+  window.location.reload()
+})

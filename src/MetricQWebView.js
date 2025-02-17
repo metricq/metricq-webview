@@ -82,10 +82,7 @@ class MetricQWebView {
       }
     }
     encodedStr = encodeURIComponent(encodedStr)
-    window.location.href =
-      parseLocationHref()[0] +
-      '#' +
-      encodedStr
+    history.pushState(null, '', parseLocationHref()[0] + '#' + encodedStr)
   }
 
   setPlotRanges (updateXAxis, updateYAxis) {
