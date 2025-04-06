@@ -31,9 +31,9 @@
             :max-height="searchHeight"
             :show-no-results="false"
             :hide-selected="false"
+            :preserve-search="true"
             :custom-label="customLabel"
             placeholder="Metrik suchen"
-            @open="firstSearch"
             @search-change="changeSearch"
             @close="keepOpen"
           >
@@ -92,6 +92,7 @@ export default {
       veil.create(disablePopupFunc)
       veil.attachPopup(popupEle)
       this.$refs.multi.activate()
+      this.changeSearch('')
     }
   },
   methods: {
@@ -143,9 +144,6 @@ export default {
           })
         }
       })
-    },
-    firstSearch (value) {
-      this.changeSearch('')
     }
   }
 }
