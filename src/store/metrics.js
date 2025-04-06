@@ -134,6 +134,14 @@ export default {
       if (state.metrics[metric] || metric === undefined) {
         Vue.set(state, 'peakedMetric', metric)
       }
+    },
+
+    togglePeakedMetric (state, { metric }) {
+      if (metric === state.peakedMetric) {
+        Vue.set(state, 'peakedMetric', undefined)
+      } else {
+        Vue.set(state, 'peakedMetric', metric)
+      }
     }
 
   },

@@ -2,6 +2,8 @@
   <li
     :class="[{ 'no_drawing' : !draw } , 'legend_item', 'legend_item_' + position]"
     @click="metricPopup"
+    @touchstart="onTouchStart"
+    @touchend="onTouchEnd"
     @mouseenter="onMouseEnter"
     @mouseleave="onMouseLeave"
   >
@@ -73,6 +75,12 @@ export default {
       required: true
     }
   },
+  data () {
+    return {
+      tappyTimer: null,
+      TAPPY_PRESS_DURATION: 200
+    }
+  },
   computed: {
     draw () {
       return this.$props.metric.draw
@@ -85,6 +93,19 @@ export default {
     }
   },
   methods: {
+    onTouchStart () {
+      this.tappyTimer = setTimeout(() => {
+        this.tappyTimer = null
+        this.metricPopup()
+      }, this.TAPPY_PRESS_DURATION)
+    },
+    onTouchEnd () {
+      if (this.tappyTimer) {
+        clearTimeout(this.tappyTimer)
+        this.$store.commit('metrics/togglePeakedMetric', { metric: this.metric.key })
+        window.MetricQWebView.graticule.draw(false)
+      }
+    },
     onMouseEnter () {
       this.$store.commit('metrics/setPeakedMetric', { metric: this.metric.key })
       window.MetricQWebView.graticule.draw(false)
@@ -94,6 +115,7 @@ export default {
       window.MetricQWebView.graticule.draw(false)
     },
     metricPopup () {
+      if (this.tappyTimer !== null) return
       this.$store.commit('metrics/setPopup', {
         metricKey: this.$props.metric.key,
         popupState: !this.$props.metric.popup
