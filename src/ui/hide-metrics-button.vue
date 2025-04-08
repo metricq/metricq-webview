@@ -50,22 +50,4 @@ export default {
 </script>
 
 <style scoped>
-
-.legend_double_item {
-    padding: 0;
-    display: inline-flex;
-    column-gap: 10px;
-    row-gap: 5px;
-    flex-wrap: nowrap;
-}
-
-.legend_double_item > .legend_item {
-    display: inline-block;
-    flex: 1;
-    text-align: center;
-}
-
-.legend_double_item > .legend_item > span {
-    margin-left: 8px;
-}
 </style>

@@ -90,6 +90,24 @@ body {
     box-shadow: 2px 2px 2px 1px #B0B0B0;
 }
 
+.legend_double_item {
+    padding: 0;
+    display: inline-flex;
+    column-gap: 10px;
+    row-gap: 5px;
+    flex-wrap: nowrap;
+}
+
+.legend_double_item > .legend_item {
+    display: inline-block;
+    flex: 1;
+    text-align: center;
+}
+
+.legend_double_item > .legend_item > span {
+    margin-left: 8px;
+}
+
 .legend_item_bottom {
     flex-wrap: wrap;
     margin-left: 10px;
